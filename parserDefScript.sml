@@ -11,14 +11,14 @@ parse:: lrmachine -> string -> parse option
 open HolKernel boolLib bossLib Parse BasicProvers Defn
 open stringTheory relationTheory pred_setTheory listTheory  boolSimps optionTheory
 open grammarDefTheory listLemmasTheory regexpTheory whileLemmasTheory
-open setLemmasTheory parseTreeTheory containerTheory Defn arithmeticTheory whileTheory markerTheory boolLemmasTheory 
+open setLemmasTheory parseTreeTheory containerTheory Defn arithmeticTheory whileTheory markerTheory boolLemmasTheory
 
 val _ = new_theory "parserDef"
 
 
 val _ = Hol_datatype `item = item of string => symbol list # symbol list`; (*  # symbol list`;*)
 
-val _ = Hol_datatype `state = state of symbol => item list`
+val _ = type_abbrev ("state", ``:item list``)
 
 val _ = Hol_datatype `action = REDUCE of rule | GOTO of state | NA`
 

@@ -512,6 +512,18 @@ FULL_SIMP_TAC (srw_ss()) [rule_nonterminals,rules,INSERT_DEF,isNonTmnlSym_def],
 METIS_TAC [rules]]
 ])
 
+val slemma1_4Tmnls = store_thm("slemma1_4Tmnls",
+``(TS t IN terminals g) = ?l p s.MEM (rule l (p++[TS t]++s)) (rules g)``,
+Cases_on `g` THEN SRW_TAC [] [EQ_IMP_THM] THEN
+FULL_SIMP_TAC (srw_ss()) [terminals,rules,startSym] THENL[
+Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [rule_terminals,INSERT_DEF] THEN METIS_TAC [rules,rgr_r9eq],
+FULL_SIMP_TAC (srw_ss()) [terminals,rules,startSym] THEN
+Q.EXISTS_TAC `rule_terminals (rule l' (p ++ [TS t] ++ s'))` THEN
+SRW_TAC [] [] THENL[
+FULL_SIMP_TAC (srw_ss()) [rule_terminals,rules,INSERT_DEF,isTmnlSym_def],
+METIS_TAC [rules]]
+])
+
 
 val slemma1_3 = store_thm("slemma1_3",
 ``~(NTS nt IN nonTerminals g) = (~(?rhs.MEM (rule nt rhs) (rules g)) /\ ~(?l p s.MEM (rule l (p++[NTS nt]++s)) (rules g)) /\ ~(nt=startSym g))``,
@@ -558,7 +570,7 @@ val rt2 = store_thm (
   ``!e. ~isNonTmnlSym e ==> ?r. e IN rule_terminals r``,
   SRW_TAC [] [] THEN
   Cases_on `e` THENL [
-    Q.EXISTS_TAC `rule l [TS s']` THEN
+    Q.EXISTS_TAC `rule l [TS s]` THEN
     SRW_TAC [] [rule_terminals] THEN
     METIS_TAC [isTmnlSym_def,isNonTmnlSym_def],
     METIS_TAC [isNonTmnlSym_def]
@@ -603,7 +615,7 @@ val rnt2 = store_thm (
   "rnt2",
   ``!e. ~(isTmnlSym e) ==> ?r.(e IN rule_nonterminals r)``,
   Cases_on `e` THEN SRW_TAC [][isTmnlSym_def, isNonTmnlSym_def] THEN
-  Q.EXISTS_TAC `rule l [NTS s']` THEN
+  Q.EXISTS_TAC `rule l [NTS s]` THEN
   SRW_TAC [] [rule_nonterminals, isNonTmnlSym_def]);
 
 val rnt = store_thm ("rnt",
@@ -1009,19 +1021,19 @@ val nullableEq1 = store_thm ("nullableEq1",
     SRW_TAC [][nullable, RTC_RULES] THEN
   Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [nullableML'] THEN
   `nullable g t` by METIS_TAC [DECIDE ``x < SUC x``] THEN
-  Q_TAC SUFF_TAC `nullable g [NTS s']` THEN1
+  Q_TAC SUFF_TAC `nullable g [NTS s]` THEN1
         METIS_TAC [APPEND, nullable_APPEND] THEN
-  `?e. MEM e (getRhs s' (rules g)) /\ nullableML g (NTS s'::sn) e`
+  `?e. MEM e (getRhs s (rules g)) /\ nullableML g (NTS s::sn) e`
      by METIS_TAC [EXISTS_MEM] THEN
   Q_TAC SUFF_TAC `nullable g e` THEN1
      METIS_TAC [x_1, nullable, RTC_RULES] THEN
-  FIRST_X_ASSUM (Q.SPECL_THEN [`g`, `NTS s' :: sn`, `e`] MP_TAC) THEN
+  FIRST_X_ASSUM (Q.SPECL_THEN [`g`, `NTS s :: sn`, `e`] MP_TAC) THEN
   SRW_TAC [][] THEN FIRST_X_ASSUM MATCH_MP_TAC THEN
   `FINITE (nonTerminals g)` by METIS_TAC [finite_nts] THEN
   SRW_TAC [][] THENL [
-    `NTS s' IN nonTerminals g` by METIS_TAC [ntsInGr, mem_r1] THEN
-    `nonTerminals g INTER (NTS s' INSERT set sn) =
-       NTS s' INSERT (nonTerminals g INTER set sn)`
+    `NTS s IN nonTerminals g` by METIS_TAC [ntsInGr, mem_r1] THEN
+    `nonTerminals g INTER (NTS s INSERT set sn) =
+       NTS s INSERT (nonTerminals g INTER set sn)`
       by METIS_TAC [INTER_COMM, INSERT_INTER] THEN
     SRW_TAC [][] THEN DECIDE_TAC,
     Q_TAC SUFF_TAC `nonTerminals g INTER set sn PSUBSET nonTerminals g`
@@ -1105,6 +1117,127 @@ val drd_langeq = store_thm ("drd_langeq",
 SRW_TAC [] [EXTENSION, language, rlanguage, EQ_IMP_THM] THEN
 METIS_TAC [derivesImpRderives, rderivesImpDerives])
 
+
+val nullableEq2 = mk_thm ([],
+  ``!g sn l.nullable g l ==> (sn=[]) ==> nullableML g sn l``)
+
+val nullableEq = store_thm ("nullableEq",
+``!g l.nullable g l = nullableML g [] l``,
+METIS_TAC [nullableEq1, nullableEq2]);
+
+
+
+(*
+
+val t1 = store_thm ("t1",
+``!g sn.MEM (NTS s) sn ==> ~nullableML g sn [NTS s]``,
+SRW_TAC [] [nullableML'])
+
+val t2 = mk_thm ([], 
+``RTC (derives g) (NTS s::t) [] ==> RTC (derives g) [NTS s] [] /\ RTC (derives g) t []``)
+
+val t3 = mk_thm ([],
+``~MEM (NTS s) sn ==> 
+    CARD (nonTerminals g DIFF set (NTS s::sn)) <
+    CARD (nonTerminals g DIFF set sn)``)
+
+val t4 = mk_thm ([], 
+``RTC (derives g) [NTS s] [] ==> ?e. MEM e (getRhs s (rules g)) /\ RTC (derives g) e []``)
+
+
+val nullableEq2 = store_thm ("nullableEq2",
+  ``!g sn l.nullable g l ==> ((nonTerminals g) INTER (LIST_TO_SET sn) = {}) ==> nullableML g sn l``,
+  HO_MATCH_MP_TAC R_IND THEN
+  Cases_on `l` THEN SRW_TAC [][nullableML'] THEN
+    FULL_SIMP_TAC (srw_ss()) [nullable, RTC_RULES] THEN
+  Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [nullableML'] THEN
+  `RTC (derives g) t [] ==> nullableML g sn t` by METIS_TAC [DECIDE ``x < SUC x``] THEN1
+METIS_TAC [notTlRtcDerives] THEN
+
+`nullableML g sn t` by METIS_TAC [t2] THEN
+`RTC (derives g) [NTS s] []` by METIS_TAC [t2] THEN
+Cases_on `~MEM (NTS s) sn` THEN FULL_SIMP_TAC (srw_ss()) [] THENL[
+FULL_SIMP_TAC (srw_ss()) [] THEN
+ ` EXISTS (nullableML g (NTS s::sn)) (getRhs s (rules g)) =
+    ?e. MEM e (getRhs s (rules g)) /\ nullableML g (NTS s::sn) e`
+     by METIS_TAC [EXISTS_MEM] THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+`?e. MEM e (getRhs s (rules g)) /\ RTC (derives g) e []` by METIS_TAC [t4] THEN
+Q.EXISTS_TAC `e` THEN
+
+val t5 = mk_thm ([], ``RTC (derives g) [NTS s] [] ==> (NTS s) IN nonTerminals g``)
+`(NTS s) IN nonTerminals g` by METIS_TAC [t5] THEN
+
+val t6 = mk_thm ([], 
+``(nonTerminals g INTER set sn = {}) ==> (NTS s) IN nonTerminals g ==> ~MEM (NTS s) sn``)
+
+SRW_TAC [] [] THEN
+METIS_TAC [t3, APPEND, APPEND_NIL, t6],
+
+
+`~nullableML g sn [NTS s]` by METIS_TAC [t1] THEN
+METIS_TAC [t1, t2, nullableEq1, nullable, nullableML']
+Cases_on `t` THEN SRW_TAC [] []
+
+------------------------------------------------------
+
+val nullableEq2 = store_thm ("nullableEq2",
+  ``!g sn l.nullable g l ==> (sn=[]) ==> nullableML g sn l``,
+  ``!g sn l.~nullableML g sn l ==> (sn=[]) ==> ~nullable g l``,
+  HO_MATCH_MP_TAC R_IND THEN
+  Cases_on `l` THEN SRW_TAC [][nullableML'] THEN
+    FULL_SIMP_TAC (srw_ss()) [nullable, RTC_RULES] THEN
+  Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [nullableML'] THEN
+  `RTC (derives g) t [] ==> nullableML g [] t` by METIS_TAC [DECIDE ``x < SUC x``] THEN1
+METIS_TAC [notTlRtcDerives] THEN
+
+`nullableML g [] t` by METIS_TAC [t2, DECIDE ``x < SUC x``] THEN
+`RTC (derives g) [NTS s] []` by METIS_TAC [t2] THEN
+Cases_on `~MEM (NTS s) []` THEN FULL_SIMP_TAC (srw_ss()) [] THENL[
+FULL_SIMP_TAC (srw_ss()) [] THEN
+ ` EXISTS (nullableML g [NTS s]) (getRhs s (rules g)) =
+    ?e. MEM e (getRhs s (rules g)) /\ nullableML g [NTS s] e`
+     by METIS_TAC [EXISTS_MEM] THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+`?e. MEM e (getRhs s (rules g)) /\ RTC (derives g) e []` by METIS_TAC [t4] THEN
+Q.EXISTS_TAC `e` THEN
+SRW_TAC [] []
+`~(CARD (nonTerminals g) < CARD (nonTerminals g))`  by DECIDE_TAC  THEN
+`nullableML g [] e` by METIS_TAC []
+
+val t5 = mk_thm ([], ``RTC (derives g) [NTS s] [] ==> (NTS s) IN nonTerminals g``)
+`(NTS s) IN nonTerminals g` by METIS_TAC [t5] THEN
+
+val t6 = mk_thm ([], 
+``(nonTerminals g INTER set sn = {}) ==> (NTS s) IN nonTerminals g ==> ~MEM (NTS s) sn``)
+
+SRW_TAC [] [] THEN
+METIS_TAC [t3, APPEND, APPEND_NIL, t6],
+
+
+`~nullableML g sn [NTS s]` by METIS_TAC [t1] THEN
+METIS_TAC [t1, t2, nullableEq1, nullable, nullableML']
+Cases_on `t` THEN SRW_TAC [] []
+
+
+-----------------------------------------
+cases s->[] in g
+1.false
+2.
+
+trans g g' = takeout all rules containing the symbol NTS s.
+card nts g' < card nts g
+
+cases ~nullableML g' [] (getRhs s (rules g))
+
+1. ==> ~RTC (derives g') getRhs []
+   ==> ~RTC (derives g) s []
+
+2. nullableML g' [] (getRhs s (rules g))
+   ==> ~ EVERY ($~ o nullableML g [NTS s]) (getRhs s (rules g))
+   ==> F
+
+*)
 
 val mlDir = ref ("./theoryML/");
 

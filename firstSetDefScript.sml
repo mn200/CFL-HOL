@@ -166,9 +166,10 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [APPEND,APPEND_ASSOC],
 
 RES_TAC THEN
-FULL_SIMP_TAC (srw_ss()) [nullableEq, nullable_def] THEN
+`nullable g [NTS v7]` by METIS_TAC [nullableEq] THEN
+FULL_SIMP_TAC (srw_ss()) [nullable_def] THEN
 `RTC (derives g) ([NTS v7] ++ (v14::v15))([] ++ (TS fst::rst))` by FULL_SIMP_TAC (srw_ss()) [derives_append, APPEND, CONS, APPEND_ASSOC] THEN
-METIS_TAC [APPEND,APPEND_ASSOC],
+METIS_TAC [APPEND,APPEND_ASSOC, CONS, derives_append, nullableEq, nullable_def],
 
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `?rst1.RTC (derives g) [v14] rst1` by METIS_TAC [RTC_RULES] THEN

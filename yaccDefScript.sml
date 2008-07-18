@@ -186,7 +186,8 @@ METIS_TAC [iclosure1_not_nil, rmDupes_not_nil, len_not_0, LENGTH_NIL])
 
 
 val auggr = Define `(auggr g s eof = 	
-         if ((~((NTS s) IN (nonTerminalsML g)) /\ (~ ((TS eof) IN (nonTerminalsML g))))) then 
+         if ((~((NTS s) IN (nonTerminalsML g)) /\ 
+	    (~ ((TS eof) IN (terminalsML g))))) then 
          SOME (G ([(rule s [NTS (startSym g); TS eof])]++(rules g)) s) 
          else NONE)`
 
@@ -228,7 +229,7 @@ val validItl = Define `(validItl g [] = T) /\
 (validItl g (item l (r1,r2) :: rst) = MEM (rule l (r1++r2)) (rules g) /\ validItl g rst)`
 
 val validStates = Define `(validStates g [] = T) /\
-(validStates g ((state sym itl)::rst) = validItl g itl /\ validStates g rst)`
+(validStates g ((sym, itl)::rst) = validItl g itl /\ validStates g rst)`
 
 val validItl_append = store_thm ("validItl_append",
 ``validItl g (l1++l2) = validItl g l1 /\ validItl g l2``,
@@ -663,7 +664,7 @@ val getState = Define `(getState (sg,red) (itl:item list) sym =
 			case (newitl,rl) of ([],[]) -> NA 
 			|| ([],(y::ys)) -> if (LENGTH rl = 1) then REDUCE  (HD rl) 
 					   else NA 
-			|| ((x::xs),[]) -> GOTO (state sym newitl)
+			|| ((x::xs),[]) -> GOTO newitl
 			|| ((x::xs),(y::ys)) -> if (itemEqRuleList (x::xs) (y::ys))
 						    then REDUCE (HD rl) else NA)`
 
@@ -679,7 +680,7 @@ val getState = Define `(getState (sg,red) (itl:item list) sym =
 
 (* parse :: machine -> (symbol list, (state,ptree) list) -> (symbol list, (state, ptree) list) option *)
 
-val doReduce = Define `doReduce m ((sym::rst), os, ((state s itl)::rem)) ru =
+val doReduce = Define `doReduce m ((sym::rst), os, ((s, itl)::rem)) ru =
                    if (isNonTmnlSym sym) then NONE 
                    else 
                        let 
@@ -695,20 +696,20 @@ val doReduce = Define `doReduce m ((sym::rst), os, ((state s itl)::rem)) ru =
                                        newStk = pop os (LENGTH r) 
                                     in 
 					let 
-					newStateStk = pop  ((state s itl)::rem) (LENGTH r)
+					newStateStk = pop  ((s, itl)::rem) (LENGTH r)
 					in
 					if (newStateStk = []) then NONE else
                                       let 
-                                           topitl = stateItl (HD newStateStk)
+                                           topitl = SND (HD newStateStk)
                                         in 
                                           let 
-                                              ns = state (NTS l) ((FST m) topitl (NTS l))
+                                              ns = ((NTS l), ((FST m) topitl (NTS l)))
                                           in 
                                               SOME ((sym::rst),([(ns,p)] ++ newStk), push newStateStk ns)`
 
 
 val parse = Define `
-(parse mac (inp, os, ((state s itl)::rem)) = 
+(parse mac (inp, os, ((s, itl)::rem)) = 
   case mac of NONE -> NONE 
   || (SOME m) ->
 	case inp of [] -> NONE
@@ -718,7 +719,7 @@ val parse = Define `
 	     in 
 		 case newState of NA -> NONE 
 		   || (GOTO st) -> NONE		     
-		   || (REDUCE ru) -> doReduce m ([e], os, ((state s itl)::rem)) ru)
+		   || (REDUCE ru) -> doReduce m ([e], os, ((s, itl)::rem)) ru)
 
 	    || (sym::rst) -> 
 		 (let      
@@ -728,8 +729,8 @@ val parse = Define `
 		       || (GOTO st) -> 
 			 if (isNonTmnlSym sym) then NONE 
 			 else (* shift goto *) 
-			     SOME (rst,(st,Leaf (TM (tmnlSym sym)))::os, push ((state s itl)::rem) st)
-			   || (REDUCE ru) -> doReduce m ((sym::rst), os, ((state s itl)::rem)) ru))`
+			     SOME (rst,((sym,st),Leaf (TM (tmnlSym sym)))::os, push ((s, itl)::rem) (sym,st))
+			   || (REDUCE ru) -> doReduce m ((sym::rst), os, ((s, itl)::rem)) ru))`
     
 
 
@@ -737,7 +738,7 @@ val parse = Define `
 
 val parser = Define `parser g m sl stl curStatel eof oldsym = 
 let 
-out = (mwhile (\(sli,stli,csli).~(sli = [eof]) \/ ~(stateSym (FST (HD stli)) = oldsym)) 
+out = (mwhile (\(sli,stli,csli).~(sli = [eof]) \/ ~(FST (FST (HD stli)) = oldsym)) 
 (\(sli,stli,csli).parse m (sli,stli, csli)) 
 (SOME (sl,stl,curStatel)))
 in
@@ -763,7 +764,7 @@ in
 	    case mac of NONE -> NONE
             || (SOME m) -> (
 			    let
-				initState = state (NTS s') (initItems ag (rules ag))
+				initState =  ((NTS s'), initItems ag (rules ag))
 			    in
 				case (parser ag (SOME m) sl [] [initState] (TS eof) (NTS (startSym g))) 
 				    of NONE -> NONE

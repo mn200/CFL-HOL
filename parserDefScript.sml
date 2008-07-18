@@ -22,9 +22,9 @@ val _ = type_abbrev ("state", ``:item list``)
 
 val _ = Hol_datatype `action = REDUCE of rule | GOTO of state | NA`
 
-val stateSym = Define `stateSym (state sym itl) = sym`
+(* val stateSym = Define `stateSym (state sym itl) = sym`
 
-val stateItl = Define `stateItl (state sym itl) = itl`
+val stateItl = Define `stateItl (state sym itl) = itl`*)
 
 
 val mlDir = ref ("./theoryML/");
@@ -41,10 +41,9 @@ val _ =
     :: MLSIG "type grammar = grammarDefML.grammar"
     :: MLSIG "type ptree = parseTreeML.ptree"
     :: DATATYPE `item = item of string => symbol list # symbol list`
-    :: DATATYPE `state = state of symbol => item list`
-    :: DATATYPE `action = REDUCE of rule | GOTO of state | NA`
-    :: DEFN stateItl
-    :: DEFN stateSym
+    :: DATATYPE `action = REDUCE of rule | GOTO of item list | NA`
+(*    :: DEFN stateItl
+    :: DEFN stateSym *)
     (*:: DEFN yacc*)
     :: [])
  end;

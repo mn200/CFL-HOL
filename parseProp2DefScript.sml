@@ -13,7 +13,7 @@ val _ = new_theory "parseProp2Def";
 correspond to a rule in the grammar*)
 
 val stacktreeleaves = Define `(stacktreeleaves [] = []) /\
-(stacktreeleaves (((state sym itl),tree)::rst) = (leaves tree)++stacktreeleaves rst )`
+(stacktreeleaves (((sym, itl),tree)::rst) = (leaves tree)++stacktreeleaves rst )`
 
 val prop2 = Define `prop2 orig sl stl = (stacktreeleaves stl ++ sl = orig)`
 
@@ -110,13 +110,13 @@ FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def]
 
 
 val red_stkleaves = store_thm ("red_stkleaves", 
-``(doReduce m (sym::rst,stl,state s itl::csl) r = 
+``(doReduce m (sym::rst,stl,(s, itl)::csl) r = 
 SOME (sl',stl',csl')) ==> ((stacktreeleaves (REVERSE stl)) = stacktreeleaves (REVERSE stl'))``,
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM, Abbrev_def] THEN
 Cases_on `isNonTmnlSym sym` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `addRule stl r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `pop (state s itl::csl) (LENGTH (ruleRhs r)) = []` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r)) = []` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `r` THEN 
 Cases_on `x` THENL[
 METIS_TAC [addrule_ntLf, isLeaf_def],
@@ -133,17 +133,16 @@ SRW_TAC [] [map_rev] THEN
 SRW_TAC [] [flat_leaves]])
 
 val red_sym = store_thm ("red_sym", 
-``(doReduce m (sym::rst,stl,state s itl::csl) r = SOME (sl',stl',csl')) 
+``(doReduce m (sym::rst,stl,(s, itl)::csl) r = SOME (sl',stl',csl')) 
 ==> (sl'=sym::rst)``,
 SRW_TAC [] [doReduce_def, LET_THM] THEN
 Cases_on `addRule stl r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `pop (state s itl::csl) (LENGTH (ruleRhs r))` THEN FULL_SIMP_TAC (srw_ss()) []
-)
+Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r))` THEN FULL_SIMP_TAC (srw_ss()) [])
 
 
 (* 3. Leaves of all the ptrees on the stack + the remaining input symbols = original symbol list *)
 val prop2thm = store_thm ("prop2thm",
-``!m g.(m=slr g) ==> prop2 orig sl (REVERSE stl) ==> ((parse m (sl, stl, (state s itl::csl)) = SOME (sl',stl',csl'))) 
+``!m g.(m=slr g) ==> prop2 orig sl (REVERSE stl) ==> ((parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))) 
 ==> prop2 orig sl' (REVERSE stl')``,
 FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM, prop2] THEN
 SRW_TAC [] [] THEN
@@ -157,10 +156,10 @@ METIS_TAC [red_stkleaves, red_sym, APPEND],
 METIS_TAC [red_stkleaves, red_sym, APPEND],
 
 Cases_on `isNonTmnlSym e` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-`stl' = ((s',Leaf (TM (tmnlSym e)))::stl)` by SRW_TAC [] [] THEN
+`stl' = (((e,l),Leaf (TM (tmnlSym e)))::stl)` by SRW_TAC [] [] THEN
 `sl'=h::t` by SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `s'` THEN Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def,tmnlToStr_def, tmnlSym_def] THENL[
+Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def,tmnlToStr_def, tmnlSym_def] THENL[
 FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def, stl_append, tmnlToStr_def] THEN
 METIS_TAC [APPEND, CONS, APPEND_ASSOC],
 METIS_TAC [isNonTmnlSym_def]]])

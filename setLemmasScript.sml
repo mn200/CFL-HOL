@@ -158,6 +158,8 @@ val not_in_inter = store_thm ("not_in_inter",
 HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [] [])
 
 
-
+val stl_mem  = store_thm ("stl_mem",
+``!s.FINITE s ==> (s=set l) ==> MEM e (SET_TO_LIST (set l)) ==> MEM e l``,
+HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [] [])
 
 val _ = export_theory ();

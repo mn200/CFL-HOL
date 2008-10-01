@@ -7,7 +7,7 @@ open regexpTheory grammarDefTheory boolLemmasTheory listLemmasTheory
 whileLemmasTheory parseTreeTheory parserDefTheory yaccDefTheory
 parseProp1DefTheory parseProp2DefTheory
 
-
+val _ = new_theory "parserPropDefTheory"
 
 val prop1Ext = Define `prop1Ext g stl csl = prop1 g stl /\ ~NULL csl /\ validStates g csl`
 
@@ -172,10 +172,6 @@ METIS_TAC [lem1, leaves_def]])
 
 
 
-val parser_comp = mk_thm ([], 
-``!sl.sl IN language g ==> (auggr g s eof = SOME ag) ==> ~NULL csl ==> validStates ag csl ==>
-(parser ag m sl [] csl (TS eof) (NTS (startSym g)) = SOME (SOME tree))``)
-
-
+val _ = export_theory ();
 
 

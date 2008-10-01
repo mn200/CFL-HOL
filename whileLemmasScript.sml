@@ -107,26 +107,60 @@ METIS_TAC [nthStateProp]]
     SOME NONE - aborted (body returned NONE on some state) 
     SOME (SOME s) - successful termination in state s 
 *)
-val mwhile = Define`mwhile (P : 'a -> bool) (f : 'a -> 'a option) = 
-                          owhile (\opt. case opt of NONE -> T || SOME s -> P s)
-                                 (\opt. case opt of NONE -> NONE || SOME s -> f s)`
+
+val mwhile = Define`
+  mwhile g f s = 
+    owhile (\opt. case opt of NONE -> F || SOME s -> g s)
+           (\opt. case opt of NONE -> NONE 
+                           || SOME s -> f s)
+           (SOME s)
+`;
+
+val mwhile_COND = store_thm(
+  "mwhile_COND",
+  ``mwhile g f s = 
+           if g s then 
+              case f s of 
+                NONE -> SOME NONE
+             || SOME s' -> mwhile g f s'
+           else SOME (SOME s)``,
+  SRW_TAC [][mwhile] THENL [
+    CONV_TAC (LAND_CONV (ONCE_REWRITE_CONV [owhile_thm])) THEN 
+    SRW_TAC [][] THEN 
+    Cases_on `f s` THEN SRW_TAC [][] THEN 
+    CONV_TAC (LAND_CONV (ONCE_REWRITE_CONV [owhile_thm])) THEN 
+    SRW_TAC [][],
+
+    CONV_TAC (LAND_CONV (ONCE_REWRITE_CONV [owhile_thm])) THEN 
+    SRW_TAC [][]
+  ]);
 
 
 
+(*
 val mwhile_EQ_NONE = store_thm(
 "mwhile_EQ_NONE",
-``!C f s.(mwhile C f s = NONE) = ~terminates ((\opt. case opt of NONE -> T || SOME x -> C x),
-                                  (\opt. case opt of NONE -> NONE || SOME x -> f x), s)``,
-SRW_TAC [][mwhile, terminates_def, owhile_def] THEN METIS_TAC [])
+``!C f s.(mwhile C f s = NONE) = 
+~terminates ((\opt. case opt of NONE -> T || SOME x -> C x),
+             (\opt. case opt of NONE -> NONE || SOME x -> f x), SOME s)``,
+SRW_TAC [][mwhile, terminates_def, owhile_def] THEN 
+Cases_on `FUNPOW (\opt. case opt of NONE -> NONE || SOME s -> f s) n (SOME s)` THEN
+SRW_TAC [][] THEN
+Q.EXISTS_TAC `n`  THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) []
+METIS_TAC [NEW_THEORY])
+*)
 
-
+(*
 val mwhile_EQ_SOME = store_thm(
 "mwhile_EQ_SOME", 
 ``(?s'.mwhile C f s = SOME s') = terminates ((\opt. case opt of NONE -> T || SOME x -> C x),
-                                  (\opt. case opt of NONE -> NONE || SOME x -> f x), s)``,
+                                  (\opt. case opt of NONE -> NONE || SOME x -> f x), SOME s)``,
 SRW_TAC [] [EQ_IMP_THM] THEN
  METIS_TAC [optionTheory.NOT_SOME_NONE,optionTheory.option_nchotomy,owhile_EQ_NONE,
 mwhile_EQ_NONE])
+*)
 
 val mwhileEndCond = store_thm ("mwhileEndCond", 
 ``(mwhile C f s = SOME (SOME s')) ==> ~ C s'``,
@@ -134,17 +168,9 @@ SRW_TAC [] [mwhile] THEN
 METIS_TAC [owhileEndCond, optionTheory.option_case_def]) 
 
 
-(*
-val mwhileEndState = store_thm ("mwhileEndState", 
-``((mwhile C f (SOME s) = SOME (SOME s')) /\ (!x.P x /\ C x ==> 
-((f x = SOME x') ==> P x')) /\ P s) ==> P s'``,
-SRW_TAC [] [mwhile] THEN
-METIS_TAC [optionTheory.option_case_def, option_case_rwt,
-nthStateProp, owhile_def, owhileEndState])
-*)
 
 val mwhileEndState = store_thm ("mwhileEndState",
-``(mwhile C f (SOME s) = SOME (SOME s')) /\
+``(mwhile C f s = SOME (SOME s')) /\
 (!x x'. P x /\ C x /\ (f x = SOME x') ==> P x') /\
 P s ==> P s'``,
 SIMP_TAC (srw_ss()) [mwhile] THEN
@@ -163,7 +189,7 @@ METIS_TAC []);
 
 
 
-val mlDir = ref ("/e/phd/Code/Parser/v14/theoryML/");
+val mlDir = ref ("./theoryML/");
 
 val _ =
  let open EmitML

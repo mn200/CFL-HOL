@@ -13,10 +13,10 @@ stack symbols as its pfx and by that it implies that a corresponding
 rule exists in the grammar *)
 
 val stackSymbols = Define `(stackSymbols [] = []) /\
-(stackSymbols (((state sym itl), pt)::rst) = sym::stackSymbols rst)`
+(stackSymbols (((sym itl), pt)::rst) = sym::stackSymbols rst)`
 
 val prop3  = Define `prop3 g stl = 
-!sym itl pt.MEM ((state sym itl), pt) stl ==> isTmnlSym sym ==> ?e.(MEM e itl /\ (?nt sfx.(e=item nt (stackSymbols (TL stl), sfx))))`
+!sym itl pt.MEM ((sym itl), pt) stl ==> isTmnlSym sym ==> ?e.(MEM e itl /\ (?nt sfx.(e=item nt (stackSymbols (TL stl), sfx))))`
 
 
 val prop3thm = store_thm ("prop3thm", 

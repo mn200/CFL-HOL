@@ -4,7 +4,7 @@ open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory boolSimps optionTheory
 
 open regexpTheory grammarDefTheory boolLemmasTheory listLemmasTheory
-parseTreeTheory parserDefTheory yaccDefTheory
+parseTreeTheory parserDefTheory yaccDefTheory parseProp1DefTheory
 
 
 val _ = new_theory "parseProp2Def";
@@ -116,6 +116,9 @@ SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM, Abbrev_def] THEN
 Cases_on `isNonTmnlSym sym` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `addRule stl r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `FST m (SND (HD (pop ((s,itl)::csl) (LENGTH (ruleRhs r)))))
+               (NTS (ruleLhs r)) =
+             []` THEN
 Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r)) = []` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `r` THEN 
 Cases_on `x` THENL[
@@ -137,12 +140,16 @@ val red_sym = store_thm ("red_sym",
 ==> (sl'=sym::rst)``,
 SRW_TAC [] [doReduce_def, LET_THM] THEN
 Cases_on `addRule stl r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `FST m (SND (HD (pop ((s,itl)::csl) (LENGTH (ruleRhs r)))))
+               (NTS (ruleLhs r)) =
+             []` THEN
 Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r))` THEN FULL_SIMP_TAC (srw_ss()) [])
 
 
 (* 3. Leaves of all the ptrees on the stack + the remaining input symbols = original symbol list *)
 val prop2thm = store_thm ("prop2thm",
-``!m g.(m=slr g) ==> prop2 orig sl (REVERSE stl) ==> ((parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))) 
+``!m g.(m=slr g) ==> prop2 orig sl (REVERSE stl) ==> 
+((parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))) 
 ==> prop2 orig sl' (REVERSE stl')``,
 FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM, prop2] THEN
 SRW_TAC [] [] THEN

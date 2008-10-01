@@ -30,38 +30,34 @@ val (followRuleML,followRuleML_ind) = tprove (followRuleML_defn,
 WF_REL_TAC (`inv_image  (((measure (\(g,sn). CARD ((allSyms g) DIFF (LIST_TO_SET sn))))) LEX (measure (\r.LENGTH (ruleRhs r)))) (\(g,sn,sym,r).(g,sn),r)`) THEN
 SRW_TAC [] [] THEN
 `FINITE (allSyms g)` by METIS_TAC [FINITE_LIST_TO_SET,finiteAllSyms] THEN
-SRW_TAC [] [FINITE_INSERT,FINITE_LIST_TO_SET] THENL[
+SRW_TAC [] [FINITE_INSERT,FINITE_LIST_TO_SET] 
+THENL[
 
-`sym IN allSyms g` by METIS_TAC [symInGr] THEN
-`((allSyms g) INTER (sym INSERT set sn)) = ((sym INSERT set sn) INTER (allSyms g))` by METIS_TAC [INTER_COMM] THEN
-ASM_REWRITE_TAC [] THEN
-FULL_SIMP_TAC (srw_ss()) [INSERT_INTER] THEN
-SRW_TAC [] [ADD1] THEN
-`(allSyms g) INTER set sn = (set sn) INTER (allSyms g)` by METIS_TAC [INTER_COMM] THEN
-ASM_REWRITE_TAC [] THEN
-DECIDE_TAC,
+      `sym IN allSyms g` by METIS_TAC [symInGr] THEN
+      `((allSyms g) INTER (sym INSERT set sn)) = ((sym INSERT set sn) INTER (allSyms g))` by METIS_TAC [INTER_COMM] THEN
+      ASM_REWRITE_TAC [] THEN
+      FULL_SIMP_TAC (srw_ss()) [INSERT_INTER] THEN
+      SRW_TAC [] [ADD1] THEN
+      `(allSyms g) INTER set sn = (set sn) INTER (allSyms g)` by METIS_TAC [INTER_COMM] THEN
+      ASM_REWRITE_TAC [] THEN
+      DECIDE_TAC,
 
-`sym IN allSyms g` by METIS_TAC [symInGr] THEN
-`~(sym IN set sn)` by FULL_SIMP_TAC list_ss [] THEN
-`~(sym IN ((allSyms g) INTER (set sn)))` by METIS_TAC [IN_INTER] THEN
-`~(allSyms g = set sn)` by METIS_TAC [] THEN
-`CARD (allSyms g) - CARD (allSyms g INTER set sn) = CARD ((allSyms g) DIFF (set sn))` by METIS_TAC [CARD_DIFF,FINITE_LIST_TO_SET,FINITE_INSERT] THEN
-ASM_REWRITE_TAC [] THEN
-`sym IN (allSyms g DIFF set sn)` by (FULL_SIMP_TAC (srw_ss()) [DIFF_DEF] THEN METIS_TAC []) THEN
-`~((allSyms g DIFF set sn)={})` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
-`~(CARD (allSyms g DIFF set sn)=0)` by METIS_TAC [CARD_EQ_0,FINITE_DIFF] THEN
-DECIDE_TAC,
-
-FULL_SIMP_TAC (srw_ss()) [ruleRhs_def],
-FULL_SIMP_TAC (srw_ss()) [ruleRhs_def]])
+      `sym IN allSyms g` by METIS_TAC [symInGr] THEN
+      `~(sym IN set sn)` by FULL_SIMP_TAC list_ss [] THEN
+      `~(sym IN ((allSyms g) INTER (set sn)))` by METIS_TAC [IN_INTER] THEN
+      `~(allSyms g = set sn)` by METIS_TAC [] THEN
+      `CARD (allSyms g) - CARD (allSyms g INTER set sn) = CARD ((allSyms g) DIFF (set sn))` by METIS_TAC [CARD_DIFF,FINITE_LIST_TO_SET,FINITE_INSERT] THEN
+      ASM_REWRITE_TAC [] THEN
+      `sym IN (allSyms g DIFF set sn)` by (FULL_SIMP_TAC (srw_ss()) [DIFF_DEF] THEN METIS_TAC []) THEN
+      `~((allSyms g DIFF set sn)={})` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
+      `~(CARD (allSyms g DIFF set sn)=0)` by METIS_TAC [CARD_EQ_0,FINITE_DIFF] THEN
+      DECIDE_TAC])
 
 
 val followSetML = Define `followSetML g sym = 
 BIGUNION (LIST_TO_SET (MAP (followRuleML g [] sym) (rules g)))`
 
 
-val _ = save_thm ("followRuleML",followRuleML)
-val _ = save_thm ("followRuleML_ind",followRuleML_ind)
 
 
 
@@ -126,6 +122,28 @@ val followSetEq1 = store_thm ("followSetEq1",
 FULL_SIMP_TAC (srw_ss()) [followSetML] THEN SRW_TAC [] [] THEN
 METIS_TAC [followRuleEq1, MEM_MAP]
 )
+
+
+val followSetMem = store_thm ("followSetMem", 
+``!u v.RTC (derives g) u v ==> (u=[NTS N]) ==> 
+(v=(pfx++[NTS N']++[TS ts]++sfx)) ==> 
+((TS ts) IN followSet g (NTS N'))``,
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [] [RTC_RULES] 
+THENL[
+
+      `LENGTH [NTS N] = LENGTH (pfx ++ [NTS N'] ++ [TS ts] ++ sfx)` 
+			       by METIS_TAC [] THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      FULL_SIMP_TAC (arith_ss) [],
+
+      FULL_SIMP_TAC (srw_ss()) [derives_def, lreseq, followSet] THEN
+      Q.EXISTS_TAC `u'` THEN
+      SRW_TAC [] [] 
+	      THENL[
+		    FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ruleRhs_def] THEN
+		    METIS_TAC [],
+			  
+		    METIS_TAC []]])
 
 
 

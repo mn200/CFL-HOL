@@ -1694,26 +1694,107 @@ THENL[
       
 
 
+val iclosureMemIc1 = store_thm
+("iclosureMemIc1",
+``!g l.MEM e (iclosure g l) =
+  MEM e l \/ ?e'.MEM e' l /\ MEM e (iclosure g [e'])``,
+MAGIC)
+(*
+HO_MATCH_MP_TAC iclosure_ind' THEN
+
+SRW_TAC [][EQ_IMP_THM] THEN
+THENL[
+      Cases_on `MEM e l` THEN SRW_TAC [][] THEN
+      FULL_SIMP_TAC (srw_ss()) [rmd_mem_list,
+				iclosure1MemType,
+				Once iclosure',LET_THM] THEN
+      Cases_on `~(set l = set (iclosure1 g (rmDupes l)))` THEN
+      FULL_SIMP_TAC (srw_ss()) [] 
+      THENL[
+	    
+
+
+	    ]
+
+
+      METIS_TAC [iclosure_mem],
+
+      METIS_TAC [iclosure_mem],
+      
+
+
+      THENL[	    
+	    SRW_TAC [][Once iclosure',LET_THM] THEN
+	    FULL_SIMP_TAC (srw_ss()) [rmd_mem_list,iclosure1MemType] THEN
+	    SRW_TAC [][] 	    
+	    THENL[
+		  Q.EXISTS_TAC `item M (p,NTS N::s)` THEN
+		  SRW_TAC [][] THEN
+		  SRW_TAC [] [rmDupes,delete_def,iclosure1,getItems,getItems_append] THEN
+		  `?r1 r2.rules g = r1++[rule N r]++r2`
+		      by METIS_TAC [rgr_r9eq] THEN
+		  SRW_TAC [][getItems_append,getItems] THEN
+		  METIS_TAC [iclosure_mem,rmd_mem_list,MEM,MEM_APPEND],
+
+		  Cases_on `~({e'} = set (iclosure1 g (rmDupes [e'])))` THEN
+		  FULL_SIMP_TAC (srw_ss()) [] THEN
+		  METIS_TAC [],
+
+		  Cases_on `~({item N ([],r)} =
+			      set (iclosure1 g (rmDupes [item N ([],r)])))` THEN
+      		  FULL_SIMP_TAC (srw_ss()) []
+                  THENL[
+			Q.EXISTS_TAC `item M (p,NTS N::s)` THEN
+			SRW_TAC [][] THEN
+			FULL_SIMP_TAC (srw_ss()) [rmDupes,delete_def,iclosure1] THEN
+			`?r1 r2.rules g = r1++[rule N r]++r2`
+			    by METIS_TAC [rgr_r9eq] THEN
+			SRW_TAC [][getItems_append,getItems] THEN
+			MAGIC,
+			
+			MAGIC
+			]
+		  ],
+
+      
+      FULL_SIMP_TAC (srw_ss()) [Once iclosure',LET_THM] THEN
+      FULL_SIMP_TAC (srw_ss()) [rmd_mem_list,iclosure1MemType] THEN
+      SRW_TAC [][] THEN
+      Q.EXISTS_TAC `item M (p,NTS N::s)` THEN
+      SRW_TAC [][] THEN
+      SRW_TAC [] [rmDupes,delete_def,iclosure1,getItems,getItems_append] THEN
+      `?r1 r2.rules g = r1++[rule N r]++r2`
+	  by METIS_TAC [rgr_r9eq] THEN
+      SRW_TAC [][getItems_append,getItems] THEN
+      METIS_TAC [iclosure_mem,rmd_mem_list,MEM,MEM_APPEND]
+      ])
+*)
+
+
+val iclosure_APPEND = 
+store_thm ("iclosure_APPEND",
+``MEM e (iclosure g (l1++l2)) =
+  (MEM e (l1++l2) \/ MEM e (iclosure g l1) \/
+  MEM e (iclosure g l2))``,
+SRW_TAC [][EQ_IMP_THM] THEN
+FULL_SIMP_TAC (srw_ss()) [Once iclosureMemIc1] THEN
+METIS_TAC [iclosure_mem,iclosureMemIc1])
 
 val iclosureSetEq = store_thm 
 ("iclosureSetEq",
-``!g l.(set l = set l') ==>
+``!g l l'.(set l = set l') ==>
   (set (iclosure g l) = set (iclosure g l'))``,
-HO_MATCH_MP_TAC iclosure_ind' THEN
-REPEAT GEN_TAC THEN STRIP_TAC THEN 
-MP_TAC iclosure' THEN 
-DISCH_THEN (fn th => REWRITE_TAC [th]) THEN 
-SRW_TAC [][LET_THM] THEN
-FULL_SIMP_TAC (srw_ss()) 
-	      [Once iclosure', LET_THM, rmDupes_twice] THEN 
-Q.ABBREV_TAC `l = v2::v3` THEN 
-markerLib.RM_ALL_ABBREVS_TAC THEN 
-Cases_on `~(set (iclosure1 g (rmDupes l)) =
-            set
-                (iclosure1 g
-			   (rmDupes (iclosure1 g (rmDupes l)))))` THEN
-SRW_TAC [] [] THEN
-MAGIC)
+SRW_TAC [][EXTENSION,EQ_IMP_THM,Once iclosureMemIc1]
+THENL[
+      METIS_TAC [iclosure_mem],
+
+      `MEM e' l'` by METIS_TAC [] THEN
+      FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+      METIS_TAC [iclosure_APPEND,rgr_r9eq,iclosure_mem,APPEND_ASSOC],
+
+      METIS_TAC [iclosure_mem,iclosureMemIc1]
+      ])
+
 
 val transIcIcImpIc = store_thm (
 "transIcIcImpIc",

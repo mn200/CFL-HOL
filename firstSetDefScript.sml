@@ -4,13 +4,13 @@ open regexpTheory grammarDefTheory listLemmasTheory
 
 val _ = new_theory "firstSetDef"
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w) 
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
 
 
 val _ = Globals.linewidth := 60
 
-val firstSet = Define 
-`firstSet g sym = 
+val firstSet = Define
+`firstSet g sym =
 {(TS fst) | ?rst.RTC (derives g) [sym] ([TS fst]++rst)}`
 
 
@@ -18,19 +18,19 @@ val firstSet = Define
 val firstSet1_defn = Hol_defn "firstSet1_defn" `
 (firstSet1 g sn [] = []) /\
 (firstSet1 g sn [TS ts] = [TS ts]) /\
-(firstSet1 g sn [NTS nt] = 
+(firstSet1 g sn [NTS nt] =
  if (MEM (NTS nt) sn) then [] else
- let 
+ let
      r = getRhs nt (rules g)
  in
-     if r=[] then [] 
-     else  
-	 rmDupes ((FLAT (MAP (firstSet1 g ((NTS nt)::sn)) r)))) /\ 
-(firstSet1 g sn (i::il) =  
+     if r=[] then []
+     else
+	 rmDupes ((FLAT (MAP (firstSet1 g ((NTS nt)::sn)) r)))) /\
+(firstSet1 g sn (i::il) =
  if isTmnlSym i then [i]
- else 
-     if (nullableML g [] [i]) then 
-	 (firstSet1 g sn [i]++firstSet1 g sn il) 
+ else
+     if (nullableML g [] [i]) then
+	 (firstSet1 g sn [i]++firstSet1 g sn il)
      else  (firstSet1 g sn [i]))`
 
 
@@ -91,8 +91,8 @@ Cases_on `nt=s` THEN
 SRW_TAC [] [] THEN
 METIS_TAC [getRhsDistrib,APPEND,APPEND_eq_NIL])
 
-val getRhsNilRtc = store_thm ("getRhsNilRtc", 
-``(getRhs nt (rules g) = []) ==> 
+val getRhsNilRtc = store_thm ("getRhsNilRtc",
+``(getRhs nt (rules g) = []) ==>
       (!l.RTC (derives g) [NTS nt] l ==> (l=[NTS nt]))``,
 SRW_TAC [] [EQ_IMP_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES1] THEN
@@ -109,7 +109,7 @@ val diff_r2 = mk_thm ([], ``!x y.~(MEM e y) ==> (diff x y = e::(diff x (e::y)))`
 val diff_r3 = mk_thm ([], ``!x y.~MEM h (diff x (h::y))``)
 
 
-val rmd_r0 = store_thm ("rmd_r0", 
+val rmd_r0 = store_thm ("rmd_r0",
 ``!x y.rmDupes (x++y) = (rmDupes x ++ rmDupes (diff y x))``,
 HO_MATCH_MP_TAC diff_ind THEN
 SRW_TAC [][diff_def,rmDupes] THEN
@@ -118,7 +118,7 @@ MAGIC)
 
 
 
-val rmd_r1 = store_thm ("rmd_r1", 
+val rmd_r1 = store_thm ("rmd_r1",
 ``!x y z.rmDupes (x++y++z) = (
 rmDupes x ++ rmDupes (diff y x) ++ rmDupes (diff z (x++y)))``,
 SRW_TAC [] [] THEN
@@ -144,31 +144,31 @@ METIS_TAC [isTmnlSym_def]])
 *)
 
 
-val firstSetList = Define 
-`firstSetList g l = 
+val firstSetList = Define
+`firstSetList g l =
       {TS fst | ?rst. RTC (derives g) l ([TS fst] ++ rst)}`
 
 val firstSet1Eq1 = store_thm ("firstSet1Eq1",
-``!g sn l.((MEM s (firstSet1 g sn l)) ==> 
+``!g sn l.((MEM s (firstSet1 g sn l)) ==>
          (s IN (firstSetList g l)))``,
 HO_MATCH_MP_TAC firstSet1_ind THEN
-SRW_TAC [] [] 
+SRW_TAC [] []
 THENL[
-   FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList] THEN 
+   FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList] THEN
    METIS_TAC [b1],
 
-   FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList] THEN 
+   FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList] THEN
    METIS_TAC [RTC_RULES],
 
    FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList, LET_THM] THEN
    Cases_on `MEM (NTS nt) sn` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-   Cases_on `getRhs nt (rules g) = []` THEN 
+   Cases_on `getRhs nt (rules g) = []` THEN
    FULL_SIMP_TAC (srw_ss()) [] THEN
-   `MEM s ((FLAT (MAP (\a. firstSet1 g (NTS nt::sn) a) 
+   `MEM s ((FLAT (MAP (\a. firstSet1 g (NTS nt::sn) a)
        (getRhs nt (rules g)))))` by METIS_TAC [rmd_r2] THEN
-   `?e. MEM e (MAP (\a.firstSet1 g (NTS nt::sn) a) 
+   `?e. MEM e (MAP (\a.firstSet1 g (NTS nt::sn) a)
        (getRhs nt (rules g))) /\ (MEM s e)` by METIS_TAC [flat_map_mem] THEN
-   `?l.(MEM l (getRhs nt (rules g))) /\ 
+   `?l.(MEM l (getRhs nt (rules g))) /\
    (MEM s (firstSet1 g (NTS nt::sn) l))` by METIS_TAC [MEM_MAP] THEN
    RES_TAC THEN
    Q.EXISTS_TAC `fst` THEN
@@ -177,15 +177,15 @@ THENL[
 
 
    FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList, LET_THM, isTmnlSym_def] THEN
-   Cases_on `MEM (NTS v7) sn` THEN 
-   Cases_on `(getRhs v7 (rules g)) = []` THEN 
+   Cases_on `MEM (NTS v7) sn` THEN
+   Cases_on `(getRhs v7 (rules g)) = []` THEN
    FULL_SIMP_TAC (srw_ss()) [] THEN
-   Cases_on `nullableML g [] [NTS v7]` THEN 
-   FULL_SIMP_TAC (srw_ss()) [] 
+   Cases_on `nullableML g [] [NTS v7]` THEN
+   FULL_SIMP_TAC (srw_ss()) []
    THENL[
 	 `nullable g [NTS v7]` by METIS_TAC [nullableEq] THEN
 	 FULL_SIMP_TAC (srw_ss()) [nullable_def] THEN
-	 METIS_TAC [derives_append, APPEND], 
+	 METIS_TAC [derives_append, APPEND],
 
 	 `nullable g [NTS v7]` by METIS_TAC [nullableEq] THEN
 	 FULL_SIMP_TAC (srw_ss()) [nullable_def] THEN
@@ -207,7 +207,7 @@ THENL[
 	 FULL_SIMP_TAC (srw_ss()) [nullable_def] THEN
 	 `RTC (derives g) ([NTS v7] ++ (v14::v15))([] ++ (TS fst::rst))` by FULL_SIMP_TAC (srw_ss()) [derives_append, APPEND, CONS, APPEND_ASSOC] THEN
 	 METIS_TAC [APPEND,APPEND_ASSOC, CONS, derives_append, nullableEq, nullable_def],
-   
+
 	 FULL_SIMP_TAC (srw_ss()) [] THEN
 	 `?rst1.RTC (derives g) [v14] rst1` by METIS_TAC [RTC_RULES] THEN
 	 `?rst2.RTC (derives g) v15 rst2` by METIS_TAC [RTC_RULES] THEN
@@ -249,23 +249,23 @@ val rtc2list_isolate_FsNT = store_thm(
   ``!dl.rtc2list (derives g) dl ==>
     !pfx N sfx.
                (HD dl =  (pfx++[NTS N]++sfx)) ==>
-	       !pfx' t rst sfx'.			      
+	       !pfx' t rst sfx'.
                 RTC (derives g) pfx pfx' ==>
 		RTC (derives g) sfx sfx' ==>
-                RTC (derives g) [NTS N] (TS t::rst) ==>               
+                RTC (derives g) [NTS N] (TS t::rst) ==>
                 (LAST dl = pfx'++TS t::rst++sfx') ==>
                    ?dl'.rtc2list (derives g) dl'
                       /\ (HD dl' = [NTS N]) /\
                         (LAST  dl' = TS t::rst) /\
                         (LENGTH dl' <= LENGTH dl)``,
-  HO_MATCH_MP_TAC SNOC_INDUCT THEN 
+  HO_MATCH_MP_TAC SNOC_INDUCT THEN
   SRW_TAC [][SNOC_APPEND, last_append] THEN
   Cases_on `dl=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
   SRW_TAC [][]  THEN
 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
-MAP_EVERY Q.EXISTS_TAC [`r1`]
+MAP_EVERY Q.EXISTS_TAC [`r1`] THEN
 
-Cases_on `LENGTH dl = 1` 
+Cases_on `LENGTH dl = 1`
 THENL[
       Cases_on `dl` THEN SRW_TAC [][] THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -273,59 +273,59 @@ THENL[
       SRW_TAC [] [] THEN
       Q.EXISTS_TAC `[[NTS N];TS t::rst]` THEN
       SRW_TAC [][] THEN
-      
 
 
-  `rtc2list (derives g) dl` 
-     by METIS_TAC [rtc2list_distrib_append_fst] THEN 
-  FULL_SIMP_TAC (srw_ss()) [] THEN 
+
+  `rtc2list (derives g) dl`
+     by METIS_TAC [rtc2list_distrib_append_fst] THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN
   `HD dl = pfx ++ [NTS N] ++ sfx`
-     by (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) []) THEN 
-  RES_TAC THEN 
+     by (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
+  RES_TAC THEN
 
 
 
 
   `dl ++ [x] = FRONT dl ++ [LAST dl; x]`
-     by METIS_TAC [APPEND_FRONT_LAST, APPEND, APPEND_ASSOC] THEN 
+     by METIS_TAC [APPEND_FRONT_LAST, APPEND, APPEND_ASSOC] THEN
   `rtc2list (derives g) [LAST dl; x]`
-     by METIS_TAC [rtc2list_distrib_append_snd, NOT_CONS_NIL] THEN 
-  `derives g (LAST dl) x` by FULL_SIMP_TAC (srw_ss()) [] THEN 
+     by METIS_TAC [rtc2list_distrib_append_snd, NOT_CONS_NIL] THEN
+  `derives g (LAST dl) x` by FULL_SIMP_TAC (srw_ss()) [] THEN
   `(?pfx2. derives g pfx' pfx2 /\ (x = pfx2 ++ rhs ++ sfx')) \/
    (?rhs2. derives g rhs rhs2 /\ (x = pfx' ++ rhs2 ++ sfx')) \/
    (?sfx2. derives g sfx' sfx2 /\ (x = pfx' ++ rhs ++ sfx2))`
-     by (Q.PAT_ASSUM `LAST dl = X` SUBST_ALL_TAC THEN 
-         FULL_SIMP_TAC (srw_ss()) [lemma2']) THEN 
+     by (Q.PAT_ASSUM `LAST dl = X` SUBST_ALL_TAC THEN
+         FULL_SIMP_TAC (srw_ss()) [lemma2']) THEN
   SRW_TAC [][] THENL [
-    MAP_EVERY Q.EXISTS_TAC [`pfx2`, `LAST dl'`, `sfx'`] THEN 
-    SRW_TAC [][] THEN 
+    MAP_EVERY Q.EXISTS_TAC [`pfx2`, `LAST dl'`, `sfx'`] THEN
+    SRW_TAC [][] THEN
     Q.EXISTS_TAC `dl'` THEN SRW_TAC [ARITH_ss][],
 
-    MAP_EVERY Q.EXISTS_TAC [`pfx'`, `rhs2`, `sfx'`] THEN 
-    SRW_TAC[][] THEN 
-    Q.EXISTS_TAC `dl' ++ [rhs2]` THEN 
+    MAP_EVERY Q.EXISTS_TAC [`pfx'`, `rhs2`, `sfx'`] THEN
+    SRW_TAC[][] THEN
+    Q.EXISTS_TAC `dl' ++ [rhs2]` THEN
     SRW_TAC [][rtc2list_append_right] THENL[
       Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [],
       Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [last_append]
     ],
 
-    MAP_EVERY Q.EXISTS_TAC [`pfx'`, `LAST dl'`, `sfx2`] THEN 
-    SRW_TAC [][] THEN Q.EXISTS_TAC `dl'` THEN 
+    MAP_EVERY Q.EXISTS_TAC [`pfx'`, `LAST dl'`, `sfx2`] THEN
+    SRW_TAC [][] THEN Q.EXISTS_TAC `dl'` THEN
     SRW_TAC [ARITH_ss][]
-  ])
+  ]])
 
 
 
-val rtc2listFsExists = 
+val rtc2listFsExists =
 store_thm ("rtc2listFsExists",
 ``!dl.rtc2list (derives g) dl ==>
   (HD dl = [NTS N]) ==>
   (LAST dl = TS ts::sfx) ==>
    ~(TL dl = []) ==>
    ?sfx'.(HD (TL dl) = TS ts::sfx') \/
-   ?pfx' N' sfx'.(HD (TL dl) = pfx'++[NTS N']++sfx') 
-		/\ nullable g pfx' 
-                /\ (TS ts IN firstSet g (NTS N')) 
+   ?pfx' N' sfx'.(HD (TL dl) = pfx'++[NTS N']++sfx')
+		/\ nullable g pfx'
+                /\ (TS ts IN firstSet g (NTS N'))
                 /\ ~(TS ts IN firstSetList g pfx')``,
 
 SRW_TAC [][] THEN
@@ -363,9 +363,9 @@ MAGIC)
 
 
 (*
-``!g sn l.(s IN (firstSetList g l)) ==> 
+``!g sn l.(s IN (firstSetList g l)) ==>
   (sn=[]) ==> (MEM s (firstSet1 g sn l))``
-HO_MATCH_MP_TAC firstSet1_ind THEN SRW_TAC [] [] 
+HO_MATCH_MP_TAC firstSet1_ind THEN SRW_TAC [] []
 THENL[
 
 FULL_SIMP_TAC (srw_ss()) [firstSetList, firstSet1, Once RTC_CASES1, derives_def],
@@ -385,13 +385,13 @@ Cases_on `MEM (NTS nt sn)`
 completeInduct_on `LENGTH dl` THEN
 SRW_TAC [][] THEN
 Cases_on `TL dl=[]` THEN
-SRW_TAC [][] 
+SRW_TAC [][]
 THENL[
       Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [],
 
       IMP_RES_TAC rtc2listFsExists
       THENL[
-	    `dl = [HD dl]++TL dl`by METIS_TAC [listHdTl] THEN     
+	    `dl = [HD dl]++TL dl`by METIS_TAC [listHdTl] THEN
 	    `derives g [NTS N] (TS ts::sfx')`
 		by METIS_TAC [rtc2list_def,APPEND,listHdTl] THEN
 	    FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq] THEN
@@ -399,20 +399,20 @@ THENL[
 		by METIS_TAC [rgr_r9eq] THEN
 	    FULL_SIMP_TAC (srw_ss()) [getRhsDistrib,getRhs_def] THEN
 	    SRW_TAC [] [firstSetML,firstSet1,LET_THM]  THEN
-	    FULL_SIMP_TAC (srw_ss()) [] 
+	    FULL_SIMP_TAC (srw_ss()) []
 	    THENL[
 		  FULL_SIMP_TAC (srw_ss()) [getRhsDistrib,getRhs_def],
 
-		  Cases_on `sfx'` THEN 
+		  Cases_on `sfx'` THEN
 		  SRW_TAC [][firstSet1,FLAT_APPEND_DISTRIB] THEN
 		  FULL_SIMP_TAC (srw_ss()) [getRhsDistrib,getRhs_def] THEN
 		  SRW_TAC [] [firstSet1,FLAT_APPEND_DISTRIB] THEN
 		  METIS_TAC [MEM,MEM_APPEND,rmd_mem_list]
 		  ],
- 
-	    `dl = [HD dl]++TL dl`by METIS_TAC [listHdTl] THEN     
-	    `LENGTH (TL dl) < LENGTH ([HD dl]++TL dl)` 
-		by (FULL_SIMP_TAC (srw_ss()) [] THEN 
+
+	    `dl = [HD dl]++TL dl`by METIS_TAC [listHdTl] THEN
+	    `LENGTH (TL dl) < LENGTH ([HD dl]++TL dl)`
+		by (FULL_SIMP_TAC (srw_ss()) [] THEN
 		    DECIDE_TAC) THEN
 	    `rtc2list (derives g) (TL dl)`
 		by METIS_TAC [rtc2list_distrib_append_snd] THEN
@@ -420,11 +420,11 @@ THENL[
              (LAST (TL dl) = pfx' ++ rhs ++ sfx') /\
              ?dl'.
                rtc2list (derives g) dl' /\ (HD dl' = [NTS N']) /\
-               (LAST dl' = rhs) /\ LENGTH dl' <= LENGTH (TL dl)` 
+               (LAST dl' = rhs) /\ LENGTH dl' <= LENGTH (TL dl)`
 		by METIS_TAC [rtc2list_isolate_NT] THEN
 	    `LENGTH (TL dl) < LENGTH dl` by METIS_TAC [] THEN
-	    `LENGTH dl' < LENGTH dl` 
-		by (FULL_SIMP_TAC (srw_ss()) [] THEN 
+	    `LENGTH dl' < LENGTH dl`
+		by (FULL_SIMP_TAC (srw_ss()) [] THEN
 		    FULL_SIMP_TAC (arith_ss) []) THEN
 	    FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH dl'`] MP_TAC) THEN
 	    SRW_TAC [][] THEN
@@ -449,7 +449,7 @@ THENL[
 
 
 
- 
+
 *)
 
 
@@ -468,13 +468,13 @@ val _ = save_thm ("firstSet1",firstSet1)
 val _ = save_thm ("firstSet1_ind",firstSet1_ind)
 
 
-val mlDir = ref ("./theoryML/");
-
+val mlDir = "./theoryML/"
+(* local open parseTreeTheory in end
 val _ =
  let open EmitML
- in emitML (!mlDir)
+ in emitML mlDir
    ("firstSet",
-    OPEN ["list", "option", "regexp", "listLemmas", "grammarDef", "whileLemmas", "set","num", "parseTree"]
+    OPEN ["list", "option", "regexp", "listLemmas", "grammarDef", "set","num", "parseTree"]
     :: MLSIG "type num = numML.num"
     :: MLSIG "type symbol = regexpML.symbol"
     :: MLSIG "type 'a set = 'a setML.set"
@@ -486,7 +486,7 @@ val _ =
     :: DEFN firstSetML
     :: [])
  end;
-
+*)
 
 
 val _ = export_theory ();

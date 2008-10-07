@@ -1,12 +1,47 @@
 open HolKernel boolLib Parse bossLib
 
 open regexpTheory grammarDefTheory
-open firstSetDefTheory listLemmasTheory
-open containerTheory pred_setTheory listTheory
+open listLemmasTheory
+open containerTheory pred_setTheory listTheory relationTheory
 
 val _ = new_theory "firstMLAcc"
 
 val _ = set_trace "Unicode" 1
+
+val _ = Globals.linewidth := 60
+
+val firstSet_def = Define
+`firstSet g sym =
+{(TS fst) | ?rst.RTC (derives g) [sym] ([TS fst]++rst)}`
+
+val getRhsNilMem = store_thm ("getRhsNilMem",
+``(getRhs nt (rules g) =[]) = ~(?r.MEM (rule nt r) (rules g))``,
+SRW_TAC [] [EQ_IMP_THM] THEN
+Cases_on `g` THEN
+FULL_SIMP_TAC (srw_ss()) [rules_def] THEN
+Induct_on `l` THEN
+SRW_TAC [] [getRhs_def] THEN
+SRW_TAC [] [] THEN
+Cases_on `h` THEN
+FULL_SIMP_TAC (srw_ss()) [getRhs_def] THEN
+Cases_on `nt=s` THEN
+SRW_TAC [] [] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [getRhsDistrib,APPEND,APPEND_eq_NIL])
+
+val getRhsNilRtc = store_thm ("getRhsNilRtc",
+``(getRhs nt (rules g) = []) ==>
+      (!l.RTC (derives g) [NTS nt] l ==> (l=[NTS nt]))``,
+SRW_TAC [] [EQ_IMP_THM] THEN
+FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES1] THEN
+FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq,getRhsNilMem] THEN
+METIS_TAC [])
+
+
+val firstSetList_def = Define
+`firstSetList g l =
+      {TS fst | ?rst. RTC (derives g) l ([TS fst] ++ rst)}`
+
 
 val firstSetAML_defn = Hol_defn "firstSetAML" `
   (firstSetAML g acc sn [] = acc) ∧
@@ -69,7 +104,6 @@ val (firstSetAML_def, firstSetAML_ind) = Defn.tprove(
     DECIDE_TAC
   ])
 
-open relationTheory
 val RTC_derives_tokfirst = store_thm(
   "RTC_derives_tokfirst",
   ``(derives g)^* (TS tok::rest) y =

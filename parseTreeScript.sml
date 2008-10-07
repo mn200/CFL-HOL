@@ -21,7 +21,8 @@ val nonTmnlToStr = Define `(nonTmnlToStr (NT s) = s)`;
 val _ = Hol_datatype 
 `ptree = Leaf of terminal | Node of nonTerminal => ptree list`;
 
-val ptree2Sym = Define `(ptree2Sym (Node nt ptl) = (NTS (nonTmnlToStr nt))) /\
+val ptree2Sym = Define 
+`(ptree2Sym (Node nt ptl) = (NTS (nonTmnlToStr nt))) /\
 (ptree2Sym (Leaf tm) = (TS (tmnlToStr tm)))`
 
 val isNode = Define `(isNode (Node _ _) = T) /\
@@ -73,8 +74,10 @@ in HOL rather than converting to list *)
 val getSymbols = Define `(getSymbols [] = []) /\ 
 (getSymbols [Leaf tmnl] = [TS (tmnlToStr tmnl)]) /\ 
 (getSymbols [Node nt ptlist] = [NTS (nonTmnlToStr nt)]) /\ 
-(getSymbols ((Leaf tmnl)::t) = (TS (tmnlToStr tmnl)) :: (getSymbols t)) /\ 
-(getSymbols ((Node nt ptlist)::t) = (NTS (nonTmnlToStr nt)) :: (getSymbols t))`;
+(getSymbols ((Leaf tmnl)::t) = 
+(TS (tmnlToStr tmnl)) :: (getSymbols t)) /\ 
+(getSymbols ((Node nt ptlist)::t) = 
+(NTS (nonTmnlToStr nt)) :: (getSymbols t))`;
 
 val ptreeToRules = Define `(ptreeToRules (Leaf tmnl) = []) /\ 
 (ptreeToRules (Node nt ptlist) = (rule ( (nonTmnlToStr nt)) (getSymbols ptlist)) :: (ptreeToRules2 ptlist)) /\ 

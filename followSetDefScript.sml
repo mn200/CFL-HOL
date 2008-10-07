@@ -9,7 +9,8 @@ firstSetDefTheory
 val _ = new_theory "followSetDef"
 
 
-val followSet = Define `followSet g sym = {TS ts| ?s.MEM s (MAP ruleRhs (rules g)) /\ ?pfx sfx.RTC (derives g) s (pfx++[sym]++[TS ts]++sfx)}`
+val followSet = Define 
+`followSet g sym = {TS ts| ?s.MEM s (MAP ruleRhs (rules g)) /\ ?pfx sfx.RTC (derives g) s (pfx++[sym]++[TS ts]++sfx)}`
 
 val followRuleML_defn = Hol_defn "followRuleML_defn"
 `(followRuleML g sn sym (rule l []) = {}) /\

@@ -150,7 +150,8 @@ Q.UNABBREV_ALL_TAC THEN SRW_TAC [][prop2_def, leaves_def, stacktreeleaves_def]]]
 val lem1 = store_thm ("lem1",
 ``(!t.
             MEM t ptl /\ isNode t ==>
-            RTC (derives g) [ptree2Sym t] (leaves t)) ==> RTC (derives g) (MAP ptree2Sym ptl) (cleaves ptl)``,
+            RTC (derives g) [ptree2Sym t] (leaves t)) ==> 
+            RTC (derives g) (MAP ptree2Sym ptl) (cleaves ptl)``,
 Induct_on `ptl` THEN  SRW_TAC [] [ptree2Sym_def, leaves_def, RTC_RULES] THEN
 Cases_on `h` THEN SRW_TAC [] [ptree2Sym_def, leaves_def] THEN
 FULL_SIMP_TAC (srw_ss() ++ DNF_ss) [isNode_def, ptree2Sym_def, leaves_def] THENL[

@@ -6,14 +6,14 @@ val _ = new_theory "firstSetDef"
 
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
 
+val _ = set_trace "Unicode" 1;
 
 val _ = Globals.linewidth := 60
 
 val firstSet = Define
 `firstSet g sym =
-{(TS fst) | ?rst.RTC (derives g) [sym] ([TS fst]++rst)}`
+{ (TS fst) | ∃rst.RTC (derives g) [sym] ([TS fst]++rst) }`
 
-val _ = set_trace "Unicode" 1;
 
 val firstSet1_defn = Hol_defn "firstSet1_defn" `
   (firstSet1 g sn [] = []) ∧
@@ -120,52 +120,58 @@ val firstSet1Eq1 = store_thm ("firstSet1Eq1",
 
     FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList, LET_THM,
                               rmd_mem_list] THEN
+    SRW_TAC [][] THEN
+    METIS_TAC [nullableEq,nullable_def,APPEND_NIL,
+	       derives_append,APPEND],
+
+
+    FULL_SIMP_TAC (srw_ss()) [LET_THM] THEN
     `∃e. MEM e (MAP (\a.firstSet1 g (NTS nt::sn) a)
                (getRhs nt (rules g))) /\ (MEM s e)`
         by METIS_TAC [flat_map_mem] THEN
-    `∃l. MEM l (getRhs nt (rules g)) ∧ MEM s (firstSet1 g (NTS nt::sn) l)`
+    `∃l. MEM l (getRhs nt (rules g)) ∧ 
+          MEM s (firstSet1 g (NTS nt::sn) l)`
        by METIS_TAC [MEM_MAP] THEN
     RES_TAC THEN
-    `MEM (rule nt l) (rules g)` by METIS_TAC [MEM_getRhs] THEN
-    Q.EXISTS_TAC `fst` THEN SRW_TAC [][] THEN
-    `derives g (NTS nt :: rest) (l ++ rest)`
+    SRW_TAC [][] THEN
+    `MEM (rule nt l') (rules g)` by METIS_TAC [MEM_getRhs] THEN
+    SRW_TAC [] [firstSetList] THEN
+    `derives g (NTS nt :: l) (l' ++ l)`
         by METIS_TAC [derives_same_append_right, APPEND, res1] THEN
-    Q.EXISTS_TAC `rst ++ rest` THEN
-    `(derives g)^* (l ++ rest) ((TS fst :: rst) ++ rest)`
+    FULL_SIMP_TAC (srw_ss()) [firstSetList] THEN
+    SRW_TAC [][] THEN
+    Q.EXISTS_TAC `rst ++ l` THEN
+    `(derives g)^* (l' ++ l) ((TS fst :: rst) ++ l)`
+       by METIS_TAC [rtc_derives_same_append_right] THEN
+    METIS_TAC [RTC_RULES, APPEND, APPEND_ASSOC],
+
+    FULL_SIMP_TAC (srw_ss()) [firstSetList] THEN
+    SRW_TAC [][] THEN
+    METIS_TAC [nullableEq,nullable_def,APPEND_NIL,
+	       derives_append,APPEND],
+
+    FULL_SIMP_TAC (srw_ss()) [LET_THM,firstSetList] THEN
+    `∃e. MEM e (MAP (\a.firstSet1 g (NTS nt::sn) a)
+               (getRhs nt (rules g))) /\ (MEM s e)`
+        by METIS_TAC [flat_map_mem] THEN
+    `∃l. MEM l (getRhs nt (rules g)) ∧ 
+       MEM s (firstSet1 g (NTS nt::sn) l)`
+       by METIS_TAC [MEM_MAP] THEN
+    RES_TAC THEN
+    SRW_TAC [][] THEN
+    `MEM (rule nt l') (rules g)` by METIS_TAC [MEM_getRhs] THEN
+    SRW_TAC [] [firstSetList] THEN
+    `derives g (NTS nt :: l) (l' ++ l)`
+        by METIS_TAC [derives_same_append_right, APPEND, res1] THEN
+    FULL_SIMP_TAC (srw_ss()) [firstSetList] THEN
+    SRW_TAC [][] THEN
+    Q.EXISTS_TAC `rst ++ l` THEN
+    `(derives g)^* (l' ++ l) ((TS fst :: rst) ++ l)`
        by METIS_TAC [rtc_derives_same_append_right] THEN
     METIS_TAC [RTC_RULES, APPEND, APPEND_ASSOC]
-  ]);
+    ])
 
 open rich_listTheory
-
-val countNt = Define
-`(countNt nt [] = 0) ∧
- (countNt nt (h::t) = 
-    case h 
-       of NTS nt'::rst -> if nt = nt' then  1+countNt nt t
-			  else countNt nt t
-       || otherwise -> countNt nt t)`
-
-
-val recast = store_thm
-("recast",
-``∀s rst sfx ntl. 
-     rtc2list (derives g) dl ∧ (LAST dl = TS s::rst) ∧
-     (HD dl = ntl ++ sfx) ∧ nullable g ntl ∧ 
-     RTC (derives g) sfx (TS s::rst) 
-   ==> 
-     ∃dl'. rtc2list (lderives g) dl' ∧ LENGTH dl' ≤ LENGTH dl ∧
-           (HD dl = ntl ++ sfx) ∧ (HD (LAST dl) = TS s) ∧ 
-           (∀N. ¬nullable g [NTS N] ==> countNt N dl' ≤ 1) ∧
-           ∀e. MEM e (FRONT dl) ==> isNonTmnlSym (HD e)``,
-MAGIC)
-
-
-val countNt' = prove(
-  ``countNt nt1 ((NTS nt2 :: rest)::sfs) = 
-      if nt1 = nt2 then 1 + countNt nt1 sfs
-      else countNt nt1 sfs``,
-  SRW_TAC [][countNt]);
 
 
 val ntderive_def = Define`
@@ -380,89 +386,27 @@ val first_first1 = prove(
     SRW_TAC [][firstSet1]
   ]);
 
-val equivalence = store_thm(
-  "equivalence",
-  ``set (firstSet1 g [] sf) = firstSetList g sf``,
-  SRW_TAC [][EXTENSION] 
-  
-  
-
-                
-
-val rtcImpFs1 = store_thm
-("rtcImpFs1",
-``∀s rst sn.rtc2list (lderives g) dl ∧
-  (LAST dl = TS s::rst) ∧
-  (∀N. ¬nullable g [NTS N] ==> countNt N dl ≤ 1) ∧
-  (∀N. nullable g [NTS N] ==> countNt N dl ≤ 2) ∧
-  (∀N. MEM (NTS N) sn ⇒ 
-       ¬(N ∈ anc (LAST dl) (REVERSE (FRONT dl)))) ∧
-  (∀N. MEM (NTS N) sn ==>
-       (nullable g [NTS N] ∧ (countNt N dl <= 1)) ∨
-       (¬nullable g [NTS N] ∧ (countNt N dl = 0))) 
-     ==>      
-   MEM (TS s) (firstSet1 g sn (HD dl))``,
-Induct_on `dl` THEN SRW_TAC [][] THEN 
-Cases_on `dl` THEN1 FULL_SIMP_TAC (srw_ss()) [firstSet1] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN 
-FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN 
-Cases_on `s1` THENL [
-  SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN 
-  SRW_TAC [][firstSet1, LET_THM, rmDupes] THEN 
-  
 
 
+val firstSet1Eq = store_thm ("firstSet1Eq",
+``∀g l.((MEM s (firstSet1 g [] l)) = 
+             (s ∈ (firstSetList g l)))``,
+SRW_TAC [] [EQ_IMP_THM] 
 THENL[
-      SRW_TAC [][firstSet1,LET_THM],
+      METIS_TAC [firstSet1Eq1],
       
-      `rtc2list (lderives g) t` 
-	  by METIS_TAC [rtc2list_distrib_append_snd,APPEND] THEN
-      `LAST t = TS s::rst` by METIS_TAC [last_append,APPEND] THEN
-      `?h' t'.t=h'::t'` by METIS_TAC [list_nchotomy] THEN
+      `∃ts.s=TS ts` 
+	  by (Cases_on `s` THEN 
+	      FULL_SIMP_TAC (srw_ss()) [firstSetList]) THEN
       SRW_TAC [][] THEN
-      FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
-      SRW_TAC [][] THEN
-      Cases_on `s1=[]` THEN
-      SRW_TAC [][]
-      THENL[
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    Cases_on `¬(rhs=[])`
-	    THENL[
-		  `∃e l.rhs=e::l` by METIS_TAC [list_nchotomy] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) []
-		  THENL[
-			MAGIC,
-
-			
-
-			
-
-
-			
-
-
-			]
-
-
-
-		  ]
-
-
-
-	    ]
-      
-      
-      
-
-
+      METIS_TAC [first_first1,containerLemmasTheory.mem_in]	
+      ])
+		
 
 
 val _ = save_thm ("firstSet1",firstSet1)
 val _ = save_thm ("firstSet1_ind",firstSet1_ind)
 
-val firstSet1Eq = mk_thm ([],
-``!g sn l.((MEM s (firstSet1 g sn l)) = (s IN (firstSetList g l)))``)
 
 
 val _ = save_thm ("firstSet1",firstSet1)

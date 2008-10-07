@@ -13,67 +13,64 @@ val firstSet = Define
 `firstSet g sym =
 {(TS fst) | ?rst.RTC (derives g) [sym] ([TS fst]++rst)}`
 
-
+val _ = set_trace "Unicode" 1;
 
 val firstSet1_defn = Hol_defn "firstSet1_defn" `
-(firstSet1 g sn [] = []) /\
-(firstSet1 g sn [TS ts] = [TS ts]) /\
-(firstSet1 g sn [NTS nt] =
- if (MEM (NTS nt) sn) then [] else
- let
-     r = getRhs nt (rules g)
- in
-     if r=[] then []
-     else
-	 rmDupes ((FLAT (MAP (firstSet1 g ((NTS nt)::sn)) r)))) /\
-(firstSet1 g sn (i::il) =
- if isTmnlSym i then [i]
- else
-     if (nullableML g [] [i]) then
-	 (firstSet1 g sn [i]++firstSet1 g sn il)
-     else  (firstSet1 g sn [i]))`
+  (firstSet1 g sn [] = []) ∧
+  (firstSet1 g sn (TS ts :: rest) = [TS ts]) ∧
+  (firstSet1 g sn (NTS nt :: rest) =
+     if MEM (NTS nt) sn then [] else
+     let
+       r = getRhs nt (rules g)
+     in
+       rmDupes ((FLAT (MAP (firstSet1 g (NTS nt::sn)) r))))`
 
 
-val (firstSet1,firstSet1_ind) = tprove (firstSet1_defn,
-WF_REL_TAC (`inv_image ((measure (\(g,sn). CARD ((nonTerminals g) DIFF (LIST_TO_SET sn)))) LEX (measure (\(syms).LENGTH syms))) (\(g,sn,syms).((g,sn),syms))`) THEN
-SRW_TAC [] [] THENL[
-`FINITE (nonTerminals g)` by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET] THEN
-`FINITE (set sn)` by METIS_TAC [FINITE_LIST_TO_SET] THEN
-`FINITE (NTS A INSERT set sn)` by METIS_TAC [FINITE_INSERT] THEN
-FULL_SIMP_TAC (srw_ss()) [CARD_DIFF] THEN
-SRW_TAC [] [] THENL[
-SRW_TAC [] [CARD_INSERT,FINITE_LIST_TO_SET] THEN
-`~(getRhs nt (rules g) = [])` by METIS_TAC [listNotEmpty] THEN
-`(NTS nt) IN (nonTerminals g)` by METIS_TAC [ntsInGr] THEN
-`(nonTerminals g INTER (NTS nt INSERT set sn)) = (NTS nt INSERT set sn) INTER nonTerminals g` by METIS_TAC [INTER_COMM] THEN
-ASM_REWRITE_TAC [] THEN
-FULL_SIMP_TAC (srw_ss()) [INSERT_INTER] THEN
-SRW_TAC [] [ADD1] THEN
-`(nonTerminals g INTER set sn) = (set sn INTER nonTerminals g)` by METIS_TAC [INTER_COMM] THEN
-ASM_REWRITE_TAC [] THEN
-DECIDE_TAC,
+val (firstSet1,firstSet1_ind) = tprove (
+  firstSet1_defn,
+  WF_REL_TAC
+   `inv_image (measure (λ(g,sn). CARD (nonTerminals g DIFF LIST_TO_SET sn))
+                 LEX
+               measure (λ(syms).LENGTH syms))
+              (λ(g,sn,syms).((g,sn),syms))` THEN
+  SRW_TAC [] [] THEN
+  `FINITE (nonTerminals g)` by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET] THEN
+  `FINITE (set sn)` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+  `FINITE (NTS A INSERT set sn)` by METIS_TAC [FINITE_INSERT] THEN
+  SRW_TAC [] [CARD_DIFF] THENL[
+    SRW_TAC [] [CARD_INSERT,FINITE_LIST_TO_SET] THEN
+    `~(getRhs nt (rules g) = [])` by METIS_TAC [listNotEmpty] THEN
+    `(NTS nt) IN (nonTerminals g)` by METIS_TAC [ntsInGr] THEN
+    `(nonTerminals g ∩ (NTS nt INSERT set sn)) =
+       (NTS nt INSERT set sn) ∩ nonTerminals g` by METIS_TAC [INTER_COMM] THEN
+    ASM_REWRITE_TAC [] THEN
+    FULL_SIMP_TAC (srw_ss()) [INSERT_INTER] THEN
+    SRW_TAC [] [ADD1] THEN
+    `(nonTerminals g ∩ set sn) = (set sn ∩ nonTerminals g)`
+       by METIS_TAC [INTER_COMM] THEN
+    ASM_REWRITE_TAC [] THEN
+    DECIDE_TAC,
 
-`~(getRhs nt (rules g) = [])` by METIS_TAC [listNotEmpty] THEN
-`(NTS nt) IN (nonTerminals g)` by METIS_TAC [ntsInGr] THEN
-`~((NTS nt) IN set sn)` by FULL_SIMP_TAC (srw_ss()) [MEM,LIST_TO_SET] THEN
-`~(NTS nt IN (nonTerminals g INTER set sn))` by METIS_TAC [IN_INTER] THEN
-`~(nonTerminals g = set sn)` by METIS_TAC [] THEN
-`FINITE (nonTerminals g)` by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET] THEN
-`FINITE (set sn)` by METIS_TAC [FINITE_LIST_TO_SET] THEN
-`FINITE (NTS nt INSERT set sn)` by METIS_TAC [FINITE_INSERT] THEN
-`CARD (nonTerminals g) - CARD (nonTerminals g INTER set sn) = CARD ((nonTerminals g) DIFF (set sn))` by METIS_TAC [CARD_DIFF] THEN
-ASM_REWRITE_TAC [] THEN
-`(NTS nt) IN (nonTerminals g DIFF set sn)` by (FULL_SIMP_TAC (srw_ss()) [DIFF_DEF] THEN METIS_TAC []) THEN
-`~((nonTerminals g DIFF set sn)={})` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
-`~(CARD (nonTerminals g DIFF set sn)=0)` by METIS_TAC [CARD_EQ_0,FINITE_DIFF] THEN
-DECIDE_TAC],
-
-DECIDE_TAC,
-DECIDE_TAC,
-DECIDE_TAC,
-DECIDE_TAC
-])
-
+    `~(getRhs nt (rules g) = [])` by METIS_TAC [listNotEmpty] THEN
+    `(NTS nt) IN (nonTerminals g)` by METIS_TAC [ntsInGr] THEN
+    `~((NTS nt) IN set sn)` by FULL_SIMP_TAC (srw_ss()) [MEM,LIST_TO_SET] THEN
+    `~(NTS nt IN (nonTerminals g INTER set sn))` by METIS_TAC [IN_INTER] THEN
+    `~(nonTerminals g = set sn)` by METIS_TAC [] THEN
+    `FINITE (nonTerminals g)`
+       by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET] THEN
+    `FINITE (set sn)` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+    `FINITE (NTS nt INSERT set sn)` by METIS_TAC [FINITE_INSERT] THEN
+    `CARD (nonTerminals g) - CARD (nonTerminals g ∩ set sn) =
+       CARD (nonTerminals g DIFF set sn)`
+       by METIS_TAC [CARD_DIFF] THEN
+    ASM_REWRITE_TAC [] THEN
+    `NTS nt ∈ (nonTerminals g DIFF set sn)` by
+       (FULL_SIMP_TAC (srw_ss()) [DIFF_DEF] THEN METIS_TAC []) THEN
+    `~((nonTerminals g DIFF set sn)={})` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
+    `~(CARD (nonTerminals g DIFF set sn)=0)`
+       by METIS_TAC [CARD_EQ_0,FINITE_DIFF] THEN
+    DECIDE_TAC
+  ]);
 
 val firstSetML = Define `firstSetML g sym = firstSet1 g [] [sym]`
 
@@ -143,88 +140,39 @@ METIS_TAC [isTmnlSym_def]])
 
 *)
 
+val MEM_getRhs = store_thm(
+  "MEM_getRhs",
+  ``MEM r (getRhs N l) = MEM (rule N r) l``,
+  Induct_on `l` THEN SRW_TAC [][getRhs_def] THEN
+  Cases_on `h` THEN SRW_TAC [][getRhs_def] THEN SRW_TAC [][]);
+
 
 val firstSetList = Define
 `firstSetList g l =
       {TS fst | ?rst. RTC (derives g) l ([TS fst] ++ rst)}`
 
 val firstSet1Eq1 = store_thm ("firstSet1Eq1",
-``!g sn l.((MEM s (firstSet1 g sn l)) ==>
-         (s IN (firstSetList g l)))``,
-HO_MATCH_MP_TAC firstSet1_ind THEN
-SRW_TAC [] []
-THENL[
-   FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList] THEN
-   METIS_TAC [b1],
+  ``∀g sn l. MEM s (firstSet1 g sn l) ==> s ∈ firstSetList g l``,
+  HO_MATCH_MP_TAC firstSet1_ind THEN SRW_TAC [] [firstSet1] THENL[
+    SIMP_TAC (srw_ss()) [firstSetList] THEN METIS_TAC [RTC_RULES],
 
-   FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList] THEN
-   METIS_TAC [RTC_RULES],
-
-   FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList, LET_THM] THEN
-   Cases_on `MEM (NTS nt) sn` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-   Cases_on `getRhs nt (rules g) = []` THEN
-   FULL_SIMP_TAC (srw_ss()) [] THEN
-   `MEM s ((FLAT (MAP (\a. firstSet1 g (NTS nt::sn) a)
-       (getRhs nt (rules g)))))` by METIS_TAC [rmd_r2] THEN
-   `?e. MEM e (MAP (\a.firstSet1 g (NTS nt::sn) a)
-       (getRhs nt (rules g))) /\ (MEM s e)` by METIS_TAC [flat_map_mem] THEN
-   `?l.(MEM l (getRhs nt (rules g))) /\
-   (MEM s (firstSet1 g (NTS nt::sn) l))` by METIS_TAC [MEM_MAP] THEN
-   RES_TAC THEN
-   Q.EXISTS_TAC `fst` THEN
-   SRW_TAC [] [] THEN
-   METIS_TAC [x_1, RTC_RULES],
-
-
-   FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList, LET_THM, isTmnlSym_def] THEN
-   Cases_on `MEM (NTS v7) sn` THEN
-   Cases_on `(getRhs v7 (rules g)) = []` THEN
-   FULL_SIMP_TAC (srw_ss()) [] THEN
-   Cases_on `nullableML g [] [NTS v7]` THEN
-   FULL_SIMP_TAC (srw_ss()) []
-   THENL[
-	 `nullable g [NTS v7]` by METIS_TAC [nullableEq] THEN
-	 FULL_SIMP_TAC (srw_ss()) [nullable_def] THEN
-	 METIS_TAC [derives_append, APPEND],
-
-	 `nullable g [NTS v7]` by METIS_TAC [nullableEq] THEN
-	 FULL_SIMP_TAC (srw_ss()) [nullable_def] THEN
-	 METIS_TAC [derives_append, APPEND],
-
-	 `nullable g [NTS v7]` by METIS_TAC [nullableEq] THEN
-	 FULL_SIMP_TAC (srw_ss()) [nullable_def] THEN
-	 METIS_TAC [derives_append, APPEND],
-
-	 FULL_SIMP_TAC (srw_ss()) [] THEN
-	 `?rst1.RTC (derives g) [v14] rst1` by METIS_TAC [RTC_RULES] THEN
-	 `?rst2.RTC (derives g) v15 rst2` by METIS_TAC [RTC_RULES] THEN
-	 `RTC (derives g) ([v14]++v15) (rst1++rst2)` by FULL_SIMP_TAC (srw_ss()) [derives_append, APPEND, CONS, APPEND_ASSOC]  THEN
-	 `RTC (derives g) ([NTS v7] ++ [v14] ++ v15) ((TS fst::rst)++rst1++rst2)` by FULL_SIMP_TAC (srw_ss()) [derives_append, APPEND, CONS, APPEND_ASSOC]  THEN
-	 METIS_TAC [APPEND,APPEND_ASSOC],
-
-	 RES_TAC THEN
-	 `nullable g [NTS v7]` by METIS_TAC [nullableEq] THEN
-	 FULL_SIMP_TAC (srw_ss()) [nullable_def] THEN
-	 `RTC (derives g) ([NTS v7] ++ (v14::v15))([] ++ (TS fst::rst))` by FULL_SIMP_TAC (srw_ss()) [derives_append, APPEND, CONS, APPEND_ASSOC] THEN
-	 METIS_TAC [APPEND,APPEND_ASSOC, CONS, derives_append, nullableEq, nullable_def],
-
-	 FULL_SIMP_TAC (srw_ss()) [] THEN
-	 `?rst1.RTC (derives g) [v14] rst1` by METIS_TAC [RTC_RULES] THEN
-	 `?rst2.RTC (derives g) v15 rst2` by METIS_TAC [RTC_RULES] THEN
-	 `RTC (derives g) ([v14]++v15) (rst1++rst2)` by FULL_SIMP_TAC (srw_ss()) [derives_append, APPEND, CONS, APPEND_ASSOC]  THEN
-	 `RTC (derives g) ([NTS v7] ++ [v14] ++ v15) ((TS fst::rst)++rst1++rst2)` by FULL_SIMP_TAC (srw_ss()) [derives_append, APPEND, CONS, APPEND_ASSOC]  THEN
-	 METIS_TAC [APPEND,APPEND_ASSOC]
-	 ],
-
-
-   FULL_SIMP_TAC (srw_ss()) [firstSetList, firstSet1, isTmnlSym_def] THEN
-   `RTC (derives g) [TS v6] [TS v6]` by METIS_TAC [RTC_RULES] THEN
-   `?rst1.RTC (derives g) [v10] rst1` by METIS_TAC [RTC_RULES] THEN
-   `?rst2.RTC (derives g) v11 rst2` by METIS_TAC [RTC_RULES] THEN
-   `RTC (derives g) ([TS v6] ++ [v10] ++ v11) ([TS v6]++rst1++rst2)` by FULL_SIMP_TAC (srw_ss()) [derives_append, APPEND, CONS, APPEND_ASSOC]  THEN
-   METIS_TAC [APPEND,APPEND_ASSOC]]
-   )
-
+    FULL_SIMP_TAC (srw_ss()) [firstSet1, firstSetList, LET_THM,
+                              rmd_mem_list] THEN
+    `∃e. MEM e (MAP (\a.firstSet1 g (NTS nt::sn) a)
+               (getRhs nt (rules g))) /\ (MEM s e)`
+        by METIS_TAC [flat_map_mem] THEN
+    `∃l. MEM l (getRhs nt (rules g)) ∧ MEM s (firstSet1 g (NTS nt::sn) l)`
+       by METIS_TAC [MEM_MAP] THEN
+    RES_TAC THEN
+    `MEM (rule nt l) (rules g)` by METIS_TAC [MEM_getRhs] THEN
+    Q.EXISTS_TAC `fst` THEN SRW_TAC [][] THEN
+    `derives g (NTS nt :: rest) (l ++ rest)`
+        by METIS_TAC [derives_same_append_right, APPEND, res1] THEN
+    Q.EXISTS_TAC `rst ++ rest` THEN
+    `(derives g)^* (l ++ rest) ((TS fst :: rst) ++ rest)`
+       by METIS_TAC [rtc_derives_same_append_right] THEN
+    METIS_TAC [RTC_RULES, APPEND, APPEND_ASSOC]
+  ]);
 
 open rich_listTheory
 

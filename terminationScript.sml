@@ -891,7 +891,7 @@ THENL[
 		  `~(s=eof)` by (SRW_TAC [][] THEN
 		  SPOSE_NOT_THEN ASSUME_TAC THEN
 		  SRW_TAC [][] THEN
-		  METIS_TAC [auggrEofInRhs,MEM,MEM_APPEND]) THEN
+		  METIS_TAC [auggrEofInRhs,MEM,MEM_APPEND,APPEND,APPEND_ASSOC]) THEN
 		  `?stl csl.
 			takesSteps (LENGTH ininp)
 			(parse (SOME (sgoto ag,reduce ag)))

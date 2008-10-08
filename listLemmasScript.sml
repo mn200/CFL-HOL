@@ -278,7 +278,7 @@ Induct_on `l` THEN SRW_TAC [] [delete] THEN
 METIS_TAC [])
 
 
-val rmDupes_defn = Hol_defn "rmDupes_defn" 
+val rmDupes_defn = Hol_defn "rmDupes_defn"
 `(rmDupes [] = []) /\
 (rmDupes (h::t) = h::rmDupes (delete h t))`
 
@@ -297,13 +297,13 @@ val _ = save_thm ("rmDupes_ind", rmDupes_ind)
 
 
 
-val rmd_r2_1 = store_thm ("rmd_r2_1", 
+val rmd_r2_1 = store_thm ("rmd_r2_1",
 ``!l.MEM e l ==> MEM e (rmDupes l)``,
 HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [] [rmDupes] THEN
 Cases_on `e=h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [delete_mem_list])
 
-val rmd_r2_2 = store_thm ("rmd_r2_2", 
+val rmd_r2_2 = store_thm ("rmd_r2_2",
 ``!l.MEM e (rmDupes l) ==> MEM e l``,
 HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [] [rmDupes] THEN
 Cases_on `e=h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -314,7 +314,7 @@ val rmd_r2 = store_thm ("rmd_r2",
 METIS_TAC [rmd_r2_1, rmd_r2_2]
 )
 
-val rmDupes_not_nil = store_thm ("rmDupes_not_nil", 
+val rmDupes_not_nil = store_thm ("rmDupes_not_nil",
 ``!x xs.~(rmDupes (x::xs) = [])``,
 FULL_SIMP_TAC (srw_ss()) [rmDupes])
 
@@ -337,7 +337,7 @@ val rmd_mem_list = store_thm ("rmd_mem_list",
 METIS_TAC [rmd_mem_list1, rmd_mem_list2])
 
 
-val rmDupes_len = store_thm ("rmDupes_len", 
+val rmDupes_len = store_thm ("rmDupes_len",
 ``!l.LENGTH l >= LENGTH (rmDupes l)``,
 HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [] [rmDupes] THEN
 Cases_on `MEM h t` THENL[
@@ -362,17 +362,10 @@ METIS_TAC [delete_twice],
 METIS_TAC [delete_twice, delete_diff_elem,rmd_del]])
 
 
-val rmDupes_twice = store_thm ("rmDupes_twice", 
+val rmDupes_twice = store_thm ("rmDupes_twice",
 ``!l.(rmDupes (rmDupes l)) = (rmDupes l)``,
 HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [] [rmDupes] THEN
 METIS_TAC [rmda_del_rmda])
-
-
-val rmDupes_twice = store_thm ("rmDupes_twice", 
-``!l.(rmDupes (rmDupes l)) = (rmDupes l)``,
-METIS_TAC [rmDupes_twice]
-)
-
 
 val delete_lts = store_thm("delete_lts",
 ``!h l.LIST_TO_SET (delete h l) = (LIST_TO_SET l) DELETE h``,
@@ -430,7 +423,7 @@ SRW_TAC [] [] THEN
 `CARD (LIST_TO_SET (rmDupes l1)) <= CARD (LIST_TO_SET l2)` by METIS_TAC [CARD_SUBSET, FINITE_LIST_TO_SET] THEN
 `CARD (LIST_TO_SET l2) >= CARD  (LIST_TO_SET (rmDupes l1))` by DECIDE_TAC THEN
 `LENGTH l2 >= CARD (LIST_TO_SET l2)` by METIS_TAC [len_card] THEN
-`LENGTH  (rmDupes l1) >= CARD (LIST_TO_SET (rmDupes l1))` by METIS_TAC [len_card] THEN 
+`LENGTH  (rmDupes l1) >= CARD (LIST_TO_SET (rmDupes l1))` by METIS_TAC [len_card] THEN
 `LENGTH l2 >= LENGTH (rmDupes l2)` by METIS_TAC [rmDupes_len] THEN
 `LENGTH l1 >= LENGTH (rmDupes l1)` by METIS_TAC [rmDupes_len] THEN
 `CARD (LIST_TO_SET l1) = CARD (LIST_TO_SET (rmDupes l1))` by METIS_TAC [rmDupes_lts_card_eq] THEN
@@ -449,7 +442,7 @@ SRW_TAC [] [] THEN
 FULL_SIMP_TAC (arith_ss) [])
 
 val set_neq_len = store_thm ("set_neq_len",
-``!s1.FINITE s1 ==> ~(s1=s2) ==>  (s2 SUBSET s1) ==> 
+``!s1.FINITE s1 ==> ~(s1=s2) ==>  (s2 SUBSET s1) ==>
 (CARD s1>=CARD s2) ==> (CARD s1>CARD s2)``,
 SRW_TAC [] [] THEN
 `s2 PSUBSET s1` by METIS_TAC [PSUBSET_DEF] THEN
@@ -483,23 +476,23 @@ val rev_nil = store_thm ("rev_nil",
 ``!l.(REVERSE l = []) = (l=[])`` ,
 Induct_on `l` THEN SRW_TAC [] [])
 
-val list_exists_mem = store_thm ("list_exists_mem", 
+val list_exists_mem = store_thm ("list_exists_mem",
 ``!l.~(l=[]) ==> ?e.MEM e l``,
 Cases_on `l` THEN SRW_TAC [] [] THEN METIS_TAC [])
 
-val FLAT_APPEND_DISTRIB = store_thm ("FLAT_APPEND_DISTRIB", 
+val FLAT_APPEND_DISTRIB = store_thm ("FLAT_APPEND_DISTRIB",
 ``!x y.FLAT (x++y) = FLAT x ++ FLAT y``,
 Induct_on `x` THEN SRW_TAC [] [FLAT,APPEND]
 )
 
-val flat_map_mem = store_thm ("flat_map_mem", 
+val flat_map_mem = store_thm ("flat_map_mem",
 ``!e l.MEM e (FLAT (MAP f l)) ==> (?e'.MEM e' (MAP f l) /\ (MEM e e'))``,
 SRW_TAC [] [] THEN
 Induct_on `l` THEN
 SRW_TAC [] [] THEN
 METIS_TAC [])
 
-val popl = store_thm ("popl", 
+val popl = store_thm ("popl",
 ``!l n.(x = pop l n) ==> (?pfx sfx.(l=pfx++sfx) /\ (sfx = x))``,
 Induct_on `l` THEN SRW_TAC [] [pop] THEN
 METIS_TAC [APPEND] THEN
@@ -522,7 +515,7 @@ SRW_TAC [] []])
 
 val rev_sing = store_thm ("rev_sing",
 ``!r.(REVERSE r = [a]) = (r=[a])``,
-Induct_on `r` THEN SRW_TAC [] [REVERSE_DEF, EQ_IMP_THM] THEN 
+Induct_on `r` THEN SRW_TAC [] [REVERSE_DEF, EQ_IMP_THM] THEN
 `LENGTH (REVERSE r ++ [h]) = LENGTH [a]` by METIS_TAC [] THEN
 FULL_SIMP_TAC (srw_ss()) [LENGTH_APPEND] THEN
 `REVERSE r = []` by METIS_TAC [LENGTH_NIL] THEN
@@ -548,12 +541,12 @@ val _ = save_thm ("take1_ind", take1_ind)
 (*val take1 = Define `(take1 0 l = []) /\
 (take1 n (x::xs) = x::take1 (n-1) xs)`
 *)
-val take =  Define 
+val take =  Define
 `(take n l = if (LENGTH l >= n) then SOME (take1 n l)
 			       else NONE)`
 
 
-val take_len = store_thm ("take_len", 
+val take_len = store_thm ("take_len",
 ``!n l.~(take n l = NONE) ==> (LENGTH l >=n)``,
 SRW_TAC [] [] THEN
 Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [take] THEN
@@ -565,19 +558,19 @@ val take10 = store_thm ("take10",
 Induct_on `l` THEN SRW_TAC [] [take1])
 
 
-val take0 = store_thm ("take0", 
+val take0 = store_thm ("take0",
 ``take 0 l = SOME []``,
 Cases_on `l` THEN SRW_TAC [] [take, take10])
 
 
-val rev_len = store_thm ("rev_len", 
+val rev_len = store_thm ("rev_len",
 ``!l.(LENGTH l) = LENGTH (REVERSE l)``,
 Induct_on `l` THEN FULL_SIMP_TAC (srw_ss()) [REVERSE_DEF, LENGTH, ADD1])
 
 
 
-val takeCoMap = store_thm ("takeCoMap", 
-``!f g l.(take n (MAP (f o g) l) = SOME x) ==> 
+val takeCoMap = store_thm ("takeCoMap",
+``!f g l.(take n (MAP (f o g) l) = SOME x) ==>
 ?x'.(take n (MAP g l) = SOME x')``,
 SRW_TAC [] [] THEN
 `(LENGTH (MAP (f o g) l)) >= n` by METIS_TAC [take_len, NOT_SOME_NONE] THEN
@@ -589,7 +582,7 @@ FULL_SIMP_TAC (srw_ss()) [take]
 
 val take1Map = store_thm ("take1Map",
 ``!f l n.((LENGTH l) >= n) ==> ((take1 n (MAP f l)) = (MAP f (take1 n l)))``,
-Induct_on `l` THEN Cases_on `n` THEN 
+Induct_on `l` THEN Cases_on `n` THEN
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (arith_ss) [ADD1, LENGTH, take1, MAP])
 
@@ -625,7 +618,7 @@ Cases_on `n=0` THEN FULL_SIMP_TAC (srw_ss()) [] THENL[
 `1=SUC 0` by DECIDE_TAC THEN
 ONCE_ASM_REWRITE_TAC [] THEN
 SRW_TAC [] [take1] THEN
-Induct_on `rst` THEN 
+Induct_on `rst` THEN
 METIS_TAC [LENGTH_NIL, APPEND_NIL, take1, APPEND],
 
 `n+1=SUC n` by DECIDE_TAC THEN
@@ -640,12 +633,12 @@ METIS_TAC [THE_DEF, IS_SOME_DEF],
 METIS_TAC [THE_DEF, IS_SOME_DEF]]],
 FULL_SIMP_TAC (arith_ss) [GREATER_OR_EQ, ADD1]])
 
-val pop0 = store_thm ("pop0", 
+val pop0 = store_thm ("pop0",
 ``!l.(pop l 0) = l``,
 Induct_on `l` THEN SRW_TAC [] [pop])
 
 
-val take_map = store_thm ("take_map", 
+val take_map = store_thm ("take_map",
 ``!stl.((take (LENGTH r) stl) = SOME x)
 ==> ((MAP SND (THE (take (LENGTH r) stl)) = (THE (take (LENGTH r) (MAP SND stl)))))``,
 Cases_on `LENGTH r` THEN SRW_TAC [] [take] THEN
@@ -653,13 +646,13 @@ METIS_TAC [take1Map, take10, take, take1, LENGTH_NIL,MAP]
 )
 
 
-val take_valid = store_thm ("take_valid", 
+val take_valid = store_thm ("take_valid",
 ``!l.((LENGTH l) >= n) ==> ?x.((take n l) = SOME x)``,
 Cases_on `n` THEN SRW_TAC [] [take]
 )
 
 
-val valid_take_map = store_thm ("valid_take_map", 
+val valid_take_map = store_thm ("valid_take_map",
 ``!n l.(take n l = SOME x) ==> ?x'.(take n (MAP f l) = SOME x')``,
 Cases_on `n` THEN SRW_TAC [] [take]
 )
@@ -667,13 +660,13 @@ Cases_on `n` THEN SRW_TAC [] [take]
 val map_rev = store_thm ("map_rev", ``!l.(MAP f (REVERSE l)) = REVERSE (MAP f l)``,
 Induct_on `l` THEN SRW_TAC [] [REVERSE_DEF, MAP])
 
-val map_pop = store_thm ("map_pop", 
+val map_pop = store_thm ("map_pop",
 ``!l.(pop (MAP f l) n) = MAP f (pop l n)``,
 Induct_on `n` THEN Induct_on `l` THEN SRW_TAC [] [pop]
 )
 
 
-val take_pop = store_thm ("take_pop", 
+val take_pop = store_thm ("take_pop",
 ``!l l' n.(take n l = SOME l') ==> (l=l'++ pop l n)``,
 Induct_on `l` THEN SRW_TAC [] [] THEN
 Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [take] THEN
@@ -698,22 +691,22 @@ METIS_TAC [rgr_r9eq, MEM_APPEND]]
 
 
 val listeq = store_thm ("listeq",
-``!l1 l2 e l1' l2' e'.(l1++[e]++l2 = l1'++[e']++l2') ==> 
+``!l1 l2 e l1' l2' e'.(l1++[e]++l2 = l1'++[e']++l2') ==>
 ~P(e) /\ ~P(e') /\ EVERY P l2 /\ EVERY P l2' ==>
 (l1=l1') /\ (e=e') /\ (l2=l2')``,
-Induct_on `l1` THENL[ 
+Induct_on `l1` THENL[
 SIMP_TAC (srw_ss()) []  THEN
 Cases_on `l1'` THEN SRW_TAC [] [] THEN
 METIS_TAC [],
 Cases_on `l1'` THEN SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC []])
 
-val delete_prop = store_thm ("delete_prop", 
+val delete_prop = store_thm ("delete_prop",
 ``!P l.EVERY P l ==> EVERY P (delete h l)``,
 Induct_on `l` THEN SRW_TAC [] [delete] THEN
 METIS_TAC [])
 
-val rmDupes_prop = store_thm ("rmDupes_prop", 
+val rmDupes_prop = store_thm ("rmDupes_prop",
 ``! l.EVERY P l ==> EVERY P (rmDupes l)``,
 HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [] [rmDupes] THEN
 METIS_TAC [delete_prop])
@@ -725,7 +718,7 @@ Induct_on `l` THEN SRW_TAC [] [delete] THEN
 Cases_on `h'=h` THEN SRW_TAC [] [] THEN
 METIS_TAC [delete_mem_list])
 
-val alld_rmd = store_thm ("alld_rmd", 
+val alld_rmd = store_thm ("alld_rmd",
 ``!l l'.(rmDupes l = l') ==> ALL_DISTINCT l'``,
 Induct_on `l` THEN SRW_TAC [] [rmDupes] THEN
 SRW_TAC [] [ALL_DISTINCT] THENL[
@@ -800,15 +793,15 @@ val len1 = store_thm ("len1",
 ``!l1 l1' rst rst'.(l1++rst = l1'++rst') ==> (LENGTH l1 = LENGTH l1') ==> (l1 = l1')``,
 Induct_on `l1` THEN Induct_on `l1'` THEN SRW_TAC [] [] THEN
 METIS_TAC [])
-		
+
 
 val len2 = store_thm ("len2",
-``!l1 l1' rst rst'.(l1++rst = l1'++rst') ==> (LENGTH l1' < LENGTH l1) ==> ?pfx sfx.(l1=pfx++sfx) /\ (l1'=pfx)``,		
+``!l1 l1' rst rst'.(l1++rst = l1'++rst') ==> (LENGTH l1' < LENGTH l1) ==> ?pfx sfx.(l1=pfx++sfx) /\ (l1'=pfx)``,
 Induct_on `l1` THEN Induct_on `l1'` THEN SRW_TAC [] [] THEN
 METIS_TAC [])
 
 val len3 = store_thm ("len3",
-``!l1 l1' rst rst'.(l1++rst = l1'++rst') ==> (LENGTH l1' > LENGTH l1) ==> ?pfx sfx.(l1'=pfx++sfx) /\ (l1=pfx)``,		
+``!l1 l1' rst rst'.(l1++rst = l1'++rst') ==> (LENGTH l1' > LENGTH l1) ==> ?pfx sfx.(l1'=pfx++sfx) /\ (l1=pfx)``,
 Induct_on `l1` THEN Induct_on `l1'` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (arith_ss) [] THEN
 `LENGTH l1' > LENGTH l1` by FULL_SIMP_TAC (arith_ss) [] THEN
@@ -821,19 +814,19 @@ Induct_on `l` THEN SRW_TAC [] [])
 
 
 
-	    
 
-val list_mem1 = store_thm ("list_mem1", 
+
+val list_mem1 = store_thm ("list_mem1",
 ``!l.~(l=[]) = ?e.MEM e l``,
 Induct_on `l` THEN SRW_TAC [] [EQ_IMP_THM, list_exists_mem])
 
-val list_mem2 = store_thm ("list_mem2", 
+val list_mem2 = store_thm ("list_mem2",
 ``!l.~(l=[]) = ?h t.(l=h::t)``,
 Induct_on `l` THEN SRW_TAC [] [EQ_IMP_THM])
 
-val last_elem = store_thm ("last_elem", 
+val last_elem = store_thm ("last_elem",
 ``!l pfx e. (l = pfx ++ [e]) ==> (LAST l = e)``,
-Induct_on `pfx` THEN SRW_TAC [] [] THEN 
+Induct_on `pfx` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [LAST_DEF])
 
 val cx = store_thm ("cx",
@@ -852,12 +845,12 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 `LENGTH (stl ++ [e]) = LENGTH (stl ++ h::h'::t'++h''::t)` by METIS_TAC [] THEN
 FULL_SIMP_TAC (arith_ss) [ADD1, LENGTH_APPEND, LENGTH]],
 
-Cases_on ` ~(stl ++ [e] = h::(t ++ stl ++ h'::t' ++ sfx))` THEN 
+Cases_on ` ~(stl ++ [e] = h::(t ++ stl ++ h'::t' ++ sfx))` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `LENGTH (stl ++ [e]) = LENGTH (h::(t ++ stl ++ h'::t' ++ sfx))` by METIS_TAC [] THEN
 FULL_SIMP_TAC (arith_ss) [ADD1, LENGTH_APPEND, LENGTH]])
 
-val pop_eq = store_thm ("pop_eq", 
+val pop_eq = store_thm ("pop_eq",
 ``!l n.(LENGTH l = n) ==> (pop l n = [])``,
 Induct_on `l` THEN SRW_TAC [] [pop] THEN
 FULL_SIMP_TAC (arith_ss) [])
@@ -874,12 +867,12 @@ METIS_TAC [popnthm, REVERSE_REVERSE, rev_len])
 
 
 
-val last_append = store_thm ("last_append", 
+val last_append = store_thm ("last_append",
 ``!l1 l2.~(l2=[]) ==> (LAST (l1++l2) = LAST l2)``,
 SRW_TAC [] [] THEN
 `?h t.l2=h::t` by METIS_TAC [list_mem2] THEN
 SRW_TAC [] [LAST_DEF] THEN
-Induct_on `l1` THEN SRW_TAC [] [] THEN 
+Induct_on `l1` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [LAST_DEF])
 
 
@@ -889,7 +882,7 @@ Induct_on `r1` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [IS_PREFIX] THEN
 Induct_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [IS_PREFIX])
 
-val elem_eq = store_thm ("elem_eq", 
+val elem_eq = store_thm ("elem_eq",
 ``!l1 l2 l3 e h.(l1++[e]++l2 = l1++[h]++l3) ==> (e=h)``,
 Induct_on `l1` THEN SRW_TAC [] [] THEN
 METIS_TAC [])
@@ -917,7 +910,7 @@ DECIDE_TAC)
 val pop_not_empty = store_thm ("pop_not_empty",
 ``!l n.(LENGTH l > n) ==> ~(pop l n = [])``,
 Induct_on `l` THEN SRW_TAC [] [] THEN
-FULL_SIMP_TAC (arith_ss) [] THEN 
+FULL_SIMP_TAC (arith_ss) [] THEN
 SRW_TAC [] [pop] THEN
 `LENGTH l > n-1` by FULL_SIMP_TAC (arith_ss) [] THEN
 METIS_TAC [])
@@ -933,7 +926,7 @@ THENL[
 
       `?pfx sfx.(l1=pfx++sfx) /\ (l1'=pfx)` by METIS_TAC [len2] THEN
       SRW_TAC [] [] THEN
-      Cases_on `sfx` THEN 
+      Cases_on `sfx` THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
       `h::t++rst=rst'` by METIS_TAC [APPEND_11, APPEND_ASSOC] THEN
       FULL_SIMP_TAC (srw_ss()) [],
@@ -942,7 +935,7 @@ THENL[
 		 (LENGTH l1' > LENGTH l1)` by DECIDE_TAC
       THENL[
 	    METIS_TAC [len1, APPEND_11],
-	    
+
 	    `?pfx sfx.(l1'=pfx++sfx) /\ (l1=pfx)` by METIS_TAC [len3] THEN
 	    SRW_TAC [] [] THEN
 	    `rst=sfx++rst'` by METIS_TAC [APPEND_11, APPEND_ASSOC] THEN
@@ -950,7 +943,7 @@ THENL[
 	    ]
       ])
 
-val isSuffix = Define 
+val isSuffix = Define
 `isSuffix x l = IS_PREFIX  (REVERSE l)  (REVERSE x)`
 
 val x = store_thm ("x",
@@ -960,11 +953,11 @@ Induct_on `t` THEN SRW_TAC [] [])
 
 val len_snoc = store_thm("len_snoc",
   ``!n. (LENGTH l = SUC n) = (?pfx t. (l = pfx ++ [t]) /\ (LENGTH pfx = n))``,
-  Induct_on `l` THEN SRW_TAC [][] THEN 
-  Cases_on `n` THEN SRW_TAC [][LENGTH_NIL] THEN 
+  Induct_on `l` THEN SRW_TAC [][] THEN
+  Cases_on `n` THEN SRW_TAC [][LENGTH_NIL] THEN
   SRW_TAC [][EQ_IMP_THM] THENL [
     MAP_EVERY Q.EXISTS_TAC [`h::pfx`, `t`] THEN SRW_TAC [][],
-    Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN 
+    Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
     METIS_TAC []
   ])
 
@@ -972,11 +965,11 @@ val len_snoc = store_thm("len_snoc",
 val isSuffix_APPEND = store_thm(
   "isSuffix_APPEND",
   ``!l1 l2. isSuffix l1 l2 = ?l0. l2 = l0 ++ l1``,
-  SIMP_TAC (srw_ss()) [isSuffix, IS_PREFIX_APPEND] THEN 
-  SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss) [EQ_IMP_THM] THEN 
+  SIMP_TAC (srw_ss()) [isSuffix, IS_PREFIX_APPEND] THEN
+  SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss) [EQ_IMP_THM] THEN
   REPEAT STRIP_TAC THENL [
     `l2 = REVERSE l ++ l1` by METIS_TAC [REVERSE_APPEND,
-					 REVERSE_REVERSE]THEN 
+					 REVERSE_REVERSE]THEN
     METIS_TAC [],
     SRW_TAC [][REVERSE_APPEND]
   ]);
@@ -994,31 +987,31 @@ val isSuffix_lemma = store_thm(
 val _ = export_rewrites ["isSuffix_lemma"]
 
 val append_eq_imp_sfx = store_thm("append_eq_imp_sfx",
-  ``!l1 l2 m1 m2. (l1 ++ l2 = m1 ++ m2) ==> 
+  ``!l1 l2 m1 m2. (l1 ++ l2 = m1 ++ m2) ==>
                   isSuffix l2 m2 \/ isSuffix m2 l2``,
-  Induct THEN SRW_TAC [][] THEN 
+  Induct THEN SRW_TAC [][] THEN
   Cases_on `m1` THENL [
-    FULL_SIMP_TAC (srw_ss()) [] THEN 
+    FULL_SIMP_TAC (srw_ss()) [] THEN
     SRW_TAC [][] THEN METIS_TAC [APPEND, isSuffix_lemma],
     FULL_SIMP_TAC (srw_ss()) []
   ]);
 
 val append_eq_imp_pfx = store_thm("append_eq_imp_pfx",
-  ``!l1 l2 m1 m2. (l1 ++ l2 = m1 ++ m2) ==> 
+  ``!l1 l2 m1 m2. (l1 ++ l2 = m1 ++ m2) ==>
                   IS_PREFIX l1 m1 \/ IS_PREFIX m1 l1``,
-  Induct THEN SRW_TAC [][IS_PREFIX_NIL] THEN 
+  Induct THEN SRW_TAC [][IS_PREFIX_NIL] THEN
   Cases_on `m1` THENL [
     SRW_TAC [][IS_PREFIX_NIL],
-    FULL_SIMP_TAC (srw_ss()) [IS_PREFIX] THEN SRW_TAC [][] THEN 
+    FULL_SIMP_TAC (srw_ss()) [IS_PREFIX] THEN SRW_TAC [][] THEN
     METIS_TAC []
   ]);
-    
+
 
 
 val c1 = store_thm ("c1",
 ``!pfx sfx.pfx++[e]++sfx = pfx++e::sfx``,
 Induct_on `pfx` THEN SRW_TAC [] [])
-		
+
 val listEqRightAppend = store_thm ("listEqRightAppend",
 ``!l l1.(l = l ++ l1) ==> (l1=[])``,
 Induct_on `l1` THEN SRW_TAC [] [] THEN
@@ -1032,7 +1025,7 @@ FULL_SIMP_TAC (arith_ss) [])
 val popAdd = store_thm ("popAdd",
 ``!l n rst.(LENGTH l >= n) ==>
   !rst.pop (l++rst) n = pop l n ++ rst``,
-Induct_on `l` THEN SRW_TAC [] [pop] 
+Induct_on `l` THEN SRW_TAC [] [pop]
 THENL[
       `n=0` by DECIDE_TAC THEN
       Cases_on `rst` THEN
@@ -1069,4 +1062,3 @@ val _ =
 
 
 val _ = export_theory ();
- 

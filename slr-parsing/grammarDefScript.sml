@@ -1176,8 +1176,25 @@ val rtc2list = Define
     `(rtc2list R [] = F) /\
     (rtc2list R [x] = T) /\
     (rtc2list R (x::y::rst) = R x y /\ rtc2list R (y::rst))`
-
 val _ = export_rewrites ["rtc2list_def"]
+
+val listderiv_def = Define`
+  listderiv R d s0 s1 = rtc2list R d /\
+                        (HD d = s0) /\
+                        (LAST d = s1)
+`;
+
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.INCONSISTENT, 2)),
+                  fixity = Infix(NONASSOC, 550),
+                  paren_style = OnlyIfNecessary,
+                  pp_elements = [BreakSpace(1,1), TOK "⊢",
+                                 BreakSpace(1,1), TM, BreakSpace(1,1),
+                                 TOK "◁", BreakSpace(1,1),
+                                 BeginFinalBlock(PP.INCONSISTENT, 2),
+                                 TM, BreakSpace(1,1), TOK "→", HardSpace 1],
+                  term_name = "listderiv"}
+
+
 
 val rtc2list_distrib_append_fst = store_thm
  ("rtc2list_distrib_append_fst",
@@ -1226,12 +1243,10 @@ THENL[
 
 
 val rtc2list_exists = store_thm ("rtc2list_exists",
-``!e.e IN (language g) ==>
-?dl.rtc2list (rderives g) dl /\
-((HD dl) = [NTS (startSym g)]) /\ (LAST dl = e)``,
-SRW_TAC [] [language, EXTENSION] THEN
+  ``∀e. e ∈ language g ==>
+        ∃dl. rderives g ⊢ dl ◁ [NTS (startSym g)] → e``,
+SRW_TAC [] [language, EXTENSION, listderiv_def] THEN
 METIS_TAC [rtc2list_startSym_rtcRderives, derivesImpRderives])
-
 
 val rtc2listRtcRdHdLast = store_thm ("rtc2listRtcRdHdLast",
 ``!t.rtc2list (rderives ag) t ==> ~(t=[]) ==>
@@ -1286,14 +1301,12 @@ Induct_on `dl` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [rtc2list])
 
 val rtc2list_exists' = prove(
-  ``!u v. RTC R u v ==>
-          ?l. ~(l = []) /\ rtc2list R l /\ (HD l = u) /\
-              (LAST l = v)``,
+  ``!u v. RTC R u v ==> ∃l. R ⊢ l ◁ u → v``,
   HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [][] THENL [
-    Q.EXISTS_TAC `[u]` THEN SRW_TAC [][],
-    `?h t. (l = h::t)` by METIS_TAC [list_CASES] THEN
+    Q.EXISTS_TAC `[u]` THEN SRW_TAC [][listderiv_def],
+    `?h t. (l = h::t)` by METIS_TAC [list_CASES, listderiv_def, rtc2list] THEN
     Q.EXISTS_TAC `u::l` THEN SRW_TAC [][] THEN
-    FULL_SIMP_TAC (srw_ss()) []
+    FULL_SIMP_TAC (srw_ss()) [listderiv_def]
   ]);
 
 
@@ -1453,24 +1466,21 @@ val RTC_empty_nonrepeat_rule = prove(
 
 val no_repeats = prove(
   ``nullable g [NTS N] ==>
-    ?d. rtc2list (derives g) d /\
-        (HD d = [NTS N]) /\
-        (LAST d = []) /\
-        !sf. MEM sf (TL d) ==>
-             ~MEM (NTS N) sf``,
+    ∃d. derives g ⊢ d ◁ [NTS N] → [] ∧
+        ∀sf. MEM sf (TL d) ==> ~MEM (NTS N) sf``,
    SRW_TAC [][nullable] THEN
-  `?d0. ~(d0 = []) /\ rtc2list (derives g) d0 /\
-        (HD d0 = [NTS N]) /\
-        (LAST d0 = [])` by METIS_TAC [rtc2list_exists'] THEN
+  `?d0. derives g ⊢ d0 ◁ [NTS N] → []`
+     by METIS_TAC [rtc2list_exists'] THEN
   completeInduct_on `LENGTH d0` THEN SRW_TAC [][] THEN
   Cases_on `!sf. MEM sf (TL d0) ==> ~MEM (NTS N) sf`
     THEN1 METIS_TAC [] THEN
   FULL_SIMP_TAC (srw_ss()) [] THEN
-`MEM sf d0`  by METIS_TAC [memTl] THEN
+  `¬(d0 = [])` by METIS_TAC [listderiv_def, rtc2list] THEN
+  `MEM sf d0`  by METIS_TAC [memTl] THEN
   `?l1 l2. rtc2list (derives g) (l1 ++ [sf]) /\
            rtc2list (derives g) (sf :: l2) /\
            (l1 ++ [sf] ++ l2 = d0)`
-               by METIS_TAC [rtc2list_split] THEN
+               by METIS_TAC [rtc2list_split, listderiv_def] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [] [] THEN

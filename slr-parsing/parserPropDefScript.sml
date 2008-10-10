@@ -15,7 +15,7 @@ val prop1Ext = Define `prop1Ext g stl csl = prop1 g stl /\ ~NULL csl /\ validSta
 val parserProp1thm = store_thm ("parserProp1thm",
 ``!g sl stl.(auggr g s eof = SOME ag) ==>
 (slr ag = m) ==> prop1Ext ag stl csl ==>
-(parser ag m sl [] csl (TS eof) (NTS (startSym g)) = SOME (SOME tree))
+(parser (inis, TS eof, startSym g, startSym ag) m sl)
 ==> validptree ag tree``,
 
 SRW_TAC [] [parser_def, prop1Ext] THEN

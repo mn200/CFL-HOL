@@ -558,8 +558,6 @@ Cases_on `n=st` THEN
 METIS_TAC [slemma1_4, nonTerminalsEq]])
 
 
-
-
 val lang2rtc2list = store_thm ("lang2rtc2list",
 ``(auggr g st eof = SOME ag) ==>
   sl IN language ag ==>
@@ -581,7 +579,7 @@ THENL[
 
       `?dl.rtc2list (rderives ag) dl /\
        (HD dl = [NTS (startSym ag)]) /\ (LAST dl = sl)` 
-	  by METIS_TAC [rtc2list_exists] THEN
+	  by METIS_TAC [rtc2list_exists,listderiv_def] THEN
       SRW_TAC [][] THEN
       Cases_on `dl` THEN
       FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
@@ -872,7 +870,8 @@ val itemEqRule = Define
 
 val isGrammarItl = Define `(isGrammarItl g itl = EVERY (itemEqRule g) itl)`
 
-val allGrammarItls = Define `allGrammarItls g = {itl | isGrammarItl g itl /\ ALL_DISTINCT itl}`
+val allGrammarItls = Define 
+`allGrammarItls g = {itl | isGrammarItl g itl /\ ALL_DISTINCT itl}`
 
 val finite_allItems = store_thm ("finite_allItems",
 ``!g.FINITE {i|MEM i (allItems (rules g))}``,
@@ -2064,15 +2063,15 @@ val parse = Define `
 (* parser :: machine -> symbol list -> ((state,ptree) list -> ptree option *)
 val stackSyms = Define `stackSyms stl = (REVERSE (MAP FST (MAP FST stl)))`
 
-val macGuard = Define 
-`macGuard (eof,oldSym)  (inp,stl,csl) =  
+val exitCond = Define 
+`exitCond (eof,oldSym)  (inp,stl,csl) =  
     (~(stl=([]:((symbol # state) # ptree) list)) /\ 
      (stackSyms stl = [oldSym]) /\ (HD inp = TS eof))`
 
-
+(*
 val parser = Define `parser g m sl stl curStatel eof oldsym = 
 let 
-out = (mwhile (\s. ~macGuard (tmnlSym eof,oldsym) s)
+out = (mwhile (\s. ~exitCond (tmnlSym eof,oldsym) s)
 (\(sli,stli,csli).parse m (sli,stli, csli)) (sl,stl,curStatel))
 in
     case out of NONE -> NONE
@@ -2080,10 +2079,24 @@ in
 	SOME (SOME (Node (NT (startSym g)) ([pt]++[Leaf (TM (tmnlSym eof))])))
 					    || SOME (NONE) -> SOME (NONE)
 	|| SOME _ -> SOME NONE`
+*)
+
+val init = Define
+`init inis sl =  (sl,([]:((symbol# state) # ptree) list),[inis])`
+
+val parser = Define `parser (initState, eof, oldS, newS) m sl = 
+let 
+out = (mwhile (\s. ~(exitCond (tmnlSym eof,NTS oldS) s))
+(\(sli,stli,csli).parse m (sli,stli, csli)) (init initState sl))
+in
+    case out of NONE -> NONE
+              || (SOME (SOME (slo,[(st1,pt)],cs))) -> 
+	SOME (SOME (Node (NT newS) ([pt]++[Leaf (TM (tmnlSym eof))])))
+	     || SOME (NONE) -> SOME (NONE)
+	|| SOME _ -> SOME NONE`
 
 
 
-(* Is [] symbol list parseable wrt a grammar????? *)
 (* yacc :: grammar -> symbol list -> ptree opion*)
 val yacc = Define `yacc g s' eof sl = 
 let 
@@ -2096,11 +2109,11 @@ in
 	in 
 	    case mac of NONE -> NONE
             || (SOME m) -> (
-			    let
-				initState =  ((NTS s'), initItems ag (rules ag))
-			    in
-				case (parser ag (SOME m) sl [] [initState] (TS eof) (NTS (startSym g))) 
-				    of NONE -> NONE
+      let
+	  initState =  ((NTS s'), initItems ag (rules ag))
+      in
+	  case (parser (initState,TS eof,startSym g,startSym ag) (SOME m) sl) 
+	   of NONE -> NONE
 		|| SOME (NONE) -> NONE
 		|| SOME (SOME out) -> SOME out))`
 

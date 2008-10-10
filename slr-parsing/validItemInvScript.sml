@@ -1470,7 +1470,7 @@ val vpPropValidItemThmStlNotNil = store_thm
 ``!m g.(auggr g st eof = SOME ag) ==>
 (slr ag = SOME m) ==> 
 ~(stl=[]) ==>
-~(macGuard (eof,NTS (startSym g)) (ininp,stl,csl)) ==>
+~(exitCond (eof,NTS (startSym g)) (ininp,stl,csl)) ==>
 RTC (rderives ag) [NTS (startSym ag)] ((stackSyms stl)++ininp) ==>
 RTC (rderives ag) ((stackSyms stl)++ininp) (onstk++ininp) ==>
 EVERY isTmnlSym (onstk++ininp) ==>
@@ -1562,7 +1562,7 @@ by METIS_TAC [APPEND,APPEND_ASSOC] THEN
 `TL (l1 ++ h ++ sfx) = []` by METIS_TAC [APPEND_11,APPEND_NIL] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `[HD (l1 ++ h ++ sfx)]=[TS eof]` by METIS_TAC [RTC_RTC,auggrStRtcRdEof,EVERY_APPEND,EVERY_DEF] THEN
-FULL_SIMP_TAC (srw_ss()) [macGuard_def] THEN
+FULL_SIMP_TAC (srw_ss()) [exitCond_def] THEN
 `(lhs = startSym ag) /\ (p = [NTS (startSym g)]) /\
        (s = [])` by METIS_TAC [auggrEofInRhs] THEN
 SRW_TAC [][] THEN
@@ -1599,7 +1599,7 @@ SRW_TAC [] [] THEN
     by METIS_TAC [rtcRderivesInRuleRhs, APPEND_ASSOC, APPEND_NIL] THEN
 `h' IN (followSet ag (NTS M))` by METIS_TAC [sgoto_exp, getState_reduce_followSet,validStates_def, parseInv] THEN
 `h'=TS eof`by METIS_TAC [RTC_RTC,auggrStRtcRdEof,EVERY_DEF,EVERY_APPEND] THEN
-FULL_SIMP_TAC (srw_ss()) [macGuard_def] THEN
+FULL_SIMP_TAC (srw_ss()) [exitCond_def] THEN
 SRW_TAC [][] THEN
 `h2++sfx=[TS eof]` by METIS_TAC [APPEND_11,APPEND_ASSOC] THEN
 Cases_on `h2`THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1653,7 +1653,7 @@ rgr_r9eq, getState_mem_itl, sgoto_exp, validStates_def, parseInv] THEN
 by METIS_TAC [validItemPopStk, ruleRhs_def]
 THENL[
       SRW_TAC [] [] THEN
-      FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def,parseInv,macGuard_def] THEN
+      FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def,parseInv,exitCond_def] THEN
       `validStlItems (((q',r'),r)::t) r'` by METIS_TAC [parseInv, SND, HD, itemlist_def] THEN
       `validStlItems (((q',r'),r)::t) [item (startSym ag) (rhs,[])]` by METIS_TAC [rgr_r9eq, validStlItems_append, getState_mem_itl, sgoto_exp, parseInv, validStates_def] THEN
       FULL_SIMP_TAC (srw_ss()) [validStlItems_def, itemFstRhs_def] THEN
@@ -1941,7 +1941,7 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [isSuffix_def, REVERSE_APPEND] THEN
       `rhs=[NTS (startSym g); TS eof]` by METIS_TAC [auggrStartRule, getstate_red, sgoto_exp, parseInv, validStates_def] THEN
       SRW_TAC [] [] THEN
-      FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND, IS_PREFIX,macGuard_def] THEN
+      FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND, IS_PREFIX,exitCond_def] THEN
             SRW_TAC [][] THEN
       METIS_TAC [auggrTmSymInBtwn,APPEND,NOT_CONS_NIL,isTmnlSym_def],
 

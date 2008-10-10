@@ -423,7 +423,7 @@ EVERY isTmnlSym sl ==>
 (SOME m=slr ag) ==> 
 (csl = MAP FST stl ++ [(NTS st, initItems ag (rules ag))]) ==>
 ~(stl=[]) ==>
-~(macGuard (eof,NTS (startSym g)) (ininp,stl,csl)) ==> 
+~(exitCond (eof,NTS (startSym g)) (ininp,stl,csl)) ==> 
  ~(ininp = []) ==> 
 EVERY isTmnlSym (onstk++ininp) ==>
 (sl=onstk++ininp) ==>
@@ -680,7 +680,7 @@ THENL[
 			    Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) []
 			    ]]) THEN
 	      SRW_TAC [] [] THEN
-	      FULL_SIMP_TAC (srw_ss()) [macGuard_def] 
+	      FULL_SIMP_TAC (srw_ss()) [exitCond_def] 
               THENL[
 
 		    FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND] THEN
@@ -1740,7 +1740,7 @@ EVERY isTmnlSym sl ==>
 (csl = MAP FST stl ++ [(NTS st, initItems ag (rules ag))]) ==>
 (LENGTH csl = LENGTH stl + 1) ==>
 ((stl=[]) \/ (~(stl=[]) /\ 
-~(macGuard (eof,NTS (startSym g)) (ininp,stl,csl)))) ==> 
+~(exitCond (eof,NTS (startSym g)) (ininp,stl,csl)))) ==> 
 ~(ininp = []) ==>
 EVERY isTmnlSym (onstk++ininp) ==>
 (sl=onstk++ininp) ==>

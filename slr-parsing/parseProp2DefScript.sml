@@ -4,7 +4,7 @@ open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory boolSimps optionTheory
 
 open regexpTheory grammarDefTheory boolLemmasTheory listLemmasTheory
-parseTreeTheory parserDefTheory yaccDefTheory parseProp1DefTheory
+parseTreeTheory yaccDefTheory parseProp1DefTheory
 
 
 val _ = new_theory "parseProp2Def";
@@ -15,7 +15,7 @@ correspond to a rule in the grammar*)
 val stacktreeleaves = Define `(stacktreeleaves [] = []) /\
 (stacktreeleaves (((sym, itl),tree)::rst) = (leaves tree)++stacktreeleaves rst )`
 
-val prop2 = Define `prop2 orig sl stl = (stacktreeleaves stl ++ sl = orig)`
+val leaves_eq_inv = Define `leaves_eq_inv orig sl stl = (stacktreeleaves stl ++ sl = orig)`
 
 
 val addrule_stkl = store_thm ("revTakeMap",
@@ -147,11 +147,11 @@ Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r))` THEN FULL_SIMP_TAC (srw_ss()
 
 
 (* 3. Leaves of all the ptrees on the stack + the remaining input symbols = original symbol list *)
-val prop2thm = store_thm ("prop2thm",
-``!m g.(m=slr g) ==> prop2 orig sl (REVERSE stl) ==> 
+val leaves_eq_invthm = store_thm ("leaves_eq_invthm",
+``!m g.(m=slrmac g) ==> leaves_eq_inv orig sl (REVERSE stl) ==> 
 ((parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))) 
-==> prop2 orig sl' (REVERSE stl')``,
-FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM, prop2] THEN
+==> leaves_eq_inv orig sl' (REVERSE stl')``,
+FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM, leaves_eq_inv] THEN
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss() ++ DNF_ss) [option_case_rwt, list_case_rwt, pairTheory.FORALL_PROD] THEN
 Cases_on `getState m itl e` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -163,12 +163,14 @@ METIS_TAC [red_stkleaves, red_sym, APPEND],
 METIS_TAC [red_stkleaves, red_sym, APPEND],
 
 Cases_on `isNonTmnlSym e` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-`stl' = (((e,l),Leaf (TM (tmnlSym e)))::stl)` by SRW_TAC [] [] THEN
+`stl' = (((e,l),Leaf (sym2Str e))::stl)` by SRW_TAC [] [] THEN
 `sl'=h::t` by SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def,tmnlToStr_def, tmnlSym_def] THENL[
-FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def, stl_append, tmnlToStr_def] THEN
-METIS_TAC [APPEND, CONS, APPEND_ASSOC],
+Cases_on `e` THEN 
+FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def,sym2Str_def] 
+THENL[
+FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def, stl_append] THEN
+METIS_TAC [APPEND, CONS, APPEND_ASSOC,sym2Str_def],
 METIS_TAC [isNonTmnlSym_def]]])
 
 

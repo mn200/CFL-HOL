@@ -3,8 +3,7 @@ open HolKernel boolLib bossLib Parse BasicProvers Defn
 open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory
 
-open regexpTheory grammarDefTheory listLemmasTheory parserDefTheory
-firstSetDefTheory
+open regexpTheory grammarDefTheory listLemmasTheory firstSetDefTheory
 
 val _ = new_theory "followSetDef"
 
@@ -92,6 +91,9 @@ val followRuleEq1 = mk_thm ([],
 ``!g sn sym r.((s IN (followRuleML g sn sym r))) ==> (s IN (followSet g sym))``)
 
 val _ = save_thm ("followRuleEq1", followRuleEq1)
+
+(*DOES NOT WORK WITH THE NEW HOL VERSION. FIX IT SO THAT IT DOES! *)
+
 (*
 val followRuleEq1 = store_thm ("followRuleEq1",
 ``∀g sn sym r.
@@ -204,6 +206,8 @@ THENL[
 
 val mlDir = ref ("./theoryML/");
 
+
+(*
 val _ =
  let open EmitML
  in emitML (!mlDir)
@@ -221,6 +225,6 @@ val _ =
     :: DEFN followSetML
     :: [])
  end;
-
+*)
 
 val _ = export_theory ();

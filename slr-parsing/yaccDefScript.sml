@@ -4,16 +4,21 @@ open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory containerTheory pairTheory boolSimps
 optionTheory rich_listTheory
 
-open regexpTheory grammarDefTheory listLemmasTheory parserDefTheory
+open regexpTheory parseTreeTheory grammarDefTheory listLemmasTheory
 firstSetDefTheory followSetDefTheory containerLemmasTheory
-setLemmasTheory boolLemmasTheory
+setLemmasTheory boolLemmasTheory whileLemmasTheory
 
 val _ = new_theory "yaccDef"
 
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w) 
-
 val _ = Globals.linewidth := 60
+
+val _ = Hol_datatype `item = item of string => symbol list # symbol list`; (*  # symbol list`;*)
+
+val _ = type_abbrev ("state", ``:item list``)
+
+val _ = Hol_datatype `action = REDUCE of rule | GOTO of state | NA`
+
 
 val getItems = Define `
 (getItems [] s = [])
@@ -36,6 +41,8 @@ val iclosure1 = Define `(iclosure1 g [] = []) /\
  (((item s (l1,TS ts::l2)))::iclosure1 g il)) /\
 (iclosure1 g ((item s (l1,NTS nt::l2))::il) = 
 (getItems (rules g) nt ++ [(item s (l1,NTS nt::l2))] ++ iclosure1 g il))`
+
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w) 
 
 
 val iclosure_defn = Hol_defn 
@@ -784,7 +791,8 @@ val buildTree = Define `(buildTree p r =
 
 val addRule = Define `(addRule p (rule l r) = 
          let x =  buildTree p (REVERSE r) in 
-              if (x = NONE) then NONE else SOME  (Node (NT l) (REVERSE (THE x))))`
+              if (x = NONE) then NONE 
+	      else SOME  (Node l (REVERSE (THE x))))`
 
 (* stack top is the first element *)
 (* ptree is a stack of parsetrees *)
@@ -808,7 +816,7 @@ if ?itl1 itl2, sym IN grammar : sgoto g itl1 sym [] = itl2 /\
 iclosure (reduce)
 *)
 
-val slr = Define `slr g =
+val slrmac = Define `slrmac g =
 let
 sg = sgoto g and
 red = reduce g
@@ -2031,7 +2039,17 @@ Cases_on `itemEqRuleList (h::t) (h'::t')` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [] [] THEN
 `MEM (rule s' l) (rule s' l::t')` by METIS_TAC [MEM] THEN
 `?l' r1. (rule s' l = rule l' r1) /\ MEM (item l' (r1,[])) itl` by METIS_TAC [reduce_mem] THEN
-FULL_SIMP_TAC (srw_ss()) []])
+FULL_SIMP_TAC (srw_ss()) []]) 
+
+
+val validItl_initProds2Items = store_thm ("validItl_initProds2Items", 
+``!g l.validItl g (initProds2Items sym (rules g))``,
+Cases_on `g` THEN SRW_TAC [] [rules_def] THEN
+Induct_on `l` THEN SRW_TAC [] [initProds2Items, validItl, rules_def] THEN
+Cases_on `h` THEN
+SRW_TAC [] [initProds2Items, validItl, rules_def] THEN
+METIS_TAC [validItl_rules_cons])
+
 
 
 val parse = Define `
@@ -2055,7 +2073,7 @@ val parse = Define `
 		       || (GOTO st) -> 
 			 if (isNonTmnlSym sym) then NONE 
 			 else (* shift goto *) 
-			     SOME (rst,((sym,st),Leaf (TM (tmnlSym sym)))::os, push ((s, itl)::rem) (sym,st))
+			     SOME (rst,((sym,st),Leaf (sym2Str sym))::os, push ((s, itl)::rem) (sym,st))
 			   || (REDUCE ru) -> doReduce m ((sym::rst), os, ((s, itl)::rem)) ru))`
     
 
@@ -2066,53 +2084,40 @@ val stackSyms = Define `stackSyms stl = (REVERSE (MAP FST (MAP FST stl)))`
 val exitCond = Define 
 `exitCond (eof,oldSym)  (inp,stl,csl) =  
     (~(stl=([]:((symbol # state) # ptree) list)) /\ 
-     (stackSyms stl = [oldSym]) /\ (HD inp = TS eof))`
-
-(*
-val parser = Define `parser g m sl stl curStatel eof oldsym = 
-let 
-out = (mwhile (\s. ~exitCond (tmnlSym eof,oldsym) s)
-(\(sli,stli,csli).parse m (sli,stli, csli)) (sl,stl,curStatel))
-in
-    case out of NONE -> NONE
-              || (SOME (SOME (slo,[(st1,pt)],cs))) -> 
-	SOME (SOME (Node (NT (startSym g)) ([pt]++[Leaf (TM (tmnlSym eof))])))
-					    || SOME (NONE) -> SOME (NONE)
-	|| SOME _ -> SOME NONE`
-*)
+     (stackSyms stl = [oldSym]) /\ 
+     (inp = [TS eof]))`
 
 val init = Define
 `init inis sl =  (sl,([]:((symbol# state) # ptree) list),[inis])`
 
-val parser = Define `parser (initState, eof, oldS, newS) m sl = 
+val parser = Define `parser (initState, eof, oldS) m sl = 
 let 
-out = (mwhile (\s. ~(exitCond (tmnlSym eof,NTS oldS) s))
+out = (mwhile (\s. ~(exitCond (eof,NTS oldS) s))
 (\(sli,stli,csli).parse m (sli,stli, csli)) (init initState sl))
 in
     case out of NONE -> NONE
-              || (SOME (SOME (slo,[(st1,pt)],cs))) -> 
-	SOME (SOME (Node (NT newS) ([pt]++[Leaf (TM (tmnlSym eof))])))
+              || (SOME (SOME (slo,[(st1,pt)],cs))) -> SOME (SOME pt)
 	     || SOME (NONE) -> SOME (NONE)
 	|| SOME _ -> SOME NONE`
 
 
 
 (* yacc :: grammar -> symbol list -> ptree opion*)
-val yacc = Define `yacc g s' eof sl = 
+val lrparse = Define `lrparse g s' eof sl = 
 let 
     g' = auggr g s' eof
 in
     case g' of NONE -> NONE
     || (SOME ag) ->
        (let
-	    mac = slr ag (* slrML g [(initItems ag (rules ag))] (SET_TO_LIST (allSyms g))  -- FOR ML version*)
+	    mac = slrmac ag (* slrML g [(initItems ag (rules ag))] (SET_TO_LIST (allSyms g))  -- FOR ML version*)
 	in 
 	    case mac of NONE -> NONE
             || (SOME m) -> (
       let
 	  initState =  ((NTS s'), initItems ag (rules ag))
       in
-	  case (parser (initState,TS eof,startSym g,startSym ag) (SOME m) sl) 
+	  case (parser (initState,eof,startSym g) (SOME m) sl) 
 	   of NONE -> NONE
 		|| SOME (NONE) -> NONE
 		|| SOME (SOME out) -> SOME out))`

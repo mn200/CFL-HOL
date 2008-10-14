@@ -8,22 +8,12 @@ open listLemmasTheory
 
 val _ = new_theory "parseTree";
 
-(* is non terminal a single char string?? *)
-val _ = Hol_datatype `nonTerminal = NT of string`;
-
-(* what if terminal is also of type string or 'a?? *)
-val _ = Hol_datatype `terminal = TM of string`;
-
-val tmnlToStr = Define `(tmnlToStr (TM s) = s)`;
-
-val nonTmnlToStr = Define `(nonTmnlToStr (NT s) = s)`;
-
 val _ = Hol_datatype 
-`ptree = Leaf of terminal | Node of nonTerminal => ptree list`;
+`ptree = Leaf of string | Node of string => ptree list`;
 
 val ptree2Sym = Define 
-`(ptree2Sym (Node nt ptl) = (NTS (nonTmnlToStr nt))) /\
-(ptree2Sym (Leaf tm) = (TS (tmnlToStr tm)))`
+`(ptree2Sym (Node nt ptl) = NTS nt) /\
+(ptree2Sym (Leaf tm) = TS tm)`
 
 val isNode = Define `(isNode (Node _ _) = T) /\
 (isNode (Leaf _) = F)`
@@ -72,16 +62,19 @@ val size_nonzero = prove(
 in HOL rather than converting to list *)
 
 val getSymbols = Define `(getSymbols [] = []) /\ 
-(getSymbols [Leaf tmnl] = [TS (tmnlToStr tmnl)]) /\ 
-(getSymbols [Node nt ptlist] = [NTS (nonTmnlToStr nt)]) /\ 
+(getSymbols [Leaf tmnl] = [TS tmnl]) /\ 
+(getSymbols [Node nt ptlist] = [NTS nt]) /\ 
 (getSymbols ((Leaf tmnl)::t) = 
-(TS (tmnlToStr tmnl)) :: (getSymbols t)) /\ 
+(TS tmnl) :: (getSymbols t)) /\ 
 (getSymbols ((Node nt ptlist)::t) = 
-(NTS (nonTmnlToStr nt)) :: (getSymbols t))`;
+(NTS nt) :: (getSymbols t))`;
 
-val ptreeToRules = Define `(ptreeToRules (Leaf tmnl) = []) /\ 
-(ptreeToRules (Node nt ptlist) = (rule ( (nonTmnlToStr nt)) (getSymbols ptlist)) :: (ptreeToRules2 ptlist)) /\ 
-(ptreeToRules2 [] = []) /\ (ptreeToRules2 (h::t) = (ptreeToRules h) ++ (ptreeToRules2 t))`;
+val ptreeToRules = 
+Define `(ptreeToRules (Leaf tmnl) = []) /\
+(ptreeToRules (Node nt ptlist) = 
+(rule nt (getSymbols ptlist)) :: (ptreeToRules2 ptlist)) /\ 
+(ptreeToRules2 [] = []) /\ 
+(ptreeToRules2 (h::t) = (ptreeToRules h) ++ (ptreeToRules2 t))`;
 
 
 (* This should be checking against an actual rule format rather than a string format!!!! *)
@@ -90,18 +83,21 @@ val checkRules = Define `(checkRules [] rls = T) /\
 
 (* val validptree = Define `(validptree pt g = (checkRules (ptreeToRules pt) (rules g)))`;*)
 
-val ptreeNodeSym = Define `(ptreeNodeSym (Node (NT nt) tl) = NTS nt) /\
-(ptreeNodeSym (Leaf (TM tm)) = TS tm)`
+val ptreeNodeSym = Define 
+`(ptreeNodeSym (Node  nt tl) = NTS nt) /\
+(ptreeNodeSym (Leaf tm) = TS tm)`
 
-val ptreeSubtSyms = Define `(ptreeSubtSyms (Node (NT nt) tl) = MAP ptreeNodeSym tl) /\
-(ptreeSubtSyms (Leaf (TM tm)) = [])`
+val ptreeSubtSyms = Define 
+`(ptreeSubtSyms (Node nt tl) = MAP ptreeNodeSym tl) /\
+(ptreeSubtSyms (Leaf  tm) = [])`
 
-val ptreeSubtree = Define `(ptreeSubtree (Node x l) = l) /\
+val ptreeSubtree = Define 
+`(ptreeSubtree (Node x l) = l) /\
 (ptreeSubtree (Leaf tm) = [])`
 
 val validptree_defn = Hol_defn "validptree_defn" 
     `(validptree g (Node n ptl) =
-      MEM (rule (nonTmnlToStr n) (getSymbols ptl)) (rules g) /\
+      MEM (rule n (getSymbols ptl)) (rules g) /\
       (!e.MEM e ptl ==> isNode e ==> validptree g e)) /\
 (validptree g (Leaf tm) = F)`
 
@@ -115,27 +111,12 @@ DECIDE_TAC)
 val _ = save_thm ("validptree",validptree)
 val _ = save_thm ("validptree_ind",validptree_ind)
 
-(*
-val validptree_defn = Hol_defn "validptree_defn" `(validptree g pt = 
-MEM (rule (nts2str (ptreeNodeSym pt)) (ptreeSubtSyms pt)) (rules g) /\ validsubptrees g (ptreeSubtree pt)) /\
-(validsubptrees  g [] = T) /\
-(validsubptrees g ((Node nt l)::ls) = validptree g (Node nt l)  /\ validsubptrees g ls) /\
-(validsubptrees g ((Leaf tm)::ls) = validsubptrees g ls)`
-*)
 
-val leaves_def = Define `(leaves (Leaf tmnl) = [TS (tmnlToStr (tmnl))]) /\ (leaves (Node nt ptlist) =  cleaves ptlist) /\ (cleaves [] = []) /\ (cleaves (h::t) = leaves h ++ cleaves t)`;
+val leaves_def = Define 
+`(leaves (Leaf tmnl) = [TS tmnl]) /\ 
+(leaves (Node nt ptlist) =  cleaves ptlist) /\ 
+(cleaves [] = []) /\ (cleaves (h::t) = leaves h ++ cleaves t)`;
 
-(* write prettyPrinter for parse tree *)
-
-
-(* Checking the validity of the parse tree while recursing over it *)
-
-(*
-IN TERMS OF STRING -> MAKE IT IN TERMS OF SYMBOLS OR BETTER STILL PARAMETRIZE IT!!!!!!!!!!!!!!!!!!
-val validptreerec = Define `(validptreerec (Leaf tmnl) rset = (tmnlToStr tmnl, []) IN rset) /\ (validptreerec (Node nt ptlist) rset = (nonTmnlToStr nt, getSymbols ptlist) IN rset /\ validptreerec2 ptlist rset) /\ (validptreerec2 [] rset = T) /\ (validptreerec2 (h::t) rset = validptreerec h rset /\ validptreerec2 t rset)`;
-
-val yield_def = Define `yield ptree = FOLDR STRCAT "" (leaves ptree)`;
-*)
 
 val flat_leaves = store_thm("flat_leaves", 
 ``!l.(leaves (Node n l)) = FLAT (MAP leaves l)``,
@@ -153,7 +134,8 @@ val getSymsEqptree2sym = store_thm ("getSymsEqptree2Sym",
 ``getSymbols l = MAP (ptree2Sym) l``,
 Induct_on `l` THEN SRW_TAC [] [getSymbols] THEN
 `getSymbols (h::l) = getSymbols [h] ++ getSymbols l` by METIS_TAC [getSyms_append, APPEND] THEN
-Cases_on `h` THEN Cases_on `l` THEN METIS_TAC [ptree2Sym, getSymbols]
+Cases_on `h` THEN Cases_on `l` THEN 
+METIS_TAC [ptree2Sym, getSymbols]
 )
 
 val mapSymsptree = store_thm ("mapSymsptree",
@@ -161,16 +143,19 @@ val mapSymsptree = store_thm ("mapSymsptree",
 Induct_on `p` THEN SRW_TAC [] [getSymbols] THEN
 Cases_on `h` THEN Cases_on `r` THEN 
 FULL_SIMP_TAC (srw_ss()) [getSymbols, ptree2Sym, SND] THEN
-Induct_on `MAP SND p` THEN METIS_TAC [getSyms_append, getSymsEqptree2sym, getSymbols])
+Induct_on `MAP SND p` THEN 
+METIS_TAC [getSyms_append, getSymsEqptree2sym, getSymbols])
 
 
 val getSyms_len = store_thm ("getSyms_len",
 ``!l.LENGTH l = LENGTH (getSymbols l)``,
 Induct_on `l` THEN SRW_TAC [] [getSymbols, LENGTH] THEN
-Cases_on `h` THEN Induct_on `l` THEN SRW_TAC [] [getSymbols, LENGTH])
+Cases_on `h` THEN Induct_on `l` THEN 
+SRW_TAC [] [getSymbols, LENGTH])
 
 val take1_getSyms = store_thm ("take1_getSyms",
-``!l n.(LENGTH l >= n) ==> (take1 n (getSymbols l) = getSymbols (take1 n l))``,
+``!l n.(LENGTH l >= n) ==> 
+(take1 n (getSymbols l) = getSymbols (take1 n l))``,
 Induct_on `n` THEN Induct_on `l` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [take1, getSymbols] THENL[
 
@@ -256,11 +241,7 @@ val _ =
 OPEN ["num", "regexp"]
     :: MLSIG "type num = numML.num"
     :: MLSIG "type symbol = regexpML.symbol"
-    :: DATATYPE `nonTerminal = NT of string`
-    :: DATATYPE `terminal = TM of string`
-    :: DATATYPE `ptree = Leaf of terminal | Node of nonTerminal => ptree list`
-    :: DEFN nonTmnlToStr
-    :: DEFN tmnlToStr
+    :: DATATYPE `ptree = Leaf of string | Node of string => ptree list`
     :: DEFN ptree2Sym
     :: [])
  end;

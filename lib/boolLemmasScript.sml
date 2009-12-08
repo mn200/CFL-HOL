@@ -5,15 +5,14 @@ open pred_setTheory listTheory arithmeticTheory Defn
 
 val _ = new_theory "boolLemmas";
 
-val if_rw_SOMEeqSOME = store_thm ("if_rw_SOMEeqSOME", 
+val if_rw_SOMEeqSOME = store_thm ("if_rw_SOMEeqSOME",
 ``((if p then SOME x else NONE) = SOME x') = ((x=x') /\ p)``,
-SRW_TAC [] [])
+SRW_TAC [][AC CONJ_ASSOC CONJ_COMM])
 
-val if_rw_SOME = store_thm ("if_rw_SOME", 
+(* I find it hard to believe this is useful *)
+val if_rw_SOME = store_thm ("if_rw_SOME",
 ``?x' p'.(SOME x' = (if p then NONE else p')) = ((p'=SOME x'))``,
-SRW_TAC [] [EQ_IMP_THM] THEN
-METIS_TAC [])
-
+MAP_EVERY Q.EXISTS_TAC [`ARB`, `NONE`] THEN SRW_TAC [][]);
 
 val option_case_rwt = store_thm("option_case_rwt",
   ``((case x of NONE -> NONE || SOME y -> f y) = SOME z) = (?a. (x = SOME a) /\ (f a = SOME z))``,
@@ -26,7 +25,7 @@ val list_case_rwt = store_thm("list_case_rwt",
   Cases_on `x` THEN SRW_TAC [][] );
 
 
-val option_r1 = store_thm ("option_r1", 
+val option_r1 = store_thm ("option_r1",
 ``!f.~(f=NONE) ==> (x=THE f) ==> ( SOME x = f)``,
 SRW_TAC [] [] THEN
 Cases_on `f` THEN
@@ -35,10 +34,11 @@ FULL_SIMP_TAC (srw_ss()) [THE_DEF]
 
 val ih = prove(
 ``{ l | EVERY P l /\ LENGTH l <= SUC n } =
-[] INSERT BIGUNION (IMAGE (\t. IMAGE (\h. h :: t) { x | P x })
-{ l | EVERY P l /\ LENGTH l <= n })``,
+    [] INSERT BIGUNION (IMAGE (\t. IMAGE (\h. h :: t) { x | P x })
+                              { l | EVERY P l /\ LENGTH l <= n })``,
 SRW_TAC [DNF_ss][Once EXTENSION, EQ_IMP_THM] THEN
-Cases_on `x` THEN SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) []);
+Cases_on `x` THEN SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+MAP_EVERY Q.EXISTS_TAC [`{ h'::t | P h'}`, `t`] THEN SRW_TAC [][]);
 
 val finite_length_limited = prove(
 ``FINITE { x | P x } ==> !n. FINITE { l | EVERY P l /\ LENGTH l <= n }``,

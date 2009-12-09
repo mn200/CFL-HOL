@@ -607,7 +607,8 @@ SRW_TAC [] [pop]]
 
 val take0out = store_thm ("take0out",
 ``!l.(take 0 l = SOME y) ==> (y=[])``,
-Induct_on `l` THEN SRW_TAC [] [] THEN METIS_TAC [take, take10, take0, SOME_11])
+Induct_on `l` THEN 
+METIS_TAC [take, take10, take0, SOME_11])
 
 
 val takenthm = store_thm ("takenthm",
@@ -1078,24 +1079,6 @@ FULL_SIMP_TAC (arith_ss) [] THEN
  `n+1 < SUC (LENGTH (TL t))` by DECIDE_TAC THEN
 FULL_SIMP_TAC (srw_ss()) [DECIDE ``n+1 = SUC n``]);
 
-
-val elId = store_thm
-("elId",
-``∀n l. n + 1 < LENGTH l ⇒ rtc2list (ID p) l ⇒
-        p ⊢ (EL n l) → (EL (n+1) l)``,
-
-Induct_on `l` THEN SRW_TAC [][] THEN
-Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN1
-(Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
-Q_TAC SUFF_TAC `p ⊢ EL n' l → EL (SUC (SUC n')) (h::l)` THEN1
-METIS_TAC [ADD1] THEN
-SRW_TAC [][] THEN
-`n'+1 < LENGTH l` by DECIDE_TAC THEN
-RES_TAC THEN
-Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-RES_TAC THEN
-METIS_TAC [elTlEq]);
 
 val elMemLen = store_thm
 ("elMemLen",

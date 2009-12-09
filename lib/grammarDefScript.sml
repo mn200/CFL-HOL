@@ -1319,6 +1319,7 @@ val rtc2list_startSym_rtcRderives = store_thm
 (u=[NTS (startSym g)]) ⇒
 ∃dl.rtc2list (rderives g) dl ∧
      ((HD dl) = [NTS (startSym g)]) ∧ (LAST dl = v)``,
+
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT_RIGHT1 THEN
 SRW_TAC [] [RTC_RULES, isTmnlSym_def] THEN
 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]
@@ -1332,9 +1333,7 @@ THENL[
 
             METIS_TAC [rtc2list_append_right],
 
-            Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [rtc2list_def],
-
-            METIS_TAC [last_elem]
+            Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [rtc2list_def]
             ]]);
 
 
@@ -1407,20 +1406,19 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN
 `([x'; y]::t) = FRONT ([x'; y]::t) ++ [(LAST dl1 ++ LAST dl2)]`
  by METIS_TAC [NOT_CONS_NIL, APPEND_FRONT_LAST] THEN
-`FRONT ([x'; y]::t) ++ ([LAST dl1 ++ LAST dl2] ++[x])= ([x'; y]::(t ++ [x]))`
+`FRONT ([x'; y]::t) ++ ([LAST dl1 ++ LAST dl2] ++[v])= ([x'; y]::(t ++ [v]))`
  by METIS_TAC [APPEND, APPEND_ASSOC] THEN
-`rtc2list (derives g)  ([(LAST dl1 ++ LAST dl2)] ++ [x])`
+`rtc2list (derives g)  ([(LAST dl1 ++ LAST dl2)] ++ [v])`
  by METIS_TAC [rtc2list_distrib_append_snd, MEM, MEM_APPEND] THEN
 FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
-`(∃x'. derives g (LAST dl1) x' ∧ (x = x' ++ (LAST dl2))) ∨
-    ∃y'. derives g (LAST dl2) y' ∧ (x = (LAST dl1) ++ y')`
+`(∃x'. derives g (LAST dl1) x' ∧ (v = x' ++ (LAST dl2))) ∨
+    ∃y'. derives g (LAST dl2) y' ∧ (v = (LAST dl1) ++ y')`
  by METIS_TAC [lemma2'] THEN
 SRW_TAC [][]
 THENL[
       MAP_EVERY Q.EXISTS_TAC [`dl1++[x'']`,`dl2`] THEN
       SRW_TAC [][last_append]
       THENL[
-	    METIS_TAC [last_append, MEM, MEM_APPEND, LAST_DEF],
 	    METIS_TAC [rtc2list_append_right],
 	    Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [],
 	    FULL_SIMP_TAC (arith_ss) []
@@ -1429,7 +1427,6 @@ THENL[
       MAP_EVERY Q.EXISTS_TAC [`dl1`,`dl2++[y']`] THEN
       SRW_TAC [][last_append]
       THENL[
-	    METIS_TAC [last_append, MEM, MEM_APPEND, LAST_DEF],
 	    METIS_TAC [rtc2list_append_right],
 	    Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) [],
 	    FULL_SIMP_TAC (arith_ss) []
@@ -1477,10 +1474,8 @@ val rtc2list_isolate_NT = store_thm(
     MAP_EVERY Q.EXISTS_TAC [`pfx''`, `rhs2`, `sfx''`] THEN
     SRW_TAC[][] THEN
     Q.EXISTS_TAC `dl' ++ [rhs2]` THEN
-    SRW_TAC [][rtc2list_append_right] THENL[
+    SRW_TAC [][rtc2list_append_right] THEN
       Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [],
-      Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [last_append]
-    ],
 
     MAP_EVERY Q.EXISTS_TAC [`pfx''`, `LAST dl'`, `sfx2`] THEN
     SRW_TAC [][] THEN Q.EXISTS_TAC `dl'` THEN
@@ -1757,7 +1752,6 @@ val rtc2list_isolate_NT' = store_thm(
     Q.EXISTS_TAC `dl' ++ [rhs2]` THEN
     SRW_TAC [][rtc2list_append_right] THENL[
       Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [],
-      Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [last_append],
       `(FRONT dl ++
        [pfx'' ++ LAST dl' ++ sfx''; pfx'' ++ rhs2 ++ sfx'']) =
       dl ++ [pfx'' ++ rhs2 ++ sfx'']`
@@ -2917,9 +2911,7 @@ THENL[
 `derives g (LAST dl') (p'++rhs++s')` by METIS_TAC [derives,APPEND_NIL] THEN
 METIS_TAC [rtc2list_append_right],
 
-Cases_on` dl'` THEN FULL_SIMP_TAC (srw_ss()) [],
-
-METIS_TAC [last_elem]
+Cases_on` dl'` THEN FULL_SIMP_TAC (srw_ss()) []
 ],
 
 

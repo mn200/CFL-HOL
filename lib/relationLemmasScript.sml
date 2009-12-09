@@ -299,5 +299,29 @@ SRW_TAC [][] THEN
 METIS_TAC [APPEND_FRONT_LAST,NOT_CONS_NIL,rtc2list_distrib_append_fst,
 	   frontAppendFst,HD,APPEND]);
 
+(*
+val elId = store_thm
+("elId",
+``∀n l.n + 1< LENGTH l ⇒ rtc2list p l 
+      ⇒
+    p ⊢ l ◁ (EL n l) → (EL (n+1) l)``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN1
+(Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`0`] MP_TAC) THEN SRW_TAC [][]
+ ) THEN
+Q_TAC SUFF_TAC `p ⊢ EL n' l → EL (SUC (SUC n')) (h::l)` THEN1
+METIS_TAC [ADD1] THEN
+SRW_TAC [][] THEN
+`n'+1 < LENGTH l` by DECIDE_TAC THEN
+RES_TAC THEN
+Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+RES_TAC THEN
+METIS_TAC [elTlEq]);
+*)
 
 val _ = export_theory ();

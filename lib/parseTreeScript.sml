@@ -149,15 +149,12 @@ val getSyms_len = store_thm ("getSyms_len",
 Induct_on `l` THEN SRW_TAC [] [getSymbols, LENGTH] THEN
 Cases_on `h` THEN Induct_on `l` THEN 
 SRW_TAC [] [getSymbols, LENGTH]);
-
+    
 val take1_getSyms = store_thm ("take1_getSyms",
 ``∀l n.(LENGTH l >= n) ⇒ 
 (take1 n (getSymbols l) = getSymbols (take1 n l))``,
 Induct_on `n` THEN Induct_on `l` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [take1, getSymbols] THENL[
-
-Cases_on `h` THEN 
-Induct_on `l` THEN FULL_SIMP_TAC (srw_ss()) [take1, getSymbols],
 
 FULL_SIMP_TAC (arith_ss) [],
 

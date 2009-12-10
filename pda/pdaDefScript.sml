@@ -10,7 +10,6 @@ open listLemmasTheory containerLemmasTheory relationLemmasTheory
 val _ = new_theory "pdaDef"
 
 val _ = Globals.linewidth := 60
-val _ = set_trace "Unicode" 1
 
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
@@ -240,8 +239,7 @@ val finiteStkSyms = store_thm
 			 (MAP (SND o SND) p.next))`
 	  THEN1 SRW_TAC [][] THEN
     UNABBREV_ALL_TAC THEN
-    SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss)
-	     [Once EXTENSION, MEM_MAP, EXISTS_trans],
+    SIMP_TAC (srw_ss()) [EXTENSION, MEM_MAP, EXISTS_trans],
 
     SRW_TAC [][]
   ]);
@@ -316,8 +314,6 @@ val laes = Define
               { w | ?state.
                     IDC p (p.start,w,[p.ssSym]) (state,[],[]) }`;
 
-
-
 val stkLen = Define `stkLen e = LENGTH (pdastk e)`;
 
 
@@ -362,7 +358,7 @@ val memState = store_thm
   SRW_TAC [][]
   THENL[
 
-     FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES1, IDC] THEN
+     FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES1] THEN
      FULL_SIMP_TAC (srw_ss()) [] THEN
      Cases_on `u` THEN
      Cases_on `r` THEN
@@ -371,7 +367,7 @@ val memState = store_thm
      FULL_SIMP_TAC (srw_ss()) [ID] THEN
      METIS_TAC [memStateRule],
 
-     FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES2, IDC] THEN
+     FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES2] THEN
      FULL_SIMP_TAC (srw_ss()) [] THEN
      Cases_on `u` THEN
      Cases_on `r` THEN
@@ -453,7 +449,28 @@ THENL[
       METIS_TAC [mem_in]
       ]);
 
+val listderiv_RTC = store_thm(
+  "listderiv_RTC",
+  ``R^* x y ⇔ ∃d. R ⊢ d ◁ x → y``,
+  EQ_TAC THENL [
+    MAP_EVERY Q.ID_SPEC_TAC [`y`, `x`] THEN
+    HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [][] THEN1
+      (Q.EXISTS_TAC `[x]`  THEN SRW_TAC [][listderiv_def]) THEN
+    Q.EXISTS_TAC `x::d` THEN SRW_TAC [][listderiv_def] THEN
+    FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+    Cases_on `d` THEN FULL_SIMP_TAC (srw_ss()) [rtc2list_def],
 
+    Q_TAC SUFF_TAC `∀d x y. R ⊢ d ◁ x → y ⇒ R^* x y` THEN1 METIS_TAC [] THEN
+    Induct THEN1 SRW_TAC [][listderiv_def] THEN
+    Cases_on `d` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+    REPEAT STRIP_TAC THEN MATCH_MP_TAC (CONJUNCT2 (SPEC_ALL RTC_RULES)) THEN
+    Q.EXISTS_TAC `h` THEN SRW_TAC [][]
+  ]);
+
+val listderiv_RTC_E = store_thm(
+  "listderiv_RTC_E",
+  ``R ⊢ d ◁ x → y ⇒ R^* x y``,
+  METIS_TAC [listderiv_RTC]);
 
 val idcStkPop = store_thm
 ("idcStkPop",
@@ -466,87 +483,27 @@ val idcStkPop = store_thm
           (stk' = p' ++ [sym] ++ s) ∧
           ¬MEM sym p' ∧
           ID m ⊢ l' ◁ (q,i,p) → (q',i',p')``,
-
-HO_MATCH_MP_TAC SNOC_INDUCT THEN
-SRW_TAC [][]
-THENL[
-      FULL_SIMP_TAC (srw_ss()) [listderiv_def],
-
-
-      Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) []
-      THENL[
-	    FULL_SIMP_TAC (srw_ss()) [listderiv_def, SNOC] THEN
-	    SRW_TAC [][] THEN
-	    MAP_EVERY Q.EXISTS_TAC [`[(q,i,p)]`,`p`] THEN
-	    SRW_TAC [][],
-
-	    FULL_SIMP_TAC (srw_ss()) [SNOC_APPEND] THEN
-	    Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) []
-            THENL[
-		  SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  `∃p'.(stk' = p' ++ [sym] ++ s) ∧ ¬MEM sym p' ∧
-                     m ⊢ (q,i,p) → (q',i',p')`
-		      by METIS_TAC [idStkPop] THEN
-		  SRW_TAC [][] THEN
-		  Q.EXISTS_TAC `(q,i,p)::[(q',i',p')]` THEN
-		  SRW_TAC [][],
-
-		  `∃e.LAST (h::h'::t') = e`
-		      by METIS_TAC [last_exists] THEN
-		  Cases_on `e` THEN
-		  Cases_on `r` THEN
-		  FIRST_X_ASSUM (Q.SPECL_THEN [`q`, `i`,`s`,
-					       `q''`, `q'''`,`r'`,
-					       `p`]
-				MP_TAC) THEN
-		  SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  `rtc2list (ID m) (h'::t')`
-		      by METIS_TAC [rtc2list_distrib_append_fst,
-				    NOT_CONS_NIL,
-				    APPEND_ASSOC, APPEND] THEN
-		  `∃l' p'.(r' = p' ++ [sym] ++ s) ∧ ¬MEM sym p' ∧
-                          rtc2list (ID m) l' ∧ (HD l' = (q,i,p)) ∧
-                          (LAST l' = (q'',q''',p'))`
-		      by METIS_TAC [] THEN
-		  SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [] THEN
-		  `h'::t' = FRONT (h'::t') ++
-				  [(q'',q''',p' ++ [sym] ++ s)]`
-		      by METIS_TAC [APPEND_FRONT_LAST,
-				    NOT_CONS_NIL] THEN
-		  `rtc2list (ID m) (FRONT (h'::t') ++
-				  [(q'',q''',p' ++ [sym] ++ s)] ++
-				  [x])` by METIS_TAC [APPEND_ASSOC,
-						      APPEND] THEN
-		  `rtc2list (ID m) ([(q'',q''',p' ++ [sym] ++ s)]
-					++ [x])`
-		      by METIS_TAC [APPEND_ASSOC,
-				    rtc2list_distrib_append_snd,
-				    MEM, MEM_APPEND] THEN
-		  `x=(q',i',stk')`
-		      by METIS_TAC [LAST_DEF, NOT_CONS_NIL,
-				    last_append, APPEND,
-				    APPEND_ASSOC] THEN
-		  FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN
-		  `∃p''.(stk' = p'' ++ [sym] ++ s) ∧ ¬MEM sym p'' ∧
-				 m ⊢ (q'',q''',p') → (q',i',p'')`
-		      by METIS_TAC [idStkPop] THEN
-		  Q.EXISTS_TAC `l'++[(q',i',p'')]` THEN
-		  Q.EXISTS_TAC `p''` THEN
-		  SRW_TAC [][]
-		  THENL[
-
-			METIS_TAC [rtc2list_append_right],
-
-			Cases_on `l'` THEN FULL_SIMP_TAC (srw_ss()) [],
-
-			METIS_TAC [last_append, NOT_CONS_NIL, LAST_DEF]
-			]]]]);
+Q_TAC SUFF_TAC
+  `∀x y.
+     m ⊢ x →* y ⇒
+     ∀q i p sym s q' i' stk'.
+       (x = (q,i,p++[sym]++s)) ∧ (y = (q',i',stk')) ∧
+       ¬MEM sym p ∧ sym ∉ stkSyms m
+      ⇒
+       ∃p'. (stk' = p' ++ [sym] ++ s) ∧ ¬MEM sym p' ∧
+            m ⊢ (q,i,p) →* (q',i',p')`
+  THEN1 METIS_TAC [listderiv_RTC] THEN
+HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [][] THEN1
+  (Q.EXISTS_TAC `p` THEN SRW_TAC [][]) THEN
+`∃q0 i0 p0. x' = (q0,i0,p0)`
+  by METIS_TAC [TypeBase.nchotomy_of ``:'a #'b``] THEN
+SRW_TAC [][] THEN
+Q.SPECL_THEN [`q`,`i`,`p`,`sym`,`s`,`q0`,`i0`,`p0`] MP_TAC idStkPop THEN
+ASM_SIMP_TAC (srw_ss()) [] THEN
+DISCH_THEN (Q.X_CHOOSE_THEN `p00` STRIP_ASSUME_TAC) THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`p00`, `sym`, `s`] MP_TAC) THEN
+SRW_TAC [][] THEN
+METIS_TAC [RTC_RULES]);
 
 
 val idInpInsert = store_thm
@@ -683,7 +640,7 @@ THENL[
 	    `LENGTH isfx <= LENGTH i2` by METIS_TAC [listderiv_def, ldIdcInpLen,
 						     rtc2listRtcHdLast, HD] THEN
 
-	    `LENGTH i2 <= LENGTH i1` by METIS_TAC [ldIdcInpLen, IDC,RTC_SUBSET,
+	    `LENGTH i2 <= LENGTH i1` by METIS_TAC [ldIdcInpLen, RTC_SUBSET,
 						   rtc2list_exists'] THEN
 	    `LENGTH isfx <= LENGTH i1` by DECIDE_TAC THEN
 	    Cases_on `ipfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1

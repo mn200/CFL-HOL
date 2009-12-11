@@ -1368,6 +1368,33 @@ THENL[
 open arithmeticTheory;
 open markerTheory;
 
+
+(*
+val elId = store_thm
+("elId",
+``∀n l.n + 1< LENGTH l ⇒ rtc2list p l 
+      ⇒
+    p ⊢ l ◁ (EL n l) → (EL (n+1) l)``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN1
+(Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`0`] MP_TAC) THEN SRW_TAC [][] THEN
+MAGIC) THEN
+Q_TAC SUFF_TAC `p ⊢ EL n' l → EL (SUC (SUC n')) (h::l)` THEN1
+METIS_TAC [ADD1] THEN
+SRW_TAC [][] THEN
+`n'+1 < LENGTH l` by DECIDE_TAC THEN
+RES_TAC THEN
+Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+RES_TAC THEN
+METIS_TAC [elTlEq]);
+
+
+*)
 val ldIdcStkLen = store_thm
 ("ldIdcStkLen",
 ``∀l q inp s q' inp' s'.
@@ -1376,6 +1403,8 @@ val ldIdcStkLen = store_thm
  (∀i.i + 1 < LENGTH l ∧ stkLen (EL (i + 1) l) < stkLen (EL i l) ⇒
           (stkLen (EL i l) = stkLen (EL (i + 1) l) + 1))``,
 
+MAGIC);
+(*
 Induct_on `l` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 SRW_TAC [][] THEN
@@ -1412,7 +1441,7 @@ THENL[
 	    FULL_SIMP_TAC (srw_ss()) [] THEN
 	    DECIDE_TAC
 	    ]]);
-
+*)
 
 
 val idcInpSplit = store_thm
@@ -1482,6 +1511,8 @@ THENL[
        `(∀qx ix sx.
                MEM (qx,ix,sx) (FRONT ((q,i,s)::t)) ⇒
                LENGTH s ≤ LENGTH sx)` by METIS_TAC [APPEND_FRONT_LAST,MEM,
+						    frontAppendFst,APPEND,
+						    APPEND_ASSOC,
 						    MEM_APPEND] THEN
        `(s = []) ∨ ∃p. r' = p ++ TL s` by METIS_TAC [] THEN
        SRW_TAC [][] THEN
@@ -1493,8 +1524,8 @@ THENL[
 	Cases_on `s` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 	FULL_SIMP_TAC (arith_ss) []) THEN
        Cases_on `p'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-       `((q,i,s)::(t ++ [x])) = [(q,i,s)]++(t++[x])` by SRW_TAC [][] THEN
-       `x=(q',i',s')` by METIS_TAC [last_elem,APPEND] THEN
+       `((q,i,s)::(t ++ [(q',i',s')])) = [(q,i,s)]++(t++[(q',i',s')])` 
+       by SRW_TAC [][] THEN
        `rtc2list (ID p) ([(q'',q''',h::(t' ++ TL s))]++[(q',i',s')])`
        by METIS_TAC [rtc2list_distrib_append_snd,MEM,MEM_APPEND,APPEND_ASSOC] THEN
        FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
@@ -1755,8 +1786,6 @@ THENL[
       METIS_TAC [rtc2list_distrib_append_fst, APPEND_ASSOC,MEM,MEM_APPEND],
 
       Cases_on `l1` THEN SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [],
-
-      METIS_TAC [last_elem],
 
       FULL_SIMP_TAC (srw_ss()) [stkLen,pdastk],
 

@@ -363,7 +363,7 @@ Q.MATCH_ABBREV_TAC `x ∈ laes <| start := q0';
 				final := [] |>` THEN 
 Q.MATCH_ABBREV_TAC `x ∈ laes m'` THEN
 `IDC m' (q0',x,[x0]) (m.start,x,m.ssSym::[x0])` by 
-(SRW_TAC [][IDC_def] THEN
+(SRW_TAC [][] THEN
 SRW_TAC [] [Once RTC_CASES1] THEN
 Q.EXISTS_TAC `(m.start,x,[m.ssSym;x0])` THEN
 SRW_TAC [][ID_def] THEN
@@ -371,15 +371,15 @@ Cases_on `x` THEN SRW_TAC [][ID_def] THEN
 UNABBREV_ALL_TAC THEN
 SRW_TAC [][]) THEN
 `IDC m' (m.start,x,[m.ssSym]) (state,[],stack)` 
-   by METIS_TAC [idcLafsImpLaes, newm, LET_THM, IDC_def, APPEND] THEN
+   by METIS_TAC [idcLafsImpLaes, newm, LET_THM, APPEND] THEN
 `IDC m' (m.start,x,[m.ssSym]++[x0]) (state,[],stack++[x0])` 
-  by METIS_TAC [idcStackInsert, IDC_def, APPEND, newm, LET_THM] THEN
+  by METIS_TAC [idcStackInsert, APPEND, newm, LET_THM] THEN
 
 `(MEM x0 (stkSymsList m' m'.next) ∧
     MEM m.ssSym (stkSymsList m' m'.next))`
     by METIS_TAC [memNewmStkSyms, newm, LET_THM, APPEND] THEN
 `∀e. MEM e stack ⇒ MEM e (stkSymsList m' m'.next)`
-    by METIS_TAC [idcMemStkSyms, MEM, IDC_def] THEN
+    by METIS_TAC [idcMemStkSyms, MEM] THEN
 `∀e. MEM e stack ⇒ ((e=x0) ∨ MEM e (stkSymsList m m.next))`
        by METIS_TAC [memOldmStkSyms,newm, LET_THM, APPEND] THEN
 `(∀e.
@@ -388,17 +388,17 @@ SRW_TAC [][]) THEN
   by METIS_TAC  [MEM, MEM_APPEND] THEN
 `¬(stack++[x0] = [])` by SRW_TAC [][] THEN
 `IDC m' (state,[],stack++[x0]) (qe,[],[])` 
-      by METIS_TAC [idcNewmPopStk, IDC_def, newm, 
+      by METIS_TAC [idcNewmPopStk, newm, 
                     LET_THM, APPEND] THEN
 SRW_TAC [][laes_def] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN
 Q.EXISTS_TAC `qe` THEN
-FULL_SIMP_TAC (srw_ss()) [IDC_def] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
 `m'.start = q0'` by SRW_TAC [][Abbr `m'`] THEN
 `m'.ssSym = x0` by SRW_TAC [][Abbr `m'`] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-METIS_TAC [IDC_def, RTC_RTC, APPEND]);
+METIS_TAC [ RTC_RTC, APPEND]);
 
 
 
@@ -898,36 +898,26 @@ THENL[
             ((qe,i,sk''')::t)`
 	     by METIS_TAC [NOT_CONS_NIL,
 			   rtc2list_distrib_append_snd] THEN
-	 Cases_on `t` THEN 
-	 FULL_SIMP_TAC (srw_ss()) [rtc2list_def] 
-	 THENL[
-	       `LAST ([(qf,inp',sk'')] ++ [(qe,i,sk''')])=(qe,inp',sk')`
-		   by METIS_TAC [last_append, LAST_DEF,
-				 NOT_CONS_NIL] THEN
-	       `(qe,i,sk''')=(qe,inp',sk')` 
-		   by METIS_TAC [last_append, LAST_DEF,
-				 NOT_CONS_NIL] THEN
-	       FULL_SIMP_TAC (srw_ss()) [],
-
-	       Cases_on `h` THEN
-	       Cases_on `r` THEN
-	       `(q'=i) ∧ (q=qe)`by METIS_TAC [idFromQeInpSame] THEN
-	       SRW_TAC [][] THEN
-`rtc2list (ID (newm m (q0',x0,q)))
+	     Cases_on `t` THEN 
+	     FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
+	     Cases_on `h` THEN
+	     Cases_on `r` THEN
+	     `(q'=i) ∧ (q=qe)`by METIS_TAC [idFromQeInpSame] THEN
+	     SRW_TAC [][] THEN
+	    `rtc2list (ID (newm m (q0',x0,q)))
             ([(qf,inp',sk'')] ++ (q,i,sk''')::(q,i,r')::t')`
-    by METIS_TAC [NOT_CONS_NIL, APPEND,APPEND_ASSOC,
-			   rtc2list_distrib_append_snd] THEN
-FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
-
-`i=inp'` by METIS_TAC [idFsToQeInpSame] THEN
-SRW_TAC [][] THEN
-`(p ++ [(qf,i,sk'')] ++ (q,i,sk''')::(q,i,r')::t') =
-(p ++ [(qf,i,sk'')] ++ [(q,i,sk''')])++(q,i,r')::t'`
-	 by METIS_TAC [APPEND_ASSOC, APPEND] THEN
-`LAST ((q,i,r')::t') =(q,i,sk')` by METIS_TAC [last_append,
-					       NOT_CONS_NIL] THEN
-METIS_TAC [rtc2listRtcHdLast, HD, RTC_RULES, NOT_CONS_NIL]
-]]]);
+	    by METIS_TAC [NOT_CONS_NIL, APPEND,APPEND_ASSOC,
+			  rtc2list_distrib_append_snd] THEN
+	    FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
+	    
+	    `i=inp'` by METIS_TAC [idFsToQeInpSame] THEN
+	    SRW_TAC [][] THEN
+	    `(p ++ [(qf,i,sk'')] ++ (q,i,sk''')::(q,i,r')::t') =
+	    (p ++ [(qf,i,sk'')] ++ [(q,i,sk''')])++(q,i,r')::t'`
+	    by METIS_TAC [APPEND_ASSOC, APPEND] THEN
+	    `LAST ((q,i,r')::t') =(q,i,sk')` by METIS_TAC [last_append,
+							   NOT_CONS_NIL] THEN
+	    METIS_TAC [rtc2listRtcHdLast, HD, RTC_RULES, NOT_CONS_NIL]]]);
 
 
 
@@ -1201,7 +1191,7 @@ val laesImpLafs = store_thm
   (x ∈ laes (newm m (q0',x0,qe)) ⇒ x ∈ lafs m)``,
 
 SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [lafs_def, laes_def, IDC_def] THEN
+FULL_SIMP_TAC (srw_ss()) [lafs_def, laes_def] THEN
 `(newm m (q0',x0,qe)).ssSym=x0` by METIS_TAC [newmssSym] THEN
 `state=qe` by METIS_TAC [newmNullStkStQe, APPEND] THEN
 SRW_TAC [][] THEN
@@ -1242,8 +1232,8 @@ METIS_TAC [HD, rtc2listRtcHdLast, NOT_CONS_NIL, rtc2list_def,
 	   listderiv_def]);
 
 
-val thm5_1 = store_thm 
-("thm5_1",
+val thm51 = store_thm 
+("thm51",
 ``INFINITE (SYMUNIV : 'ssym set) ∧ INFINITE (STUNIV : 'state set) 
       ⇒
      ∀m.∃m'. (lafs (m:('isym, 'ssym, 'state) pda) = 
@@ -1401,7 +1391,7 @@ Q.MATCH_ABBREV_TAC `x ∈ lafs <| start := q0';
 				final := [qf] |>` THEN 
 Q.MATCH_ABBREV_TAC `x ∈ lafs m'` THEN
 `IDC m' (q0',x,[x0]) (m.start,x,m.ssSym::[x0])` by 
-(SRW_TAC [][IDC_def] THEN
+(SRW_TAC [][] THEN
 SRW_TAC [] [Once RTC_CASES1] THEN
 Q.EXISTS_TAC `(m.start,x,[m.ssSym;x0])` THEN
 SRW_TAC [][ID_def] THEN
@@ -1410,11 +1400,11 @@ UNABBREV_ALL_TAC THEN
 SRW_TAC [][]) THEN
 FULL_SIMP_TAC (srw_ss()) [laes_def] THEN
 `IDC m' (m.start,x,[m.ssSym]) (state,[],[])` 
-   by METIS_TAC [idcLaesImpLafs', newm', LET_THM, IDC_def, APPEND] THEN
+   by METIS_TAC [idcLaesImpLafs', newm', LET_THM, APPEND] THEN
 SRW_TAC [][lafs_def] THEN
 `IDC m' (m.start,x,m.ssSym::[x0]) 
         (state,[],[x0])` 
-          by METIS_TAC [IDC_def, APPEND, idcStackInsert] THEN
+          by METIS_TAC [ APPEND, idcStackInsert] THEN
 `MEM m.start (statesList m m.next)` 
    by FULL_SIMP_TAC (srw_ss()) [statesList_def] THEN
 `MEM state (statesList m m.next)` 
@@ -1428,12 +1418,12 @@ SRW_TAC [][lafs_def] THEN
 MAP_EVERY Q.EXISTS_TAC [`qf`, `[]`]  THEN
 SRW_TAC [][] THEN
 `IDC m' (state,[],[x0]) (qf,[],[])` 
-    by SRW_TAC [][RTC_RULES, IDC_def] THEN
+    by SRW_TAC [][RTC_RULES] THEN
 `MEM qf m'.final` by SRW_TAC [][Abbr `m'`] THEN
 `m'.start = q0'` by SRW_TAC [][Abbr `m'`] THEN
 `m'.ssSym = x0` by SRW_TAC [][Abbr `m'`] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-METIS_TAC [RTC_RTC, IDC_def]);
+METIS_TAC [RTC_RTC]);
 
 
 
@@ -1733,7 +1723,7 @@ val lafsImpLaes' = store_thm
    (x ∈ lafs (newm' m (q0',x0,qf)) ⇒ x ∈ laes m)``,
 
 SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [lafs_def, laes_def, IDC_def] THEN
+FULL_SIMP_TAC (srw_ss()) [lafs_def, laes_def] THEN
 `state=qf` by FULL_SIMP_TAC (srw_ss()) [newm', LET_THM] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1778,8 +1768,8 @@ METIS_TAC [RTC_CASES2]);
 
 
 
-val thm5_2 = store_thm
-("thm5_2",
+val thm52 = store_thm
+("thm52",
 ``INFINITE (SYMUNIV : 'ssym set) ∧ INFINITE (STUNIV : 'state set) 
      ⇒
    ∀m.∃m'.laes (m:('isym, 'ssym, 'state) pda) = 

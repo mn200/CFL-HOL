@@ -37,6 +37,11 @@ let ts = MAP (trans q)  (rules g)
            next := ts;
            final := ([]:'state list) |>`;
 
+val g2pPdaExists = store_thm
+("g2pPdaExists",
+``∀g.∃m.(m = grammar2pda g)``,
+SRW_TAC [][]);
+
 
 val pdaStartState = store_thm("pdaStartState",
 ``(grammar2pda g q).start = q``,
@@ -376,7 +381,7 @@ val laesImpLang = store_thm
        x ∈ language g``,
 
 SRW_TAC [][language_def, laes_def] THEN
-FULL_SIMP_TAC (srw_ss()) [pdaStackSym, pdaStartState, IDC_def] THEN
+FULL_SIMP_TAC (srw_ss()) [pdaStackSym, pdaStartState] THEN
 `∃dl. ID (grammar2pda g (q:'c)) ⊢ dl ◁ 
        ((q:'c),x,[NTS (startSym g)]) → (state,[],[])`
          by METIS_TAC [rtc2list_exists'] THEN
@@ -476,7 +481,7 @@ val ldImpIdc = store_thm
 ``∀dl x y.lderives g ⊢ dl ◁  [NTS (startSym g)] → (x++y) ∧
       isGnf g ∧ EVERY isTmnlSym x ∧ EVERY isNonTmnlSym y
               ⇒
-	  IDC (grammar2pda g q)
+	  RTC (ID (grammar2pda g q))
 	  (q,x,[NTS (startSym g)]) (q,[],y)``,
 
 HO_MATCH_MP_TAC SNOC_INDUCT THEN
@@ -490,12 +495,11 @@ THENL[
       Cases_on `x'` THEN Cases_on `y` THEN SRW_TAC [][] THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN 
       SRW_TAC [][] THEN 
-      FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, IDC_def, isTmnlSym_def],
+      FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def],
 
       Cases_on `dl` THEN SRW_TAC [][] THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
       SRW_TAC [][] THEN
-      `LAST [x] = x'++y` by METIS_TAC [last_append, APPEND, NOT_CONS_NIL] THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
       SRW_TAC [][] THEN
       Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -505,7 +509,7 @@ THENL[
        SRW_TAC [][] THEN
        FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
        FULL_SIMP_TAC (srw_ss()) [lderives_def, lreseq, isGnf] THEN
-       SRW_TAC [][IDC_def] THEN
+       SRW_TAC [][] THEN
        `validGnfProd (rule (startSym g) (x' ++ y))` 
        by METIS_TAC [rgr_r9eq, EVERY_APPEND, EVERY_DEF] THEN
        FULL_SIMP_TAC (srw_ss()) [validGnfProd] THEN
@@ -580,13 +584,12 @@ THENL[
 			 `IDC (grammar2pda (G l n) q) (q,s1,[NTS n])
 			 (q,[],NTS lhs::l2)` by METIS_TAC [] THEN
 			 `IDC (grammar2pda (G l n) q) (q,s1++[ts],[NTS n])
-			 (q,[]++[ts],NTS lhs::l2)` by METIS_TAC [idcInpInsert, 
-								 IDC_def] THEN
+			 (q,[]++[ts],NTS lhs::l2)` by METIS_TAC [idcInpInsert] THEN
 			 FULL_SIMP_TAC (srw_ss()) [] THEN
 			 Q_TAC SUFF_TAC `ID (grammar2pda (G l n) q) 
 			 (q,[ts],NTS lhs::l2) (q,[], l2)` THEN1
 			 (SRW_TAC [][] THEN
-			  METIS_TAC [IDC_def, RTC_RULES_RIGHT1, APPEND_NIL]) THEN
+			  METIS_TAC [ RTC_RULES_RIGHT1, APPEND_NIL]) THEN
 			 SRW_TAC [][grammar2pda, LET_THM, ID_def, rules_def] THEN
 			 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, trans] THEN
 			 METIS_TAC [APPEND_NIL],
@@ -615,13 +618,12 @@ THENL[
 			 `IDC (grammar2pda (G l n) q) (q,s1,[NTS n])
 			 (q,[],NTS lhs::s2)` by METIS_TAC [] THEN
 			 `IDC (grammar2pda (G l n) q) (q,s1++[ts],[NTS n])
-			 (q,[]++[ts],NTS lhs::s2)` by METIS_TAC [idcInpInsert, 
-								 IDC_def] THEN
+			 (q,[]++[ts],NTS lhs::s2)` by METIS_TAC [idcInpInsert] THEN
 			 FULL_SIMP_TAC (srw_ss()) [] THEN
 			 Q_TAC SUFF_TAC `ID (grammar2pda (G l n) q) 
 			 (q,[ts],NTS lhs::s2) (q,[], NTS s::t''++s2)` THEN1
 			 (SRW_TAC [][] THEN
-			  METIS_TAC [IDC_def, RTC_RULES_RIGHT1]) THEN
+			  METIS_TAC [ RTC_RULES_RIGHT1]) THEN
 			 SRW_TAC [][grammar2pda, LET_THM, ID_def, rules_def] THEN
 			 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, trans] THEN
 			 METIS_TAC [APPEND_NIL],
@@ -711,6 +713,13 @@ val pda2grammar = Define
    (∀q.MEM q (statesList m m.next) =
        MEM (rule (startSym g) [NTS (m.start,m.ssSym,q)]) (rules g)) ∧
    (∀r.MEM r (rules g) = p2gtrans m r)`;
+
+
+val p2gGrExists = store_thm
+("p2gGrExists",
+``∀m.∃g.(g = pda2grammar m)``,
+SRW_TAC [][]);
+
 
 
 val tupfrmst = Define `tupfrmst (st,syms,stk,st') = st`;
@@ -2220,6 +2229,15 @@ THENL[
 		  by METIS_TAC [APPEND_FRONT_LAST,last_append,APPEND] THEN
 		  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]
 		  ]]]);
+
+
+val p2gEqPda = store_thm
+("p2gEqPda",
+``pda2grammar m g ∧  EVERY isTmnlSym x ⇒
+ (∀q A p.(derives g)^* [NTS (q,A,p)]  x = (ID m)^* (q,x,[A]) (p,[],[]))``,
+
+SRW_TAC [][EQ_IMP_THM] THEN
+METIS_TAC [p2gImpPda, pdaImpP2g, rtc2list_exists']);
 
 
 val _ = export_theory ();

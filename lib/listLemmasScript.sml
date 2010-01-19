@@ -9,6 +9,8 @@ open containerLemmasTheory
 
 val _ = new_theory "listLemmas";
 
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
 (* 14/05/07 AB *)
 val _ = Globals.linewidth := 60
 
@@ -1340,6 +1342,37 @@ SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [BUTFIRSTN_LENGTH_APPEND,APPEND_ASSOC]);
 
+val rmdAPPr = store_thm(
+  "rmdAPPr",
+  ``∀l s. LENGTH (rmDupes l) ≤ LENGTH (rmDupes (l ++ s))``,
+  HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [][rmDupes, delete_append]);
+
+val rmdAPPl = store_thm
+("rmdAPPl",
+ ``∀p l. LENGTH (rmDupes l) ≤ LENGTH (rmDupes (p ++ l))``,
+MAGIC);
+
+val rmdLenLe = store_thm
+("rmdLenLe",
+``∀l p s. LENGTH (rmDupes l) ≤ LENGTH (rmDupes (p++l++s))``,
+SRW_TAC [][] THEN
+METIS_TAC [DECIDE ``a≤ b ∧ b≤ c ⇒ a≤ c``,rmdAPPl,rmdAPPr]);
+
+
+
+val notMemRmDLen = store_thm
+("notMemRmDLen",
+``∀X P X SF.¬MEM e (rmDupes X) ⇒
+ SUC (LENGTH (rmDupes X)) ≤ LENGTH (rmDupes (P ++ e::X ++ SF))``,
+MAGIC );
+
+
+val memdel = store_thm
+("memdel",
+``∀l.MEM e (delete h l) ⇒ MEM e l``,
+
+Induct_on `l` THEN SRW_TAC [][delete] THEN
+METIS_TAC []);
 
 
 (*val _ =

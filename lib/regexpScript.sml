@@ -9,6 +9,7 @@ val _ = new_theory "regexp";
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 val _ = Hol_datatype `symbol = NTS of 'nts | TS of 'ts`;
 
@@ -415,6 +416,213 @@ Induct_on `l1` THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [ldNts,FILTER_APPEND]);
 
+val distElemSubset = Define
+`distElemSubset dl dl'  = 
+   (∀e.MEM e (distinctldNts dl') ⇒ MEM e (distinctldNts dl))`;
+
+val distElemLen = Define
+`distElemLen dl dl'  = 
+(LENGTH (distinctldNts dl') ≤ LENGTH (distinctldNts dl))`;
+
+val distLenAddElem = store_thm
+("distLenAddElem",
+``∀dl1 l.LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts l) 
+⇒
+LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts (e::l))``,
+
+SRW_TAC [][distinctldNts] THEN
+`ldNts (e::l) = ldNts [e] ++ ldNts l` by METIS_TAC [APPEND,ldNtsApp] THEN
+ONCE_ASM_REWRITE_TAC[] THEN
+`LENGTH (rmDupes (ldNts l)) ≤ LENGTH (rmDupes (ldNts [e] ++ ldNts l))`
+by METIS_TAC [rmdLenLe,APPEND_NIL] THEN
+DECIDE_TAC);
+
+val lendistNtsApp' = store_thm
+("lendistNtsApp'",
+``∀x p s.LENGTH (distinctldNts [x]) ≤ LENGTH (distinctldNts [p++x++s])``,
+
+Induct_on `x` THEN SRW_TAC [][] THEN1
+SRW_TAC [][distinctldNts,ldNts,rmDupes] THEN
+
+FULL_SIMP_TAC (srw_ss()) [distinctldNts,ldNts,rmDupes] THEN
+SRW_TAC [][EQ_IMP_THM,rmDupes] THEN
+SRW_TAC [][rmd_del] THEN
+Cases_on `MEM h (rmDupes (FILTER isNonTmnlSym x))` THEN1
+ (IMP_RES_TAC delete_mem_len THEN
+  FIRST_X_ASSUM (Q.SPECL_THEN [`p++[h]`,`s`] MP_TAC) THEN SRW_TAC [][] THEN
+  `SUC
+  (LENGTH (delete h (rmDupes (FILTER isNonTmnlSym x)))) ≤
+  LENGTH (rmDupes (FILTER isNonTmnlSym (p ++ [h]++x ++ s)))` by DECIDE_TAC THEN
+  METIS_TAC [APPEND,APPEND_ASSOC]) 
+ THENL[
+       IMP_RES_TAC notMem_delete_len THEN
+       `LENGTH (FILTER isNonTmnlSym (p ++ h::x ++ s)) > 
+       LENGTH (rmDupes (FILTER isNonTmnlSym x))` by
+       (FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND] THEN
+	`LENGTH (FILTER isNonTmnlSym x) ≥
+	LENGTH (rmDupes (FILTER isNonTmnlSym x))` by METIS_TAC [rmDupes_len] THEN
+	DECIDE_TAC) THEN
+       `LENGTH (FILTER isNonTmnlSym (p ++ h::x ++ s)) ≥ 
+       LENGTH (rmDupes (FILTER isNonTmnlSym (p ++ h::x ++ s)))`
+       by METIS_TAC [rmDupes_len] THEN
+       Cases_on `h` THEN
+       FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, FILTER_APPEND] THEN
+       Q.ABBREV_TAC `X= (FILTER isNonTmnlSym x)` THEN
+       Q.ABBREV_TAC `P = (FILTER isNonTmnlSym p)` THEN
+       Q.ABBREV_TAC `SF = (FILTER isNonTmnlSym s)` THEN
+       METIS_TAC [notMemRmDLen],
+
+
+       Q.ABBREV_TAC `X= (FILTER isNonTmnlSym x)` THEN
+       Q.ABBREV_TAC `P = (FILTER isNonTmnlSym p)` THEN
+       Q.ABBREV_TAC `SF = (FILTER isNonTmnlSym s)` THEN
+       Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND,isNonTmnlSym_def] THEN
+       UNABBREV_ALL_TAC THEN
+       `MEM (TS t) (FILTER isNonTmnlSym x)` by METIS_TAC [rmd_r2] THEN
+       FULL_SIMP_TAC (srw_ss()) [MEM_FILTER],
+
+       Q.ABBREV_TAC `X= (FILTER isNonTmnlSym x)` THEN
+       Q.ABBREV_TAC `P = (FILTER isNonTmnlSym p)` THEN
+       Q.ABBREV_TAC `SF = (FILTER isNonTmnlSym s)` THEN
+       Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND,isNonTmnlSym_def] THEN
+       METIS_TAC []
+       ]);
+
+
+val desApp = store_thm
+("desApp",
+``∀dl1.distElemSubset dl dl1 ⇒ distElemSubset (l1 ++ dl ++ l2) dl1``,
+
+Induct_on `dl1` THEN SRW_TAC [][distElemSubset] THEN1
+FULL_SIMP_TAC (srw_ss()) [distinctldNts, ldNts, rmDupes]  THEN
+FULL_SIMP_TAC (srw_ss()) [distElemSubset] THEN
+MAGIC);
+
+
+
+val distLenAddElem2 = store_thm
+("distLenAddElem2",
+ ``∀dl1 l.LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts l) ∧
+ distElemSubset l dl1
+⇒
+LENGTH (distinctldNts (e::dl1)) ≤ LENGTH (distinctldNts ((p++e++s)::l))``,
+
+Induct_on `dl1` THEN SRW_TAC [][] THEN1
+ (FULL_SIMP_TAC (srw_ss()) [distElemSubset,distinctldNts,ldNts,rmDupes] THEN
+  SRW_TAC [][FILTER_APPEND] THEN
+  METIS_TAC [rmdLenLe,APPEND_ASSOC]) THEN
+ 
+ FULL_SIMP_TAC (srw_ss()) [distElemSubset,distinctldNts,ldNts,rmDupes,
+			   FILTER_APPEND] THEN
+MAGIC);
+
+val memdist = store_thm 
+("memdist",
+``∀dl.distElemSubset ((pfx++rhs++s2)::l) dl ⇒ 
+ distElemSubset ((pfx++[NTS lhs]++s2)::(pfx++rhs++s2)::l) ((NTS lhs::s2)::dl)``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [distinctldNts, distElemSubset, ldNts, rmDupes,
+			  isNonTmnlSym_def] THEN
+SRW_TAC [][FILTER_APPEND] THEN
+METIS_TAC [isNonTmnlSym_def, rmd_r2, MEM, MEM_APPEND, memdel]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [distElemSubset] THEN
+SRW_TAC [][] THEN
+METIS_TAC [memdistNtsApp, APPEND, APPEND_ASSOC]);
+
+
+
+val memdist' = store_thm 
+("memdist'",
+``∀dl.distElemSubset ((p++pfx++rhs++s2++s2')::l) dl ⇒ 
+ distElemSubset ((p++pfx++[NTS lhs]++s2++s2')::(p++pfx++rhs++s2++s2')::l) 
+ ((pfx++[NTS lhs]++s2)::dl)``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [distinctldNts, distElemSubset, ldNts, rmDupes,
+			  isNonTmnlSym_def] THEN
+SRW_TAC [][FILTER_APPEND] THEN
+METIS_TAC [isNonTmnlSym_def, rmd_r2, MEM, MEM_APPEND, memdel]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [distElemSubset] THEN
+SRW_TAC [][] THEN
+METIS_TAC [memdistNtsApp, APPEND, APPEND_ASSOC]);
+
+
+
+
+val lendist' = store_thm 
+("lendist'",
+``∀dl.distElemLen ((p++pfx++rhs++s2++s2')::l) dl ⇒ 
+ distElemLen ((p++pfx++[NTS lhs]++s2++s2')::(p++pfx++rhs++s2++s2')::l) 
+ ((pfx++[NTS lhs]++s2)::dl)``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN
+
+FULL_SIMP_TAC (srw_ss()) [distElemLen, distinctldNts, ldNts, rmDupes,
+			  isNonTmnlSym_def, FILTER_APPEND] THEN
+MAGIC);
+
+
+val distLenAddElemNew = store_thm
+("distLenAddElemNew",
+``∀dl1 l.LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts l)  ∧
+ distElemSubset l dl1
+⇒
+LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts ((p++[e]++s)::l)) -1``,
+MAGIC);
+
+val distesubaddlist = store_thm
+("distesubaddlist",
+``distElemSubset dl l ⇒ distElemSubset (p++dl++s) l``,
+SRW_TAC [][distElemSubset] THEN
+FULL_SIMP_TAC (srw_ss()) [distinctldNts,ldNts] THEN
+Q_TAC SUFF_TAC `MEM e (FILTER isNonTmnlSym (FLAT (p ++ dl ++ s)))` THEN1
+METIS_TAC [rmd_r2] THEN
+`MEM e (FILTER isNonTmnlSym (FLAT l))` by METIS_TAC [rmd_r2] THEN
+SRW_TAC [][FLAT_APPEND,FILTER_APPEND] THEN
+METIS_TAC [rmd_r2]);
+
+val distesub1 = store_thm
+("distesub1",
+``∀h t dl1.(∀e.MEM e dl1 ⇒ ∃e1.(HD dl1 ++ e1 = h) ∧
+	    ((e ++ e1 = h) ∨ MEM (e ++ e1) t)) 
+    ⇒
+    distElemSubset (h::t) dl1``,
+
+Cases_on `dl1` THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [distElemSubset,distinctldNts,ldNts,rmDupes] THEN
+SRW_TAC [][] THEN
+Q_TAC SUFF_TAC `MEM e (FILTER isNonTmnlSym (h' ++ FLAT t'))` THEN1
+METIS_TAC [rmd_r2] THEN
+`MEM e (FILTER isNonTmnlSym (h ++ FLAT t))` by METIS_TAC [rmd_r2] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND,MEM_FILTER] THEN
+`∃e1.(h ++ e1 = h') ∧ ((h ++ e1 = h') ∨ MEM (h ++ e1) t')` by METIS_TAC [] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [MEM_FLAT] THEN
+METIS_TAC [rgr_r9eq,rmd_r2,MEM,MEM_APPEND,MEM_FLAT,APPEND_ASSOC]);
+
+val distesub2 = store_thm
+("distesub2",
+ ``∀h t dl2.
+ (∀e.MEM e dl2 ⇒ ∃e0.EVERY isTmnlSym e0 ∧ ((e0 ++ e = h) ∨ MEM (e0 ++ e) t))
+ ⇒
+ distElemSubset (h::t) dl2``,
+
+Cases_on `dl2` THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [distElemSubset,distinctldNts,ldNts,rmDupes] THEN
+SRW_TAC [][] THEN
+Q_TAC SUFF_TAC `MEM e (FILTER isNonTmnlSym (h' ++ FLAT t'))` THEN1
+METIS_TAC [rmd_r2] THEN
+ `MEM e (FILTER isNonTmnlSym (h ++ FLAT t))` by METIS_TAC [rmd_r2] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND,MEM_FILTER] THEN
+ `∃e0.EVERY isTmnlSym e0 ∧((e0 ++ h = h') ∨ MEM (e0 ++ h) t')` by METIS_TAC [] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [MEM_FLAT] THEN
+METIS_TAC [rgr_r9eq,rmd_r2,MEM,MEM_APPEND,MEM_FLAT,APPEND_ASSOC]);
 
 
 val _ = export_theory ();

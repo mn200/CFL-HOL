@@ -609,7 +609,7 @@ SRW_TAC [] [pop]]
 
 val take0out = store_thm ("take0out",
 ``!l.(take 0 l = SOME y) ==> (y=[])``,
-Induct_on `l` THEN 
+Induct_on `l` THEN
 METIS_TAC [take, take10, take0, SOME_11])
 
 
@@ -1347,10 +1347,59 @@ val rmdAPPr = store_thm(
   ``∀l s. LENGTH (rmDupes l) ≤ LENGTH (rmDupes (l ++ s))``,
   HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [][rmDupes, delete_append]);
 
+val rmd'_def = Define`
+  (rmd' [] = []) ∧
+  (rmd' (h::t) = if MEM h t then rmd' t else h::rmd' t)
+`;
+
+val MEM_rmd' = store_thm(
+  "MEM_rmd'",
+  ``MEM e (rmd' l) = MEM e l``,
+  Induct_on `l` THEN SRW_TAC [][rmd'_def] THEN METIS_TAC []);
+
+val rmd'_SNOC = store_thm(
+  "rmd'_SNOC",
+  ``rmd' (p ++ [h]) = if MEM h p then rmd' (delete h p) ++ [h]
+                      else rmd' p ++ [h]``,
+  Induct_on `p` THEN ASM_SIMP_TAC (srw_ss()) [rmd'_def] THEN
+  Q.X_GEN_TAC `g` THEN Cases_on `g = h` THENL [
+    ASM_SIMP_TAC (srw_ss()) [delete] THEN
+    SRW_TAC [][delete_not_mem1],
+    ASM_SIMP_TAC (srw_ss()) [delete] THEN
+    Cases_on `MEM h p` THEN ASM_SIMP_TAC (srw_ss()) [] THENL [
+      SRW_TAC [][rmd'_def] THEN METIS_TAC [delete_mem_list],
+      SRW_TAC [][]
+    ]
+  ]);
+
+val REVERSE_delete = store_thm(
+  "REVERSE_delete",
+  ``REVERSE (delete h p) = delete h (REVERSE p)``,
+  Induct_on `p` THEN SRW_TAC [][delete, delete_append] THEN SRW_TAC [][]);
+
+
+val rmd'_REVERSE = store_thm(
+  "rmd'_REVERSE",
+  ``∀l. rmDupes l = REVERSE (rmd' (REVERSE l))``,
+  HO_MATCH_MP_TAC rmDupes_ind THEN
+  SRW_TAC [][rmd'_def, rmDupes, rmd'_SNOC, REVERSE_APPEND, delete_not_mem1,
+             REVERSE_delete]);
+
+val LENGTH_CARD = prove(
+  ``LENGTH (rmd' l) = CARD (set l)``,
+  Induct_on `l` THEN SRW_TAC [][rmd'_def]);
+
+fun introfy th = SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) [AND_IMP_INTRO] th
+val rmd'_APP2 = prove(
+  ``LENGTH (rmd' l) ≤ LENGTH (rmd' (l ++ p))``,
+  SRW_TAC [][LENGTH_CARD] THEN
+  MATCH_MP_TAC (introfy CARD_SUBSET) THEN
+  SRW_TAC [][SUBSET_DEF]);
+
 val rmdAPPl = store_thm
 ("rmdAPPl",
  ``∀p l. LENGTH (rmDupes l) ≤ LENGTH (rmDupes (p ++ l))``,
-MAGIC);
+ SRW_TAC [][rmd'_REVERSE, LENGTH_REVERSE, REVERSE_APPEND, rmd'_APP2]);
 
 val rmdLenLe = store_thm
 ("rmdLenLe",
@@ -1364,8 +1413,11 @@ val notMemRmDLen = store_thm
 ("notMemRmDLen",
 ``∀X P X SF.¬MEM e (rmDupes X) ⇒
  SUC (LENGTH (rmDupes X)) ≤ LENGTH (rmDupes (P ++ e::X ++ SF))``,
-MAGIC );
-
+ SRW_TAC [][rmd'_REVERSE, LENGTH_REVERSE, REVERSE_APPEND, LENGTH_CARD,
+            DECIDE ``SUC x ≤ y ⇔ x < y``, MEM_rmd'] THEN
+ MATCH_MP_TAC (introfy CARD_PSUBSET) THEN
+ SRW_TAC [][PSUBSET_DEF, SUBSET_DEF] THEN
+ SRW_TAC [][EXTENSION] THEN Q.EXISTS_TAC `e` THEN SRW_TAC [][]);
 
 val memdel = store_thm
 ("memdel",

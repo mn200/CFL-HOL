@@ -512,22 +512,23 @@ REPEAT STRIP_TAC THEN MATCH_MP_TAC (GEN_ALL distElemSS_trans) THEN
 Q.EXISTS_TAC `dl` THEN SRW_TAC [][disElemSS_append, disElemSS_refl]);
 
 
+val LENGTH_distinctldNts = store_thm(
+  "LENGTH_distinctldNts",
+  ``LENGTH (distinctldNts d) = CARD (set (ldNts d))``,
+  SRW_TAC [][distinctldNts, rmDupes_lts_card, rmDupes_lts_card_eq]);
 
-val distLenAddElem2 = store_thm
+(* NOT TRUE: if p++e++s is already in l then its length is unchanged, but
+             e may not be in dl1, making its length one bigger. *)
+(* val distLenAddElem2 = store_thm
 ("distLenAddElem2",
- ``∀dl1 l.LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts l) ∧
- distElemSubset l dl1
-⇒
-LENGTH (distinctldNts (e::dl1)) ≤ LENGTH (distinctldNts ((p++e++s)::l))``,
+ ``∀dl1 l.
+     LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts l) ∧
+     distElemSubset l dl1
+   ⇒
+     LENGTH (distinctldNts (e::dl1)) ≤ LENGTH (distinctldNts ((p++e++s)::l))``,
+ SRW_TAC [][LENGTH_distinctldNts]
 
-Induct_on `dl1` THEN SRW_TAC [][] THEN1
- (FULL_SIMP_TAC (srw_ss()) [distElemSubset,distinctldNts,ldNts,rmDupes] THEN
-  SRW_TAC [][FILTER_APPEND] THEN
-  METIS_TAC [rmdLenLe,APPEND_ASSOC]) THEN
-
- FULL_SIMP_TAC (srw_ss()) [distElemSubset,distinctldNts,ldNts,rmDupes,
-			   FILTER_APPEND] THEN
-MAGIC);
+*)
 
 val memdist = store_thm
 ("memdist",
@@ -566,27 +567,33 @@ METIS_TAC [memdistNtsApp, APPEND, APPEND_ASSOC]);
 
 
 
-
+(* false again for the same reason (this goal is ridiculously specific as well)
 val lendist' = store_thm
 ("lendist'",
-``∀dl.distElemLen ((p++pfx++rhs++s2++s2')::l) dl ⇒
- distElemLen ((p++pfx++[NTS lhs]++s2++s2')::(p++pfx++rhs++s2++s2')::l)
- ((pfx++[NTS lhs]++s2)::dl)``,
+``∀dl.  distElemLen ((p++pfx++rhs++s2++s2')::l) dl ⇒
+        distElemLen ((p++pfx++[NTS lhs]++s2++s2')::(p++pfx++rhs++s2++s2')::l)
+                    ((pfx++[NTS lhs]++s2)::dl)``,
+SRW_TAC [][distElemLen, LENGTH_distinctldNts]
 
 Induct_on `dl` THEN SRW_TAC [][] THEN
 
 FULL_SIMP_TAC (srw_ss()) [distElemLen, distinctldNts, ldNts, rmDupes,
 			  isNonTmnlSym_def, FILTER_APPEND] THEN
 MAGIC);
+*)
 
 
+(* false  if dl1 = l, and p ++ [e] ++ s is in l already
 val distLenAddElemNew = store_thm
 ("distLenAddElemNew",
-``∀dl1 l.LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts l)  ∧
- distElemSubset l dl1
-⇒
-LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts ((p++[e]++s)::l)) -1``,
+``∀dl1 l.
+    LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts l) ∧
+    distElemSubset l dl1
+  ⇒
+    LENGTH (distinctldNts dl1) ≤ LENGTH (distinctldNts ((p++[e]++s)::l)) - 1``,
+SRW_TAC [][LENGTH_distinctldNts]
 MAGIC);
+*)
 
 val distesubaddlist = store_thm
 ("distesubaddlist",

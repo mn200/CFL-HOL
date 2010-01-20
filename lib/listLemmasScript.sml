@@ -516,16 +516,12 @@ FULL_SIMP_TAC (srw_ss()) [LENGTH_APPEND, SUC_ADD_SYM, ADD1] THEN
 `~(LENGTH x = LENGTH t + LENGTH x + 1)` by DECIDE_TAC,
 SRW_TAC [] []])
 
-val rev_sing = store_thm ("rev_sing",
-``!r.(REVERSE r = [a]) = (r=[a])``,
-Induct_on `r` THEN SRW_TAC [] [REVERSE_DEF, EQ_IMP_THM] THEN
-`LENGTH (REVERSE r ++ [h]) = LENGTH [a]` by METIS_TAC [] THEN
-FULL_SIMP_TAC (srw_ss()) [LENGTH_APPEND] THEN
-`REVERSE r = []` by METIS_TAC [LENGTH_NIL] THEN
-FULL_SIMP_TAC (srw_ss()) [rev_nil]
-)
+val append_eq_sing = store_thm(
+  "append_eq_sing",
+  ``(p ++ q = [e]) <=> (p = [e]) /\ (q = []) \/ (p = []) /\ (q = [e])``,
+  Cases_on `p` THEN SRW_TAC [][CONJ_ASSOC]);
 
-
+val rev_sing = save_thm ("rev_sing", listTheory.REVERSE_EQ_SING)
 
 val take1_defn = Hol_defn "take1_defn" `(take1 0 [] = []) /\
     (take1 n (x::xs) = (if n=0 then [] else x::take1 (n - 1) xs))`
@@ -713,66 +709,36 @@ SRW_TAC [] [rmd_del] THEN
 ASM_REWRITE_TAC [] THEN
 METIS_TAC [alld_delete]])
 
+val diff_thm = store_thm(
+  "diff_thm",
+  ``(diff l1 [] = l1) ∧
+    (diff l1 (h::t) = diff (delete h l1) t)``,
+  Cases_on `l1` THEN SRW_TAC [][diff, delete] THENL [
+    Cases_on `t` THEN SRW_TAC [][diff],
+    FULL_SIMP_TAC (srw_ss()) [] THEN
+    SRW_TAC [][delete_not_mem1]
+  ]);
+
+val MEM_delete = store_thm(
+  "MEM_delete",
+  ``MEM e (delete h l) = e ≠ h ∧ MEM e l``,
+  Induct_on `l` THEN SRW_TAC [][delete] THEN METIS_TAC []);
+
+val diff_mem = store_thm ("diff_mem",
+``!e l1 l2. MEM e (diff l1 l2) = MEM e l1 /\ ~(MEM e l2)``,
+Induct_on `l2` THEN SRW_TAC [][diff_thm, MEM_delete] THEN METIS_TAC []);
 
 val diff_mem1 = store_thm ("diff_mem1",
 ``!e l1 l2.MEM e (diff l1 l2) ==> MEM e l1 /\ ~(MEM e l2)``,
-Induct_on `l2` THEN SRW_TAC [] [diff] THENL[
-Cases_on `l1` THEN METIS_TAC [diff],
-Cases_on `MEM h l1` THEN FULL_SIMP_TAC (srw_ss()) [diff] THEN
-Cases_on `l1` THEN FULL_SIMP_TAC (srw_ss()) [diff, delete] THENL[
-Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list],
-Cases_on `h=h'` THEN Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM]],
-
-Cases_on `MEM h l1` THEN FULL_SIMP_TAC (srw_ss()) [diff] THEN
-Cases_on `l1` THEN FULL_SIMP_TAC (srw_ss()) [diff, delete] THENL[
-Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list],
-Cases_on `h=h'` THEN Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM]],
-
-Cases_on `MEM h l1` THEN FULL_SIMP_TAC (srw_ss()) [diff] THEN
-Cases_on `l1` THEN FULL_SIMP_TAC (srw_ss()) [diff, delete] THENL[
-Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list],
-Cases_on `h=h'` THEN Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM]]])
-
+METIS_TAC [diff_mem]);
 
 val diff_mem2 = store_thm ("diff_mem2",
 ``!e l1 l2.MEM e l1 ==> ~(MEM e l2) ==> MEM e (diff l1 l2)``,
-Induct_on `l2` THEN SRW_TAC [] [diff] THENL[
-Cases_on `l1` THEN METIS_TAC [diff],
-Cases_on `MEM h l1` THEN FULL_SIMP_TAC (srw_ss()) [diff] THEN
-Cases_on `l1` THEN FULL_SIMP_TAC (srw_ss()) [diff, delete] THENL[
-Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list],
-
-Cases_on `h=h'` THEN Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-
-METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-
-Cases_on `MEM h l1` THEN FULL_SIMP_TAC (srw_ss()) [diff] THEN
-Cases_on `l1` THEN FULL_SIMP_TAC (srw_ss()) [diff, delete] THENL[
-Cases_on `h=h'` THEN Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-Cases_on `h=h'` THEN Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM]],
-
-Cases_on `MEM h l1` THEN FULL_SIMP_TAC (srw_ss()) [diff] THEN
-Cases_on `l1` THEN FULL_SIMP_TAC (srw_ss()) [diff, delete] THENL[
-Cases_on `h=h'` THEN Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-Cases_on `h=h'` THEN Cases_on `h'=e` THEN METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM],
-METIS_TAC [not_mem_delete, delete_mem_list, APPEND, MEM]]]])
-
-val diff_mem = store_thm ("diff_mem",
-``!e l1 l2.MEM e (diff l1 l2) = MEM e l1 /\ ~(MEM e l2)``,
-METIS_TAC [diff_mem1, diff_mem2])
-
+METIS_TAC [diff_mem]);
 
 val diff_DIFF = store_thm ("diff_DIFF",
-``!l1 l2.LIST_TO_SET (diff l1 l2) = (LIST_TO_SET l1) DIFF (LIST_TO_SET l2)``,
-SRW_TAC [] [diff, delete, EXTENSION] THEN
-METIS_TAC [diff_mem])
-
+``!l1 l2. set (diff l1 l2) = (set l1) DIFF (set l2)``,
+SRW_TAC [] [EXTENSION, diff_mem]);
 
 val len1 = store_thm ("len1",
 ``!l1 l1' rst rst'.(l1++rst = l1'++rst') ==> (LENGTH l1 = LENGTH l1') ==> (l1 = l1')``,
@@ -1347,59 +1313,13 @@ val rmdAPPr = store_thm(
   ``∀l s. LENGTH (rmDupes l) ≤ LENGTH (rmDupes (l ++ s))``,
   HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [][rmDupes, delete_append]);
 
-val rmd'_def = Define`
-  (rmd' [] = []) ∧
-  (rmd' (h::t) = if MEM h t then rmd' t else h::rmd' t)
-`;
-
-val MEM_rmd' = store_thm(
-  "MEM_rmd'",
-  ``MEM e (rmd' l) = MEM e l``,
-  Induct_on `l` THEN SRW_TAC [][rmd'_def] THEN METIS_TAC []);
-
-val rmd'_SNOC = store_thm(
-  "rmd'_SNOC",
-  ``rmd' (p ++ [h]) = if MEM h p then rmd' (delete h p) ++ [h]
-                      else rmd' p ++ [h]``,
-  Induct_on `p` THEN ASM_SIMP_TAC (srw_ss()) [rmd'_def] THEN
-  Q.X_GEN_TAC `g` THEN Cases_on `g = h` THENL [
-    ASM_SIMP_TAC (srw_ss()) [delete] THEN
-    SRW_TAC [][delete_not_mem1],
-    ASM_SIMP_TAC (srw_ss()) [delete] THEN
-    Cases_on `MEM h p` THEN ASM_SIMP_TAC (srw_ss()) [] THENL [
-      SRW_TAC [][rmd'_def] THEN METIS_TAC [delete_mem_list],
-      SRW_TAC [][]
-    ]
-  ]);
-
-val REVERSE_delete = store_thm(
-  "REVERSE_delete",
-  ``REVERSE (delete h p) = delete h (REVERSE p)``,
-  Induct_on `p` THEN SRW_TAC [][delete, delete_append] THEN SRW_TAC [][]);
-
-
-val rmd'_REVERSE = store_thm(
-  "rmd'_REVERSE",
-  ``∀l. rmDupes l = REVERSE (rmd' (REVERSE l))``,
-  HO_MATCH_MP_TAC rmDupes_ind THEN
-  SRW_TAC [][rmd'_def, rmDupes, rmd'_SNOC, REVERSE_APPEND, delete_not_mem1,
-             REVERSE_delete]);
-
-val LENGTH_CARD = prove(
-  ``LENGTH (rmd' l) = CARD (set l)``,
-  Induct_on `l` THEN SRW_TAC [][rmd'_def]);
-
 fun introfy th = SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) [AND_IMP_INTRO] th
-val rmd'_APP2 = prove(
-  ``LENGTH (rmd' l) ≤ LENGTH (rmd' (l ++ p))``,
-  SRW_TAC [][LENGTH_CARD] THEN
-  MATCH_MP_TAC (introfy CARD_SUBSET) THEN
-  SRW_TAC [][SUBSET_DEF]);
 
 val rmdAPPl = store_thm
 ("rmdAPPl",
  ``∀p l. LENGTH (rmDupes l) ≤ LENGTH (rmDupes (p ++ l))``,
- SRW_TAC [][rmd'_REVERSE, LENGTH_REVERSE, REVERSE_APPEND, rmd'_APP2]);
+ SRW_TAC [][rmDupes_lts_card] THEN MATCH_MP_TAC (introfy CARD_SUBSET) THEN
+ SRW_TAC [][SUBSET_DEF, rmd_mem_list]);
 
 val rmdLenLe = store_thm
 ("rmdLenLe",
@@ -1407,17 +1327,15 @@ val rmdLenLe = store_thm
 SRW_TAC [][] THEN
 METIS_TAC [DECIDE ``a≤ b ∧ b≤ c ⇒ a≤ c``,rmdAPPl,rmdAPPr]);
 
-
-
 val notMemRmDLen = store_thm
 ("notMemRmDLen",
-``∀X P X SF.¬MEM e (rmDupes X) ⇒
- SUC (LENGTH (rmDupes X)) ≤ LENGTH (rmDupes (P ++ e::X ++ SF))``,
- SRW_TAC [][rmd'_REVERSE, LENGTH_REVERSE, REVERSE_APPEND, LENGTH_CARD,
-            DECIDE ``SUC x ≤ y ⇔ x < y``, MEM_rmd'] THEN
+``∀X P X SF.
+    ¬MEM e (rmDupes X) ⇒
+    SUC (LENGTH (rmDupes X)) ≤ LENGTH (rmDupes (P ++ e::X ++ SF))``,
+ SRW_TAC [][rmDupes_lts_card, DECIDE ``SUC x ≤ y ⇔ x < y``, rmd_mem_list] THEN
  MATCH_MP_TAC (introfy CARD_PSUBSET) THEN
- SRW_TAC [][PSUBSET_DEF, SUBSET_DEF] THEN
- SRW_TAC [][EXTENSION] THEN Q.EXISTS_TAC `e` THEN SRW_TAC [][]);
+ SRW_TAC [][PSUBSET_DEF, SUBSET_DEF, rmd_mem_list] THEN
+ SRW_TAC [][EXTENSION, rmd_mem_list] THEN Q.EXISTS_TAC `e` THEN SRW_TAC [][]);
 
 val memdel = store_thm
 ("memdel",

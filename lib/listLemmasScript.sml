@@ -410,13 +410,14 @@ HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [] [rmDupes] THEN
 METIS_TAC [rmd_mem_list,not_mem_delete])
 
 val rmDupes_lts_card_eq = store_thm ("rmDupes_lts_card_eq",
-``!l.CARD (LIST_TO_SET l) = CARD (LIST_TO_SET (rmDupes l))``,
+``!l. CARD (set (rmDupes l)) = CARD (set l)``,
 HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [] [rmDupes] THENL[
-METIS_TAC [rmd_mem_list,not_mem_delete],
-`LIST_TO_SET t = h INSERT LIST_TO_SET (delete h t)` by METIS_TAC [delete_lts] THEN
-FULL_SIMP_TAC (srw_ss()) [not_mem_delete],
-METIS_TAC [rmd_mem_list,not_mem_delete],
-METIS_TAC [rmd_mem_list,not_mem_delete, delete_not_mem]])
+  METIS_TAC [rmd_mem_list,not_mem_delete],
+  METIS_TAC [rmd_mem_list,not_mem_delete],
+  `set t = h INSERT set (delete h t)` by METIS_TAC [delete_lts] THEN
+  FULL_SIMP_TAC (srw_ss()) [not_mem_delete],
+  METIS_TAC [rmd_mem_list,not_mem_delete, delete_not_mem]
+])
 
 
 val mem_subset_len = store_thm ("mem_subset_len",

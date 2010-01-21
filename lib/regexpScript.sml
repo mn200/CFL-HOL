@@ -17,6 +17,8 @@ val _ = Hol_datatype `symbol = NTS of 'nts | TS of 'ts`;
 val isTmnlSym_def = Define
 `(isTmnlSym sym = (∃s.sym = (TS s)))`;
 
+val _ = overload_on ("isWord", ``EVERY isTmnlSym``)
+
 val isNonTmnlSym_def = Define
 `isNonTmnlSym sym = (∃s.sym = (NTS s)) ∨ F`;
 

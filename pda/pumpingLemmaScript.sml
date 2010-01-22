@@ -1690,9 +1690,42 @@ SRW_TAC [][] THEN
 = (pz0' ++ NTS n::NTS n'::s2)::(t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1)`
 by METIS_TAC [] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
-`EVERY isNonTmnlSym ([NTS n] ++ [NTS n'] ++ s2)`
-
-
+`∃y1 y2.(s1=y1++y2) ∧ 
+(MAP (λl. addLast l s2) dl1 =
+ (pz0' ++ NTS n::NTS n'::s2)::
+ t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ y1) ∧
+(MAP (addFront x) (TL dl2) = y2)` by MAGIC THEN
+SRW_TAC [][] THEN
+`EVERY isNonTmnlSym ([NTS n] ++ [NTS n'] ++ s2)` by FULL_SIMP_TAC (srw_ss()) [] THEN
+Q.ABBREV_TAC `dl = ((pz0' ++ NTS n::NTS n'::s2)::
+                  (t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++
+                   (y1 ++ MAP (addFront x) (TL dl2))))` THEN
+`(pz0' ++ NTS n::NTS n'::s2) = (pz0'++[NTS n]++[NTS n'])++s2`
+  by METIS_TAC [APPEND, APPEND_ASSOC] THEN
+`EVERY isTmnlSym (x++y)` by FULL_SIMP_TAC (srw_ss())[] THEN
+`(pz0' ++ NTS n::NTS n'::s2) = pz0'++([NTS n]++[NTS n'])++s2`
+by METIS_TAC [APPEND, APPEND_ASSOC] THEN
+`∃dt1 dt2 xt yt.
+splitDerivProp (g,dl,x++y) (dt1,pz0'++[NTS n]++[NTS n'],xt) (dt2,s2,yt)`
+by METIS_TAC [ldSplitDeriv, APPEND_ASSOC] THEN
+FULL_SIMP_TAC (srw_ss()) [splitDerivProp] THEN
+SRW_TAC [][] THEN
+`EVERY isNonTmnlSym ([NTS n] ++ [NTS n'])` by FULL_SIMP_TAC (srw_ss()) [] THEN
+`pz0' ++ [NTS n] ++ [NTS n']=pz0' ++ ([NTS n] ++ [NTS n'])`
+by METIS_TAC [APPEND_ASSOC] THEN
+`∃dt3 dt4 xt' yt'.
+splitDerivProp (g,dt1,xt) (dt3,pz0',xt') (dt4,[NTS n]++[NTS n'],yt')`
+by MAGIC (* METIS_TAC [ldSplitDeriv]*) THEN
+FULL_SIMP_TAC (srw_ss()) [splitDerivProp] THEN
+SRW_TAC [][] THEN
+UNABBREV_ALL_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN
+`dt3 = [pz0']` by
+(Cases_on `dt3` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+ SRW_TAC [][] THEN
+ METIS_TAC [APPEND, APPEND_NIL, rtc2listRtcldTmnls]) THEN
+SRW_TAC [][] THEN
 MAGIC) THEN
 
 FULL_SIMP_TAC (srw_ss()) [list_lem1] THEN
@@ -1729,8 +1762,8 @@ val islpowTmnl = store_thm
 ("islpowTmnl",
 ``∀l.EVERY isTmnlSym l ⇒ EVERY isTmnlSym (FLAT (lpow l i))``,
 
-Induct_on `i` THEN SRW_TAC [][lpow,REPLICATE] THEN
-FULL_SIMP_TAC (srw_ss()) [lpow,REPLICATE]);
+Induct_on `i` THEN SRW_TAC [][lpow_def,REPLICATE] THEN
+FULL_SIMP_TAC (srw_ss()) [lpow_def,REPLICATE]);
 
 
 val rtcDerivesReplEnd = store_thm
@@ -1743,7 +1776,7 @@ val rtcDerivesReplEnd = store_thm
   (lderives g)^* [NTS B] (FLAT (lpow p i) ++ z ++ FLAT (lpow z' i))``,
 
 Induct_on `i` THEN SRW_TAC [][] THEN1
-(SRW_TAC [][lpow,REPLICATE] THEN
+(SRW_TAC [][lpow_def,REPLICATE] THEN
  METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left,
 	    APPEND_ASSOC,RTC_RTC]) THEN
 RES_TAC THEN

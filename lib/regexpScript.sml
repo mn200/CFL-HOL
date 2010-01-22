@@ -647,5 +647,121 @@ FULL_SIMP_TAC (srw_ss()) [MEM_FLAT] THEN
 METIS_TAC [rgr_r9eq,rmd_r2,MEM,MEM_APPEND,MEM_FLAT,APPEND_ASSOC]);
 
 
+val symRepProp = Define
+`symRepProp dl = 
+    ∃p tsl B sfx v w s.
+     (dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ s) ∧
+     EVERY isTmnlSym tsl ∧
+     ∃s0 s1.(s = s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx] ++ s1) ∧
+     EVERY isTmnlSym v ∧
+     (∀e.MEM e s0 ⇒ ∃p0 p1 nt.(e = tsl ++ p0 ++ [NTS nt] ++ p1 ++ sfx) ∧ 
+      EVERY isTmnlSym p0)`;
+
+
+val spropApp = store_thm
+("spropApp",
+``∀dl.(dl≠[]) ∧  ¬symRepProp dl ⇒
+¬symRepProp (TL dl)``,
+
+Induct_on `dl` THEN SRW_TAC [][symRepProp] THEN
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [symRepProp] THEN
+Cases_on `p` THEN SRW_TAC [][] THEN1
+ (FIRST_X_ASSUM (Q.SPECL_THEN [`[h]`,`tsl`,`B`,`sfx`,`v`,`w`, `t`]
+		 MP_TAC) THEN SRW_TAC [][] THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN
+  METIS_TAC [MEM,MEM_APPEND]) THEN
+
+ FIRST_X_ASSUM (Q.SPECL_THEN [`h::h''::t'`,`tsl`,`B`,`sfx`,`v`,`w`,`s`]
+		MP_TAC) THEN SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [] THEN
+ METIS_TAC [MEM,MEM_APPEND]);
+
+val leftnt = store_thm ("leftnt",
+``∀s.¬EVERY isTmnlSym s ⇒
+∃l1 n l2. (s= l1++[NTS n]++l2) /\ EVERY isTmnlSym l1``,
+Induct_on `s` THEN SRW_TAC [][] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def] THEN
+METIS_TAC [APPEND_NIL,EVERY_DEF,APPEND,APPEND_ASSOC,EVERY_DEF,
+	   isTmnlSym_def]);
+
+val leftmostAddFront = store_thm
+("leftmostAddFront",
+ ``∀l h s2.(∀e.MEM e l ⇒ ∃p0 p1 nt.(e = p0 ++ [NTS nt] ++ p1 ++ s2) ∧
+       EVERY isTmnlSym p0) ∧ EVERY isTmnlSym h ⇒
+ (∀e.MEM e (MAP (addFront h) l) ⇒
+  ∃p0 p1 nt.(e = p0 ++ [NTS nt] ++ p1 ++ s2) ∧
+  EVERY isTmnlSym p0)``,
+ 
+ Induct_on `l` THEN SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+ `∃p0 p1 nt.
+ (h = p0 ++ [NTS nt] ++ p1 ++ s2) ∧ EVERY isTmnlSym p0`
+ by METIS_TAC [] THEN
+ SRW_TAC [][] THEN1
+ METIS_TAC [EVERY_APPEND] THEN
+IMP_RES_TAC addFrontMem THEN
+SRW_TAC [][] THEN
+RES_TAC THEN
+SRW_TAC [][]);
+
+val leftmostAddFront' = store_thm
+("leftmostAddFront'",
+ ``∀l h s2.(∀e.MEM e l ⇒ ∃p0 p1 nt.(e = p0 ++ [NTS nt] ++ p1 ++ s2) ∧
+       EVERY isTmnlSym p0) ∧ EVERY isTmnlSym h ⇒
+ (∀e.MEM e (MAP (addFront h) l) ⇒
+  ∃p0 p1 nt.(e = h ++ p0 ++ [NTS nt] ++ p1 ++ s2) ∧
+  EVERY isTmnlSym p0)``,
+ 
+ Induct_on `l` THEN SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+ `∃p0 p1 nt.
+ (h = p0 ++ [NTS nt] ++ p1 ++ s2) ∧ EVERY isTmnlSym p0`
+ by METIS_TAC [] THEN
+ SRW_TAC [][] THEN1
+ METIS_TAC [EVERY_APPEND] THEN
+IMP_RES_TAC addFrontMem THEN
+SRW_TAC [][] THEN
+RES_TAC THEN
+SRW_TAC [][]);
+
+
+val leftmostAddFront2 = store_thm
+("leftmostAddFront2",
+ ``∀l h s2 tsl.(∀e.MEM e l ⇒ ∃p0 p1 nt.(e = tsl ++ p0 ++ [NTS nt] ++ p1 ++ s2) ∧
+       EVERY isTmnlSym p0) ∧ EVERY isTmnlSym h ∧ EVERY isTmnlSym tsl ⇒
+ (∀e.MEM e (MAP (addFront h) l) ⇒
+  ∃p0 p1 nt.(e = h ++ tsl ++ p0 ++ [NTS nt] ++ p1 ++ s2) ∧
+  EVERY isTmnlSym p0)``,
+ 
+ Induct_on `l` THEN SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+ `∃p0 p1 nt.
+ (h = tsl ++ p0 ++ [NTS nt] ++ p1 ++ s2) ∧ EVERY isTmnlSym p0`
+ by METIS_TAC [] THEN
+ SRW_TAC [][] THEN1
+ METIS_TAC [EVERY_APPEND] THEN
+IMP_RES_TAC addFrontMem THEN
+SRW_TAC [][] THEN
+RES_TAC THEN
+SRW_TAC [][]);
+
+val leftmostAddLast' = store_thm
+("leftmostAddLast'",
+ ``∀l h s2.(∀e.MEM e l ⇒ ∃p0 p1 nt.(e = p0 ++ [NTS nt] ++ p1 ++ s2) ∧
+       EVERY isTmnlSym p0) ⇒
+ (∀e.MEM e (MAP (λl'.addLast l' h) l) ⇒
+  ∃p0 p1 nt.(e = p0 ++ [NTS nt] ++ p1 ++ s2 ++ h) ∧
+  EVERY isTmnlSym p0)``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [addLast_def]);
+ 
+val existsThrice = store_thm
+("existsThrice",
+``EXISTS ($~ o $~ o $~ o isTmnlSym) p0 = EXISTS ($~ o isTmnlSym) p0``,
+
+Induct_on `p0` THEN SRW_TAC [][]);
+
+
 val _ = export_theory ();
 

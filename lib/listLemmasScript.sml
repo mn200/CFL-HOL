@@ -1345,6 +1345,81 @@ val memdel = store_thm
 Induct_on `l` THEN SRW_TAC [][delete] THEN
 METIS_TAC []);
 
+val lpow = Define `lpow l i = REPLICATE i l`;
+
+val _ = overload_on ("FLAT (lpow l i)", ``pow l i``)
+
+val flatRepSuc = store_thm
+("flatRepSuc",
+``∀p i.FLAT (lpow p (SUC i)) = p++FLAT (lpow p i)``,
+
+Induct_on `i` THEN SRW_TAC [][] THEN
+SRW_TAC [][lpow, REPLICATE] THEN
+`1=SUC 0`by DECIDE_TAC THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+SRW_TAC [][REPLICATE]);
+
+
+val flatRepComm = store_thm
+("flatRepComm",
+``∀i p.p++FLAT (lpow p i) =  FLAT (lpow p i)++p``,
+
+Induct_on `i` THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [lpow,REPLICATE]);
+
+
+val dropLast = Define 
+`dropLast sfx l = REVERSE (DROP (LENGTH sfx) (REVERSE l))`;
+
+val listsec = Define 
+    `listsec front back l =
+	     (dropLast back) ((DROP (LENGTH front)) l)`;
+
+
+val listsecPfxSfx = store_thm
+("listsecPfxSfx",
+ ``∀m.(listsec p s (p++m++s) = m)``,
+ SRW_TAC [][listsec,dropLast] THEN
+ `(DROP (LENGTH p) (p ++ m ++ s)) = m++s` 
+ by METIS_TAC [BUTFIRSTN_LENGTH_APPEND,APPEND_ASSOC] THEN
+ ONCE_ASM_REWRITE_TAC[] THEN
+ SRW_TAC [][REVERSE_APPEND] THEN
+ METIS_TAC [LENGTH_REVERSE, REVERSE_REVERSE,BUTFIRSTN_LENGTH_APPEND]);
+    
+val listsecDropNilSfx = store_thm
+("listsecDropNilSfx",
+``listsec p [] (p++x) = x``,
+
+SRW_TAC [][listsec,dropLast] THEN
+METIS_TAC [BUTFIRSTN_LENGTH_APPEND]);
+
+
+val listsecLast = store_thm
+("listsecLast",
+``∀l.
+(LAST l =p ++ ml ++ s) ∧ (l≠[]) ∧
+(∀e.MEM e l ⇒ ∃m. m ≠ [] ∧ (e = p ++ m ++ s))
+⇒
+(LAST (MAP (listsec p s) l) = ml)``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+Cases_on `l=[]`THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][listsecPfxSfx] THEN1
+METIS_TAC [APPEND_11,APPEND_ASSOC] THEN
+`(LAST l = p ++ ml ++ s)` by METIS_TAC [APPEND,last_append] THEN
+METIS_TAC [MAP_EQ_NIL,APPEND,last_append]);
+
+val addFrontListsec = store_thm
+("addFrontListsec",
+``∀t.(∀e.MEM e t ⇒ ∃rst.(e=s1++rst)) ⇒ 
+ (MAP (addFront s1) (MAP (listsec s1 []) t) = t)``,
+
+Induct_on `t` THEN SRW_TAC [][addFront, listsec, dropLast] THEN
+`∃rst.h = s1++rst` by METIS_TAC [] THEN
+SRW_TAC [][] THEN
+METIS_TAC [BUTFIRSTN_LENGTH_APPEND]);
+
+
 
 (*val _ =
 val mlDir = ref ("./theoryML/");

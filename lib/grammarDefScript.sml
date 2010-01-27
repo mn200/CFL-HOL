@@ -3350,6 +3350,15 @@ Cases_on `dl1=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`h'::t`] MP_TAC) THEN SRW_TAC [][] THEN
 Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) []);
 
+val rtc_lderives_same_append_right = store_thm 
+("rtc_lderives_same_append_right",
+        ``∀u v.RTC (lderives g) u v 
+              ⇒
+	      RTC (lderives g) (u++x) (v++x)``,
+        HO_MATCH_MP_TAC RTC_INDUCT THEN
+        METIS_TAC [RTC_RULES,lderives_same_append_right]);
+
+
 val mlDir = "./theoryML/"
 
 (* val _ =

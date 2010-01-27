@@ -4,7 +4,7 @@ open pred_setTheory stringTheory containerTheory relationTheory
 listTheory rich_listTheory optionTheory arithmeticTheory
 
 
-open listLemmasTheory relationLemmasTheory grammarDefTheory
+open listLemmasTheory relationLemmasTheory grammarDefTheory arithmeticLemmasTheory
      regexpTheory parseTreeTheory pdaDefTheory
 
 val _ = new_theory "pumpingLemma";
@@ -435,11 +435,11 @@ THENL[
 			 SRW_TAC [][] THEN
 			 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]
 			 ]) THEN1
-	     METIS_TAC [distLenAddElem, APPEND, APPEND_ASSOC, distElemLen_def] THEN	    
-	     (FULL_SIMP_TAC (srw_ss()) [distElemLen_def, LENGTH_distinctldNts] THEN
-	    `MAP (λl. addLast l (rhs ++ s2)) dl1 ++ MAP (addFront x'') (TL dl2)
+	    METIS_TAC [distLenAddElem, APPEND, APPEND_ASSOC, distElemLen_def] THEN	    
+	    (FULL_SIMP_TAC (srw_ss()) [distElemLen_def, LENGTH_distinctldNts] THEN
+	     `MAP (λl. addLast l (rhs ++ s2)) dl1 ++ MAP (addFront x'') (TL dl2)
                  = (pfx++rhs++s2)::t'` by METIS_TAC [] THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
+	     FULL_SIMP_TAC (srw_ss()) [] THEN
 	     Q_TAC SUFF_TAC `set (ldNts ((NTS lhs::s2)::dl2)) ⊆ 
 	     set (ldNts ((pfx ++ [NTS lhs] ++ s2)::(pfx ++ rhs ++ s2)::t'))` THEN1
 	     METIS_TAC [CARD_SUBSET, FINITE_LIST_TO_SET] THEN
@@ -519,60 +519,58 @@ THENL[
 
 
 		    FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
 		    Q.ABBREV_TAC `z=(LAST ((pfx ++ [NTS n; NTS n'] ++ pfx')::
 					   (t'' ++ [pfx ++ v ++ [NTS B] ++ w ++ pfx']
 					    ++ s1)))` THEN
-		    `(pfx ++ [NTS B] ++ pfx' ++ h)::
-	      (pfx ++ [NTS n; NTS n'] ++ pfx' ++ h)::
-	      (MAP (λl. l ++ h) t'' ++
-	       [pfx ++ v ++ [NTS B] ++ w ++ pfx' ++ h] ++
-	       MAP (λl. l ++ h) s1 ++ MAP (addFront z) t) =
-	      [] ++ [pfx ++ [NTS B] ++ (pfx'++h)] ++ 
-	      (pfx ++ [NTS n; NTS n'] ++ pfx' ++ h)::
-	      (MAP (λl. l ++ h) t'' ++
-	       [pfx ++ v ++ [NTS B] ++ w ++ pfx' ++ h] ++
-	       MAP (λl. l ++ h) s1 ++ MAP (addFront z) t)`
-		    by METIS_TAC [APPEND_ASSOC, APPEND] THEN
-		    `¬EXISTS ($~ o isTmnlSym) pfx` by METIS_TAC [NOT_EVERY] THEN
-		    `¬EXISTS ($~ o isTmnlSym) v` by METIS_TAC [NOT_EVERY] THEN
-		    `(pfx ++ [NTS n; NTS n'] ++ pfx' ++ h)::
-	      (MAP (λl. l ++ h) t'' ++
-	       [pfx ++ v ++ [NTS B] ++ w ++ pfx' ++ h] ++
-	       MAP (λl. l ++ h) s1 ++ MAP (addFront z) t) = 
-	      ((pfx ++ [NTS n; NTS n'] ++ pfx' ++ h)::
-	       (MAP (λl. l ++ h) t'')) ++
-	      [pfx ++ v ++ [NTS B] ++ w ++ (pfx' ++ h)] ++
-	      (MAP (λl. l ++ h) s1 ++ MAP (addFront z) t)`
-		    by METIS_TAC [APPEND_ASSOC, APPEND] THEN
-		    `∀e. MEM e ((pfx ++ [NTS n; NTS n'] ++ pfx' ++ h)::
-				(MAP (λl. l ++ h) t''))
-	      ⇒ ∃p0 p1 nt.
-	      (e = pfx ++ p0 ++ [NTS nt] ++ p1 ++ pfx' ++ h) ∧
-	      EVERY isTmnlSym p0` by MAGIC (* METIS_TAC [leftmostAddLast']*) THEN
-		    MAGIC (* METIS_TAC [NOT_EVERY, APPEND_ASSOC] *)
+		    FIRST_X_ASSUM (Q.SPECL_THEN 
+				   [`[]`,`pfx`,`B`,`pfx'++h`,`v`,`w`,
+				    `(pfx ++ [NTS n; NTS n'] ++ pfx' ++ h)::
+				    (MAP (λl. l ++ h) t'' ++
+				     [pfx ++ v ++ [NTS B] ++ w ++ pfx' ++ h] ++
+				     MAP (λl. l ++ h) s1 ++ MAP (addFront z) t)`] 
+				   MP_TAC) THEN
+		    SRW_TAC [][] THEN1
+		    METIS_TAC [NOT_EVERY] THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    FIRST_X_ASSUM (Q.SPECL_THEN 
+				   [`(pfx ++ [NTS n; NTS n'] ++ pfx' ++ h)::
+				    MAP (λl. l ++ h) t''`,
+				    `MAP (λl. l ++ h) s1 ++ MAP (addFront z) t`]
+				   MP_TAC) THEN SRW_TAC [][] THEN1
+		    METIS_TAC [NOT_EVERY] THEN1
+		    METIS_TAC [NOT_EVERY] THEN
+		    SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
+		    FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
+		    SRW_TAC [][] THEN
+		    `∃p0 p1 nt.(l = pfx ++ p0 ++ [NTS nt] ++ p1 ++ pfx') ∧
+           	      EVERY ($~ o $~ o isTmnlSym) p0` by METIS_TAC [] THEN
+		    SRW_TAC [][] THEN
+		    METIS_TAC [APPEND_ASSOC, APPEND_11, EVERY_APPEND,
+			       everyNotTwice, NOT_EXISTS]
 		    ]) THEN
 	     
 	     FULL_SIMP_TAC (srw_ss()) [addLast_def] THEN
 	     Q.ABBREV_TAC `s1' =  
 	    MAP (addFront (LAST (t'' ++ [tsl ++ [NTS B] ++ sfx'] ++ s0 ++
 				 [tsl ++ v ++ [NTS B] ++ w ++ sfx'] ++s1))) t` THEN
-	     `(pfx ++ [NTS lhs] ++ pfx' ++ h)::
-                (MAP (λl. l ++ h) t'' ++
-                 [tsl ++ [NTS B] ++ sfx' ++ h] ++
-                 MAP (λl. l ++ h) s0 ++
-                 [tsl ++ v ++ [NTS B] ++ w ++ sfx' ++ h] ++
-                 MAP (λl. l ++ h) s1 ++ s1') =
-		((pfx ++ [NTS lhs] ++ pfx' ++ h)::(MAP (λl. l ++ h) t'')) ++ 
-		[tsl ++ [NTS B] ++ (sfx'++h)] ++ 
-		MAP (λl. l ++ h) s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx' ++ h] ++
-                 MAP (λl. l ++ h) s1 ++ s1'`
-	    by METIS_TAC [APPEND, APPEND_ASSOC] THEN
-	    `¬EXISTS ($~ o isTmnlSym) tsl` by METIS_TAC [NOT_EVERY] THEN
-	    `¬EXISTS ($~ o isTmnlSym) v` by METIS_TAC [NOT_EVERY] THEN
-	    `∀e.MEM e (MAP (λl. l ++ h) s0) ⇒
-		 ∃p0 p1 nt.(e = tsl ++ p0 ++ [NTS nt] ++ p1 ++ sfx' ++h) ∧
-		 EVERY isTmnlSym p0` by MAGIC THEN
-	    MAGIC (* METIS_TAC [NOT_EVERY, APPEND_ASSOC, APPEND] *)) THEN1
+	     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+	     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+	     FIRST_X_ASSUM (Q.SPECL_THEN 
+			    [`t''`,`tsl`,`B`,`sfx'`,`v`,`w`,
+			     `s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx'] ++ s1`]
+			    MP_TAC) THEN
+	     SRW_TAC [][] THEN1
+	     METIS_TAC [NOT_EVERY] THEN
+	     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+	     FIRST_X_ASSUM (Q.SPECL_THEN [`s0`,`s1`] MP_TAC) THEN
+	     SRW_TAC [][] THEN
+	     METIS_TAC [NOT_EVERY]) THEN1
 
 	    (FULL_SIMP_TAC (srw_ss()) [distElemLen_def, LENGTH_distinctldNts] THEN
 	    `MAP (λl. addLast l sfx) dl1 ++ MAP (addFront x'') (TL dl2)
@@ -665,40 +663,42 @@ THENL[
 		    SRW_TAC [][] THEN
 		    `t=[]` by METIS_TAC [rtc2listRtcldTmnls] THEN
 		    SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		    `(h ++ sfx ++ [NTS B] ++ s2)::
-	      (h ++ sfx ++ [NTS n; NTS n'] ++ s2)::
-	      (MAP (addFront h) t'' ++
-	       [h ++ sfx ++ v ++ [NTS B] ++ w ++ s2] ++
-	       MAP (addFront h) s1) =
-	      [] ++ [(h++sfx) ++ [NTS B] ++ s2] ++ 
-	      ((h ++ sfx ++ [NTS n; NTS n'] ++ s2)::
-	      (MAP (addFront h) t'' ++
-	       [h ++ sfx ++ v ++ [NTS B] ++ w ++ s2] ++
-	       MAP (addFront h) s1))` by METIS_TAC [APPEND, APPEND_NIL, 
-						    APPEND_ASSOC] THEN
-		    `¬EXISTS ($~ o isTmnlSym) (h++sfx)`
-		    by METIS_TAC [EVERY_APPEND, NOT_EVERY] THEN
-		    `¬EXISTS ($~ o isTmnlSym) v`
-		    by METIS_TAC [NOT_EVERY] THEN
- 		    `∀e.MEM e ((h ++ sfx ++ [NTS n; NTS n'] ++ s2)::
-			       (MAP (addFront h) t'')) ⇒
-			       ∃p0 p1 nt.
-			       (e = (h++sfx )++ p0 ++ [NTS nt] ++ p1 ++ s2) ∧
-			       EVERY isTmnlSym p0` by MAGIC THEN
-		    MAGIC(* METIS_TAC [NOT_EVERY, APPEND, APPEND_ASSOC]*)
-		    ]) THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    FIRST_X_ASSUM (Q.SPECL_THEN 
+				   [`[]`,`h++sfx`,`B`,`s2`,`v`,`w`,
+				    `(h ++ sfx ++ [NTS n; NTS n'] ++ s2)::
+				    (MAP (addFront h) t'' ++
+				     [h ++ sfx ++ v ++ [NTS B] ++ w ++ s2] ++
+				     MAP (addFront h) s1)`] MP_TAC) THEN
+		    SRW_TAC [][] THEN1
+		    METIS_TAC [NOT_EVERY] THEN1
+		    METIS_TAC [NOT_EVERY] THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    FIRST_X_ASSUM (Q.SPECL_THEN 
+				   [`(h ++ sfx ++ [NTS n; NTS n'] ++ s2)::
+				    MAP (addFront h) t''`,
+				    `MAP (addFront h) s1`] MP_TAC) THEN
+		    SRW_TAC [][] THEN1
+		    METIS_TAC [NOT_EVERY] THEN1
+		    METIS_TAC [APPEND_11, APPEND_ASSOC, NOT_EVERY] THEN
+		    FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
+		    SRW_TAC [][] THEN
+		    FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+		    SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
+		    METIS_TAC [APPEND_11, APPEND_ASSOC, NOT_EVERY]]) THEN
 
 	     Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [addLast_def] THEN
-	     `¬EXISTS ($~ o isTmnlSym) tsl` by METIS_TAC [NOT_EVERY] THEN
-	     `¬EXISTS ($~ o isTmnlSym) v` by METIS_TAC [NOT_EVERY] THEN
-	     `t'' ++ [tsl ++ [NTS B] ++ sfx'] ++ s0 ++
-	    [tsl ++ v ++ [NTS B] ++ w ++ sfx'] ++ s1 =
-	    t'' ++ [tsl ++ [NTS B] ++ sfx'] ++ 
-	    (s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx'] ++ s1)` 
-	     by METIS_TAC [APPEND_ASSOC] THEN
-	     MAGIC
-	     (* METIS_TAC [NOT_EVERY] *)
-	     ) THEN1
+	     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+	     FIRST_X_ASSUM (Q.SPECL_THEN 
+			    [`t''`,`tsl`,`B`,`sfx'`,`v`,`w`,
+			     `s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx'] ++ s1`]
+			    MP_TAC) THEN SRW_TAC [][] THEN
+	     METIS_TAC [NOT_EVERY, everyNotTwice]) THEN1
 	    METIS_TAC [distLenAddElem, APPEND, APPEND_ASSOC, distElemLen_def] THEN
 	    (FULL_SIMP_TAC (srw_ss()) [distElemLen_def, LENGTH_distinctldNts] THEN
 	    `MAP (λl. addLast l (sfx++rhs++s2)) dl1 ++ MAP (addFront x'') (TL dl2)
@@ -1006,34 +1006,7 @@ THENL[
 	     METIS_TAC [MEM, MEM_APPEND, rmd_r2])
 	    ]]);
 
-val powLe  = store_thm
-("powLe",
-``∀n p p'.n ≤ 2**(p-1) ∧ (p ≤ p') ⇒ n ≤ 2**(p'-1)``,
-SRW_TAC [][] THEN MATCH_MP_TAC arithmeticTheory.LESS_EQ_TRANS THEN 
-Q.EXISTS_TAC `2 ** (p - 1)` THEN SRW_TAC [][] THEN DECIDE_TAC);
 
-
-val powMult = store_thm
-("powMult",
-``∀n.2*2**n = 2**(n+1)``,
-
-Induct_on `n` THEN SRW_TAC [][] THEN
-`SUC n + 1 = SUC (SUC n)` by DECIDE_TAC THEN
-ONCE_ASM_REWRITE_TAC [] THEN
-SRW_TAC [][Once EXP] THEN
-METIS_TAC [EXP]);
-
-val powGt0 = store_thm
-("powGt0",
-``∀n.n > 0 ⇒ 2 ** n > 0``,
-
- Induct_on `n` THEN SRW_TAC [][] THEN
- Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
- `SUC (SUC n') = SUC n' + 1` by DECIDE_TAC THEN
- SRW_TAC [][] THEN
- `2**(SUC n' + 1) = 2*2**(SUC n')` by METIS_TAC [powMult] THEN
- SRW_TAC [][] THEN
- DECIDE_TAC);
 
 val inpLen = store_thm
 ("inpLen",
@@ -1666,7 +1639,6 @@ MAP_EVERY Q.EXISTS_TAC [`[]`, `(t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1)`,
 			`pz0'`,`B`,`s2`,`n`,`n'`] THEN
 SRW_TAC [][] THEN1
 METIS_TAC [APPEND, APPEND_ASSOC] THEN
-
 `EVERY isNonTmnlSym ([NTS n] ++ [NTS n'] ++ s2)` 
 by FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, EVERY_APPEND] THEN
 `(pz0' ++ NTS n::NTS n'::s2 = (pz0' ++ [NTS n] ++ [NTS n']) ++ s2)`
@@ -1676,64 +1648,91 @@ by METIS_TAC [APPEND, APPEND_ASSOC] THEN
 (FULL_SIMP_TAC (srw_ss()) [symRepProp_def] THEN
 SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) []) THEN
-
 `∃dl1 dl2 x y. splitDerivProp (g,(pz0' ++ NTS n::NTS n'::s2)::
 			       (t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1),z)
 (dl1,pz0'++[NTS n]++[NTS n'],x) (dl2,s2,y)` 
 by METIS_TAC [ldSplitDeriv] THEN
 FULL_SIMP_TAC (srw_ss()) [splitDerivProp] THEN
 SRW_TAC [][] THEN
-
-(* ldSplitDeriv *)
-
-`MAP (λl. addLast l s2) dl1 ++ MAP (addFront x) (TL dl2)
-= (pz0' ++ NTS n::NTS n'::s2)::(t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1)`
-by METIS_TAC [] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
-`∃y1 y2.(s1=y1++y2) ∧ 
-(MAP (λl. addLast l s2) dl1 =
- (pz0' ++ NTS n::NTS n'::s2)::
- t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ y1) ∧
-(MAP (addFront x) (TL dl2) = y2)` by MAGIC THEN
-SRW_TAC [][] THEN
-`EVERY isNonTmnlSym ([NTS n] ++ [NTS n'] ++ s2)` by FULL_SIMP_TAC (srw_ss()) [] THEN
-Q.ABBREV_TAC `dl = ((pz0' ++ NTS n::NTS n'::s2)::
-                  (t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++
-                   (y1 ++ MAP (addFront x) (TL dl2))))` THEN
-`(pz0' ++ NTS n::NTS n'::s2) = (pz0'++[NTS n]++[NTS n'])++s2`
-  by METIS_TAC [APPEND, APPEND_ASSOC] THEN
-`EVERY isTmnlSym (x++y)` by FULL_SIMP_TAC (srw_ss())[] THEN
-`(pz0' ++ NTS n::NTS n'::s2) = pz0'++([NTS n]++[NTS n'])++s2`
-by METIS_TAC [APPEND, APPEND_ASSOC] THEN
-`∃dt1 dt2 xt yt.
-splitDerivProp (g,dl,x++y) (dt1,pz0'++[NTS n]++[NTS n'],xt) (dt2,s2,yt)`
-by METIS_TAC [ldSplitDeriv, APPEND_ASSOC] THEN
-FULL_SIMP_TAC (srw_ss()) [splitDerivProp] THEN
-SRW_TAC [][] THEN
-`EVERY isNonTmnlSym ([NTS n] ++ [NTS n'])` by FULL_SIMP_TAC (srw_ss()) [] THEN
-`pz0' ++ [NTS n] ++ [NTS n']=pz0' ++ ([NTS n] ++ [NTS n'])`
-by METIS_TAC [APPEND_ASSOC] THEN
-`∃dt3 dt4 xt' yt'.
-splitDerivProp (g,dt1,xt) (dt3,pz0',xt') (dt4,[NTS n]++[NTS n'],yt')`
-by MAGIC (* METIS_TAC [ldSplitDeriv]*) THEN
-FULL_SIMP_TAC (srw_ss()) [splitDerivProp] THEN
-SRW_TAC [][] THEN
-UNABBREV_ALL_TAC THEN
+`dl1 ≠ []` by (Cases_on `dl1` THEN 
+	       FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+Cases_on `dl1` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
-`dt3 = [pz0']` by
-(Cases_on `dt3` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
- SRW_TAC [][] THEN
- METIS_TAC [APPEND, APPEND_NIL, rtc2listRtcldTmnls]) THEN
-SRW_TAC [][] THEN
-MAGIC) THEN
+FULL_SIMP_TAC (srw_ss()) [addLast_def] THEN SRW_TAC [][] THEN
+(* ldSplitDeriv *)
+FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+`MAP (λl. l ++ s2) t ++ MAP (addFront x) (TL dl2) =
+t' ++ ([pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1)` 
+by METIS_TAC [APPEND, APPEND_ASSOC] THEN
+Q.ABBREV_TAC `l1 = MAP (λl. l ++ s2) t` THEN
+Q.ABBREV_TAC `rst = MAP (addFront x) (TL dl2)` THEN
+Q.ABBREV_TAC `l1' = t'` THEN
+Q.ABBREV_TAC `rst' = [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1` THEN
+`(l1 = l1') ∧ (rst = rst') ∨
+(∃s1' s2'.(l1 = l1' ++ s1') ∧ (rst = s2') ∧ (rst' = s1' ++ s2')) ∨
+∃s1' s2'. (l1' = l1 ++ s1') ∧ (rst' = s2') ∧ (rst = s1' ++ s2')`
+by METIS_TAC [twoListAppEq] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][]
+THENL[
+      `dl2 ≠ []`by (Cases_on `dl2` THEN 
+		    FULL_SIMP_TAC (srw_ss())  [listderiv_def]) THEN
+      `dl2 = HD dl2::TL dl2` by METIS_TAC [NULL_EQ_NIL, CONS] THEN
+      SRW_TAC [][] THEN
+      UNABBREV_ALL_TAC THEN
+      `MAP (addFront x) (TL dl2) = [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1`
+      by METIS_TAC [APPEND_11, APPEND_ASSOC, APPEND] THEN
+      Cases_on `TL dl2` THEN SRW_TAC [][] THEN
+      FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+      Cases_on `EVERY isTmnlSym h`  THEN1
+      (`EVERY isTmnlSym (pz0' ++ v ++ [NTS B] ++ w ++ s2)` 
+       by METIS_TAC [EVERY_APPEND] THEN
+       FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
+      IMP_RES_TAC leftnt THEN
+      SRW_TAC [][] THEN
+      `EVERY isNonTmnlSym [NTS B]` by SRW_TAC [][isNonTmnlSym_def] THEN
+      `(x ++ l1) ++ [NTS n''] ++ l2 =
+      (pz0' ++ v) ++ [NTS B] ++ (w ++ s2)` by METIS_TAC [APPEND, APPEND_ASSOC] THEN
+      `isWord (x++l1) ∧isWord (pz0'++v)` by METIS_TAC [EVERY_APPEND] THEN
+      `[NTS B] ≠ []` by SRW_TAC [][] THEN
+      `(x++l1 = pz0'++v) ∧ ([NTS n'']++l2 = [NTS B]++(w++s2))` 
+      by METIS_TAC [symlistdiv3] THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+      METIS_TAC [APPEND_ASSOC, mg1, APPEND_NIL, APPEND, MEM, NOT_EVERY],
+
+      UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
+      Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+      (`dl2 ≠ []`by (Cases_on `dl2` THEN 
+		     FULL_SIMP_TAC (srw_ss())  [listderiv_def]) THEN
+       `dl2 = HD dl2::TL dl2` by METIS_TAC [NULL_EQ_NIL, CONS] THEN
+       SRW_TAC [][] THEN
+       `MEM (pz0' ++ v ++ [NTS B] ++ w ++ s2) (MAP (addFront x) (TL dl2))`
+       by METIS_TAC [rgr_r9eq] THEN
+       FULL_SIMP_TAC (srw_ss()) [MEM_MAP, addFront_def] THEN
+       Cases_on `EVERY isTmnlSym y'` THEN1
+       (`EVERY isTmnlSym (pz0' ++ v ++ [NTS B] ++ w ++ s2)`
+       by METIS_TAC [EVERY_APPEND] THEN
+       FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
+       IMP_RES_TAC leftnt THEN SRW_TAC [][] THEN
+       `(pz0' ++ v) ++ [NTS B] ++ (w ++ s2) =
+         (x ++ l1) ++ [NTS n''] ++ l2` by METIS_TAC [APPEND, APPEND_ASSOC] THEN
+	 `EVERY isNonTmnlSym [NTS B]` by SRW_TAC [][isNonTmnlSym_def] THEN
+	 `isWord (x++l1) ∧isWord (pz0'++v)` by METIS_TAC [EVERY_APPEND] THEN
+       `(pz0'++v = x ++ l1) ∧ ([NTS n'']++l2 = [NTS B] ++ (w ++ s2))`
+       by METIS_TAC [NOT_CONS_NIL, symlistdiv3] THEN
+       FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+       METIS_TAC [APPEND_ASSOC, mg1, APPEND_NIL, APPEND, MEM, NOT_EVERY]) THEN
+      METIS_TAC [mg2],
+
+      UNABBREV_ALL_TAC THEN
+      METIS_TAC [mg2]
+      ]) THEN
 
 FULL_SIMP_TAC (srw_ss()) [list_lem1] THEN
 Cases_on `e` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def] THEN
 `∃p0 p1 nt.s1'++[TS t]++s2 = s1' ++ p0 ++ [NTS nt] ++ p1 ++ s2`
 by METIS_TAC [] THEN
-`[TS t] = p0++[NTS nt]++p1` by METIS_TAC [APPEND_ASSOC, APPEND_11]THEN
+`[TS t] = p0++[NTS nt]++p1` by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
 FULL_SIMP_TAC (srw_ss()) [lreseq]) THEN
 
 FIRST_X_ASSUM (Q.SPECL_THEN [`t'`,`tsl`,`B`,`sfx`,`v`,`w`,
@@ -1792,11 +1791,6 @@ METIS_TAC [rtc_lderives_same_append_right,rtc_lderives_same_append_left,
 METIS_TAC [RTC_RTC,rtc_lderives_same_append_left]);
 
 
-val ntlist = Define
-`ntlist g = nonTerminalsList (startSym g) (rules g)`;
-
-val ntms = Define
-    `ntms g = rmDupes (ntlist g)`;
 
 val numdlds = store_thm
 ("numdlds",
@@ -1821,7 +1815,8 @@ Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
 SRW_TAC [][] THEN
 SRW_TAC [][distinctldNts_def, ldNts_def, FILTER_APPEND] THEN
-FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THENL[
+FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] 
+THENL[
 
  `MEM (NTS lhs) (rmDupes (FILTER isNonTmnlSym s1 ++ [NTS lhs] ++
 			 FILTER isNonTmnlSym s2 ++ FILTER isNonTmnlSym s1 ++
@@ -1840,9 +1835,20 @@ METIS_TAC [MEM, NOT_CONS_NIL, LENGTH_NIL, DECIDE ``LENGTH l ≠ 0 ⇒ LENGTH l �
 METIS_TAC [MEM, NOT_CONS_NIL, LENGTH_NIL, DECIDE ``LENGTH l ≠ 0 ⇒ LENGTH l ≥ 1``]]);
 
 
+val lderivesTmnlItself = store_thm
+("lderivesTmnlItself",
+``isWord v ⇒ (lderives g)^* v v``,
+
+SRW_TAC [][Once RTC_CASES1] THEN
+FULL_SIMP_TAC (srw_ss()) [lderives_def]);
+
+
+val allNonUseless = Define
+`allNonUseless g = (∀e.e ∈ (allSyms g) ⇒ gaw g e)`;
+
 val pumpCfg = store_thm
 ("pumpCfg",
-``∀g.isCnf (g:('a,'b) grammar)  ∧ EVERY (gaw g) (ntList g) ⇒
+``∀g.isCnf (g:('a,'b) grammar)  ∧ allNonUseless g ⇒
  ∃n.n > 0 ∧
  ∀z.z ∈ (llanguage g)  ∧ LENGTH z ≥ n ⇒
  ∃u v w x y.
@@ -1855,15 +1861,12 @@ SRW_TAC [][] THEN
 Q.EXISTS_TAC `2**k` THEN
 SRW_TAC [][] THEN1
 (UNABBREV_ALL_TAC THEN
- FULL_SIMP_TAC (srw_ss()) [ntms, ntlist, nonTerminalsList_def] THEN
+ FULL_SIMP_TAC (srw_ss()) [ntms_def, ntList_def, nonTerminalsList_def] THEN
  `MEM (startSym g) (rmDupes (startSym g::nonTmnls (rules g)))`
  by METIS_TAC [MEM, MEM_APPEND, rmd_r2] THEN
  `LENGTH (rmDupes (startSym g::nonTmnls (rules g))) > 0`
 by METIS_TAC [MEM, LENGTH_NIL, DECIDE ``LENGTH x ≠ 0 ⇒ LENGTH x > 0``] THEN
 METIS_TAC [powGt0]) THEN
-
-
-
  `(lderives g)^* [NTS (startSym g)] z ∧ EVERY isTmnlSym z` 
  by FULL_SIMP_TAC (srw_ss()) [llanguage_def] THEN
  `∃dl.(lderives g) ⊢ dl ◁ [NTS (startSym g)] → z` 
@@ -1871,12 +1874,17 @@ METIS_TAC [powGt0]) THEN
  Q.ABBREV_TAC `k0=LENGTH (distinctldNts dl)` THEN
 `LENGTH (distinctldNts dl) ≥ 1` by METIS_TAC [numdlds] THEN
 `k0 ≥ 1 ⇒ 1 ≤ k0` by DECIDE_TAC THEN
-`k0 ≤ k` by MAGIC THEN
+`isNonTmnlSym (NTS (startSym g))` by METIS_TAC [isNonTmnlSym_def] THEN
+IMP_RES_TAC dldntsLeg THEN
+FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+`MEM (startSym g) (ntms g)` by 
+(SRW_TAC [][ntms_def, ntList_def, nonTerminalsList_def] THEN
+ METIS_TAC [rmd_r2, MEM, APPEND]) THEN
+`k0 ≤ k` by METIS_TAC [dldntsLeg] THEN
  `1 ≤ k0` by METIS_TAC [] THEN
- `LENGTH z ≥ 2 ** k0` by MAGIC THEN
-
+`k ≠ 0` by DECIDE_TAC THEN
+ `LENGTH z ≥ 2 ** k0` by METIS_TAC [powGtTrans] THEN
  `LENGTH z > 2**(k0-1)` by METIS_TAC [powGt] THEN
-
  `symRepProp dl` by METIS_TAC [inpLeninv,symRepProp_def] THEN
 `EVERY isNonTmnlSym ([NTS (startSym g)]:('a,'b) symbol list)`
 by METIS_TAC [APPEND_ASSOC,APPEND_11,symbol_11,isNonTmnlSym_def,EVERY_DEF] THEN
@@ -1962,7 +1970,7 @@ SRW_TAC [][] THEN1
 				EVERY_DEF, APPEND_NIL] THEN
        `LENGTH zy' ≠ 0` by METIS_TAC [LENGTH_NIL] THEN
        DECIDE_TAC]) 
-THENL[            
+THENL[           
       `LENGTH (distinctldNts dl1') ≤
       LENGTH (distinctldNts (dl1 ++ TL dl2))` by METIS_TAC [distElemLen_def] THEN
       `LENGTH (distinctldNts dl2') ≤
@@ -1972,7 +1980,13 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [] THEN
       `∀e. (MEM e dl1 ⇒ MEM (tsl ++ e ++ sfx) dl)
       ∧ (∀e. MEM e dl2 ⇒ MEM (tsl ++ v ++ e ++ sfx) dl) ⇒
-      LENGTH (distinctldNts (dl1++TL dl2)) ≤ k` by MAGIC THEN
+      LENGTH (distinctldNts (dl1++TL dl2)) ≤ LENGTH (distinctldNts dl)` by 
+      METIS_TAC [dldntsLenLe] THEN
+      `∀e. (MEM e dl1 ⇒ MEM (tsl ++ e ++ sfx) dl)
+      ∧ (∀e. MEM e dl2 ⇒ MEM (tsl ++ v ++ e ++ sfx) dl) ⇒
+      LENGTH (distinctldNts (dl1++TL dl2)) ≤ k` by 
+      METIS_TAC [DECIDE ``a ≤ b ∧ b ≤ c ⇒ a ≤ c``] THEN
+      FULL_SIMP_TAC (srw_ss()) [distElemLen_def] THEN
       `LENGTH (distinctldNts dl1') ≤ k` 
       by METIS_TAC [DECIDE ``a ≤ b ∧ b ≤ c ⇒ a ≤ c``] THEN
       `LENGTH (distinctldNts dl2') ≤ k` 
@@ -1995,112 +2009,118 @@ THENL[
        `k - 1 + 1 = k` by DECIDE_TAC THEN
        METIS_TAC [],
 
-       FULL_SIMP_TAC (srw_ss()) [ntProp] THEN
-       SRW_TAC [][] THEN1
+       FULL_SIMP_TAC (srw_ss()) [language_def,llanguage_def, EXTENSION] THEN
+       SRW_TAC [][] 
+       THENL[
+	     (* 3 subgoals *)
        
-       (Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
-       (`(tsl ++ [NTS B] ++ sfx) = pz0++sz0`
-       by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-       `(tsl ++ [NTS B] ++ sfx = [NTS (startSym g)])`
-       by METIS_TAC [] THEN
-       FULL_SIMP_TAC (srw_ss()) [lreseq] THEN SRW_TAC [][] THEN
-       
+	     (* 1 *)
+	     FULL_SIMP_TAC (srw_ss()) [ntProp] THEN
+	     (Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+	      (`(tsl ++ [NTS B] ++ sfx) = pz0++sz0`
+	      by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+	      `(tsl ++ [NTS B] ++ sfx = [NTS (startSym g)])`
+	      by METIS_TAC [] THEN
+	      FULL_SIMP_TAC (srw_ss()) [lreseq] THEN SRW_TAC [][] THEN
 
-       `(lderives g)^* [NTS (startSym g)] (pfx++sfx')`
-       by METIS_TAC [ldMemRel, APPEND, APPEND_NIL, APPEND_ASSOC] THEN
+	      `(lderives g)^* [NTS (startSym g)] (pfx++sfx')`
+	      by METIS_TAC [ldMemRel, APPEND, APPEND_NIL, APPEND_ASSOC] THEN
+	      
+	      `dl1 ≠ []` by (Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+	      `(lderives g)^* (pfx++sfx') (v ++ [NTS (startSym g)] ++ w)`
+	      by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN
+	      
+	      `dl1'' ≠ []` by (Cases_on `dl1''` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+	      `(lderives g)^* [NTS (startSym g)] zb'`
+	      by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN
+	      
+	      `dl2'' ≠ []` by (Cases_on `dl2''` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+	      `(lderives g)^* w zy'`
+	      by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN       
+	      `(lderives g)^* [NTS (startSym g)] (v ++ [NTS (startSym g)] ++ w)`
+	      by METIS_TAC [RTC_RTC] THEN
+	      `(lderives g)^* v v` by METIS_TAC [lderivesTmnlItself] THEN
+	      `(lderives g)^* [NTS (startSym g)] 
+	     (FLAT (lpow v i) ++ zb' ++ FLAT (lpow zy' i))` 
+	      by METIS_TAC [rtcDerivesReplEnd] THEN
+	      `rst' = []` by
+	      (Cases_on `dl3`  THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+	       SRW_TAC [][] THEN
+	       Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [lderives_def]) THEN
+	      SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+	      `llanguage g = language g` by METIS_TAC [drd_ld_langeq] THEN
+	      FULL_SIMP_TAC (srw_ss()) [language_def, llanguage_def, EXTENSION] THEN
+	      METIS_TAC [EVERY_APPEND, islpowTmnl]) THEN
 
-       `dl1 ≠ []` by (Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
-       `(lderives g)^* (pfx++sfx') (v ++ [NTS (startSym g)] ++ w)`
-       by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN
+	     `h = pz0++sz0` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN       
+	     SRW_TAC [][] THEN
 
-       `dl1'' ≠ []` by (Cases_on `dl1''` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
-       `(lderives g)^* [NTS (startSym g)] zb'`
-       by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN
+	      `(lderives g)^* [NTS (startSym g)] (tsl ++ pfx++sfx'++sfx)`
+	      by METIS_TAC [ldMemRel, APPEND, APPEND_ASSOC] THEN
+	      
+	      `dl1 ≠ []` by (Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+	      `(lderives g)^* (pfx++sfx') (v ++ [NTS B] ++ w)`
+	      by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN
+	      
+	      `dl1'' ≠ []` by (Cases_on `dl1''` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+	      `(lderives g)^* [NTS B] zb'`
+	      by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN
 
-       `dl2'' ≠ []` by (Cases_on `dl2''` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
-       `(lderives g)^* w zy'`
-       by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN       
-       `(lderives g)^* [NTS (startSym g)] (v ++ [NTS (startSym g)] ++ w)`
-       by METIS_TAC [RTC_RTC] THEN
-       `(lderives g)^* v v` by MAGIC THEN
-       `(lderives g)^* [NTS (startSym g)] 
-      (FLAT (lpow v i) ++ zb' ++ FLAT (lpow zy' i))` 
-       by METIS_TAC [rtcDerivesReplEnd] THEN
-       SRW_TAC [][language_def, EXTENSION] THEN
-       FULL_SIMP_TAC (srw_ss()) [llanguage_def, EXTENSION, listderiv_def] THEN1
-       Cases_on `dl3` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-       SRW_TAC [][] THEN
-       FULL_SIMP_TAC (srw_ss()) [] THEN
-       MAGIC) THEN MAGIC) THEN
-       MAGIC]);
+	      
+	      `dl3 ≠ []` by (Cases_on `dl3` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+	      `(lderives g)^* sfx rst'`
+	      by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN
+	      
+	      `dl2'' ≠ []` by (Cases_on `dl2''` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+	      `(lderives g)^* w zy'`
+	      by METIS_TAC [rtc2listRtcHdLast, listderiv_def, APPEND_ASSOC] THEN       
+	      `(lderives g)^* [NTS (startSym g)] (tsl ++ v ++ [NTS B] ++ w ++sfx)`
+	      by METIS_TAC [RTC_RTC, rtc_lderives_same_append_left,
+			    rtc_lderives_same_append_right, APPEND_ASSOC] THEN
+	      `(lderives g)^* [NTS B] (pfx++sfx')` by 
+	      (`lderives g (tsl ++ [NTS B] ++ sfx)
+	       (tsl ++ pfx ++ sfx' ++ sfx)`
+	       by METIS_TAC [ldMemRel', APPEND, APPEND_ASSOC] THEN
+	       FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
+	       SRW_TAC [][] THEN
+	      `EVERY isNonTmnlSym [NTS lhs]` by SRW_TAC [][isNonTmnlSym_def] THEN
+	       `(s1=tsl) ∧ ([NTS lhs] ++ s2 = [NTS B]++sfx)`
+	       by METIS_TAC [symlistdiv3, NOT_CONS_NIL] THEN
+	       FULL_SIMP_TAC (srw_ss()) [] THEN
+	       SRW_TAC [][] THEN
+	       `rhs = pfx++sfx'` by METIS_TAC [APPEND_11, APPEND_ASSOC] THEN
+	       METIS_TAC [ldres1, RTC_RULES]) THEN
+	      `(lderives g)^* [NTS B] (v ++ [NTS B] ++ w)`
+	      by METIS_TAC [RTC_RTC] THEN
+	      `(lderives g)^* v v` by METIS_TAC [lderivesTmnlItself] THEN
+	      `(lderives g)^* [NTS B] 
+                 (FLAT (lpow v i) ++ zb' ++ FLAT (lpow zy' i))` 
+	      by METIS_TAC [rtcDerivesReplEnd] THEN	      	      
+	      `llanguage g = language g` by METIS_TAC [drd_ld_langeq] THEN
+	      FULL_SIMP_TAC (srw_ss()) [language_def, llanguage_def, EXTENSION] THEN
+	      `(lderives g)^* (pz0++sz0) (tsl ++ [NTS B] ++sfx)`
+	      by METIS_TAC [ldMemRel, APPEND, APPEND_ASSOC] THEN
+	      `(lderives g)^* (pz0++sz0) 
+		 (tsl ++ (FLAT (lpow v i) ++ zb' ++ FLAT (lpow zy' i)) ++ sfx)`
+	      by METIS_TAC [EVERY_APPEND, islpowTmnl, RTC_RTC,
+			    rtc_lderives_same_append_right, 
+			    rtc_lderives_same_append_left] THEN
+	      `(lderives g)^* 
+		 (tsl ++ FLAT (lpow v i) ++ zb' ++ FLAT (lpow zy' i) ++ sfx)
+		 (tsl ++ FLAT (lpow v i) ++ zb' ++ FLAT (lpow zy' i) ++ rst')`
+	      by METIS_TAC [APPEND_ASSOC, EVERY_APPEND, islpowTmnl,			    
+			    rtc_lderives_same_append_left] THEN	   
+	      `(lderives g)^* (pz0++sz0) 
+		 (tsl ++ FLAT (lpow v i) ++ zb' ++ FLAT (lpow zy' i) ++ rst')`
+	      by METIS_TAC [RTC_RTC, APPEND_ASSOC] THEN
+	      METIS_TAC [EVERY_APPEND, islpowTmnl]),
 
-(*       
-       `(lderives g)^* [NTS B'] zb'` by 
-       (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	Cases_on `dl1'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	METIS_TAC [rtc2listRtcHdLast, HD, NOT_CONS_NIL]) THEN
-       
-       `(lderives g)^* w' zy'` by
-       (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	Cases_on `dl2'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	METIS_TAC [rtc2listRtcHdLast, HD, NOT_CONS_NIL]) THEN
+	      METIS_TAC [islpowTmnl],
 
-       `lderives g (tsl' ++ [NTS B'] ++ sfx') (tsl' ++ pfx ++ sfx ++ sfx')`
-       by METIS_TAC [ldMemRel', APPEND_ASSOC] THEN
-       FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN SRW_TAC [][] THEN
-       `EVERY isNonTmnlSym [NTS lhs]` by SRW_TAC [][isNonTmnlSym_def] THEN
-       `(s1 = tsl') ∧ ([NTS lhs]++s2 = [NTS B']++sfx')`
-       by METIS_TAC [symlistdiv3, NOT_CONS_NIL] THEN
-       FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
-       `rhs = pfx++sfx` by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
-       SRW_TAC [][] THEN
-       `(lderives g)^* (pfx ++ sfx)  (v' ++ [NTS B'] ++ w')` by
-       (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	METIS_TAC [rtc2listRtcHdLast, HD, NOT_CONS_NIL]) THEN
-       `(lderives g)^* [NTS B'] (v'++[NTS B']++w')` 
-       by METIS_TAC [ldres1, RTC_RULES] THEN
-       `(lderives g)^* [NTS B'] (FLAT (lpow v' i) ++ zb' ++ FLAT (lpow zy' i))`
-       by METIS_TAC [rtcDerivesReplEnd] THEN
-       `(lderives g)^* s2 rst'` by 
-       (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	Cases_on `dl'''` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	METIS_TAC [rtc2listRtcHdLast, HD, NOT_CONS_NIL]) THEN
-       
-       Cases_on `i` THEN SRW_TAC [][] THEN1
-       
-       (SRW_TAC [][lpow, REPLICATE] THEN
-       `(lderives g)^* [NTS (startSym g)] (s1++pfx++sfx++s2)`
-       by MAGIC (* METIS_TAC [ldMemRel, APPEND_ASSOC]*) THEN
-       `(lderives g)^* (s1++pfx++sfx++s2) (s1++v' ++ [NTS B'] ++ w'++s2)`
-       by METIS_TAC [rtc_lderives_same_append_left, rtc_lderives_same_append_right,
-		     APPEND_ASSOC] THEN
-       `(lderives g)^* (s1++v' ++ [NTS B'] ++ w'++s2)
-	(s1++v' ++ zb' ++ w'++s2)` by METIS_TAC [rtc_lderives_same_append_left, 
-						   rtc_lderives_same_append_right,
-						   APPEND_ASSOC] THEN
-       `(lderives g)^* (s1++v' ++ zb' ++ w'++s2)
-	(s1++v' ++ zb' ++ zy'++s2)` by METIS_TAC [rtc_lderives_same_append_left, 
-						   rtc_lderives_same_append_right,
-						   APPEND_ASSOC] THEN
-       `(lderives g)^* (s1++v' ++ zb' ++ zy'++s2)
-	(s1++v' ++ zb' ++ zy'++rst')` by METIS_TAC [rtc_lderives_same_append_left, 
-						   rtc_lderives_same_append_right,
-						   APPEND_ASSOC] THEN
-       `(lderives g)^* (s1++v' ++ [NTS B'] ++ w'++s2)
-	(s1++v' ++ zb' ++ zy'++rst')` by METIS_TAC [RTC_RTC] THEN
-       `(s1++v' ++ zb' ++ zy' ++rst') ∈ llanguage g` by
-       (FULL_SIMP_TAC (srw_ss()) [llanguage_def, EXTENSION] THEN
-	METIS_TAC [RTC_RTC, EVERY_APPEND, APPEND_ASSOC]) THEN
-       METIS_TAC [drd_ld_langeq])
-
-
-       
-       
-      
-      MAGIC*)
-
+	      METIS_TAC [islpowTmnl]
+	      ]]);
 
 
 val _ = export_theory();
+
 

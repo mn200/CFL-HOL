@@ -1,7 +1,7 @@
 (* A theory about parse trees *)
 open HolKernel boolLib bossLib Parse Defn BasicProvers
 
-open stringTheory grammarDefTheory regexpTheory listTheory pairTheory
+open stringTheory grammarDefTheory symbolDefTheory listTheory pairTheory
 optionTheory
 
 open listLemmasTheory

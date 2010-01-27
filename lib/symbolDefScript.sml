@@ -1,9 +1,8 @@
-(* A theory about regular expressions *)
 open HolKernel boolLib bossLib Parse
 open stringTheory listTheory rich_listTheory;
 open pred_setTheory listLemmasTheory;
 
-val _ = new_theory "regexp";
+val _ = new_theory "symbolDef";
 
 
 val _ = Globals.linewidth := 60

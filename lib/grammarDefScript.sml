@@ -5,7 +5,7 @@ open HolKernel boolLib bossLib Parse BasicProvers
 open stringTheory relationTheory listTheory arithmeticTheory Defn
 containerTheory pred_setTheory
 
-open pred_setTheory listLemmasTheory regexpTheory
+open pred_setTheory listLemmasTheory symbolDefTheory
 containerLemmasTheory setLemmasTheory relationLemmasTheory
 
 val _ = new_theory "grammarDef";

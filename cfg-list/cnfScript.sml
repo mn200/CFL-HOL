@@ -4,7 +4,7 @@ open HolKernel boolLib bossLib Parse BasicProvers
 open stringTheory relationTheory pred_setTheory listTheory
 arithmeticTheory rich_listTheory
 
-open grammarDefTheory listLemmasTheory regexpTheory setLemmasTheory
+open grammarDefTheory listLemmasTheory symbolDefTheory setLemmasTheory
 containerTheory
 
 val _ = new_theory "cnf";

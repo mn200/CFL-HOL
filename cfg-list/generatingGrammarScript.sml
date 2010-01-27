@@ -1,7 +1,7 @@
 (* A theory about regular expressions *)
 open HolKernel boolLib bossLib Parse
 open stringTheory listTheory relationTheory;
-open pred_setTheory regexpTheory grammarDefTheory listLemmasTheory;
+open pred_setTheory symbolDefTheory grammarDefTheory listLemmasTheory;
 
 val _ = new_theory "generatingGrammar";
 

@@ -4,8 +4,8 @@ open pred_setTheory stringTheory containerTheory relationTheory
 listTheory rich_listTheory optionTheory arithmeticTheory
 
 
-open listLemmasTheory relationLemmasTheory grammarDefTheory arithmeticLemmasTheory
-     regexpTheory parseTreeTheory pdaDefTheory
+open listLemmasTheory relationLemmasTheory grammarDefTheory
+     arithmeticLemmasTheory symbolDefTheory parseTreeTheory pdaDefTheory
 
 val _ = new_theory "pumpingLemma";
 
@@ -132,20 +132,7 @@ SRW_TAC [][] THEN
 	     ]]]);
 
 
-val rtc_lderives_same_append_right = store_thm 
-("rtc_lderives_same_append_right",
-        ``∀u v.RTC (lderives g) u v 
-              ⇒
-	      RTC (lderives g) (u++x) (v++x)``,
-        HO_MATCH_MP_TAC RTC_INDUCT THEN
-        METIS_TAC [RTC_RULES,lderives_same_append_right]);
 
-val powGt = store_thm
-("powGt",
-``1 ≤ k ∧ m ≥ 2 ** k ⇒ m > 2**(k-1)``,
-SRW_TAC [][GREATER_EQ, GREATER_DEF] THEN 
-MATCH_MP_TAC LESS_LESS_EQ_TRANS THEN 
-Q.EXISTS_TAC `2 ** k` THEN SRW_TAC [ARITH_ss][]);
 
 
 val cnfRtcdPfxSfx = store_thm

@@ -4,7 +4,7 @@ open pred_setTheory stringTheory containerTheory relationTheory
 listTheory rich_listTheory optionTheory arithmeticTheory
 
 open listLemmasTheory relationLemmasTheory containerLemmasTheory
-     grammarDefTheory pdaDefTheory regexpTheory parseTreeTheory
+     grammarDefTheory pdaDefTheory symbolDefTheory parseTreeTheory
 
 val _ = new_theory "homomorphism"
 

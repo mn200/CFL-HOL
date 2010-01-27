@@ -4,7 +4,7 @@ open pred_setTheory stringTheory containerTheory relationTheory
 listTheory rich_listTheory optionTheory markerTheory
 
 open listLemmasTheory relationLemmasTheory
-     grammarDefTheory pdaDefTheory regexpTheory
+     grammarDefTheory pdaDefTheory symbolDefTheory
 
 val _ = new_theory "pdaEqCfg"
 

@@ -4,7 +4,7 @@ open pred_setTheory stringTheory containerTheory relationTheory
 listTheory rich_listTheory optionTheory
 
 open listLemmasTheory relationLemmasTheory
-     grammarDefTheory pdaDefTheory regexpTheory parseTreeTheory
+     grammarDefTheory pdaDefTheory symbolDefTheory parseTreeTheory
 
 val _ = new_theory "closure"
 

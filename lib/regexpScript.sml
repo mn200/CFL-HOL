@@ -608,6 +608,14 @@ METIS_TAC [rmd_r2] THEN
 SRW_TAC [][FLAT_APPEND,FILTER_APPEND] THEN
 METIS_TAC [rmd_r2]);
 
+val dldntsLenLe = store_thm 
+      ("dldntsLenLe",
+       ``∀e. (MEM e dl1 ⇒ MEM (tsl ++ e ++ sfx) dl)
+       ∧ (∀e. MEM e dl2 ⇒ MEM (tsl ++ v ++ e ++ sfx) dl) ⇒
+       LENGTH (distinctldNts (dl1++TL dl2)) ≤ LENGTH (distinctldNts dl)``,
+
+MAGIC);
+
 val distesub1 = store_thm
 ("distesub1",
 ``∀h t dl1.(∀e.MEM e dl1 ⇒ ∃e1.(HD dl1 ++ e1 = h) ∧

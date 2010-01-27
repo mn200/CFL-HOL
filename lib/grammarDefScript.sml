@@ -2957,6 +2957,18 @@ val rtc2listldFstNt = store_thm
 MAGIC);
 
 
+val rtc2listldFstNt' = store_thm
+("rtc2listldFstNt'",
+``∀pfx sfx.rtc2list (lderives g) l ∧ 
+    (l = pfx++[p++m++rst]++sfx) ∧ ¬(EVERY isTmnlSym m) ∧
+    EVERY isTmnlSym p ∧ (EVERY isTmnlSym (LAST l)) ⇒
+    ∃r1 r2 tl.(sfx = r1 ++ [p++tl++rst] ++ r2)  ∧ EVERY isTmnlSym tl ∧
+    (∀e.MEM e r1 ⇒ 
+     ∃p0 p1 nt.(e = p ++ p0 ++ [NTS nt] ++ p1 ++ rst) ∧ isWord p0)``,
+
+MAGIC);
+
+
 val lderivesPfxSame = store_thm
 ("lderivesPfxSame",
 ``∀dl s1 rst.
@@ -3138,6 +3150,25 @@ Cases_on `h` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]);
 
 
+val ntList = Define
+`ntList g = nonTerminalsList (startSym g) (rules g)`;
+
+val ntms = Define
+    `ntms g = rmDupes (ntList g)`;
+
+val dldntsLeg = store_thm
+("dldntsLeg",
+``∀g dl x.lderives g ⊢ dl ◁ x → y ∧ 
+ (∀e.MEM e x ∧ isNonTmnlSym e ⇒ ∃nt.(e=NTS nt) ∧ MEM nt (ntms g)) ⇒
+LENGTH (distinctldNts dl) ≤ LENGTH (ntms g)``,
+
+Induct_on `dl` THEN SRW_TAC [][LENGTH_distinctldNts] THEN
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN 
+MAGIC);
+
+
 val symMemProp = store_thm
 ("symMemProp",
 ``∀dl x.lderives g ⊢ dl ◁ x → y ∧ EVERY isTmnlSym y ⇒
@@ -3286,6 +3317,24 @@ SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]);
 
 
+
+val mg1 = store_thm
+("mg1",
+ ``isCnf g ⇒ ¬(lderives g ⊢ dl ◁ x → y ∧ EVERY isTmnlSym y ∧
+	       ∃p s.MEM (p++x++s) (TL dl))``,
+MAGIC);
+
+val mg2 = store_thm
+("mg2",
+``isCnf g ∧ lderives g ⊢
+              (pz0' ++ NTS n::NTS n'::s2)::
+                  (t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++
+                   s1) ◁ pz0' ++ NTS n::NTS n'::s2 → (x ++ y)
+ ⇒ (h ++ s2)::(MAP (λl. l ++ s2) t'' ++
+	       MAP (addFront x) (TL dl2)) ≠
+ t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1 ∧
+¬∃dl.lderives g ⊢ dl2 ◁ s2 → y``,
+MAGIC);
 
 
 val listderivTrans = store_thm

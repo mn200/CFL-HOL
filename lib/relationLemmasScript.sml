@@ -299,6 +299,15 @@ SRW_TAC [][] THEN
 METIS_TAC [APPEND_FRONT_LAST,NOT_CONS_NIL,rtc2list_distrib_append_fst,
 	   frontAppendFst,HD,APPEND]);
 
+
+val rtc2listImpLd = store_thm
+("rtc2listImpLd",
+``∀t. rtc2list R t ⇒ R ⊢ t ◁ HD t → LAST t``,
+
+Induct_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN
+Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]);
+
 (*
 val elId = store_thm
 ("elId",

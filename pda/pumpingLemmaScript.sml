@@ -20,19 +20,6 @@ val isCnf = Define
     ((LENGTH r = 1) ∧ EVERY isTmnlSym r)`;
 
 
-val ldMemRel' = store_thm
-("ldMemRel'",
-``∀dl x e1 e2 p m s.
- R ⊢ dl ◁ x → y ∧ (dl = p ++ [e1] ++ [e2] ++ s) ⇒
- R e1 e2``,
-
-Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-SRW_TAC [][] THEN
-`rtc2list R ([e1]++[e2]++s)` by METIS_TAC [rtc2list_distrib_append_snd,
-					   MEM, MEM_APPEND, APPEND_ASSOC] THEN
-FULL_SIMP_TAC (srw_ss()) []);
-
-
 val cnfvwNotNil = store_thm
 ("cnfvwNotNil",
 ``∀dl x. lderives g ⊢ dl ◁ x → (v ++ [NTS B] ++ w) ∧ isCnf g ∧ LENGTH x > 1 ⇒
@@ -66,8 +53,6 @@ SRW_TAC [][] THEN
 	     (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf] THEN
 SRW_TAC [][] THEN FULL_SIMP_TAC (arith_ss) []  THEN
 METIS_TAC [LENGTH_NIL, DECIDE ``0 ≠ 2``, DECIDE ``0 ≠ 1``]);
-
-
 
 
 val cnfNotLderivesNilAllntms = store_thm
@@ -130,9 +115,6 @@ SRW_TAC [][] THEN
 	     `EVERY isTmnlSym (s1'++[NTS lhs'])` by METIS_TAC [EVERY_APPEND] THEN
 	     FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]
 	     ]]]);
-
-
-
 
 
 val cnfRtcdPfxSfx = store_thm
@@ -1323,7 +1305,8 @@ val listsecldSfxNil = store_thm
 ``∀dl x.
 lderives g ⊢ dl ◁ (p++x) → (p++y) ∧ EVERY isTmnlSym p
 ⇒
-lderives g ⊢ MAP (listsec p []) dl ◁ listsec p [] (p++x) → listsec p [] (p++y)``,
+lderives g ⊢ MAP (listsec p []) dl ◁ 
+listsec p [] (p++x) → listsec p [] (p++y)``,
 
 Induct_on `dl` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
@@ -1401,16 +1384,6 @@ FULL_SIMP_TAC (srw_ss()) [MEM_FILTER]) THEN
 METIS_TAC [rmd_r2, MEM_APPEND]);
 
 
-
-
-val rtc2listImpLd = store_thm
-("rtc2listImpLd",
-``∀t. rtc2list R t ⇒ R ⊢ t ◁ HD t → LAST t``,
-
-Induct_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
-Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]);
-
 val distesubtrans = store_thm
 ("distesubtrans",
 ``distElemSubset dl dl1 ∧ distElemSubset dl1 dl0 ⇒
@@ -1421,10 +1394,171 @@ SRW_TAC [][distElemSubset_def]);
 
 val listAddFrontLast = store_thm
 ("listAddFrontLast",
-``∀l.(∀e.MEM e l ⇒ MEM (p ++ e ++ s) (MAP (λl. addLast l s) (MAP (addFront p) l)))``,
+``∀l.(∀e.MEM e l ⇒ 
+MEM (p ++ e ++ s) (MAP (λl. addLast l s) (MAP (addFront p) l)))``,
  
 Induct_on `l` THEN SRW_TAC [][addLast_def, addFront_def] THEN 
 METIS_TAC [addLast_def]);
+
+
+val symPropExistsGen = store_thm
+("symPropExistsGen",
+``∀dl x p s.lderives g ⊢ dl ◁ x → y ∧ MEM (p ++ x ++ s) (TL dl) ∧ isWord y
+⇒ symRepProp dl``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN
+IMP_RES_TAC listDerivHdBrk THEN
+`h = x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [symRepProp_def] THEN
+
+(* 1st subgoal *)
+Cases_on `isWord (s1++rhs++s2)` THEN1
+(`isWord (p ++ s1 ++ [NTS lhs] ++ s2 ++ s)` by METIS_TAC [] THEN
+ FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
+IMP_RES_TAC leftnt THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN1
+METIS_TAC [NOT_EVERY] 
+ THENL[
+
+       `¬ EVERY isTmnlSym rhs` by METIS_TAC [NOT_EVERY] THEN
+       IMP_RES_TAC leftnt THEN
+       SRW_TAC [][] THEN
+       `EVERY isNonTmnlSym [NTS n']` by SRW_TAC [][isNonTmnlSym_def] THEN
+       `(s1 ++ l1') ++ [NTS n'] ++ (l2' ++ s2) =
+       l1 ++ [NTS n] ++ l2` by METIS_TAC [APPEND_ASSOC] THEN
+       `(s1++l1' = l1) ∧ ([NTS n'] ++ (l2' ++ s2) = [NTS n] ++ l2)`
+       by METIS_TAC [symlistdiv3,NOT_CONS_NIL,EVERY_APPEND] THEN
+       FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN1
+       METIS_TAC [NOT_EVERY] THEN
+
+       (Cases_on `EVERY isTmnlSym p` THEN1
+	     (`isWord (s1++l1') ∧ isWord (p++s1)` by METIS_TAC [EVERY_APPEND] THEN
+	      `EVERY isNonTmnlSym [NTS n]` by SRW_TAC [][] THEN
+	      `(s1 ++ l1') ++ [NTS n] ++ (l2' ++ s2) =
+	      (p ++ s1) ++ [NTS lhs] ++ (s2 ++ s)` by METIS_TAC [APPEND_ASSOC] THEN
+	      `(s1++l1' = p++s1) ∧ ([NTS n] ++ (l2' ++ s2) = [NTS lhs] ++ (s2 ++ s))`
+	      by METIS_TAC [NOT_CONS_NIL, symlistdiv3] THEN
+	      FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+	      FULL_SIMP_TAC (srw_ss()) [] THEN
+	      MAP_EVERY Q.EXISTS_TAC [`[]`,`s1`,`lhs`,`s2`,`l1'`,`l2'`,
+				      `(p ++ s1 ++ [NTS lhs] ++ s2 ++ s)::t`] THEN
+	      SRW_TAC [][] THEN
+	      METIS_TAC [APPEND, APPEND_NIL, MEM]) THEN
+       
+	     IMP_RES_TAC leftnt THEN SRW_TAC [][] THEN
+	     `EVERY isNonTmnlSym [NTS n]` by SRW_TAC [][] THEN 
+	     `(s1 ++ l1') ++ [NTS n] ++ (l2' ++ s2) =
+	     l1 ++ [NTS n'] ++ (l2 ++ s1 ++ [NTS lhs] ++ s2 ++ s)` 
+	     by METIS_TAC [APPEND_ASSOC] THEN
+	     `(s1++l1' = l1) ∧ 
+	     ([NTS n] ++ (l2' ++ s2) = [NTS n'] ++ (l2 ++ s1 ++ [NTS lhs] ++ s2 ++ s))`
+	     by METIS_TAC [NOT_CONS_NIL, symlistdiv3] THEN
+	     FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN1
+	     METIS_TAC [EVERY_APPEND, NOT_EVERY] THEN
+	     
+	     (Q.PAT_ASSUM `s1 ++ l1' ++ [NTS n] ++ l2' ++ s2 =
+	     s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++
+	     s2 ++ s` MP_TAC THEN
+	     IMP_RES_TAC twoListAppEq THEN SRW_TAC [][] 
+	     THENL[
+		   FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+		   `s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s ++ s = 
+		   (s1 ++ l1') ++ ([NTS n] ++ l2) ++ (s1 ++ [NTS lhs] ++ s ++ s)` 
+		   by METIS_TAC [APPEND_ASSOC] THEN
+		   `¬isWord ([NTS n]++l2)` by SRW_TAC [][isTmnlSym_def] THEN
+		   `isWord (s1++l1')` by SRW_TAC [][] THEN
+		   `((s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s ++ s)::t) =
+		   [] ++ [(s1 ++ l1') ++ ([NTS n] ++ l2) ++ 
+			  (s1 ++ [NTS lhs] ++ s ++ s)]++t` by
+		   METIS_TAC [APPEND_NIL, APPEND, APPEND_ASSOC] THEN
+		   `∃r1 r2 tl. 
+		   (t = r1 ++ [(s1 ++ l1') ++ tl ++ 
+			       (s1 ++ [NTS lhs] ++ s ++ s)] ++ r2) ∧ 
+		   isWord tl ∧ ∀e.MEM e r1 ⇒ ∃p0 p1 nt. 
+		   (e = (s1++l1') ++ p0 ++ [NTS nt] ++ p1 ++ 
+		    (s1 ++ [NTS lhs] ++ s ++ s)) ∧
+		   isWord p0` by MAGIC (* METIS_TAC [rtc2listldFstNt']*) THEN
+		   FULL_SIMP_TAC (srw_ss()) [] THEN
+		   SRW_TAC [][] THEN
+
+		   (MAP_EVERY Q.EXISTS_TAC
+		   [`[]`,`s1`,`lhs`,`s`,`l1'++tl++s1`,`s`,
+		    `(s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s ++ s)::
+		    (r1 ++ [s1 ++ l1' ++ tl ++ s1 ++ [NTS lhs] ++ s ++ s] ++ r2)`]
+		   THEN SRW_TAC [][] THEN
+		   MAP_EVERY Q.EXISTS_TAC 
+		   [`(s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s ++s)::r1`,
+		    `r2`] THEN
+		   SRW_TAC [][] THEN1
+		   METIS_TAC [APPEND_ASSOC] THEN
+		   RES_TAC THEN
+		   SRW_TAC [][] THEN
+		   MAP_EVERY Q.EXISTS_TAC [`l1'++p0`,`p1++s1++[NTS lhs]++s`,`nt`] THEN
+		   SRW_TAC [][]),
+		   
+		   FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+		   `s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s1' ++ s2 = 
+		   (s1 ++ l1') ++ ([NTS n] ++ l2) ++ (s1 ++ [NTS lhs] ++ s1' ++ s2)` 
+		   by METIS_TAC [APPEND_ASSOC] THEN
+		   `¬isWord ([NTS n]++l2)` by SRW_TAC [][isTmnlSym_def] THEN
+		   `isWord (s1++l1')` by SRW_TAC [][] THEN
+		   `((s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s1' ++ s2)::t) =
+		   [] ++ [(s1 ++ l1') ++ ([NTS n] ++ l2) ++ 
+			  (s1 ++ [NTS lhs] ++ s1' ++ s2)]++t` by
+		   METIS_TAC [APPEND_NIL, APPEND, APPEND_ASSOC] THEN
+		   `∃r1 r2 tl. 
+		   (t = r1 ++ [(s1 ++ l1') ++ tl ++ 
+			       (s1 ++ [NTS lhs] ++ s1' ++ s2)] ++ r2) ∧ 
+		   isWord tl ∧ ∀e.MEM e r1 ⇒ ∃p0 p1 nt. 
+		   (e = (s1++l1') ++ p0 ++ [NTS nt] ++ p1 ++ 
+		    (s1 ++ [NTS lhs] ++ s1' ++ s2)) ∧
+		   isWord p0` by MAGIC (* METIS_TAC [rtc2listldFstNt']*) THEN
+		   FULL_SIMP_TAC (srw_ss()) [] THEN
+		   SRW_TAC [][] THEN
+
+		   (MAP_EVERY Q.EXISTS_TAC
+		    [`[]`,`s1`,`lhs`,`s2`,`l1'++tl++s1`,`s1'`,
+		    `(s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s2++ s1' ++ s2)::
+		    (r1 ++ [s1 ++ l1' ++ tl ++ s1 ++ [NTS lhs] ++ s1' ++ s2] ++ r2)`]
+		   THEN SRW_TAC [][] THEN
+		   MAP_EVERY Q.EXISTS_TAC 
+		    [`(s1 ++ l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s2 ++s1'++s2)::r1`,
+		    `r2`] THEN
+		   SRW_TAC [][] THEN1
+		   METIS_TAC [APPEND_ASSOC] THEN
+		   RES_TAC THEN
+		   SRW_TAC [][] THEN
+		   MAP_EVERY Q.EXISTS_TAC [`l1'++p0`,`p1++s1++[NTS lhs]++s1'`,`nt`] THEN
+		   SRW_TAC [][]),
+		   
+
+		   FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+		   FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
+		   SRW_TAC [][] THEN
+		   `s1'' ++ [NTS lhs'] ++ s2 = s1 ++ [NTS lhs] ++ (s1' ++ s)`
+		   by METIS_TAC [APPEND_ASSOC] THEN
+		   `EVERY isNonTmnlSym [NTS lhs']` 
+		   by SRW_TAC [][isNonTmnlSym_def] THEN
+		   `(s1'' = s1) ∧ ([NTS lhs'] ++ s2 = [NTS lhs] ++ (s1' ++ s))`
+		   by METIS_TAC [NOT_CONS_NIL, symlistdiv3] THEN
+		   FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+		   `rhs ++ s1' = l1' ++ [NTS n] ++ l2 ++ s1 ++ [NTS lhs] ++ s1' ++ s`
+		   by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
+		   SRW_TAC [][] THEN
+		   FULL_SIMP_TAC (srw_ss()) [] THEN
+		   MAGIC
+		   ])),
+
+       MAGIC
+       ]);
+
 
 
 val lastExp = store_thm
@@ -1684,7 +1818,8 @@ THENL[
       `(x++l1 = pz0'++v) ∧ ([NTS n'']++l2 = [NTS B]++(w++s2))` 
       by METIS_TAC [symlistdiv3] THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
-      METIS_TAC [APPEND_ASSOC, mg1, APPEND_NIL, APPEND, MEM, NOT_EVERY],
+      `HD dl2 = s2` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+      METIS_TAC [symPropExistsGen, APPEND, APPEND_ASSOC, APPEND_NIL, MEM],
 
       UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
       Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
@@ -1692,9 +1827,20 @@ THENL[
 		     FULL_SIMP_TAC (srw_ss())  [listderiv_def]) THEN
        `dl2 = HD dl2::TL dl2` by METIS_TAC [NULL_EQ_NIL, CONS] THEN
        SRW_TAC [][] THEN
-       `MEM (pz0' ++ v ++ [NTS B] ++ w ++ s2) (MAP (addFront x) (TL dl2))`
-       by METIS_TAC [rgr_r9eq] THEN
-       FULL_SIMP_TAC (srw_ss()) [MEM_MAP, addFront_def] THEN
+       `HD dl2 = s2` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+       METIS_TAC [symPropExistsGen, APPEND, APPEND_ASSOC, APPEND_NIL, MEM]) THEN
+       `HD dl2 = s2` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+       METIS_TAC [symPropExistsGen, APPEND, APPEND_ASSOC, APPEND_NIL, MEM],
+
+      Cases_on `s1'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+      SRW_TAC [][] THEN1
+      (* s1' = [] *)
+      (UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
+      `MAP (addFront x) (TL dl2) = [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ s1`
+      by METIS_TAC [APPEND_11, APPEND_ASSOC] THEN
+      `MEM (pz0' ++ v ++ [NTS B] ++ w ++ s2) (MAP (addFront x) (TL dl2))`
+      by METIS_TAC [rgr_r9eq, MEM, MEM_APPEND] THEN
+      FULL_SIMP_TAC (srw_ss()) [MEM_MAP, addFront_def] THEN
        Cases_on `EVERY isTmnlSym y'` THEN1
        (`EVERY isTmnlSym (pz0' ++ v ++ [NTS B] ++ w ++ s2)`
        by METIS_TAC [EVERY_APPEND] THEN
@@ -1706,12 +1852,95 @@ THENL[
 	 `isWord (x++l1) ∧isWord (pz0'++v)` by METIS_TAC [EVERY_APPEND] THEN
        `(pz0'++v = x ++ l1) ∧ ([NTS n'']++l2 = [NTS B] ++ (w ++ s2))`
        by METIS_TAC [NOT_CONS_NIL, symlistdiv3] THEN
-       FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
-       METIS_TAC [APPEND_ASSOC, mg1, APPEND_NIL, APPEND, MEM, NOT_EVERY]) THEN
-      METIS_TAC [mg2],
+       FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN1
+       METIS_TAC [EVERY_APPEND, NOT_EVERY] THEN
+       (`dl2 ≠ []`by (Cases_on `dl2` THEN 
+		     FULL_SIMP_TAC (srw_ss())  [listderiv_def]) THEN
+       `dl2 = HD dl2::TL dl2` by METIS_TAC [NULL_EQ_NIL, CONS] THEN
+       SRW_TAC [][] THEN
+       `HD dl2 = s2` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+       METIS_TAC [symPropExistsGen, APPEND, APPEND_ASSOC, APPEND_NIL, MEM])) THEN
+      
+      (* s1' ≠ [] *)
+      UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
+      `MAP (λl. l ++ s2) t = t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ t''` 
+      by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+      `t = MAP (listsec ([]:γ list) s2) (t' ++ [pz0' ++ v ++ [NTS B] ++ w ++ s2] ++ t'')`
+      by MAGIC THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      `lderives g ⊢ (pz0' ++ [NTS n] ++ [NTS n'])::
+      MAP (listsec ([]:γ list) s2) t' ++ [ listsec ([]:γ list) s2 (pz0' ++ v ++ [NTS B] ++ w ++ s2)]
+       ◁ pz0' ++ [NTS n] ++ [NTS n'] → 
+       listsec ([]:γ list) s2 (pz0' ++ v ++ [NTS B] ++ w ++ s2)`
+       by MAGIC THEN
+       `lderives g ⊢[listsec ([]:γ list) s2 (pz0' ++ v ++ [NTS B] ++ w ++ s2)] ++
+       MAP (listsec ([]:γ list) s2) t'' ◁
+       listsec ([]:γ list) s2 (pz0' ++ v ++ [NTS B] ++ w ++ s2) → x` by MAGIC THEN
+       `listsec ([]:γ list) s2 (pz0' ++ v ++ [NTS B] ++ w ++ s2) = 
+			      pz0'++v ++ [NTS B] ++ w`
+			      by MAGIC THEN
+       FULL_SIMP_TAC (srw_ss()) [] THEN       
+       `isWord (pz0' ++ v)` by METIS_TAC [EVERY_APPEND] THEN
+      `EVERY isNonTmnlSym ([NTS B] ++ w)` by MAGIC THEN
+      `pz0' ++ v ++ [NTS B] ++ w = pz0' ++ (v ++ [NTS B] ++ w)`
+      by METIS_TAC [APPEND_ASSOC] THEN
+      `pz0' ++ v ++ [NTS B] ++ w = (pz0' ++ v) ++ ([NTS B] ++ w)`
+      by METIS_TAC [APPEND_ASSOC] THEN
+      `¬symRepProp ((pz0' ++ v ++ [NTS B] ++ w)::MAP (listsec ([]:γ list) s2) t'')`
+      by MAGIC THEN
+      `∃dl1' dl2' x' y'.
+      splitDerivProp 
+      (g,(pz0' ++ v ++ [NTS B] ++ w)::MAP (listsec ([]:γ list) s2) t'',x) 
+      (dl1',pz0',x') (dl2',v ++ [NTS B] ++ w,y')`
+      by METIS_TAC [ldSplitDeriv] THEN
+      FULL_SIMP_TAC (srw_ss()) [splitDerivProp] THEN
+      SRW_TAC [][] THEN
+      `dl1' = [pz0']` by
+      (Cases_on `dl1'` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+       SRW_TAC [][] THEN
+       `t=[]` by METIS_TAC [rtc2listRtcldTmnls]) THEN
+      SRW_TAC [][] THEN
+      `x'=pz0'` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+      SRW_TAC [][] THEN
+      MAP_EVERY Q.EXISTS_TAC [`MAP (listsec pz0' []) 
+			      ((pz0' ++ [NTS n] ++ [NTS n'])::
+			       (MAP (listsec [] s2) t' ++
+				[pz0' ++ v ++ [NTS B] ++ w]))`, `dl2'`,`dl2`] THEN
+      MAP_EVERY Q.EXISTS_TAC [`v`,`w`] THEN SRW_TAC [][] THEN1
+      MAGIC (* listsecldSfxNil *) THEN
+      
+      `MEM y' dl2'` by MAGIC THEN
+      `∃rst'.y' = v ++ rst'`by METIS_TAC [lderivesPfxSame, APPEND_ASSOC] THEN
+      SRW_TAC [][] THEN
+      Q.EXISTS_TAC `rst'` THEN
+      SRW_TAC [][] THEN
+      (* 9 subgoals *)
+      (* 1 *)
+      MAGIC,
 
-      UNABBREV_ALL_TAC THEN
-      METIS_TAC [mg2]
+      (* 2 *)      
+      (FULL_SIMP_TAC (srw_ss()) [distElemSubset_def] THEN
+       SRW_TAC [][] THEN
+       IMP_RES_TAC dldntsMemList THEN
+       SRW_TAC [][distinctldNts_def,ldNts_def, FILTER_APPEND] THEN
+       Cases_on `dl2'` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+       FULL_SIMP_TAC (srw_ss()) [addLast_def, FILTER_APPEND] THEN
+       MAGIC
+       (* METIS_TAC [rmd_r2, rgr_r9eq, MEM, MEM_APPEND, APPEND] *)) THEN1
+      
+      (* 3 *)
+      MAGIC THEN1
+      
+      (* 4 *)
+      MAGIC THEN
+      
+      (* 5 *)
+      MAGIC
+      
+      
+      
+      
       ]) THEN
 
 FULL_SIMP_TAC (srw_ss()) [list_lem1] THEN
@@ -1821,13 +2050,6 @@ METIS_TAC [MEM, NOT_CONS_NIL, LENGTH_NIL, DECIDE ``LENGTH l ≠ 0 ⇒ LENGTH l �
  by METIS_TAC [rmd_r2, rgr_r9eq, MEM, MEM_APPEND] THEN
 METIS_TAC [MEM, NOT_CONS_NIL, LENGTH_NIL, DECIDE ``LENGTH l ≠ 0 ⇒ LENGTH l ≥ 1``]]);
 
-
-val lderivesTmnlItself = store_thm
-("lderivesTmnlItself",
-``isWord v ⇒ (lderives g)^* v v``,
-
-SRW_TAC [][Once RTC_CASES1] THEN
-FULL_SIMP_TAC (srw_ss()) [lderives_def]);
 
 
 val allNonUseless = Define

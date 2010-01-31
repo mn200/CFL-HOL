@@ -3035,16 +3035,6 @@ Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][derives] THEN
 METIS_TAC [APPEND_NIL]);
 
-(*
-val rtc2listldFstNt = store_thm
-("rtc2listldFstNt",
-``∀pfx sfx.rtc2list (lderives g) l ∧ 
-    (l = pfx++[p++m++rst]++sfx) ∧ ¬(EVERY isTmnlSym m) ∧
-    EVERY isTmnlSym p ∧ (EVERY isTmnlSym (LAST l)) ⇒
-    ∃tl.MEM (p++tl++rst) sfx ∧ EVERY isTmnlSym tl``,
-
-MAGIC);
-*)
 
 val rtc2listldFstNt' = store_thm
 ("rtc2listldFstNt'",
@@ -3485,8 +3475,6 @@ val ntms = Define
     `ntms g = rmDupes (ntList g)`;
 
 
-
-
 val dldntsLeg = store_thm
 ("dldntsLeg",
 ``∀g dl x.lderives g ⊢ dl ◁ x → y ∧ 
@@ -3631,6 +3619,44 @@ THENL[
 	    FULL_SIMP_TAC (srw_ss()) [] THEN
 	    METIS_TAC [NOT_EVERY, everyNotTwice, frontAppendFst, APPEND,
 		       existsThrice]])]);
+
+
+val memld = store_thm
+("memld",
+``R ⊢ dl ◁ x → y ⇒ MEM x dl ∧ MEM y dl``,
+
+Cases_on `dl` THEN SRW_TAC [][listderiv_def] THEN
+Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [last_append, APPEND, APPEND_FRONT_LAST, MEM_APPEND,MEM]);
+
+
+val listDerivLastBrk = store_thm
+("listDerivLastBrk",
+``R ⊢ l ++ [e] ◁  x → z ∧ (l ≠ [])
+ ⇒
+R ⊢ l ◁ x → LAST l ∧ (e = z) ∧ R (LAST l) e``,
+
+SRW_TAC [][listderiv_def] THEN1
+METIS_TAC [rtc2list_distrib_append_fst] THEN1
+(Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
+`l=FRONT l ++ [LAST l]` by METIS_TAC [APPEND_FRONT_LAST] THEN
+`rtc2list R ([LAST l]++[e])`
+ by METIS_TAC [MEM, MEM_APPEND, rtc2list_distrib_append_snd, APPEND_ASSOC] THEN
+FULL_SIMP_TAC (srw_ss()) []);
+
+val ldImprtc2list = store_thm
+("ldImprtc2list",
+``∀dl x y.R ⊢ dl ◁ x → y ⇒ R^* x y``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+Cases_on `dl` THEN1
+ (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN SRW_TAC [][]) THEN
+IMP_RES_TAC listDerivHdBrk THEN
+RES_TAC THEN
+`h = x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+METIS_TAC [RTC_RULES]);
+
 
 
 val mlDir = "./theoryML/"

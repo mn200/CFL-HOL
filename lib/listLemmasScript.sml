@@ -1419,6 +1419,37 @@ Induct_on `t` THEN SRW_TAC [][addFront, listsec, dropLast] THEN
 SRW_TAC [][] THEN
 METIS_TAC [BUTFIRSTN_LENGTH_APPEND]);
 
+val addLastListsec = store_thm
+("addLastListsec",
+ ``∀t. (∀e. MEM e t ⇒ ∃rst. e = rst ++ sfx) ⇒
+ (MAP (λl. l ++ sfx) (MAP (listsec [] sfx) t) = t)``,
+
+Induct_on `t` THEN SRW_TAC [][listsec, dropLast] THEN
+`∃rst. h = rst ++ sfx` by METIS_TAC [] THEN
+SRW_TAC [][REVERSE_APPEND]  THEN
+METIS_TAC [REVERSE_REVERSE, BUTFIRSTN_LENGTH_APPEND, LENGTH_REVERSE]);
+
+
+val addLastImpListsec = store_thm
+("addLastImpListsec",
+``∀l l'.(MAP (λl. l ++ s2) l = l') ⇒ (l = MAP (listsec [] s2) l')``,
+
+Induct_on `l` THEN SRW_TAC [][listsec] THEN
+FULL_SIMP_TAC (srw_ss()) [listsec, dropLast, REVERSE_APPEND]  THEN
+METIS_TAC [LENGTH_REVERSE, REVERSE_REVERSE, BUTFIRSTN_LENGTH_APPEND]);
+
+
+val listsecSame = store_thm
+("listsecSame",
+ ``∀l.(∀e.MEM e l ⇒ ∃rst.(e = v ++ rst ++ y)) ⇒
+(MAP (listsec v []) (MAP (listsec [] y) l) = MAP (listsec v y) l)``,
+
+Induct_on `l` THEN SRW_TAC [][listsec, dropLast, addFront] THEN
+`∃rst. h = v ++ rst ++ y` by METIS_TAC [] THEN
+SRW_TAC [][REVERSE_APPEND] THEN
+METIS_TAC [REVERSE_REVERSE, BUTFIRSTN_LENGTH_APPEND, LENGTH_REVERSE,
+	   REVERSE_APPEND, APPEND_ASSOC]);
+
 
 
 (*val _ =

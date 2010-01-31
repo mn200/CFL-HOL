@@ -308,6 +308,37 @@ Induct_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN
 Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]);
 
+
+
+val rtc2listTrans = store_thm
+("rtc2listTrans",
+``∀t t'.rtc2list R t ∧ rtc2list R (LAST t::t') ⇒
+ rtc2list R (t++t')``,
+
+Induct_on `t` THEN SRW_TAC [][] THEN
+Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+`rtc2list R t` by METIS_TAC [rtc2list_distrib_append_snd, APPEND] THEN
+`LAST (h::t) = LAST t` by METIS_TAC [last_append, APPEND] THEN
+RES_TAC THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`t'`] MP_TAC) THEN SRW_TAC [][] THEN
+`rtc2list R (t ++ t')` by METIS_TAC [] THEN
+ Cases_on `t` THEN 
+FULL_SIMP_TAC (srw_ss()) []);
+
+
+
+val ldAppend = store_thm
+("ldAppend",
+``∀p e s x.R ⊢ (p ++ [e] ++ s) ◁ x → y =
+R ⊢ p ++ [e] ◁ x → e ∧ R ⊢ [e]++s ◁ e → y``,
+
+SRW_TAC [][listderiv_def] THEN
+Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][EQ_IMP_THM] THEN
+METIS_TAC [rtc2list_distrib_append_fst, APPEND, APPEND_ASSOC, MEM,
+	   rtc2list_distrib_append_snd, last_append, rtc2listTrans,
+	   last_elem]);
+
 (*
 val elId = store_thm
 ("elId",

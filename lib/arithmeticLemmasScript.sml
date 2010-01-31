@@ -9,6 +9,14 @@ val _ = Globals.linewidth := 60
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 
+val powGt = store_thm
+("powGt",
+``1 ≤ k ∧ m ≥ 2 ** k ⇒ m > 2**(k-1)``,
+SRW_TAC [][GREATER_EQ, GREATER_DEF] THEN 
+MATCH_MP_TAC LESS_LESS_EQ_TRANS THEN 
+Q.EXISTS_TAC `2 ** k` THEN SRW_TAC [ARITH_ss][]);
+
+
 val powLe  = store_thm
 ("powLe",
 ``∀n p p'.n ≤ 2**(p-1) ∧ (p ≤ p') ⇒ n ≤ 2**(p'-1)``,

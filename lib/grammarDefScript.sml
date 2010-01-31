@@ -3490,13 +3490,7 @@ Q_TAC SUFF_TAC `set (ldNts [h]) ⊆ (set (MAP NTS (ntms g)))` THEN1
 (SRW_TAC [][] THEN
  METIS_TAC [CARD_SUBSET, FINITE_LIST_TO_SET, LENGTH_MAP, CARD_LIST_TO_SET,
 	    DECIDE ``a ≤ b ∧ b ≤ c ⇒ a ≤ c``]) THEN
-MAGIC
-(*
-Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
-SRW_TAC [][ldNts_def] THEN
-Cases_on `h'` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
-METIS_TAC [MEM_MAP, symbol_11]
-*));
+MAGIC);
 
 
 val symMemProp = store_thm
@@ -3657,6 +3651,12 @@ RES_TAC THEN
 `h = x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 METIS_TAC [RTC_RULES]);
 
+val symPropExistsGen = store_thm
+("symPropExistsGen",
+``∀dl x p s.
+lderives g ⊢ dl ◁ x → y ∧ MEM (p ++ x ++ s) (TL dl) ∧ isWord y ∧ isCnf g
+⇒ symRepProp dl``,
+MAGIC);
 
 
 val mlDir = "./theoryML/"

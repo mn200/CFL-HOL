@@ -3529,7 +3529,8 @@ METIS_TAC [APPEND_NIL]) THEN
 
 val symPropExists = store_thm
 ("symPropExists",
-``lderives g ⊢ dl ◁ x → z ∧ (dl = ([[NTS A]] ++ p ++ [p0 ++ [NTS A] ++ s0] ++ s)) ∧
+``lderives g ⊢ dl ◁ x → z ∧ 
+(dl = ([[NTS A]] ++ p ++ [p0 ++ [NTS A] ++ s0] ++ s)) ∧
   EVERY isTmnlSym z ⇒
   symRepProp dl``,
 

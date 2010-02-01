@@ -339,6 +339,23 @@ METIS_TAC [rtc2list_distrib_append_fst, APPEND, APPEND_ASSOC, MEM,
 	   rtc2list_distrib_append_snd, last_append, rtc2listTrans,
 	   last_elem]);
 
+
+val ldsubderivs = store_thm
+("ldsubderivs",
+``∀dl1 dl2. R ⊢ dl1++dl2 ◁ x → y ⇒
+(dl1 ≠ [] ⇒ R ⊢ dl1 ◁ HD dl1 → LAST dl1 ∧ (HD dl1 = x)) ∧
+(dl2 ≠ [] ⇒ R ⊢ dl2 ◁ HD dl2 → LAST dl2 ∧ (LAST dl2 = y)) ∧
+((dl1≠[]) ∧ (dl2≠[]) ⇒ R (LAST dl1) (HD dl2))``,
+
+Cases_on `dl1` THEN Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN1
+METIS_TAC [rtc2list_distrib_append_fst, APPEND, APPEND_ASSOC, MEM,
+	   rtc2list_distrib_append_snd] THEN1
+METIS_TAC [rtc2list_distrib_append_fst, APPEND, APPEND_ASSOC, MEM,
+	   rtc2list_distrib_append_snd] THEN
+
+`h::t = FRONT (h::t) ++ [LAST (h::t)]` by METIS_TAC [APPEND_FRONT_LAST,MEM] THEN
+METIS_TAC [ldMemRel', APPEND, APPEND_ASSOC, listderiv_def]);
 (*
 val elId = store_thm
 ("elId",

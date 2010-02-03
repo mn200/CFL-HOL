@@ -3163,17 +3163,6 @@ val rtc_lderives_same_append_right = store_thm
         METIS_TAC [RTC_RULES,lderives_same_append_right]);
 
 
-val ldMemRel' = store_thm
-("ldMemRel'",
-``∀dl x e1 e2 p m s.
- R ⊢ dl ◁ x → y ∧ (dl = p ++ [e1] ++ [e2] ++ s) ⇒
- R e1 e2``,
-
-Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-SRW_TAC [][] THEN
-`rtc2list R ([e1]++[e2]++s)` by METIS_TAC [rtc2list_distrib_append_snd,
-					   MEM, MEM_APPEND, APPEND_ASSOC] THEN
-FULL_SIMP_TAC (srw_ss()) []);
 
 val lderivesTmnlItself = store_thm
 ("lderivesTmnlItself",

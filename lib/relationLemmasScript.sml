@@ -340,6 +340,19 @@ METIS_TAC [rtc2list_distrib_append_fst, APPEND, APPEND_ASSOC, MEM,
 	   last_elem]);
 
 
+val ldMemRel' = store_thm
+("ldMemRel'",
+``∀dl x e1 e2 p m s.
+ R ⊢ dl ◁ x → y ∧ (dl = p ++ [e1] ++ [e2] ++ s) ⇒
+ R e1 e2``,
+
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+`rtc2list R ([e1]++[e2]++s)` by METIS_TAC [rtc2list_distrib_append_snd,
+					   MEM, MEM_APPEND, APPEND_ASSOC] THEN
+FULL_SIMP_TAC (srw_ss()) []);
+
+
 val ldsubderivs = store_thm
 ("ldsubderivs",
 ``∀dl1 dl2. R ⊢ dl1++dl2 ◁ x → y ⇒

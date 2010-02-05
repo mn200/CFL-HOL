@@ -3721,12 +3721,114 @@ RES_TAC THEN
 `h = x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 METIS_TAC [RTC_RULES]);
 
-val symPropExistsGen = store_thm
-("symPropExistsGen",
-``∀dl x p s.
-lderives g ⊢ dl ◁ x → y ∧ MEM (p ++ x ++ s) (TL dl) ∧ isWord y ∧ isCnf g
-⇒ symRepProp dl``,
-MAGIC);
+
+
+val ldStreams = store_thm
+("ldStreams",
+``∀dl x1 x2 y.
+lderives g ⊢ dl ◁ (x1++x2) → y ∧ isWord y ⇒
+∃dl1 dl2 y1 y2.
+lderives g ⊢ dl1 ◁ x1 → y1 ∧ 
+lderives g ⊢ dl2 ◁ x2 → y2 ∧
+(y = y1 ++ y2) ∧ 
+(dl = MAP (λl.addLast l x2) dl1 ++ MAP (addFront y1) (TL dl2))``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+ (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+  SRW_TAC [][] THEN
+  MAP_EVERY Q.EXISTS_TAC [`[x1]`,`[x2]`] THEN
+  FULL_SIMP_TAC (srw_ss()) [addLast_def]) THEN
+`h = x1++x2` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+IMP_RES_TAC listDerivHdBrk THEN
+FULL_SIMP_TAC (srw_ss()) [lderives] THEN
+SRW_TAC [][] THEN
+IMP_RES_TAC twoListAppEq THEN SRW_TAC [][]
+THENL[
+      FIRST_X_ASSUM (Q.SPECL_THEN [`s1++rhs`,`s2`,`y`] MP_TAC) THEN SRW_TAC [][] THEN
+      MAP_EVERY Q.EXISTS_TAC [`[s1++[NTS lhs]]++dl1`,`dl2`,`y1`,`y2`] THEN
+      SRW_TAC [][addLast_def] THEN
+      Cases_on `dl1` THEN 
+      FULL_SIMP_TAC (srw_ss()) [listderiv_def, addLast_def] THEN
+      SRW_TAC [][] THEN
+      METIS_TAC [ldres1, APPEND_NIL, lderives_same_append_left],
+
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      IMP_RES_TAC twoListAppEq THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+      SRW_TAC [][]
+      THENL[
+	    FIRST_X_ASSUM (Q.SPECL_THEN [`s1`,`rhs++s2`,`y`] MP_TAC) THEN
+	    SRW_TAC [][] THEN
+	    MAP_EVERY Q.EXISTS_TAC [`dl1`,`[NTS lhs::s2]++dl2`,`y1`,`y2`] THEN
+	    SRW_TAC [][addLast_def] THEN
+	    Cases_on `dl2` THEN 
+	    FULL_SIMP_TAC (srw_ss()) [listderiv_def, addLast_def] THEN
+	    SRW_TAC [][] THEN1
+	    METIS_TAC [ldres1, APPEND_NIL, lderives_same_append_right, APPEND] THEN
+	    Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+	    `t''=[]` by METIS_TAC [rtc2listRtcldTmnls] THEN
+	    SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+	    METIS_TAC [APPEND, APPEND_ASSOC],
+
+	    FIRST_X_ASSUM (Q.SPECL_THEN [`x1`,`s1''++rhs++s2`,`y`] MP_TAC) THEN
+	    SRW_TAC [][] THEN
+	    MAP_EVERY Q.EXISTS_TAC [`dl1`,`[s1''++[NTS lhs]++s2]++dl2`,`y1`,
+				    `y2`] THEN SRW_TAC [][] THEN
+	    Cases_on `dl2` THEN 
+	    FULL_SIMP_TAC (srw_ss()) [listderiv_def, addLast_def] THEN
+	    SRW_TAC [][] THEN1
+	    METIS_TAC [ldres1, APPEND_NIL, lderives_same_append_right, APPEND,
+		       lderives_same_append_left] THEN
+	    Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+	    FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+	    `t''=[]` by METIS_TAC [rtc2listRtcldTmnls] THEN
+	    SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [addLast_def] THEN
+	    METIS_TAC [APPEND, APPEND_ASSOC],
+
+	    Cases_on `s1''` THEN SRW_TAC [][] THEN
+	    FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][]
+	    THENL[
+		  FIRST_X_ASSUM (Q.SPECL_THEN [`s1`,`rhs++s2`,`y`] MP_TAC) THEN
+		  SRW_TAC [][] THEN
+		  MAP_EVERY Q.EXISTS_TAC [`dl1`,`[NTS lhs::s2]++dl2`,`y1`,`y2`] THEN
+		  SRW_TAC [][addLast_def] THEN
+		  Cases_on `dl2` THEN 
+		  FULL_SIMP_TAC (srw_ss()) [listderiv_def, addLast_def] THEN
+		  SRW_TAC [][] THEN1
+		  METIS_TAC [ldres1, APPEND_NIL, lderives_same_append_right, APPEND] THEN
+		  Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
+		  `t''=[]` by METIS_TAC [rtc2listRtcldTmnls] THEN
+		  SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+		  METIS_TAC [APPEND, APPEND_ASSOC],
+
+		  FIRST_X_ASSUM (Q.SPECL_THEN [`s1++rhs`,`s2`,`y`] MP_TAC) THEN SRW_TAC [][] THEN
+		  MAP_EVERY Q.EXISTS_TAC [`[s1++[NTS lhs]]++dl1`,`dl2`,`y1`,`y2`] THEN
+		  SRW_TAC [][addLast_def] THEN
+		  Cases_on `dl1` THEN 
+		  FULL_SIMP_TAC (srw_ss()) [listderiv_def, addLast_def] THEN
+		  SRW_TAC [][] THEN
+		  METIS_TAC [ldres1, APPEND_NIL, lderives_same_append_left]
+		  ]
+	    ],
+
+      
+      FIRST_X_ASSUM (Q.SPECL_THEN [`s1++rhs++s1'`,`s2'`,`y`] MP_TAC) THEN
+      SRW_TAC [][] THEN
+      `∃dl1 dl2 y1 y2.
+            lderives g ⊢ dl1 ◁ s1 ++ rhs ++ s1' → y1 ∧
+            lderives g ⊢ dl2 ◁ s2' → y2 ∧ (y = y1 ++ y2) ∧
+            ((s1 ++ rhs ++ s1' ++ s2')::t =
+             MAP (λl. addLast l s2') dl1 ++
+             MAP (addFront y1) (TL dl2))` by METIS_TAC [APPEND_ASSOC] THEN
+      SRW_TAC [][] THEN
+      MAP_EVERY Q.EXISTS_TAC [`(s1++[NTS lhs]++s1')::dl1`,`dl2`,`y1`,`y2`] THEN
+      SRW_TAC [][] THEN
+      Cases_on `dl1` THEN Cases_on `dl2` THEN 
+      FULL_SIMP_TAC (srw_ss()) [listderiv_def,addLast_def] THEN
+      METIS_TAC [lderives_same_append_left, lderives_same_append_right, ldres1]
+      ]);
 
 
 val mlDir = "./theoryML/"

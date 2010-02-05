@@ -3543,6 +3543,69 @@ val ntList = Define
 val ntms = Define
     `ntms g = rmDupes (ntList g)`;
 
+val nonTmnlsApp = store_thm
+("nonTmnlsApp",
+``∀l1 l2.nonTmnls (l1 ++ l2) = nonTmnls l1 ++ nonTmnls l2``,
+Induct_on `l1` THEN SRW_TAC [][nonTmnls] THEN
+Cases_on `h` THEN SRW_TAC [][nonTmnls]);
+
+val ruleRhsInntms = store_thm
+("ruleRhsInntms",
+``∀rhs.MEM (rule lhs rhs) (rules g) ⇒ 
+(MEM lhs (ntms g)) ∧
+(∀e. MEM e rhs ∧ isNonTmnlSym e ⇒ ∃nt. (e = NTS nt) ∧ MEM nt (ntms g))``,
+
+SRW_TAC [][rgr_r9eq] THEN
+SRW_TAC [][ntms, ntList, nonTerminalsList, nonTmnlsApp, nonTmnls] THEN1
+METIS_TAC [rmd_r2, rgr_r9eq, APPEND , APPEND_ASSOC] THEN
+Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+SRW_TAC [][FILTER_APPEND] THEN
+FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, nts2str_def] THEN
+METIS_TAC [rmd_r2, rgr_r9eq, APPEND , APPEND_ASSOC]);
+
+val cardLenLeq = store_thm
+("cardLenLeq",
+``∀l.CARD (set s) ≤ LENGTH l ∧ (∀e.MEM e s ⇒ MEM e l) ∧ MEM x l ∧ ¬MEM x s
+⇒
+CARD ((set s) ∪ {x}) ≤ LENGTH l``,
+
+SRW_TAC [][] THEN
+`set s ⊂ set l` by 
+(SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [PSUBSET_DEF, EXTENSION, SUBSET_DEF] THEN
+ METIS_TAC []) THEN
+`CARD (set s) < CARD (set l)` by METIS_TAC [FINITE_LIST_TO_SET, CARD_PSUBSET] THEN
+`CARD (set s ∪ {x}) ≤ CARD (set l)` by
+(`set s ∪ {x} = x INSERT set s` by METIS_TAC [FINITE_LIST_TO_SET, INSERT_SING_UNION,
+					      UNION_COMM] THEN
+ SRW_TAC [][] THEN
+ METIS_TAC [CARD_LIST_TO_SET,DECIDE ``a < b ⇒ SUC a ≤ b``]) THEN
+METIS_TAC [CARD_LIST_TO_SET,DECIDE ``a ≤ b ∧ b ≤ c ⇒ a ≤ c``]);
+
+val ldInTmnsApp = store_thm
+("ldInTmnsApp",
+``∀dl x.lderives g ⊢ dl ◁ x → y ∧
+ (∀e.MEM e x ∧ isNonTmnlSym e ⇒ ∃nt.(e=NTS nt) ∧ MEM nt (ntms g)) ⇒
+(∀e.MEM e (FLAT dl) ∧ isNonTmnlSym e ⇒ ∃nt.(e=NTS nt) ∧ MEM nt (ntms g))``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+(FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][]) THEN
+`h = x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+IMP_RES_TAC listDerivHdBrk THEN
+FULL_SIMP_TAC (srw_ss()) [lderives] THEN
+SRW_TAC [][] THEN
+`MEM lhs (ntms g) ∧
+(∀e.MEM e rhs ∧ isNonTmnlSym e ⇒ ∃nt. (e = NTS nt) ∧ MEM nt (ntms g))`
+by METIS_TAC [ruleRhsInntms] THEN1
+METIS_TAC [MEM_APPEND, MEM] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`s1++rhs++s2`] MP_TAC) THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC []);
+
+
 
 val dldntsLeg = store_thm
 ("dldntsLeg",
@@ -3550,16 +3613,96 @@ val dldntsLeg = store_thm
  (∀e.MEM e x ∧ isNonTmnlSym e ⇒ ∃nt.(e=NTS nt) ∧ MEM nt (ntms g)) ⇒
 LENGTH (distinctldNts dl) ≤ LENGTH (ntms g)``,
 
-Induct_on `dl` THEN SRW_TAC [][LENGTH_distinctldNts] THEN
+Induct_on `dl` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
+SRW_TAC [][] THEN1
 
-Q_TAC SUFF_TAC `set (ldNts [h]) ⊆ (set (MAP NTS (ntms g)))` THEN1
-(SRW_TAC [][] THEN
- METIS_TAC [CARD_SUBSET, FINITE_LIST_TO_SET, LENGTH_MAP, CARD_LIST_TO_SET,
-	    DECIDE ``a ≤ b ∧ b ≤ c ⇒ a ≤ c``]) THEN
-MAGIC);
+ (SRW_TAC [][LENGTH_distinctldNts] THEN
+  Q_TAC SUFF_TAC `set (ldNts [h]) ⊆ (set (MAP NTS (ntms g)))` THEN1
+  (SRW_TAC [][] THEN
+   METIS_TAC [CARD_SUBSET, FINITE_LIST_TO_SET, LENGTH_MAP, CARD_LIST_TO_SET,
+	      DECIDE ``a ≤ b ∧ b ≤ c ⇒ a ≤ c``]) THEN
+
+  FULL_SIMP_TAC (srw_ss()) [SUBSET_DEF, EXTENSION] THEN
+  SRW_TAC [][] THEN
+  Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+  (IMP_RES_TAC memldNts THEN
+   FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+   FIRST_X_ASSUM (Q.SPECL_THEN [`NTS n`] MP_TAC) THEN
+   SRW_TAC [][] THEN
+   FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, rgr_r9eq] THEN
+   SRW_TAC [][] THEN
+   METIS_TAC []) THEN
+  FULL_SIMP_TAC (srw_ss()) [ldNts_def, MEM_FILTER, isNonTmnlSym_def]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [lderives] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+`MEM lhs (ntms g) ∧
+(∀e.MEM e rhs ∧ isNonTmnlSym e ⇒ ∃nt. (e = NTS nt) ∧ MEM nt (ntms g))`
+by METIS_TAC [ruleRhsInntms] THEN
+`LENGTH (distinctldNts ((s1 ++ rhs ++ s2)::t)) ≤ LENGTH (ntms g)`
+by METIS_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [LENGTH_distinctldNts] THEN
+Cases_on `(NTS lhs) ∈ (set (ldNts ((s1 ++ rhs ++ s2)::t)))`
+THENL[
+      `(set (ldNts ((s1 ++ [NTS lhs] ++ s2)::(s1 ++ rhs ++ s2)::t))) = 
+      (set (ldNts ((s1 ++ rhs ++ s2)::t)))` by
+      (FULL_SIMP_TAC (srw_ss()) [EXTENSION, ldNts_def, FILTER_APPEND,
+				 isNonTmnlSym_def] THEN
+       METIS_TAC []) THEN
+      METIS_TAC [CARD_SUBSET, FINITE_LIST_TO_SET, CARD_LIST_TO_SET,
+		 DECIDE ``a ≤ b ∧ b ≤ c ⇒ a ≤ c``],
+
+      `set (ldNts ((s1 ++ rhs ++ s2)::t)) ∪ {NTS lhs} =
+      (set (ldNts ((s1 ++ [NTS lhs] ++ s2)::(s1 ++ rhs ++ s2)::t)))`
+      by (FULL_SIMP_TAC (srw_ss()) [EXTENSION, ldNts_def, FILTER_APPEND,
+				 isNonTmnlSym_def] THEN
+       METIS_TAC []) THEN
+      `MEM (NTS lhs) (MAP (NTS :α -> (α, β) symbol) (ntms g))` by
+      (FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN METIS_TAC []) THEN
+      `LENGTH (MAP NTS (ntms g)) = LENGTH (ntms g)` by METIS_TAC [LENGTH_MAP] THEN     
+      `∀e.MEM e (ldNts ((s1 ++ rhs ++ s2)::t)) ⇒ MEM e (MAP NTS (ntms g))`
+      by 
+      (SRW_TAC [][ldNts_def, FILTER_APPEND] THEN
+      FULL_SIMP_TAC (srw_ss()) [MEM_FILTER]  THEN
+       Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] 
+       THENL[
+	     Q_TAC SUFF_TAC `MEM n (ntms g)` THEN1
+	     (SRW_TAC [][rgr_r9eq] THEN FULL_SIMP_TAC (srw_ss()) [] THEN 
+	      METIS_TAC []) THEN1
+	     METIS_TAC [MEM, symbol_11, MEM_APPEND],
+	     Q_TAC SUFF_TAC `MEM n (ntms g)` THEN1
+	     (SRW_TAC [][rgr_r9eq] THEN FULL_SIMP_TAC (srw_ss()) [] THEN 
+	      METIS_TAC []) THEN
+	     METIS_TAC [MEM, symbol_11, MEM_APPEND],
+	     Q_TAC SUFF_TAC `MEM n (ntms g)` THEN1
+	     (SRW_TAC [][rgr_r9eq] THEN FULL_SIMP_TAC (srw_ss()) [] THEN 
+	      METIS_TAC []) THEN
+	     METIS_TAC [MEM, symbol_11, MEM_APPEND],
+
+	     `lderives g ⊢ ((s1 ++ rhs ++ s2)::t) ◁ s1++rhs++s2 → 
+	     (LAST ((s1++rhs++s2)::t))` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+	     `(∀e.MEM e (s1++rhs++s2) ∧ isNonTmnlSym e ⇒
+	       ∃nt. (e = NTS nt) ∧ MEM nt (ntms g))` by METIS_TAC [MEM, MEM_APPEND,
+								   isNonTmnlSym_def] THEN
+	     `FLAT ((s1++rhs++s2)::t) = s1++rhs++s2 ++ FLAT t` 
+	     by SRW_TAC [][FLAT_APPEND] THEN
+	     IMP_RES_TAC ldInTmnsApp THEN
+	     FULL_SIMP_TAC (srw_ss()) [] THEN
+	     Q_TAC SUFF_TAC `MEM n (ntms g)` THEN1
+	     (SRW_TAC [][rgr_r9eq] THEN FULL_SIMP_TAC (srw_ss()) [] THEN 
+	      METIS_TAC []) THEN
+	     METIS_TAC [isNonTmnlSym_def, symbol_11]
+	     ]) THEN
+      Q.ABBREV_TAC `s = (ldNts ((s1 ++ rhs ++ s2)::t))` THEN
+      Q.ABBREV_TAC `l:(α,β) symbol list = MAP NTS (ntms g)` THEN
+      `CARD (set s) ≤ LENGTH l` by METIS_TAC [LENGTH_MAP] THEN
+      `LENGTH (ntms g) = LENGTH l` by METIS_TAC [LENGTH_MAP] THEN
+      `CARD (set s ∪ {NTS lhs}) ≤  LENGTH l` 
+      by METIS_TAC [cardLenLeq, mem_in, LENGTH_MAP] THEN      
+      METIS_TAC [CARD_LIST_TO_SET,DECIDE ``a ≤ b ∧ b ≤ c ⇒ a ≤ c``]]);
 
 
 val symMemProp = store_thm

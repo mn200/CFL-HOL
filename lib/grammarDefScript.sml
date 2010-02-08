@@ -55,76 +55,6 @@ val getRules = Define `
     else getRules sym rs)`;
 
 
-val rhsWithSym = Define
-`(rhsWithSym sym [] = []) ∧
- (rhsWithSym sym ((rule l r)::rst) =
-  if MEM sym r then (r::rhsWithSym sym rst)
-  else rhsWithSym sym rst)`;
-
-val rulesWithSymInRhs = Define
-`(rulesWithSymInRhs sym [] = []) ∧
- (rulesWithSymInRhs sym ((rule l r)::rst) =
-  if MEM sym r then
-      ((l, breakAtElem sym r)::rulesWithSymInRhs sym rst)
-  else rulesWithSymInRhs sym rst)`;
-
-
-val lhsWithLastSym = Define `
-  (lhsWithLastSym sym [] = []) ∧
-  (lhsWithLastSym sym ((rule l [])::rs) =
-   rmDupes (lhsWithLastSym sym rs)) ∧
-  (lhsWithLastSym sym ((rule l r)::rs) =
-   if (LAST r =  sym) then
-       rmDupes ((NTS l) :: lhsWithLastSym sym rs)
-   else rmDupes (lhsWithLastSym sym rs))`;
-
-val last_l1 = prove(
-  ``∀sym l r. (lhsWithLastSym  sym [rule l r] ≠ [])
-         ⇒
-      (∃pfx.pfx++[sym] = r)``,
-  REPEAT GEN_TAC THEN Cases_on `r` THEN
-  SRW_TAC [][lhsWithLastSym, rmDupes] THEN
-  Q.EXISTS_TAC `FRONT (h::t)` THEN
-  SRW_TAC [][APPEND_FRONT_LAST]);
-
-val lwls_r1 = store_thm (
-"lwls_r1",
-``(lhsWithLastSym sym (rule s l::rs) ≠ []:('c, 'd) symbol list)
-         ⇒
-  ((lhsWithLastSym sym [rule s l] ≠ []:('c, 'd) symbol list) ∨
-   (lhsWithLastSym sym rs ≠ []:('c, 'd) symbol list))``,
-SRW_TAC [] [] THEN
-Cases_on `l` THENL[
-FULL_SIMP_TAC (srw_ss()) [lhsWithLastSym] THEN
-Cases_on `lhsWithLastSym sym rs` THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-METIS_TAC [],
-METIS_TAC [rmDupes,lhsWithLastSym]]);
-
-
-val notNullLhsLastSym = store_thm (
-"notNullLhsLastSym",
-``∀sym rs.(lhsWithLastSym sym rs ≠ []:('c, 'd) symbol list)
-       ⇒
-    (∃l pfx.MEM (rule l (pfx++[sym])) rs)``,
-SRW_TAC [] [] THEN
-Induct_on `rs` THEN
-SRW_TAC [] [lhsWithLastSym] THEN
-SRW_TAC [] [] THEN
-Cases_on `h` THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-`~(lhsWithLastSym sym (rule n l::rs)=
-     []:('c, 'd) symbol list) ⇒
- ((lhsWithLastSym sym [rule n l] ≠ []:('c, 'd) symbol list) ∨
-  (lhsWithLastSym sym rs ≠ []:('c, 'd) symbol list))`
- by METIS_TAC [lwls_r1] THEN
-RES_TAC  THEN
-`(lhsWithLastSym  sym [rule n l] ≠ []:('c, 'd) symbol list)
-      ⇒
-   (∃pfx.l=pfx++[sym])` by METIS_TAC [last_l1] THEN
-METIS_TAC []);
-
-
 val rule_terminals = Define
 `rule_terminals (rule l r) =
     { tmnl | isTmnlSym tmnl ∧ MEM tmnl r }`;
@@ -148,17 +78,6 @@ val nonTerminals = Define
 `nonTerminals (G p s) =
   NTS s INSERT BIGUNION (IMAGE rule_nonterminals (set p))`;
 
-val nonTerminalsML =  Define
-`(nonTerminalsML (G [] s) = {NTS s}) ∧
- (nonTerminalsML (G (rule l r::rs) s) =
-      set (FILTER isNonTmnlSym (NTS l :: r)) ∪
-      nonTerminalsML (G rs s))`;
-
-
-val terminalsML = Define
-`(terminalsML (G [] s) = LIST_TO_SET []) ∧
- (terminalsML (G (rule l r::rs) s) =
-      LIST_TO_SET (FILTER isTmnlSym r) ∪ terminalsML (G rs s))`;
 
 val terminalsList = Define
 `(terminalsList [] = []) ∧
@@ -175,51 +94,12 @@ val nonTerminalsList = Define
 `nonTerminalsList s rl = s::nonTmnls rl`;
 
 
-val nonTerminalsEq = store_thm
-("nonTerminalsEq",
-``nonTerminals g = nonTerminalsML g``,
-Cases_on `g` THEN
-Induct_on `l` THEN
-SRW_TAC [] [nonTerminals, nonTerminalsML] THEN
-Cases_on `h` THEN
-FULL_SIMP_TAC (srw_ss()) [rule_nonterminals,nonTerminalsML,
-			  isNonTmnlSym_def,nonTerminals] THEN
-`nonTerminalsML (G l n) =
-     NTS n INSERT BIGUNION (IMAGE rule_nonterminals (set l))`
-	 by SRW_TAC [] [] THEN
-ONCE_ASM_REWRITE_TAC [] THEN
-SRW_TAC [] [filter_seteq,insert_union,isNonTmnlSym_def]);
-
-
-val terminalsEq = store_thm
-("terminalsEq",
-``terminals g = terminalsML g``,
-Cases_on `g` THEN
-Induct_on `l` THEN
-SRW_TAC [] [terminals, terminalsML] THEN
-Cases_on `h` THEN
-FULL_SIMP_TAC (srw_ss()) [terminalsML,isTmnlSym_def,terminals,
-			  rule_terminals] THEN
-`terminalsML (G l n) = BIGUNION (IMAGE rule_terminals (set l))`
-				by SRW_TAC [] [] THEN
-ONCE_ASM_REWRITE_TAC [] THEN
-FULL_SIMP_TAC (srw_ss()) [filter_seteq,insert_union,
-			  isTmnlSym_def]);
 
 
 val allSyms = Define
 `allSyms g = nonTerminals g ∪ terminals g`;
 
 
-val allSymsML = Define
-`allSymsML g = nonTerminalsML g ∪ terminalsML g`;
-
-
-val allSymsEq = store_thm (
-"allSymsEq",
-``allSyms g = allSymsML g``,
-METIS_TAC [allSyms, allSymsML, terminalsEq, nonTerminalsEq,
-	   NOT_EQUAL_SETS]);
 
 val derives = Define
 `derives g lsl rsl = ∃s1 s2 rhs lhs.
@@ -288,11 +168,6 @@ val rtc_derives_same_append_left = store_thm ("rtc_derives_same_append_left",
         METIS_TAC [relationTheory.RTC_RULES,derives_same_append_left]
 );
 
-val b1 = store_thm ("b1",
-``∀rst. ~RTC (derives g) [] (fst::rst)``,
-SRW_TAC [] [Once RTC_CASES1, derives]
-)
-
 val rtc_derives_same_append_right = store_thm ("rtc_derives_same_append_right",
         ``∀u v.RTC (derives g) u v ⇒ ∀x. RTC (derives g) (u++x) (v++x)``,
         HO_MATCH_MP_TAC relationTheory.RTC_INDUCT THEN
@@ -345,89 +220,14 @@ METIS_TAC []
 );
 
 
-(*
-Useless symbols
-A symbol X is useful if there is a derivation S *=> aXb *=> w for some a,b,w where w in T*.
-but have to handle the case where X may only occur in sentential forms containing a useless
-symbol itself.
-*)
 
-(*
-Lemma 4.2
-Given a CFG G = (V T P S) we can effectively find an
-equivalent CFG G' = (V', T', P', S) such that for each X in V'UT'
-there exists a and b in (V'UT')* for which S=>*aXb.
-*)
-
-
-val is_null = Define `is_null g r = ∀w.RTC (derives g) r w ⇒ is_word w ⇒ (w=[]) `;
-
-(*
-Theorem 4.3
-
-If L=L(G) for some CFG G = (V,T,P,S), then L-{e} is L(G') for a CFG G' with no useless symbols or e-productions.
-*)
-
-(*
- Lemma 4.3
-Define an A-production to be a production with variable A on the
-left. Let G=(V,T,P,S) be a CFG. Let A->xBy be a production in P and
-B->b1|b2... be the set of all B-productions. Let G1=(V,T,P1,S) be
-obtained from G by deleting the production A->xBy from P and adding
-the productions A->xb1y|xb2y.... Then L(g)=L(G1).
-*)
-
-
-
-
-
-(*
-Theorem 4.6
-Every CFL L without e can be generated by a grammar for
-which every production is of the form A->aalph, where A is a variable,
-a is a terminal and alpha (possibly empty) is a string of variables.
-*)
-
-val numTmnls = Define `(numTmnls [] = 0)
-∧ (numTmnls (r::rs) = if isTmnlSym r then 1+numTmnls rs else numTmnls rs)`
-
-
-val sub_result = store_thm ("sub_result",
-  ``∀g symlist.EVERY (gaw g) symlist ⇒
-    ∃w. RTC (derives g) symlist w ∧ EVERY isTmnlSym w``,
-STRIP_TAC THEN
-  Induct_on `symlist` THEN SRW_TAC [][] THENL [
-    Q.EXISTS_TAC `[]` THEN SRW_TAC [][RTC_RULES],
-    FULL_SIMP_TAC (srw_ss()) [gaw] THEN
-    Q.EXISTS_TAC `w' ++ w` THEN SRW_TAC [] [] THEN
-    `RTC (derives g) (h::symlist) (w' ++ w) = RTC (derives g) ([h]++symlist) (w' ++ w)` by SRW_TAC [] [] THEN
-    ASM_REWRITE_TAC [] THEN METIS_TAC [derives_append]]);
-
-
-val key_result = store_thm ("key_result",
-  ``EVERY (gaw g) v ∧ derives g u v ⇒ EVERY (gaw g) u``,
-  SRW_TAC [][derives] THEN
-  FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND] THEN `EVERY (gaw g) rhs ⇒
-    ∃w. RTC (derives g) rhs w ∧ EVERY isTmnlSym w` by FULL_SIMP_TAC (srw_ss()) [gaw,sub_result]
-THEN RES_TAC THEN SRW_TAC [] [gaw] THEN
-`∀lhs rhs g.MEM (rule lhs rhs) (rules g) ⇒ derives g [NTS lhs] rhs` by FULL_SIMP_TAC (srw_ss()) [res1]
-THEN RES_TAC THEN METIS_TAC [RTC_RULES]);
-
-val sub_result_rev = store_thm ("sub_result_rev",
-``∀symlist.(∃w. RTC (derives g) symlist w ∧ EVERY isTmnlSym w) ⇒ EVERY (gaw g) symlist``,
-Q_TAC SUFF_TAC `∀symlist w.RTC (derives g) symlist w ⇒ EVERY isTmnlSym w ⇒ EVERY (gaw g) symlist`
-THEN1 METIS_TAC [] THEN HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [] []
-THENL [Induct_on `symlist` THEN SRW_TAC [] [gaw] THEN Q.EXISTS_TAC `[h]` THEN SRW_TAC [] [RTC_RULES],
-METIS_TAC [key_result]]);
-
-val term_syms_gen_words = store_thm ("term_syms_gen_words",
-  ``EVERY isTmnlSym w ⇒ EVERY (gaw g) w``,
-  METIS_TAC [RTC_RULES, sub_result_rev])
 
 
 
 val upgr_r7 = store_thm("upgr_r7",
-``∀ u z.RTC (derives g) u z ⇒ (u=x++y) ⇒ ∃x' y'. (z=x'++y') ⇒ RTC (derives g) x x' ∧ RTC (derives g) y y'``,
+``∀u z.
+    (derives g)^* u z ⇒ (u=x++y) ⇒
+    ∃x' y'. (z=x'++y') ⇒ (derives g)^* x x' ∧ (derives g)^* y y'``,
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT_RIGHT1 THEN
 SRW_TAC [] [] THENL[
   MAP_EVERY Q.EXISTS_TAC [`x`,`y`] THEN SRW_TAC [] [RTC_RULES,RTC_REFLEXIVE],
@@ -436,7 +236,9 @@ SRW_TAC [] [] THENL[
 
 
 val lupgr_r7 = store_thm("lupgr_r7",
-``∀ u z.RTC (lderives g) u z ⇒ (u=x++y) ⇒ ∃x' y'. (z=x'++y') ⇒ RTC (lderives g) x x' ∧ RTC (lderives g) y y'``,
+``∀u z.
+     (lderives g)^* u z ⇒ (u=x++y) ⇒
+     ∃x' y'. (z=x'++y') ⇒ (lderives g)^* x x' ∧ (lderives g)^* y y'``,
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT_RIGHT1 THEN
 SRW_TAC [] [] THENL[
   MAP_EVERY Q.EXISTS_TAC [`x`,`y`] THEN SRW_TAC [] [RTC_RULES,RTC_REFLEXIVE],
@@ -465,7 +267,7 @@ METIS_TAC [RTC_RULES_RIGHT1]
 
 
 val rtc_r1 = store_thm("rtc_r1",
-``RTC (derives g) s1 s2 ⇒ ~(s1=s2) ⇒ (∃sf.derives g s1 sf ∧ RTC (derives g) sf s2)``,
+``(derives g)^* s1 s2 ⇒ s1≠s2 ⇒ ∃sf. derives g s1 sf ∧ (derives g)^* sf s2``,
 REWRITE_TAC [Once RTC_CASES1] THEN
 SRW_TAC [] [] THEN
 METIS_TAC [RTC_RULES]
@@ -482,7 +284,10 @@ METIS_TAC []
 
 
 val lemma2 = store_thm("lemma2",
-``∀s1 s2 s1' s2'.derives g (s1++s2) s ⇒ (∃s1'.derives g s1 s1' ∧ (s=s1'++s2)) ∨ (∃s2'.derives g s2 s2' ∧ (s=s1++s2'))``,
+``∀s1 s2 s1' s2'.
+     derives g (s1++s2) s ⇒
+     (∃s1'. derives g s1 s1' ∧ (s=s1'++s2)) ∨
+     (∃s2'.derives g s2 s2' ∧ (s=s1++s2'))``,
 SRW_TAC [] [] THEN
 RULE_ASSUM_TAC (REWRITE_RULE [derives]) THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -711,13 +516,6 @@ SRW_TAC [] [] THENL[
 SRW_TAC [] [rule_terminals] THEN
 METIS_TAC [isTmnlSym_def],
 METIS_TAC []]]);
-
-val symInGr = store_thm ("symInGr",
-``∀sym g.~(lhsWithLastSym sym (rules g)=[]) ⇒ sym IN (allSyms g)``,
-SRW_TAC [] [] THEN
-`(∃l pfx.MEM (rule l (pfx++[sym])) (rules g))` by METIS_TAC [notNullLhsLastSym] THEN
-Cases_on `sym` THEN
-METIS_TAC [allNtSymsInGr,allTmSymsInGr,notNullLhsLastSym,APPEND_NIL])
 
 
 val finiteTerminals = store_thm("finiteTerminals",
@@ -2581,58 +2379,7 @@ SRW_TAC [] [allSyms] THEN
 Cases_on `e` THEN
 METIS_TAC [slemma1_4, slemma1_4Tmnls, rgr_r9eq])
 
-val gaw_rhs = store_thm ("gaw_rhs",
-``∀lhs rhs.MEM (rule lhs rhs) (rules g) ⇒
-(∀nt.nt IN nonTerminals g ⇒ ∃w. RTC (derives g) [nt] w ∧ EVERY isTmnlSym w) ⇒
-EVERY (gaw g) rhs``,
-Induct_on `rhs` THEN SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [] THENL[
 
-Cases_on `h` THEN
-METIS_TAC [term_syms_gen_words, EVERY_DEF, isTmnlSym_def, slemma1_4, APPEND, gaw],
-
-`∀e.MEM e (h::rhs) ⇒ e IN (allSyms g)` by METIS_TAC [ruleRhsInAllSyms] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-`∀e.MEM e rhs ⇒ e IN allSyms g` by METIS_TAC [] THEN
-`FINITE (LIST_TO_SET (rules g))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
-`FINITE (allSyms g)` by METIS_TAC [finiteAllSyms] THEN
-`∀e. e IN allSyms g = MEM e (SET_TO_LIST (allSyms g))` by METIS_TAC [MEM_SET_TO_LIST] THEN
-`∀e. MEM e rhs ⇒ gaw g e` by METIS_TAC [gawAllSyms] THEN
-METIS_TAC [EVERY_MEM]])
-
-val gaw_rderives_single = store_thm ("gaw_rderives_single",
-  ``∀a b. gaw g a ⇒ rderives g [a] b ⇒
-          (∀nt. nt ∈ nonTerminals g ⇒ gaw g nt) ⇒ EVERY (gaw g) b``,
-  SRW_TAC [][rderives, lreseq] THEN
-  METIS_TAC [gaw_rhs, gaw])
-
-val gaw_rderives = store_thm ("gaw_rderives",
-``∀a b.EVERY (gaw g) a ⇒ rderives g a b ⇒
-(∀nt.nt IN (nonTerminals g) ⇒ gaw g nt) ⇒ EVERY (gaw g) b``,
-SRW_TAC [] [gaw, rderives] THEN
-`(NTS lhs) IN nonTerminals g` by METIS_TAC [slemma1_4] THEN
-FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND, gaw] THEN
-METIS_TAC [gaw_rderives_single, gaw, rdres1])
-
-val gaw_rtc_rderives = store_thm("gaw_rtc_rderives",
-``∀a b.RTC (rderives g) a b ⇒ EVERY (gaw g) a ⇒
-(∀nt.nt IN (nonTerminals g) ⇒ gaw g nt) ⇒ EVERY (gaw g) b``,
-HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [] [] THEN
-`EVERY (gaw g) a'` by METIS_TAC [gaw_rderives] THEN
-METIS_TAC [])
-
-val gaw_l1 = store_thm ("gaw_l1",
-``∀pfx sfx.
-     RTC (rderives g) [NTS (startSym g)] (pfx ++ r1 ++ [NTS nt] ++ r2 ++ sfx) ⇒
-    (∀nt. nt ∈ nonTerminals g ⇒ gaw g nt) ⇒
-    ∃w. RTC (rderives g) (r2++sfx) w ∧ EVERY isTmnlSym w``,
-SRW_TAC [] [] THEN
-`(NTS (startSym g)) IN (nonTerminals g)` by METIS_TAC [slemma1_4] THEN
-`gaw g (NTS (startSym g))` by METIS_TAC [] THEN
-`EVERY (gaw g) (pfx ++ r1 ++ [NTS nt] ++ r2 ++ sfx)` by METIS_TAC [EVERY_DEF, gaw_rtc_rderives] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-`EVERY (gaw g) (r2++sfx)` by FULL_SIMP_TAC (srw_ss()) [] THEN
-METIS_TAC [EVERY_DEF, EVERY_APPEND, gaw, sub_result, derivesImpRderives, rderivesImpDerives])
 
 val rderivesHdTmnl = store_thm ("rderivesHdTmnl",
 ``rderives g u u' ⇒ isTmnlSym (HD u) ⇒ (HD u' = HD u)``,
@@ -3232,16 +2979,6 @@ FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 Cases_on `dl1=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`h'::t`] MP_TAC) THEN SRW_TAC [][] THEN
 Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) []);
-
-val rtc_lderives_same_append_right = store_thm
-("rtc_lderives_same_append_right",
-        ``∀u v.RTC (lderives g) u v
-              ⇒
-	      RTC (lderives g) (u++x) (v++x)``,
-        HO_MATCH_MP_TAC RTC_INDUCT THEN
-        METIS_TAC [RTC_RULES,lderives_same_append_right]);
-
-
 
 val notspropLsTmnls = store_thm
 ("notspropLsTmnls",

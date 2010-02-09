@@ -1056,6 +1056,13 @@ val rtc_lderives_same_append_left = store_thm
         HO_MATCH_MP_TAC RTC_INDUCT THEN
         METIS_TAC [RTC_RULES,lderives_same_append_left]);
 
+val rtc_lderives_same_append_right = store_thm
+("rtc_lderives_same_append_right",
+        ``∀u v.RTC (lderives g) u v
+              ⇒
+              RTC (lderives g) (u++x) (v++x)``,
+        HO_MATCH_MP_TAC RTC_INDUCT THEN
+        METIS_TAC [RTC_RULES,lderives_same_append_right]);
 
 val drd_ld = store_thm ("drd_ld",
 ``∀l0 l1 l2.derives g l0 l1 ⇒
@@ -2968,7 +2975,6 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [lderives] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]);
-
 
 val listderivTrans = store_thm
 ("listderivTrans",

@@ -1,2 +1,2 @@
 OPTIONS = QUIT_ON_FAILURE
-INCLUDES=../lib ../cfg-list/
+INCLUDES=../lib 

@@ -250,7 +250,7 @@ METIS_TAC [apg_r4,aProdg]]);
 
 (* TERMINATION *)
 val apgt_r1 = prove(
-``∀g g'.RTC (\x y.∃a b.aProdg A B x y) g g' ⇒  (language g = language g')``,
+``∀g g'.RTC (\x y.∃a b.aProdg a b x y) g g' ⇒  (language g = language g')``,
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
 METIS_TAC [lemma4_3]
 );
@@ -2789,7 +2789,6 @@ which every production is of the form A->aα, where A is a variable,
 a is a terminal and alpha (possibly empty) is a string of variables.
 *)
 
-
 val ntsl = Define `ntsl g = rmDupes (nonTerminalsList (startSym g) (rules g))`;
 
 val r49P1 = Define
@@ -2810,22 +2809,67 @@ let rules0 = (set (rules g0) DIFF nt2oldprods ∪ newprods0) in
 (startSym g0 = startSym g) ∧ (set (rules g) = rules0)`;
 
 
-val r49P1LangEq = store_thm
-("r49P1LangEq",
-``r49P1 (bs,nts,g,seen) (bs',nts',g',seen') ∧ ((set (MAP NTS nts)) ∩ seen = {})
-⇒ (language g = language g')``,
+``∀s. FINITE s ⇒
+r49P1 (bs,nts,g,seen) (bs',nts',g',seen') 
+⇒
+r49P1 (bs,nts,g,seen ∪ s) (bs',nts',g',seen' ∪ s)``
 
-SRW_TAC [][r49P1, LET_THM] THEN
-`ntk ≠ ntj` by MAGIC THEN
-`aProdg ntk ntj g g'`
-
-SRW_TAC [][aProdg] THEN
-FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [][] THEN
+RES_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [r49P1, LET_THM, EXTENSION, INSERT_DEF] THEN
 SRW_TAC [][]
-SPOSE_NOT_THEN ASSUME_TAC THEN
 FULL_SIMP_TAC (srw_ss()) []
 
 
+METIS_TAC [IN_LIST_TO_SET]
+
+
+
+val r49P1LangEq = store_thm
+("r49P1LangEq",
+``∀v seen.(v = CARD seen) ⇒
+ ∀nts bs g. r49P1 (bs,nts,g,seen) (bs',nts',g',seen') ∧ ((set (MAP NTS nts)) ∩ seen = {})
+ ⇒ (language g = language g')``,
+
+
+completeInduct_on `v` THEN SRW_TAC [][] THEN
+Cases_on `seen = {}` THEN
+SRW_TAC [][] THEN1 MAGIC THEN
+`∃e.e ∈ seen` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
+`CARD (seen DIFF {e}) < CARD seen` by MAGIC THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`CARD (seen DIFF {e})`] MP_TAC) THEN SRW_TAC [][] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`seen DIFF {e}`] MP_TAC) THEN SRW_TAC [][] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`nts`,`bs`,`g`] MP_TAC) THEN SRW_TAC [][] THEN
+
+
+
+
+
+Cases_on `CARD seen` THEN
+SRW_TAC [][] THEN
+Cases_on `n` THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+MAGIC
+
+FIRS
+
+
+`set (MAP NTS nts) ∩ seen = {}` by MAGIC THEN
+FULL_SIMP_TAC (srw_ss()) [r49P1, LET_THM] THEN
+SRW_TAC [][] THEN
+
+FIRST_X_ASSUM (Q.SPECL_THEN [`ntk::nts'`,`bs`,`g`] MP_TAC) THEN SRW_TAC [][]
+
+
+FULL_SIMP_TAC (srw_ss()) [aProdg, r49P1, LET_THM] THEN
+SRW_TAC [][] THEN
+`A ≠ B` by MAGIC THEN
+Q.EXISTS_TAC `[]` THEN
+Q.EXISTS_TAC `s` THEN
+SRW_TAC [][] THEN
+
+FULL_SIMP_TAC(srw_ss()) [EXTENSION] THEN
+METIS_TAC [APPEND, APPEND_NIL, APPEND_ASSOC]
 MAGIC);
 
 
@@ -2856,8 +2900,6 @@ val r49P2LangEq = store_thm
 ``r49 (b::bs,nts,g,seen) (bs',nts',g',seen') ∧ ¬MEM b (ntsl g) 
 ⇒ (language g = language g')``,
 
-SRW_TAC [][r49, LET_THM]
-
 MAGIC);
 
 
@@ -2871,27 +2913,45 @@ r49P2 (bs0,nts0,g',seen0) (bs,nts,g,seen)`;
 
 val r49LangEq = store_thm
 ("r49LangEq",
-``r49 (b::bs,nts,g,seen) (bs',nts',g',seen') ∧ ¬MEM b (ntsl g) 
+``r49 (b::bs,nts,g,seen) (bs',nts',g',seen') ∧ ¬MEM b (ntsl g) ∧
+(set (MAP NTS nts) ∩ seen = {})
 ⇒ (language g = language g')``,
 
-SRW_TAC [][r49, LET_THM]
-
-MAGIC);
+SRW_TAC [][r49, LET_THM] THEN
+`¬MEM b (ntsl g'')` by MAGIC THEN
+METIS_TAC [r49P1LangEq, r49P2LangEq]);
 
 
 val r49g'Exists = store_thm
 ("r49g'Exists",
-``LENGTH bs ≥ LENGTH (nts g) ∧ ALL_DISTINCT bs ∧ (set bs DIFF set (nts g) = {})
-⇒
-∀g bs.∃g'.RTC (r49 (bs, nts g, g, {})) (DROP (LENGTH (nts g)) bs,[],g',nts g)``,
+``∀g bs lnts.(∀e.MEM e lnts ⇒ MEM e (ntsl g)) ∧
+LENGTH bs ≥ LENGTH lnts ∧ ALL_DISTINCT bs ∧ (set bs DIFF set (lnts) = {})
+⇒ ∃g'.RTC r49 (bs, lnts, g, {}) (DROP (LENGTH lnts) bs,[],g',set (MAP NTS lnts))``,
 
+Induct_on `LENGTH lnts` THEN SRW_TAC [][] THEN1
+MAGIC THEN
+Cases_on `lnts` THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`t`] MP_TAC) THEN SRW_TAC [][] THEN
+Cases_on `bs` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+FULL_SIMP_TAC (arith_ss) [] THEN
+`LENGTH t' ≥ LENGTH t` by DECIDE_TAC THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`g`,`t'`] MP_TAC) THEN SRW_TAC [][] THEN
 MAGIC);
 
 
 val rtcr49RtcLangeq = store_thm
 ("rtcr49RtcLangeq",
-``∀g g'.RTC (\x y.r49 x y) g g' ⇒  (language g = language g')``,
+``∀s0 s.RTC r49 s0 s ⇒ ∀bs0 nts0 g0 seen0.(s0=(bs0,nts0,g0,seen0)) ⇒
+  (s = (bs,nts,g,seen)) ⇒ 
+  LENGTH bs ≥ LENGTH lnts ∧ ALL_DISTINCT bs ∧ (set bs DIFF set (lnts) = {}) ⇒
+ (language g0 = language g)``,
 
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
+SRW_TAC [][] THEN
+Cases_on `s0'` THEN
+Cases_on `r` THEN
+Cases_on `r'` THEN
 MAGIC);
 
 

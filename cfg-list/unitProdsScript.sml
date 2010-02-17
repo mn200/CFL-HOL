@@ -1,7 +1,7 @@
 (* A theory about regular expressions *)
 open HolKernel boolLib bossLib Parse
 open stringTheory relationTheory listTheory
-open pred_setTheory regexpTheory grammarDefTheory listLemmasTheory eProdsTheory
+open pred_setTheory symbolDefTheory grammarDefTheory listLemmasTheory eProdsTheory
 
 
 val _ = new_theory "unitProds"
@@ -68,9 +68,12 @@ val g'ImpgRules = store_thm
 ("g'ImpgRules",
 ``e ∈ upgr_rules g ⇒ MEM e (rules g)``,
 
-SRW_TAC [][upgr_rules,nonUnitProds]
+SRW_TAC [][upgr_rules,nonUnitProds] THEN
+ FULL_SIMP_TAC (srw_ss()) [newProds, unitProds, EXTENSION, allDeps] THEN
+SRW_TAC [][] THEN
+METIS_TAC [rule_11, rules_def]
 
-(*
+
 val upgr_r1 = prove 
 (``negr g0 g ⇒ upgr g g' ⇒
  derives g' v v' ⇒ 
@@ -78,8 +81,8 @@ val upgr_r1 = prove
  SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [upgr,derives_def] THEN
 SRW_TAC [][] THEN
-`MEM (rule lhs rhs) (rules g)` by MAGIC THEN
- METIS_TAC []
+
+
  );
 
 
@@ -90,7 +93,7 @@ HO_MATCH_MP_TAC RTC_INDUCT_RIGHT1 THEN
 METIS_TAC [RTC_RULES,upgr_r1, RTC_SUBSET,RTC_RULES_RIGHT1]
 );
 
-*)
+
 val upgr_r3 = prove
 (``∀v v'.negr g0 g ⇒ upgr g g' ⇒
 derives g' v v' ⇒ RTC (derives g) v v'``,

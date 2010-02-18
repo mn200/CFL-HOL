@@ -98,7 +98,7 @@ HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
 SRW_TAC [] [RTC_RULES] THEN
 RES_TAC THEN
 FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES1] THEN
-SRW_TAC [] [] 
+SRW_TAC [] []
 THENL[
 FULL_SIMP_TAC (srw_ss()) [derives_def,aProdg] THEN
 Cases_on `lhs = A` THENL[
@@ -192,9 +192,9 @@ DISJ2_TAC THEN
 SRW_TAC [] [] THEN
 `(∃x'' y'' z''. ((y'=x''++y''++z'') ∧ RTC (derives g') p x'' ∧ RTC (derives g') [NTS B] y'' ∧ RTC (derives g') s z''))` by METIS_TAC [upgr_r19] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-`∃R.MEM (rule B R) (rules g') ∧ RTC (derives g') R y''` 
+`∃R.MEM (rule B R) (rules g') ∧ RTC (derives g') R y''`
 by METIS_TAC [slemma1_r3] THEN
-`RTC (derives g') (s1 ++ p ++ R ++ s ++ s2) (x' ++ x'' ++ y'' ++ z'' ++ z')` 
+`RTC (derives g') (s1 ++ p ++ R ++ s ++ s2) (x' ++ x'' ++ y'' ++ z'' ++ z')`
 by METIS_TAC [derives_append] THEN
 `aProdg A B g g'`
 by (FULL_SIMP_TAC (srw_ss()) [aProdg, UNION_DEF, DIFF_DEF,
@@ -1299,7 +1299,7 @@ val rdNumNtEq = store_thm
 (lhs = B)``,
 
 SRW_TAC [][rdNumNt] THEN
-FULL_SIMP_TAC (srw_ss()) [rightnt] THEN 
+FULL_SIMP_TAC (srw_ss()) [rightnt] THEN
 METIS_TAC [listNtEq']);
 
 
@@ -2213,7 +2213,7 @@ THENL[
 	    `(derives g')^* (HD dl1) (HD dl2)` by METIS_TAC [RTC_RULES_RIGHT1] THEN
 	    METIS_TAC [RTC_RTC,RTC_RULES,rtc2list_exists'],
 
-	    `HD dl2 = HD (dl2 ++ dl3)` by 
+	    `HD dl2 = HD (dl2 ++ dl3)` by
 	    (Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
 	    `dl2 ++ dl3 ≠ []` by SRW_TAC [][] THEN
 	    `derives g' (LAST dl1) (HD dl2)` by
@@ -2308,11 +2308,11 @@ Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN1
 	      Cases_on `∃pfx sfx.
 	      isWord sfx ∧ (s1 ++ rhs ++ s2 = pfx ++ [NTS B] ++ sfx)` THEN
 	      FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-	      SPOSE_NOT_THEN ASSUME_TAC THEN 
+	      SPOSE_NOT_THEN ASSUME_TAC THEN
 	      `REVERSE rhs ++ REVERSE s1 = [NTS B] ++ l`
 	      by METIS_TAC [APPEND_11, APPEND_ASSOC] THEN
 	      SRW_TAC [][] THEN
-	      `REVERSE (REVERSE rhs ++ REVERSE s1) = 
+	      `REVERSE (REVERSE rhs ++ REVERSE s1) =
 	      (REVERSE ([NTS B] ++ l))` by  METIS_TAC [] THEN
 	      FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN
 	      METIS_TAC [NOT_CONS_NIL, NOT_EVERY],
@@ -2340,8 +2340,8 @@ Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN1
 					REVERSE_APPEND] THEN
 
 	      `REVERSE sfx' ++ NTS B::REVERSE pfx' =
-	      REVERSE sfx' ++ [NTS B] ++ REVERSE pfx'` 
-	      by METIS_TAC [APPEND,APPEND_ASSOC] THEN	      
+	      REVERSE sfx' ++ [NTS B] ++ REVERSE pfx'`
+	      by METIS_TAC [APPEND,APPEND_ASSOC] THEN
 	      `(REVERSE pfx'=l) ∧ (REVERSE sfx'= REVERSE s2)`
 	      by METIS_TAC [listNtEq, isWordRev] THEN
 	      SRW_TAC [][] THEN
@@ -2380,7 +2380,7 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 							   APPEND_11] THEN
   `s1 ++ rhs = REVERSE l ++ REVERSE [NTS B]`
   by METIS_TAC [REVERSE_APPEND, REVERSE_REVERSE] THEN
-  `rdNumNt (NTS B) [REVERSE l ++ [NTS B] ++ s2] = 0` 
+  `rdNumNt (NTS B) [REVERSE l ++ [NTS B] ++ s2] = 0`
   by METIS_TAC [rdNumNtApp,APPEND, APPEND_ASSOC, REVERSE_DEF] THEN
   METIS_TAC [rdNumNtNeq]) THEN
 
@@ -2424,7 +2424,7 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 			  SRW_TAC [][] THEN1
 			  (Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 			   SRW_TAC [][] THEN1
-			   (Cases_on `rhs` THEN 
+			   (Cases_on `rhs` THEN
 			    FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
 			   METIS_TAC []) THEN
 			  Q.EXISTS_TAC `s2` THEN SRW_TAC [][] THEN1
@@ -2445,12 +2445,12 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 			  METIS_TAC [rdNumNtEq] THEN
 			  `∃pfx.s1++rhs++s2 =pfx++[NTS B]++sfx` by METIS_TAC [] THEN
 			  SPOSE_NOT_THEN ASSUME_TAC THEN
-			  FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND, 
+			  FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND,
 						    isSuffix_def, REVERSE_APPEND] THEN
-			  `REVERSE (REVERSE rhs ++ REVERSE s1) = 
+			  `REVERSE (REVERSE rhs ++ REVERSE s1) =
 		             REVERSE ([NTS B]++l)` by METIS_TAC [APPEND_11,
 								APPEND_ASSOC] THEN
-			   FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN 
+			   FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN
 			   SRW_TAC [][] THEN
 			   METIS_TAC [listNtEq',APPEND,APPEND_ASSOC]
 			  ]],
@@ -2489,7 +2489,7 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 			 Q.EXISTS_TAC `s2` THEN SRW_TAC [][] THEN1
 			 METIS_TAC [rdNumNtEq] THEN1
 			 METIS_TAC [APPEND_ASSOC] THEN
-			 FULL_SIMP_TAC (srw_ss()) [isSuffix_def, 
+			 FULL_SIMP_TAC (srw_ss()) [isSuffix_def,
 						   IS_PREFIX_APPEND] THEN
 			 `LENGTH (s1 ++ rhs ++ s2) = LENGTH (pfx ++ [NTS B] ++ s2)`
 			 by METIS_TAC [] THEN
@@ -2504,7 +2504,7 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 				[h'']`,`dl3`] THEN SRW_TAC [][] THEN1
 			       (Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 				SRW_TAC [][] THEN1
-				(Cases_on `rhs` THEN 
+				(Cases_on `rhs` THEN
 				 FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
 			       METIS_TAC []) THEN
 			       Q.EXISTS_TAC `s2` THEN SRW_TAC [][] THEN1
@@ -2517,7 +2517,7 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 				[h'']++s1''`,`dl3`] THEN SRW_TAC [][] THEN1
 			       (Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 				SRW_TAC [][] THEN1
-				(Cases_on `rhs` THEN 
+				(Cases_on `rhs` THEN
 				 FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
 				METIS_TAC []) THEN
 			       Q.EXISTS_TAC `s2` THEN SRW_TAC [][] THEN1
@@ -2597,7 +2597,7 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 					   [pfx ++ [NTS B] ++ s2]`,
 					   `h''::t'`] THEN SRW_TAC [][] THEN1
 		   (Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		    SRW_TAC [][] THEN1 
+		    SRW_TAC [][] THEN1
 		    (`pfx = s1 ++ FRONT rhs`
 		     by METIS_TAC [lastElemEq, APPEND_FRONT_LAST,
 				   APPEND_ASSOC, APPEND_11] THEN
@@ -2625,7 +2625,7 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 	     `∃pfx.s1++rhs++s2 = pfx++[NTS B]++sfx` by METIS_TAC [] THEN
 	     SRW_TAC [][IS_PREFIX_APPEND, isSuffix_def] THEN
 	     SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN	     
+	     FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN
 	     METIS_TAC [listNtEq, APPEND, APPEND_ASSOC, REVERSE_REVERSE,
 			isWordRev]
 	     ]],
@@ -2643,7 +2643,7 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
        by METIS_TAC [rnnSing,rdNumNtApp,APPEND] THEN
        FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND, isSuffix_def] THEN
        SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
-       FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN	
+       FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN
        `REVERSE (REVERSE rhs ++ REVERSE s1) = REVERSE ([NTS B] ++ l)`
        by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
        FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN
@@ -2749,7 +2749,7 @@ THENL[
 	    `(derives g')^* (HD dl1) (HD dl2)` by METIS_TAC [RTC_RULES_RIGHT1] THEN
 	    METIS_TAC [RTC_RTC,RTC_RULES,rtc2list_exists'],
 
-	    `HD dl2 = HD (dl2 ++ dl3)` by 
+	    `HD dl2 = HD (dl2 ++ dl3)` by
 	    (Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
 	    `dl2 ++ dl3 ≠ []` by SRW_TAC [][] THEN
 	    `derives g' (LAST dl1) (HD dl2)` by
@@ -2792,25 +2792,115 @@ a is a terminal and alpha (possibly empty) is a string of variables.
 val ntsl = Define `ntsl g = rmDupes (nonTerminalsList (startSym g) (rules g))`;
 
 val r49P1 = Define
-`r49P1 (bs0: α list, nts0: α list, g0:(α,β) grammar, seen0:(α,β) symbol -> bool) 
-       (bs,nts,g,seen) = 
+`r49P1 (bs0: α list, nts0: α list, g0:(α,β) grammar, seen0: α list)
+       (bs,nts,g,seen) =
 
-∃ntk.(nts0 = ntk::nts) ∧ (bs0 = bs) ∧ (seen0 = seen) ∧
+∃ntk nttl.
+   (nts0 = nts) ∧
+   (nts0 = ntk::nttl) ∧ (bs0 = bs) ∧ (seen0 = seen) ∧
 
-let nt2oldprods = { rule ntk  (ntj::a) | 
-		   ntj ∈ seen0 ∧ MEM (rule ntk (ntj::a)) (rules g0) } in
+let nt2oldprods = { rule ntk  (NTS ntj::a) |
+		   MEM ntj seen0 ∧ MEM (rule ntk (NTS ntj::a)) (rules g0) } in
 
-let newprods0 = { rule ntk (y++a) | 
-		 ∃ntj. MEM (rule ntj y) (rules g0) ∧ 
+let newprods0 = { rule ntk (y++a) |
+		 ∃ntj. MEM (rule ntj y) (rules g0) ∧
 		 rule ntk (NTS ntj::a) ∈ nt2oldprods } in
 
 let rules0 = (set (rules g0) DIFF nt2oldprods ∪ newprods0) in
 
 (startSym g0 = startSym g) ∧ (set (rules g) = rules0)`;
 
+val rulesets_the_same_derives = prove(
+  ``(set (rules g1) = set (rules g2)) ⇒ (derives g1 x y ⇔ derives g2 x y)``,
+  SRW_TAC [][derives_def, EXTENSION]);
+
+val rulesets_the_same_RTC_derives = prove(
+  ``(set (rules g1) = set (rules g2)) ⇒
+      ((derives g1)^* x y ⇔ (derives g2)^* x y)``,
+  Q_TAC SUFF_TAC `
+    ∀g1 g2. (set (rules g1) = set (rules g2)) ⇒
+            ∀x y. (derives g1)^* x y ⇒ (derives g2)^* x y
+  ` THEN1 METIS_TAC [] THEN
+  REPEAT GEN_TAC THEN STRIP_TAC THEN
+  HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [][] THEN
+  METIS_TAC [RTC_RULES, rulesets_the_same_derives]);
+
+val rulesets_the_same = prove(
+  ``(startSym g1 = startSym g2) ∧ (set (rules g1) = set (rules g2)) ⇒
+    (language g1 = language g2)``,
+  STRIP_TAC THEN SRW_TAC [][language_def, EXTENSION] THEN
+  METIS_TAC [rulesets_the_same_RTC_derives]);
+
+(* need to add an extra hypothesis encoding that the rules for everything in
+   the seen list satisfy at least the first two properties in the middle of
+   p96 :
+     rules involving nts in seen0 are of the form
+       NTi -> NTj γ or
+       NTi -> a γ
+     where i and j are the position in the list, and i < j
+
+   Try :
+
+   ∀i j. i < LENGTH seen0 ∧ MEM (rule (EL i seen0) rhs) (rules g0) ⇒
+         (∃t rest. rhs = TS t :: rest) ∨
+         (∃nt rest. (rhs = NTS nt :: rest) ∧
+                    ∀j. j < i ⇒ EL j seen0 ≠ nt)
+*)
+val r49P1_equiv = prove(
+  ``∀s. (∀i j. i < LENGTH s ∧ MEM (rule (EL i s) rhs) (rules g0) ⇒
+              (∃t rest. rhs = TS t :: rest) ∨
+              (∃nt rest. (rhs = NTS nt :: rest) ∧
+                         ∀j. j < i ⇒ EL j s ≠ nt)) ⇒
+        r49P1 (bs,nts,g0,s) (bs,nts,g,s) ⇒
+        (language g0 = language g)``,
+  SIMP_TAC (srw_ss()) [r49P1, LET_THM] THEN
+  HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [][] THENL [
+    `({rule ntk (NTS ntj::a) | F} = {})` by SRW_TAC [][EXTENSION] THEN
+    `({rule ntk (y++a)|F} = {})`  by SRW_TAC [][EXTENSION] THEN
+    FULL_SIMP_TAC (srw_ss()) [] THEN METIS_TAC [rulesets_the_same],
+
+    `{rule ntk (NTS ntj::a) | ((ntj = e) ∨ ntj ∈ s) ∧
+                              MEM (rule ntk (NTS ntj::a)) (rules g0)} =
+     {rule ntk (NTS e::a) | ntk,a | MEM (rule ntk (NTS e::a)) (rules g0)} ∪
+     {rule ntk (NTS ntj::a) | ntj ∈ s ∧ MEM (rule ntk (NTS ntj::a)) (rules g0)}`
+       by SRW_TAC [][EXTENSION, EQ_IMP_THM] THEN
+    POP_ASSUM MP_TAC THEN
+    Q.MATCH_ABBREV_TAC `(XXX = ntk_erules ∪ ntk_jrules) ⇒ Goal` THEN
+    MAP_EVERY Q.UNABBREV_TAC [`XXX`, `Goal`] THEN
+    DISCH_THEN SUBST_ALL_TAC THEN
+    `{rule ntk (y ++ a) | ∃ntj. MEM (rule ntj y) (rules g0) ∧
+                                ((ntj = e) ∨ ntj ∈ s) ∧
+                                MEM (rule ntk (NTS ntj::a)) (rules g0)} =
+     {rule ntk (y ++ a) | MEM (rule e y) (rules g0) ∧
+                          MEM (rule ntk (NTS e::a)) (rules g0)} ∪
+     {rule ntk (y ++ a) | ∃ntj. MEM (rule ntj y) (rules g0) ∧ ntj ∈ s ∧
+                                MEM (rule ntk (NTS ntj::a)) (rules g0)}`
+        by (SRW_TAC [][EXTENSION, EQ_IMP_THM] THEN METIS_TAC []) THEN
+    POP_ASSUM MP_TAC THEN
+    Q.MATCH_ABBREV_TAC `(XXX = new_erules ∪ new_jrules) ⇒ Goal` THEN
+    MAP_EVERY Q.UNABBREV_TAC [`XXX`, `Goal`] THEN
+    DISCH_THEN SUBST_ALL_TAC THEN
+    `set (rules g0) DIFF (ntk_erules ∪ ntk_jrules) ∪ (new_erules ∪ new_jrules) =
+     (set (rules g0) DIFF ntk_jrules ∪ new_jrules) DIFF ntk_erules ∪ new_erules`
+       by (SRW_TAC [][EXTENSION, EQ_IMP_THM] THENL [
+             METIS_TAC [],
+             METIS_TAC [],
+             SRW_TAC [][] THEN DISJ1_TAC THEN
+             POP_ASSUM MP_TAC THEN
+             SRW_TAC [][Abbr`ntk_erules`, Abbr`new_jrules`] THEN
+             Cases_on `ntk = ntk'` THEN SRW_TAC [][] THEN
+             Cases_on `MEM (rule ntk (NTS e::a')) (rules g0)` THEN
+             SRW_TAC [][] THEN
+
+
+
+
+
+
+
 
 ``∀s. FINITE s ⇒
-r49P1 (bs,nts,g,seen) (bs',nts',g',seen') 
+r49P1 (bs,nts,g,seen) (bs',nts',g',seen')
 ⇒
 r49P1 (bs,nts,g,seen ∪ s) (bs',nts',g',seen' ∪ s)``
 
@@ -2874,8 +2964,8 @@ MAGIC);
 
 
 val r49P2 = Define
-`r49P2 (bs0: α list, nts0: α list, g0:(α,β) grammar, seen0:(α,β) symbol -> bool) 
-       (bs, nts,g,seen) = 
+`r49P2 (bs0: α list, nts0: α list, g0:(α,β) grammar, seen0:(α,β) symbol -> bool)
+       (bs, nts,g,seen) =
 
 ∃ntk b.(nts0 = ntk::nts) ∧ (bs0 = b::bs) ∧ (seen = seen0 ∪ {NTS ntk}) ∧
        (nts = TL nts0) ∧
@@ -2887,7 +2977,7 @@ let newprods1 = { rule b a | MEM (rule ntk (NTS ntk::a))  (rules g0) } ∪
 
 let rules1 = set (rules g0) DIFF recprods ∪ newprods1 in
 
-let newprods3 = { rule ntk (y++[NTS b]) | 
+let newprods3 = { rule ntk (y++[NTS b]) |
 		 rule ntk y ∈ rules1 ∧ (¬∃rst.y = NTS ntk::rst) } in
 
 (startSym g = startSym g0) ∧
@@ -2897,15 +2987,15 @@ let newprods3 = { rule ntk (y++[NTS b]) |
 
 val r49P2LangEq = store_thm
 ("r49LangEq",
-``r49 (b::bs,nts,g,seen) (bs',nts',g',seen') ∧ ¬MEM b (ntsl g) 
+``r49 (b::bs,nts,g,seen) (bs',nts',g',seen') ∧ ¬MEM b (ntsl g)
 ⇒ (language g = language g')``,
 
 MAGIC);
 
 
 val r49 = Define
-`r49 (bs0: α list, nts0: α list, g0:(α,β) grammar, seen0:(α,β) symbol -> bool) 
-     (bs,nts,g,seen) = 
+`r49 (bs0: α list, nts0: α list, g0:(α,β) grammar, seen0:(α,β) symbol -> bool)
+     (bs,nts,g,seen) =
 
 ∃g'.r49P1 (bs0,nts0,g0,seen0) (bs0,nts0,g',seen0) ∧
 r49P2 (bs0,nts0,g',seen0) (bs,nts,g,seen)`;
@@ -2943,7 +3033,7 @@ MAGIC);
 val rtcr49RtcLangeq = store_thm
 ("rtcr49RtcLangeq",
 ``∀s0 s.RTC r49 s0 s ⇒ ∀bs0 nts0 g0 seen0.(s0=(bs0,nts0,g0,seen0)) ⇒
-  (s = (bs,nts,g,seen)) ⇒ 
+  (s = (bs,nts,g,seen)) ⇒
   LENGTH bs ≥ LENGTH lnts ∧ ALL_DISTINCT bs ∧ (set bs DIFF set (lnts) = {}) ⇒
  (language g0 = language g)``,
 

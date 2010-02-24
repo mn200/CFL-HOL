@@ -23,9 +23,18 @@ Theory of context free grammar.
 Based on Chapter 4, Hopcroft & Ullman.
 *)
 
+
 (* e.g. S -> E * E becomes (Node S [E, *, E]) *)
 val _ = Hol_datatype
 `rule = rule of 'nts => ('nts,'ts) symbol list`;
+
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.INCONSISTENT, 2)),
+                  fixity = Infix(NONASSOC, 550),
+                  paren_style = OnlyIfNecessary,
+                  pp_elements = [BreakSpace(1,1), TM, TOK "↝",
+                                 BreakSpace(1,1), TM, BreakSpace(1,1),
+				 HardSpace 1],
+                  term_name = "rule"};
 
 
 (* grammar = (V, T, P, S) *)

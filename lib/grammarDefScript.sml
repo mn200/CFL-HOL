@@ -22,17 +22,18 @@ fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 Theory of context free grammar.
 Based on Chapter 4, Hopcroft & Ullman.
 *)
-
+val _ = overload_on ("IN", ``MEM``);
 
 (* e.g. S -> E * E becomes (Node S [E, *, E]) *)
 val _ = Hol_datatype
 `rule = rule of 'nts => ('nts,'ts) symbol list`;
-
+(*
 val _ = add_rule {block_style = (AroundEachPhrase, (PP.INCONSISTENT, 2)),
                   fixity = Infix(NONASSOC, 550),
                   paren_style = OnlyIfNecessary,
-                  pp_elements = [HardSpace 1, TOK "↝", BreakSpace(1,1)],
+                  pp_elements = [HardSpace 1, TOK "⇒", BreakSpace(1,1)],
                   term_name = "rule"};
+*)
 
 
 (* grammar = (V, T, P, S) *)
@@ -151,8 +152,6 @@ val llanguage = Define
 val rlanguage = Define
 `rlanguage g = { tsl | RTC (rderives g) [NTS (startSym g)] tsl ∧
                        EVERY isTmnlSym tsl }`;
-
-
 
 val derives_same_append_left = store_thm
 ("derives_same_append_left",
@@ -3467,6 +3466,31 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [listderiv_def,addLast_def] THEN
       METIS_TAC [lderives_same_append_left, lderives_same_append_right, ldres1]
       ]);
+
+
+val rulesets_the_same_derives = store_thm
+("rulesets_the_same_derives",
+  ``(set (rules g1) = set (rules g2)) ⇒ (derives g1 x y ⇔ derives g2 x y)``,
+  SRW_TAC [][derives, EXTENSION]);
+
+val rulesets_the_same_RTC_derives = store_thm
+("rulesets_the_same_RTC_derives",
+  ``(set (rules g1) = set (rules g2)) ⇒
+      ((derives g1)^* x y ⇔ (derives g2)^* x y)``,
+  Q_TAC SUFF_TAC `
+    ∀g1 g2. (set (rules g1) = set (rules g2)) ⇒
+            ∀x y. (derives g1)^* x y ⇒ (derives g2)^* x y
+  ` THEN1 METIS_TAC [] THEN
+  REPEAT GEN_TAC THEN STRIP_TAC THEN
+  HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [][] THEN
+  METIS_TAC [RTC_RULES, rulesets_the_same_derives]);
+
+val rulesets_the_same = store_thm
+("rulesets_the_same",
+  ``(startSym g1 = startSym g2) ∧ (set (rules g1) = set (rules g2)) ⇒
+    (language g1 = language g2)``,
+  STRIP_TAC THEN SRW_TAC [][language, EXTENSION] THEN
+  METIS_TAC [rulesets_the_same_RTC_derives]);
 
 
 val mlDir = "./theoryML/"

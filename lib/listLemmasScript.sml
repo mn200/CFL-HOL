@@ -500,7 +500,8 @@ METIS_TAC [APPEND, APPEND_ASSOC])
 
 val listappnil = store_thm ("listappnil",
 ``!x.(x = pfx ++ x ) ==> (pfx=[])``,
-SRW_TAC [][]);
+SRW_TAC [][] THEN
+METIS_TAC [APPEND_EQ_SELF]);
 
 val append_eq_sing = store_thm(
   "append_eq_sing",

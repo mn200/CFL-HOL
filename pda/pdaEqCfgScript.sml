@@ -677,27 +677,28 @@ val adj = Define
 val transSym = Define
 `transSym (NTS (st,sym,st')) = sym`;
 
-val transToState = Define
-`transToState (NTS (st,sym,st')) = st'`;
+val toState = Define
+`toState (NTS (st,sym,st')) = st'`;
 
-val transFrmState = Define
-`transFrmState (NTS (st,sym,st')) =  st`;
+val frmState = Define
+`frmState (NTS (st,sym,st')) =  st`;
 
 val ntslCond = Define
 `ntslCond m (q',ql,mrhs) ntsl = 
       EVERY isNonTmnlSym ntsl ∧
       (∀e1 e2 p s.(ntsl = p++[e1;e2]++s) ⇒ adj e1 e2) ∧
-      (transFrmState (HD ntsl) = q') ∧
-      (transToState (LAST ntsl) = ql) ∧
-      (∀e.MEM e ntsl ⇒ MEM (transToState e) (statesList m m.next)) ∧
-      (∀e.MEM e ntsl ⇒ MEM (transFrmState e) (statesList m m.next))`;
+      (frmState (HD ntsl) = q') ∧
+      (toState (LAST ntsl) = ql) ∧
+      (∀e.MEM e ntsl ⇒ MEM (toState e) (statesList m)) ∧
+      (∀e.MEM e ntsl ⇒ MEM (frmState e) (statesList m))`;
 
 val p2gtrans = Define
 `p2gtrans m (rule l ntsl) = 
    ∃isymo ssym q q' p mrhs.
-        MEM q (statesList m m.next) ∧ MEM q' (statesList m m.next) ∧ 
-	MEM p (statesList m m.next) ∧
-        (MEM ((isymo, ssym, q),q',mrhs) m.next ∧ (l=(q,ssym,p))) ∧	
+        (l=(q,ssym,p)) ∧	
+        MEM q (statesList m) ∧ MEM q' (statesList m) ∧ 
+	MEM p (statesList m) ∧
+        MEM ((isymo, ssym, q),q',mrhs) m.next ∧ 
 	(((ntsl=[]) ∧ (isymo=NONE) ∧ (q'=p) ∧ (mrhs=[])) ∨ 
 	 (∃ts.(ntsl=[TS ts]) ∧ (isymo=SOME (TS ts)) ∧ (q'=p) ∧ (mrhs=[])) ∨
 	(∃h t.((ntsl=h::t) ∧ (t≠[])) ∧ 
@@ -710,15 +711,16 @@ val p2gtrans = Define
 
 val pda2grammar = Define
 `pda2grammar m g = 
-   (∀q.MEM q (statesList m m.next) =
+   (∀q.MEM q (statesList m) =
        MEM (rule (startSym g) [NTS (m.start,m.ssSym,q)]) (rules g)) ∧
    (∀r.MEM r (rules g) = p2gtrans m r)`;
 
 
 val p2gGrExists = store_thm
 ("p2gGrExists",
-``∀m.∃g.(g = pda2grammar m)``,
-SRW_TAC [][]);
+``∀m.∃g.pda2grammar m g``,
+SRW_TAC [][pda2grammar] THEN
+MAGIC);
 
 
 
@@ -735,8 +737,8 @@ val pdaTransSplit = store_thm
        ⇒
       ∃l.(inp = FLAT (MAP tupinp l)) ∧
          (stk = MAP tupstk l) ∧
-	 (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList p p.next)) ∧
-	 (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList p p.next)) ∧
+	 (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList p)) ∧
+	 (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList p)) ∧
 	 (∀h t.(l=h::t) ⇒ (tupfrmst h = q) ∧ (tupstk h = HD stk) ∧
 	  (tuptost (LAST l) = qf)) ∧
 	 (∀e1 e2 pfx sfx.(l = pfx++[e1;e2]++sfx) ⇒ 
@@ -1570,22 +1572,22 @@ FULL_SIMP_TAC (srw_ss()) [toRhs,isNonTmnlSym_def]);
 
 val transFrmStEq = store_thm
 ("transFrmStEq",
- ``transFrmState (toRhs h) = tupfrmst h``,
+ ``frmState (toRhs h) = tupfrmst h``,
 
 Cases_on `h` THEN Cases_on `r` THEN
 Cases_on `r'` THEN 
-FULL_SIMP_TAC (srw_ss()) [toRhs,transFrmState,tupfrmst]);
+FULL_SIMP_TAC (srw_ss()) [toRhs,frmState,tupfrmst]);
 
 
 
 
 val transToStEq = store_thm
 ("transToStEq",
- ``transToState (toRhs h) = tuptost h``,
+ ``toState (toRhs h) = tuptost h``,
 
 Cases_on `h` THEN Cases_on `r` THEN
 Cases_on `r'` THEN 
-FULL_SIMP_TAC (srw_ss()) [toRhs,transToState,tuptost]);
+FULL_SIMP_TAC (srw_ss()) [toRhs,toState,tuptost]);
 
 
 
@@ -1594,8 +1596,8 @@ FULL_SIMP_TAC (srw_ss()) [toRhs,transToState,tuptost]);
 val memMapToRhsSl = store_thm
 ("memMapToRhsSl",
 ``∀t.MEM e (MAP toRhs t) ∧
-(∀e.MEM e (MAP tuptost t) ⇒ MEM e (statesList m m.next)) ⇒
-MEM (transToState e) (statesList m m.next)``,
+(∀e.MEM e (MAP tuptost t) ⇒ MEM e (statesList m)) ⇒
+MEM (toState e) (statesList m)``,
 
 Induct_on `t` THEN SRW_TAC [][] THEN
 METIS_TAC [transToStEq]);
@@ -1603,8 +1605,8 @@ METIS_TAC [transToStEq]);
 val memMapToRhsSl' = store_thm
 ("memMapToRhsSl'",
 ``∀t.MEM e (MAP toRhs t) ∧
-(∀e.MEM e (MAP tupfrmst t) ⇒ MEM e (statesList m m.next)) ⇒
-MEM (transFrmState e) (statesList m m.next)``,
+(∀e.MEM e (MAP tupfrmst t) ⇒ MEM e (statesList m)) ⇒
+MEM (frmState e) (statesList m)``,
 
 Induct_on `t` THEN SRW_TAC [][] THEN
 METIS_TAC [transFrmStEq]);
@@ -1630,8 +1632,8 @@ val isAdjList = store_thm
 val p2gtransNone = store_thm
 ("p2gtransNone",
 ``(LENGTH l ≥ 2) ∧ MEM ((NONE,A,q),q',MAP tupstk l) m.next ∧
- (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList m m.next)) ∧
-  (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m m.next)) ∧
+ (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList m)) ∧
+  (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m)) ∧
 (∀h t.(l = h::t) ⇒(tupfrmst h = q') ∧(tuptost (LAST (h::t)) = p)) ∧
 (∀e1 e2 pfx sfx.(l = pfx ++ [e1; e2] ++ sfx) ⇒ (tupfrmst e2 = tuptost e1)) 
 ⇒
@@ -1690,8 +1692,8 @@ val p2gtransSome = store_thm
 ("p2gtransSome",
 ``(LENGTH l ≥ 2) ∧ MEM ((SOME ih,A,q),q',MAP tupstk l) m.next ∧
  isTmnlSym ih ∧
- (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList m m.next)) ∧
-  (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m m.next)) ∧
+ (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList m)) ∧
+  (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m)) ∧
 (∀h t.(l = h::t) ⇒(tupfrmst h = q') ∧(tuptost (LAST (h::t)) = p)) ∧
 (∀e1 e2 pfx sfx.(l = pfx ++ [e1; e2] ++ sfx) ⇒ (tupfrmst e2 = tuptost e1)) 
 ⇒
@@ -1770,8 +1772,8 @@ FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
  Cases_on `h'` THEN Cases_on `r` THEN
 `(∃l.(q'' = FLAT (MAP tupinp l)) ∧
  (r' = MAP tupstk l) ∧
- (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList m m.next)) ∧
-  (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m m.next)) ∧
+ (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList m)) ∧
+  (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m)) ∧
  (∀h t. (l = h::t) ⇒ (tupfrmst h = q') ∧ (tupstk h = HD r') ∧
   (tuptost (LAST l) = p)) ∧
  (∀e1 e2 pfx sfx. (l = pfx ++ [e1; e2] ++ sfx) ⇒ (tupfrmst e2 = tuptost e1) ∧
@@ -1941,16 +1943,16 @@ THENL[
 val listPairImpIdc = store_thm
 ("listPairImpIdc",
 ``∀l.(∀e1 e2.MEM (e1,e2) l ⇒
-   (ID m)^* (transFrmState e1,e2,[transSym e1])
-   (transToState e1,[],[])) ∧
+   (ID m)^* (frmState e1,e2,[transSym e1])
+   (toState e1,[],[])) ∧
  (∀e1 e2 p s.(MAP FST l = p ++ [e1; e2] ++ s) ⇒ adj e1 e2) 
   ⇒ EVERY isNonTmnlSym (MAP FST l) ⇒
 
   (∀h1 h2 i1 i2 t.((l = (h1,h2)::t) ∧ (LAST l = (i1,i2)))
     ⇒
-   (ID m)^* (transFrmState h1,h2++(FLAT (MAP SND t)),[transSym h1]++
+   (ID m)^* (frmState h1,h2++(FLAT (MAP SND t)),[transSym h1]++
 	     (MAP transSym (MAP FST t)))
-   (transToState i1,[],[]))``,
+   (toState i1,[],[]))``,
 
 
 Induct_on `l` THEN SRW_TAC [][] THEN
@@ -1962,19 +1964,19 @@ by METIS_TAC [rgr_r9eq,APPEND_ASSOC,APPEND] THEN
 Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 `(ID m)^*
-            (transFrmState q,r ++ FLAT (MAP SND t),
+            (frmState q,r ++ FLAT (MAP SND t),
              transSym q::MAP transSym (MAP FST t))
-            (transToState i1,[],[])` by METIS_TAC [] THEN
+            (toState i1,[],[])` by METIS_TAC [] THEN
 
 `adj h1 q` by METIS_TAC [APPEND,APPEND_ASSOC,APPEND_NIL] THEN
 Cases_on `h1` THEN Cases_on `q` THEN 
 FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
 Cases_on `n` THEN  Cases_on `r'` THEN
 Cases_on `n'` THEN  Cases_on `r'` THEN
-FULL_SIMP_TAC (srw_ss()) [adj,transToState,transFrmState,transSym] THEN
+FULL_SIMP_TAC (srw_ss()) [adj,toState,frmState,transSym] THEN
 SRW_TAC [][] THEN
 `(ID m)^* (q,h2,[q']) (q'',[],[])`
-by METIS_TAC [transToState,transSym,transFrmState] THEN
+by METIS_TAC [toState,transSym,frmState] THEN
 METIS_TAC [idcStackInsert,idcInpInsert,APPEND_NIL,APPEND,
 	   APPEND_ASSOC,RTC_RTC]);
 
@@ -2005,9 +2007,9 @@ THENL[
       METIS_TAC [id_thm, RTC_RULES,APPEND_NIL],
       
       `∃isymo q' mrhs.
-      MEM q (statesList m m.next) ∧
-      MEM q' (statesList m m.next) ∧
-      MEM p (statesList m m.next) ∧
+      MEM q (statesList m) ∧
+      MEM q' (statesList m) ∧
+      MEM p (statesList m) ∧
       MEM ((isymo,A,q),q',mrhs) m.next ∧
       ((∃ts.
           ((h'' = TS ts) ∧ (t = [])) ∧
@@ -2054,8 +2056,8 @@ THENL[
 	    SRW_TAC [][] THEN
 
 	    `∀e1 e2.MEM (e1,e2) l0 ⇒ 
-	    (ID m)^* (transFrmState e1,e2,[transSym e1]) 
-	             (transToState e1,[],[])` by
+	    (ID m)^* (frmState e1,e2,[transSym e1]) 
+	             (toState e1,[],[])` by
 	    (SRW_TAC [][] THEN
 	     RES_TAC THEN
 	     `LENGTH dl0 < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
@@ -2076,8 +2078,8 @@ THENL[
 				     LAST ([NTS (q',q'',r')]::t))] ++r2')`
 	      by METIS_TAC [rgr_r9eq] THEN
 	      SRW_TAC [][] THEN
-	      FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,transFrmState,
-					transToState,transSym] THEN
+	      FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,frmState,
+					toState,transSym] THEN
 	      METIS_TAC [everyFlat]) THEN
 	     `t=[]` by (Cases_on `t` THEN 
 			FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq]) THEN
@@ -2089,9 +2091,9 @@ THENL[
 	    `∀i2 i1.(LAST l0 = (i1,i2)) ⇒
 		     ∀t h2 h1.(l0 = (h1,h2)::t) ⇒
 		     (ID m)^*
-		     (transFrmState h1,h2 ++ FLAT (MAP SND t),
+		     (frmState h1,h2 ++ FLAT (MAP SND t),
 		      [transSym h1] ++ MAP transSym (MAP FST t))
-		     (transToState i1,[],[])` 
+		     (toState i1,[],[])` 
 	    by METIS_TAC [listPairImpIdc] THEN
 	    
 	    Cases_on `l0=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -2107,21 +2109,21 @@ THENL[
 	    THENL[	   
 		  Cases_on `n`  THEN
 		  Cases_on `r''` THEN
-		  FULL_SIMP_TAC (srw_ss()) [transToState] THEN
+		  FULL_SIMP_TAC (srw_ss()) [toState] THEN
 		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 		  SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [transFrmState,
-					    transToState] THEN1
+		  FULL_SIMP_TAC (srw_ss()) [frmState,
+					    toState] THEN1
 		  METIS_TAC [RTC_RULES] THEN
 		  `LAST t = (NTS (q',q''',r'''),r)` 
 		  by METIS_TAC [last_append,APPEND,APPEND_ASSOC,MEM] THEN
 		  
-		  `transToState (LAST (q''::MAP FST t))= r'''` 
+		  `toState (LAST (q''::MAP FST t))= r'''` 
 		  by (`MAP FST t = MAP FST (FRONT t) ++ 
 		      MAP FST [(NTS (q',q''',r'''),r)]`
 		      by METIS_TAC [MAP_APPEND,APPEND_FRONT_LAST] THEN
 		      FULL_SIMP_TAC (srw_ss()) [] THEN
-		      METIS_TAC [transToState,last_append,APPEND,
+		      METIS_TAC [toState,last_append,APPEND,
 				 last_elem]) THEN
 		  METIS_TAC [RTC_RULES],
 
@@ -2151,8 +2153,8 @@ THENL[
 	    SRW_TAC [][] THEN
 
 	    `∀e1 e2.MEM (e1,e2) l0 ⇒ 
-	    (ID m)^* (transFrmState e1,e2,[transSym e1]) 
-	             (transToState e1,[],[])` by
+	    (ID m)^* (frmState e1,e2,[transSym e1]) 
+	             (toState e1,[],[])` by
 	    (SRW_TAC [][] THEN
 	     RES_TAC THEN
 	     `LENGTH dl0 < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
@@ -2173,8 +2175,8 @@ THENL[
 				     LAST ([NTS (q',q'',r')]::t''))] ++r2')`
 	      by METIS_TAC [rgr_r9eq] THEN
 	      SRW_TAC [][] THEN
-	      FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,transFrmState,
-					transToState,transSym] THEN
+	      FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,frmState,
+					toState,transSym] THEN
 	      METIS_TAC [everyFlat]) THEN
 	     `t''=[]` by (Cases_on `t''` THEN 
 			FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq]) THEN
@@ -2190,9 +2192,9 @@ THENL[
 	    `∀i2 i1.(LAST l0 = (i1,i2)) ⇒
 		     ∀t h2 h1.(l0 = (h1,h2)::t) ⇒
 		     (ID m)^*
-		     (transFrmState h1,h2 ++ FLAT (MAP SND t),
+		     (frmState h1,h2 ++ FLAT (MAP SND t),
 		      [transSym h1] ++ MAP transSym (MAP FST t))
-		     (transToState i1,[],[])` 
+		     (toState i1,[],[])` 
 	    by METIS_TAC [listPairImpIdc,EVERY_DEF] THEN
 	    
 	    Cases_on `l0=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -2208,19 +2210,19 @@ THENL[
 	    THENL[	   
 		  Cases_on `n`  THEN
 		  Cases_on `r''` THEN
-		  FULL_SIMP_TAC (srw_ss()) [transToState] THEN
+		  FULL_SIMP_TAC (srw_ss()) [toState] THEN
 		  Cases_on `t''=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  FULL_SIMP_TAC (srw_ss()) [transFrmState,
-					    transToState] THEN
+		  FULL_SIMP_TAC (srw_ss()) [frmState,
+					    toState] THEN
 		  `LAST t'' = (NTS (q',q'',r'''),r)` 
 		  by METIS_TAC [last_append,APPEND,APPEND_ASSOC,MEM] THEN
 		  
-		  `transToState (LAST (h''::MAP FST t''))= r'''` 
+		  `toState (LAST (h''::MAP FST t''))= r'''` 
 		  by (`MAP FST t'' = MAP FST (FRONT t'') ++ 
 		      MAP FST [(NTS (q',q'',r'''),r)]`
 		      by METIS_TAC [MAP_APPEND,APPEND_FRONT_LAST] THEN
 		      FULL_SIMP_TAC (srw_ss()) [] THEN
-		      METIS_TAC [transToState,last_append,APPEND,
+		      METIS_TAC [toState,last_append,APPEND,
 				 last_elem]) THEN
 		  METIS_TAC [RTC_RULES],
 

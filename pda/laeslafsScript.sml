@@ -1265,7 +1265,7 @@ val newm' = Define
       (q0':'state,x0:'ssym,qf:'state) = 
 let d = [((NONE:'isym option,x0,q0'),(p.start,p.ssSym::[x0]))] ++
         p.next ++
-        MAP (toFinalStateTrans x0 qf) (statesList p p.next)
+        MAP (toFinalStateTrans x0 qf) (statesList p)
 in
       <| start := q0';  ssSym := x0;  
          next := d; final := ([qf]:'state list) |>`;
@@ -1319,7 +1319,7 @@ val finalStateRule = store_thm
   ¬(q0' ∈ states m) ∧
   ¬(qf ∈ states m) ∧
   (m' = (newm' m (q0',x0,qf)))  ∧
-  (MEM state (statesList m m.next))
+  (MEM state (statesList m))
      ⇒
   MEM ((NONE,x0,state),qf,[]) m'.next``,
 
@@ -1336,7 +1336,7 @@ val memStartStateNewm' = store_thm
   ¬(qf ∈ states m) ∧
   (m'=(newm' m (q0',x0,qf)))
      ⇒
-   MEM m.start (statesList m' m'.next)``,
+   MEM m.start (statesList m')``,
 
 SRW_TAC [][newm', LET_THM] THEN
 SRW_TAC [][statesList_def] THEN
@@ -1366,7 +1366,7 @@ val toFsTrans = store_thm
    MEM ((NONE,x0,state),qf,[]) m'.next``,
 
 SRW_TAC [][newm', LET_THM] THEN
-`MEM state (statesList m m.next)` 
+`MEM state (statesList m)` 
     by METIS_TAC [mem_in, states_list_eqresult] THEN
 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq]THEN
 SRW_TAC [][statesList_def, statesList'_def, toFinalStateTrans] THEN
@@ -1405,9 +1405,9 @@ SRW_TAC [][lafs_def] THEN
 `IDC m' (m.start,x,m.ssSym::[x0]) 
         (state,[],[x0])` 
           by METIS_TAC [ APPEND, idcStackInsert] THEN
-`MEM m.start (statesList m m.next)` 
+`MEM m.start (statesList m)` 
    by FULL_SIMP_TAC (srw_ss()) [statesList_def] THEN
-`MEM state (statesList m m.next)` 
+`MEM state (statesList m)` 
     by METIS_TAC [memState] THEN
 `state ∈ states m` by METIS_TAC [mem_in, states_list_eqresult] THEN
 `MEM ((NONE,x0,state),qf,[]) m'.next` 

@@ -1755,7 +1755,7 @@ val (star_rules, star_ind, star_cases) = Hol_reln
 
 val starImpgrcl = store_thm
 ("starImpgrcl",
-``∀w.star (language g) w ⇒ w ∈ language (grClosure s0 g)``,
+``∀w. star (language g) w ⇒ w ∈ language (grClosure s0 g)``,
 
 HO_MATCH_MP_TAC star_ind THEN
 SRW_TAC [][language_def, EXTENSION] THEN
@@ -1840,7 +1840,6 @@ SRW_TAC [][] THEN
 Cases_on `dl1=[]` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [rtc2listRtcHdLast, HD, NOT_CONS_NIL, grclRtcImpD]);
-
 
 val closure_cfg = store_thm
 ("closure_cfg",

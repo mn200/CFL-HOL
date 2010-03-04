@@ -159,7 +159,9 @@ val statesList' = Define
                     q::q'::statesList' rst)`;
 
 val statesList = Define
-`statesList p d = p.start:'state::p.final ++ statesList' d`;
+`statesList p = p.start:'state::p.final ++ statesList' p.next`;
+
+val _ = overload_on ("states",``\m.statesList m``);
 
 
 val pdastk = Define `pdastk (state,inp,stk) = stk`;
@@ -195,7 +197,7 @@ SRW_TAC [][statesList']);
 
 val states_list_eqresult = store_thm(
   "states_list_eqresult",
-  ``states p = set (statesList p p.next)``,
+  ``states p = set (statesList p)``,
   SRW_TAC [][states, EXTENSION, EQ_IMP_THM, statesList]
   THENL[
 	METIS_TAC [],
@@ -336,8 +338,8 @@ val memStateRule = store_thm
 ("memStateRule",
  ``MEM ((x,h,st),q,sl) m.next
     ⇒
-   MEM st (statesList m m.next) ∧
-   MEM q (statesList m m.next)``,
+   MEM st (statesList m) ∧
+   MEM q (statesList m)``,
 
   SRW_TAC [][] THEN
   FULL_SIMP_TAC (srw_ss()) [statesList] THEN
@@ -351,8 +353,8 @@ val memState = store_thm
 ``IDC m (st,inp,stk) (st',inp',stk')
       ⇒
    (st=st') ∨
-   ((MEM st (statesList m m.next)) ∧
-   (MEM st' (statesList m m.next)))``,
+   ((MEM st (statesList m)) ∧
+   (MEM st' (statesList m)))``,
 
   Cases_on `st=st'` THEN
   SRW_TAC [][]
@@ -1395,6 +1397,7 @@ METIS_TAC [elTlEq]);
 
 
 *)
+
 val ldIdcStkLen = store_thm
 ("ldIdcStkLen",
 ``∀l q inp s q' inp' s'.
@@ -1839,7 +1842,7 @@ SRW_TAC [][]);
 val rtc2listLastMemState = store_thm
 ("rtc2listLastMemState",
 ``∀q i s t.rtc2list (ID p) ((q,i,s)::t) ∧ (t≠[]) ⇒
-   MEM (pdastate (LAST t)) (statesList p p.next)``,
+   MEM (pdastate (LAST t)) (statesList p)``,
 
 SRW_TAC [][] THEN
 `t=FRONT t ++ [LAST t]` by METIS_TAC [APPEND_FRONT_LAST]  THEN
@@ -1872,7 +1875,7 @@ THENL[
 val rtc2listFstMemState = store_thm
 ("rtc2listFstMemState",
 ``∀q i s t.rtc2list (ID p) ((q,i,s)::t) ∧ (t≠[]) ⇒
-   MEM q (statesList p p.next)``,
+   MEM q (statesList p)``,
 
 SRW_TAC [][] THEN
 Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN

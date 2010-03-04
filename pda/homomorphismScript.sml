@@ -56,7 +56,7 @@ METIS_TAC []);
 
 val memld = store_thm
 ("memld",
-``R ⊢ dl ◁ x → y ⇒ MEM x dl ∧ MEM y dl``,
+``R ⊢ dl ◁ x ↝ y ⇒ MEM x dl ∧ MEM y dl``,
 
 Cases_on `dl` THEN SRW_TAC [][listderiv_def] THEN
 Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -179,7 +179,6 @@ val mImpm'Trans1 = store_thm
  SRW_TAC [][id_thm] THEN
  METIS_TAC [APPEND]);
 
-
 val mImpm'Trans2 = store_thm
 ("mImpm'Trans2",
 ``MEM ((SOME ih,sh,q),p,st') m.next ∧ (h a = ih::isyms) ∧ hInvpda m m' h 
@@ -204,7 +203,6 @@ IDC m' ((q,[]),[a],sh::st) ((p,isyms),[],st' ++ st)``,
  `ID m' ((q, ih::isyms),[],sh::st) ((p,isyms),[],st'++st)`
  by SRW_TAC [][id_thm] THEN
  METIS_TAC [ RTC_RULES]);
-
 
 val mImpm'OneSym = store_thm
 ("mImpm'OneSym",

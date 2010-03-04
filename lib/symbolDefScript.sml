@@ -6,7 +6,6 @@ val _ = new_theory "symbolDef";
 
 
 val _ = Globals.linewidth := 60
-val _ = set_trace "Unicode" 1
 
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
@@ -621,13 +620,13 @@ METIS_TAC [rgr_r9eq,rmd_r2,MEM,MEM_APPEND,MEM_FLAT,APPEND_ASSOC]);
 
 
 val symRepProp = Define
-`symRepProp dl = 
+`symRepProp dl =
     ∃p tsl B sfx v w s.
      (dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ s) ∧
      EVERY isTmnlSym tsl ∧
      ∃s0 s1.(s = s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx] ++ s1) ∧
      EVERY isTmnlSym v ∧
-     (∀e.MEM e s0 ⇒ ∃p0 p1 nt.(e = tsl ++ p0 ++ [NTS nt] ++ p1 ++ sfx) ∧ 
+     (∀e.MEM e s0 ⇒ ∃p0 p1 nt.(e = tsl ++ p0 ++ [NTS nt] ++ p1 ++ sfx) ∧
       EVERY isTmnlSym p0)`;
 
 
@@ -680,10 +679,10 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN1
 
 (Q.PAT_ASSUM `∀e. P e` MP_TAC THEN
- FIRST_X_ASSUM (Q.SPECL_THEN 
+ FIRST_X_ASSUM (Q.SPECL_THEN
 		[`dl2`] MP_TAC) THEN
  SRW_TAC [][] THEN
- FIRST_X_ASSUM (Q.SPECL_THEN [`[]`,`tsl`,`B`,`sfx`,`v`,`w`, 
+ FIRST_X_ASSUM (Q.SPECL_THEN [`[]`,`tsl`,`B`,`sfx`,`v`,`w`,
 			      `(s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx] ++ s1)++dl2`]
 	       MP_TAC) THEN
 SRW_TAC [][] THEN1
@@ -693,10 +692,10 @@ SRW_TAC [][] THEN1
 METIS_TAC [everyNotTwice, NOT_EVERY]) THEN
 
 Q.PAT_ASSUM `∀e. P e` MP_TAC THEN
-FIRST_X_ASSUM (Q.SPECL_THEN 
+FIRST_X_ASSUM (Q.SPECL_THEN
 	       [`dl2`] MP_TAC) THEN
 SRW_TAC [][] THEN
- FIRST_X_ASSUM (Q.SPECL_THEN [`h::t'`,`tsl`,`B`,`sfx`,`v`,`w`, 
+ FIRST_X_ASSUM (Q.SPECL_THEN [`h::t'`,`tsl`,`B`,`sfx`,`v`,`w`,
 			      `(s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx] ++ s1)++dl2`]
 	       MP_TAC) THEN
 SRW_TAC [][] THEN1
@@ -737,7 +736,7 @@ val leftmostAddFront = store_thm
  (∀e.MEM e (MAP (addFront h) l) ⇒
   ∃p0 p1 nt.(e = p0 ++ [NTS nt] ++ p1 ++ s2) ∧
   EVERY isTmnlSym p0)``,
- 
+
  Induct_on `l` THEN SRW_TAC [][] THEN
  FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
  `∃p0 p1 nt.
@@ -757,7 +756,7 @@ val leftmostAddFront' = store_thm
  (∀e.MEM e (MAP (addFront h) l) ⇒
   ∃p0 p1 nt.(e = h ++ p0 ++ [NTS nt] ++ p1 ++ s2) ∧
   EVERY isTmnlSym p0)``,
- 
+
  Induct_on `l` THEN SRW_TAC [][] THEN
  FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
  `∃p0 p1 nt.
@@ -778,7 +777,7 @@ val leftmostAddFront2 = store_thm
  (∀e.MEM e (MAP (addFront h) l) ⇒
   ∃p0 p1 nt.(e = h ++ tsl ++ p0 ++ [NTS nt] ++ p1 ++ s2) ∧
   EVERY isTmnlSym p0)``,
- 
+
  Induct_on `l` THEN SRW_TAC [][] THEN
  FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
  `∃p0 p1 nt.
@@ -801,12 +800,12 @@ val leftmostAddLast' = store_thm
 
 Induct_on `l` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [addLast_def]);
- 
+
 
 
 val dldntsListsec = store_thm
 ("dldntsListsec",
-``∀m.(∀e. MEM e m ⇒ ∃rst. e = v ++ rst ++ y) ⇒ 
+``∀m.(∀e. MEM e m ⇒ ∃rst. e = v ++ rst ++ y) ⇒
 distElemSubset m (MAP (listsec v y) m)``,
 
 Induct_on `m` THEN SRW_TAC [][] THEN1
@@ -876,7 +875,7 @@ FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, FILTER_APPEND, isNonTmnlSym_def,
 METIS_TAC [APPEND, APPEND_ASSOC]);
 
 
-val dldntsLenLe = store_thm 
+val dldntsLenLe = store_thm
       ("dldntsLenLe",
        ``(∀e.MEM e dl1 ⇒ MEM (tsl ++ e ++ sfx) dl)
        ∧ (∀e. MEM e dl2 ⇒ MEM (tsl ++ v ++ e ++ sfx) dl) ∧ (dl2 ≠ []) ⇒

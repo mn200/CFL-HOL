@@ -122,7 +122,7 @@ MAP_EVERY Q.EXISTS_TAC [`a`,`b`] THEN
 SRW_TAC [] []
 ]);
 
-val rgr_r4 = prove(
+val rgr_r4 = store_thm("rgr_r4",
 ``rgr g g' ⇒
 (∃ a b.RTC (derives g') [NTS (startSym g)] (a++[NTS l]++b)) ⇒ derives g [NTS l] r 
 ⇒ derives  g' [NTS l] r``,

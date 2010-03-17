@@ -40,7 +40,7 @@ FULL_SIMP_TAC (srw_ss()) [usefulnts,derives_def,rules_def,gaw_def] THEN
 SRW_TAC [] [] THEN 
 MAP_EVERY Q.EXISTS_TAC [`s1`,`s2`,`rhs`,`lhs`] THEN SRW_TAC [] []);
 
-val subr3 = prove(
+val subr3 = store_thm("subr3",
 ``∀ a b.usefulnts g g' ⇒
 derives g a b ⇒ EVERY (gaw g) a ⇒ EVERY (gaw g) b ⇒ derives g' a b``,
 Cases_on `g` THEN SRW_TAC [] [] THEN FULL_SIMP_TAC (srw_ss()) [usefulnts,derives_def,gaw_def] THEN

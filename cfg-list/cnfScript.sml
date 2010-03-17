@@ -64,7 +64,8 @@ val badTmnlRules = Define `(badTmnlRules g = SUM (MAP ruleTmnls (rules g)))`
 
 val badNtRules = Define `(badNtRules g = SUM  (MAP ruleNonTmnls (rules g)))`
 
-val cnf = Define `cnf g = (badNtRules g = 0) ∧ (badTmnlRules g = 0)`
+val cnf = Define 
+    `cnf g = (badNtRules g = 0) ∧ (badTmnlRules g = 0)`
 
 
 val trans2NT = Define 
@@ -1254,14 +1255,17 @@ METIS_TAC [RTC_RULES]
 val lemma9_b = store_thm("lemma9_b",
 ``INFINITE (UNIV:'a set) ⇒
 (badTmnlRules g = 0) ⇒ 
-      (∃g'.RTC (\x y.∃nt:'a nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ∧ (badNtRules g' = 0))``,
+      (∃g'.RTC (\x y.∃nt:'a nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ∧ 
+       (badNtRules g' = 0))``,
 completeInduct_on `badNtRules g` THEN
 Cases_on `v=0` THENL[
 METIS_TAC [RTC_RULES],
 SRW_TAC [] [] THEN
 `∃g' nt nt1 nt2. trans2NT nt nt1 nt2 g g'` by  METIS_TAC [MONO_NOT,lemma11_b] THEN
 `(badNtRules g' < badNtRules g)` by METIS_TAC [lemma6_b] THEN
-`∃g''.RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g' g'' ∧ (badTmnlRules g' = 0) ∧ (badNtRules g'' = 0)` by  METIS_TAC [lemma15_a] THEN
+`∃g''.RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g' g'' ∧ 
+		     (badTmnlRules g' = 0) ∧ (badNtRules g'' = 0)` 
+		     by  METIS_TAC [lemma15_a] THEN
 Q.EXISTS_TAC `g''` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Q.ABBREV_TAC `r=(\x y. ∃nt nt1 nt2. trans2NT nt nt1 nt2 x y)` THEN
@@ -1276,5 +1280,15 @@ val thm4_5 = store_thm("thm4_5",
 SRW_TAC [] [cnf] THEN
 METIS_TAC [cnf,lemma14_b,lemma9_a,lemma9_b,cnf_lemma]
 );
+
+val isCnf_def = Define
+`isCnf g = ∀l r.MEM (rule l r) (rules g) ⇒
+    ((LENGTH r = 2) ∧ EVERY isNonTmnlSym r) ∨
+    ((LENGTH r = 1) ∧ EVERY isTmnlSym r)`;
+
+val cnfEq = store_thm
+(``[] ∉ language g  ⇒ (cnf g ⇔ isCnf g)``,
+
+MAGIC);
 
 val _ = export_theory ();

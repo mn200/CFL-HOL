@@ -19,7 +19,7 @@ if nullable g [s] then ((MAP (CONS s) (munge0 g sl)) ++ munge0 g sl)
 else (MAP (CONS s) (munge0 g sl)))`;
 
 val munge = Define 
-`(munge g p = {rule l r' | ∃r.MEM (rule l r) p ∧ MEM r' (munge0 g r) ∧ ~(r'=[])})`;
+`(munge g p = { rule l r' | ∃r.MEM (rule l r) p ∧ MEM r' (munge0 g r) ∧ ~(r'=[]) })`;
 
 val negr = Define 
 `negr g g' = (∀e.MEM e (rules g') = 
@@ -82,7 +82,7 @@ METIS_TAC [rtc_derives_same_append_left,rtc_derives_same_append_right,
 	   RTC_RULES]);
 
 
-val negr_r3 = prove (
+val negr_r3 = store_thm("negr_r3",
 ``∀u v.RTC (derives g') u v ⇒ negr g g' ⇒ RTC (derives g) u v``,
 HO_MATCH_MP_TAC RTC_INDUCT THEN
 SRW_TAC [] [RTC_RULES]  THEN
@@ -96,7 +96,7 @@ SRW_TAC [] [negr,rules_def,munge] THEN
 METIS_TAC []);
 
 
-val negr_r5 = prove(
+val negr_r5 = store_thm("negr_r5",
 ``∀rhs.MEM rhs (munge0 g rhs)``,
 Induct_on `rhs` THENL[
 FULL_SIMP_TAC (srw_ss()) [munge0],
@@ -144,7 +144,7 @@ val negr_r9 = prove(
 SRW_TAC [] [nullable]);
 
 
-val negr_r10 = prove(
+val negr_r10 = store_thm("negr_r10",
 ``~nullable g s ⇒ RTC (derives g) s s' ⇒ ~(s'=[])``,
 METIS_TAC [negr_r9]);
 
@@ -198,7 +198,8 @@ Induct_on `s` THENL [
 
 
 val negr_r14 = prove(
-``∀s1 s2 s'.no_rhs g (s1++s2) s' ⇒ (∃s1' s2'. (s'=s1'++s2') ∧  no_rhs g s1 s1' ∧ no_rhs g s2 s2')``,
+``∀s1 s2 s'.no_rhs g (s1++s2) s' ⇒ 
+		     (∃s1' s2'. (s'=s1'++s2') ∧  no_rhs g s1 s1' ∧ no_rhs g s2 s2')``,
 SIMP_TAC (srw_ss()) [no_rhs] THEN
 Induct_on `s1` THENL [
   SRW_TAC [] [munge0],
@@ -214,28 +215,40 @@ Induct_on `s1` THENL [
 ]]);
 
 
-val negr_r15 = store_thm("negr_r15",
-``∀s sf.RTC (derives g) s sf ⇒ negr g g' ⇒
-(s=[NTS (startSym g)]) ⇒ ∀sf'. no_rhs g sf sf' ⇒  ~(sf'=[]) ⇒ RTC (derives g') s sf'``,
+val negr_r15 = store_thm
+("negr_r15",
+ ``∀s sf.RTC (derives g) s sf ⇒ negr g g' ⇒
+ (s=[NTS (startSym g)]) ⇒ ∀sf'. no_rhs g sf sf' ⇒  ~(sf'=[]) ⇒ 
+ RTC (derives g') s sf'``,
+
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT_RIGHT1 THEN SRW_TAC [] [RTC_RULES]
 THENL[
- `sf'=[NTS (startSym g)]` by (FULL_SIMP_TAC (srw_ss()) [no_rhs,munge0] THEN Cases_on `nullable g [NTS (startSym g)]` THEN 
- FULL_SIMP_TAC (srw_ss()) []) THEN SRW_TAC [] [RTC_RULES],
+ `sf'=[NTS (startSym g)]` by 
+      (FULL_SIMP_TAC (srw_ss()) [no_rhs,munge0] THEN 
+       Cases_on `nullable g [NTS (startSym g)]` THEN 
+       FULL_SIMP_TAC (srw_ss()) []) THEN SRW_TAC [] [RTC_RULES],
 
- FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
- `∃ s1' rhs' s2'.(sf''=(s1'++rhs'++s2')) ∧ no_rhs g s1 s1' ∧ no_rhs g rhs rhs' ∧ no_rhs g s2 s2'` by METIS_TAC [negr_r14]
- THEN Cases_on `rhs'=[]` 
+      FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
+      `∃ s1' rhs' s2'.(sf''=(s1'++rhs'++s2')) ∧ no_rhs g s1 s1' ∧ 
+      no_rhs g rhs rhs' ∧ no_rhs g s2 s2'` by METIS_TAC [negr_r14]
+      THEN Cases_on `rhs'=[]` 
  THENL[
-  `no_rhs g [NTS lhs] []` by (SRW_TAC [] [no_rhs,munge0] THEN METIS_TAC [negr_r10,RTC_RULES,negr_r1,res1,no_rhs]) THEN
-   `no_rhs g (s1++[NTS lhs]++s2) (s1'++s2')` by METIS_TAC [negr_r12b,APPEND_NIL] THEN
-  `~(sf=[])` by SRW_TAC [] [] THEN METIS_TAC [APPEND_NIL],
+       `no_rhs g [NTS lhs] []` by 
+       (SRW_TAC [] [no_rhs,munge0] THEN 
+	METIS_TAC [negr_r10,RTC_RULES,negr_r1,res1,no_rhs]) THEN
+       `no_rhs g (s1++[NTS lhs]++s2) (s1'++s2')` by METIS_TAC [negr_r12b,APPEND_NIL] THEN
+       `~(sf=[])` by SRW_TAC [] [] THEN METIS_TAC [APPEND_NIL],
 
-  `no_rhs g (s1++[NTS lhs]++s2) (s1'++[NTS lhs]++s2')` by METIS_TAC [negr_r5,negr_r12b,no_rhs] THEN
-`~(sf=[]) ∧ ~((s1' ++ [NTS lhs] ++ s2')=[])` by SRW_TAC [] []  THEN `RTC (derives g') [NTS (startSym g)] (s1' ++ [NTS lhs] ++ s2')` by METIS_TAC []  THEN 
-`derives g [NTS lhs] rhs` by METIS_TAC [res1] THEN
-`derives g' [NTS lhs] rhs'` by METIS_TAC [negr_r7] THEN
-`derives g' (s1'++[NTS lhs]++s2') (s1'++rhs'++s2')` by METIS_TAC [derives_same_append_left,derives_same_append_right] THEN
-METIS_TAC [RTC_RULES_RIGHT1]]]);
+       `no_rhs g (s1++[NTS lhs]++s2) (s1'++[NTS lhs]++s2')` 
+       by METIS_TAC [negr_r5,negr_r12b,no_rhs] THEN
+       `~(sf=[]) ∧ ~((s1' ++ [NTS lhs] ++ s2')=[])` by SRW_TAC [] []  THEN 
+       `RTC (derives g') [NTS (startSym g)] (s1' ++ [NTS lhs] ++ s2')` 
+       by METIS_TAC []  THEN 
+       `derives g [NTS lhs] rhs` by METIS_TAC [res1] THEN
+       `derives g' [NTS lhs] rhs'` by METIS_TAC [negr_r7] THEN
+       `derives g' (s1'++[NTS lhs]++s2') (s1'++rhs'++s2')` 
+       by METIS_TAC [derives_same_append_left,derives_same_append_right] THEN
+       METIS_TAC [RTC_RULES_RIGHT1]]]);
 
 val thm4_3 = store_thm ("thm4_3",
 ``negr g g' ⇒ ~([] IN language g) ⇒ (language g = language g')``,

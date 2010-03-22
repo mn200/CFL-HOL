@@ -5,7 +5,7 @@ open stringTheory relationTheory pred_setTheory listTheory
 arithmeticTheory rich_listTheory
 
 open grammarDefTheory listLemmasTheory symbolDefTheory setLemmasTheory
-containerTheory relationLemmasTheory
+containerTheory relationLemmasTheory unitProdsTheory eProdsTheory
 
 val _ = new_theory "cnf";
 
@@ -1275,8 +1275,8 @@ METIS_TAC [RTC_RULES]])
 
 val thm4_5 = store_thm("thm4_5",
 ``∀g:('a, 'b) grammar.
-      INFINITE (UNIV:'a set) ⇒
-      ∃g'. (cnf g') ∧ (eqLang g g')``,
+INFINITE (UNIV:'a set) ⇒
+∃g'. (cnf g') ∧ (eqLang g g')``,
 SRW_TAC [] [cnf] THEN
 METIS_TAC [cnf,lemma14_b,lemma9_a,lemma9_b,cnf_lemma]
 );
@@ -1286,9 +1286,22 @@ val isCnf_def = Define
     ((LENGTH r = 2) ∧ EVERY isNonTmnlSym r) ∨
     ((LENGTH r = 1) ∧ EVERY isTmnlSym r)`;
 
-val cnfEq = store_thm
-(``[] ∉ language g  ⇒ (cnf g ⇔ isCnf g)``,
 
+val cnfisCnfEq = store_thm
+("cnfisCnfEq",
+``∀g:('a, 'b) grammar.
+ INFINITE (UNIV:'a set) ⇒ 
+ [] ∉ language g  ⇒ cnf g ⇒ isCnf g``,
+
+(* 
+∃g'. negr g g' ∧ eqLang g g' 
+
+∃g''. upgr g' g'' ∧ eqLang g' g'' 
+
+Prove: negr g g' ∧ upgr g' g'' ⇒ ¬∃l.rule l [] ∈ rules g' ∧ g''
+
+*)
 MAGIC);
+
 
 val _ = export_theory ();

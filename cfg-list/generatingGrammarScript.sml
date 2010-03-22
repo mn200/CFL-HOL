@@ -21,7 +21,8 @@ val usefulnts = Define
 val use_exists = store_thm
 ("use_exists",
 ``∀g.∃g'.usefulnts g g'``,
-SRW_TAC [][usefulnts] THEN
+
+Cases_on `g` THEN SRW_TAC [][usefulnts] THEN
 MAGIC);
 
 val eq_startsym = store_thm ("eq_startsym",
@@ -104,7 +105,7 @@ val lemma4_1a = store_thm(
 METIS_TAC [subr3,RTC_RULES_RIGHT1,key_result],
  METIS_TAC [eq_startsym,RTC_MONOTONE,subr2]]);
 	
-(*
+
 val lemma4_1 = store_thm(
   "lemma4_1",
   ``~ (language g = {}:('nts,'ts) symbol list set) ⇒ usefulnts g g' ⇒ 
@@ -117,30 +118,33 @@ METIS_TAC [lemma4_1a] THEN
 Cases_on `g` THEN
 FULL_SIMP_TAC (srw_ss()) [usefulnts,nonTerminals_def,EXTENSION,
 			  startSym_def,rules_def] THEN
-SRW_TAC [][] THENL[
+`usefulnts (G l (startSym g')) g'` 
+by FULL_SIMP_TAC (srw_ss()) [usefulnts,rules_def,startSym_def] THEN
+SRW_TAC [][] THEN
+
 SRW_TAC [] [gaw_def] THEN
-`∃e.e IN language (G l (startSym g'))` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
+Q.ABBREV_TAC `g = (G l (startSym g'))` THEN
+Cases_on `nt` THEN1
+(`∃rhs.
+     rule n rhs ∈ rules g' ∨
+     ∃l p s.
+       rule l (p ++ [NTS n] ++ s) ∈ rules g' ∨
+       (n = startSym g')` by METIS_TAC [slemma1_4] THEN
+RES_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [gaw_def] THEN
+SRW_TAC [][] THEN1
+METIS_TAC [subr4] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [gaw_def] THEN
+ METIS_TAC [subr4]) THEN
+
+`∃e.e IN language g` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
 FULL_SIMP_TAC (srw_ss()) [language_def] THEN
 SRW_TAC [] [gaw_def] THEN 
 Q.EXISTS_TAC `e` THEN
 FULL_SIMP_TAC (srw_ss()) [startSym_def] THEN
-`usefulnts (G l (startSym g')) g'` 
-by FULL_SIMP_TAC (srw_ss()) [usefulnts,rules_def,startSym_def] THEN
-`RTC (derives (G l (startSym g'))) [NTS (startSym g')] e ⇒ EVERY isTmnlSym e ⇒ 
-RTC (derives g') [NTS (startSym g')] e` 
-by METIS_TAC [subr4] THEN
-Cases_on `nt` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-IMP_RES_TAC slemma1_4 THEN
-METIS_TAC []
-FULL_SIMP_TAC (srw_ss()) [usefulnts,gaw_def],
-
-FULL_SIMP_TAC (srw_ss()) [rule_nonterminals_def] THENL[
-METIS_TAC [gaw_def,rules_def,subr5,usefulnts],
-FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
-SRW_TAC [] [] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-METIS_TAC [usefulnts,subr5]
-]])
-*)
+METIS_TAC [subr4, startSym_def]) THEN
+METIS_TAC [tsNotInNonTmnls]);
 
 
 val _ = export_theory ();

@@ -7,7 +7,7 @@ open pred_setTheory symbolDefTheory grammarDefTheory listLemmasTheory
 relationLemmasTheory
 
 open containerLemmasTheory cnfTheory eProdsTheory generatingGrammarTheory
-    unitProdsTheory
+    unitProdsTheory aProdsTheory l2rTheory
 
 val _ = new_theory "gnf";
 
@@ -3543,7 +3543,7 @@ val r49 = Define
 `r49 (bs0: α list, nts0: α list, g0:(α,β) grammar, seen0: α list)
        (bs,nts,g,seen) =
 
-∃ntk b.(nts0 = ntk::nts) ∧ (bs0 = b::bs) ∧ (seen = seen0 ++ [ntk]) ∧
+∃ntk b.(nts0 = ntk::nts) ∧ (bs = bs0 ++ [b]) ∧ (seen = seen0 ++ [ntk]) ∧
        (nts = TL nts0) ∧
 
 ∃rules0. (rules0 = aProdsRules ntk seen0 NULL (set (rules g0))) ∧
@@ -3601,7 +3601,7 @@ val r49_seenInv = prove
 SRW_TAC [][r49] THEN
 `FINITE (aProdsRules ntk s0 NULL (set (rules g0)))`
 by METIS_TAC [FINITE_LIST_TO_SET, finiteaProdsRules] THEN
-`∃r.∀e. MEM e r ⇔ e ∈ aProdsRules ntk s0 NULL (set (rules g0))` 
+`∃r.set r =  aProdsRules ntk s0 NULL (set (rules g0))` 
  by METIS_TAC [listExists4Set] THEN
 `seenInv r s0` by
 (SRW_TAC [][seenInv,aProdsRules] THEN
@@ -3628,7 +3628,7 @@ by METIS_TAC [FINITE_LIST_TO_SET, finiteaProdsRules] THEN
   Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
   MAGIC) THEN
 
- `∃r'.∀e.MEM e r' ⇔ e ∈ l2rRules ntk b
+ `∃r'. set r' = l2rRules ntk b
  (aProdsRules ntk s0 NULL (set (rules g0)))` 
  by METIS_TAC [listExists4Set, finitel2rRules] THEN
 
@@ -3683,36 +3683,184 @@ SRW_TAC [][] THEN
  `(set (ntms g1) ∩ set bs1 = {})` by MAGIC THEN
 METIS_TAC []);
 
-(*
-val usefulInv = Define
-`usefulInv g = ∀nt. nt ∈ (ntms g) ⇒ gaw g (NTS nt)`;
+
+val rhsTlNonTms = Define
+`rhsTlNonTms ru ntsl bs = 
+ (∀e. e ∈ (set ntsl DIFF set bs) ⇒
+  (∀r.MEM (rule e r) ru ⇒ 
+   ∃h t.(r = h::t) ∧ EVERY isNonTmnlSym t ∧ (isNonTmnlSym h ⇒ t ≠ []))) ∧
+ (∀e. MEM e bs ⇒ ∀r. MEM (rule e r) ru ⇒ EVERY isNonTmnlSym r ∧ r ≠ [])`;
 
 
-val r49_usefulInv = store_thm
-("r49_usefulInv",
-``usefulInv g0 ∧ r49 (bs0,nts0,g0,s0) (bs,nts,g,s) ⇒
- usefulInv g``,
+val isCnfImprhsTlNonTmnls = store_thm
+("isCnfImprhsTlNonTmnls",
+``isCnf g0 ⇒ (set (ntms g0) ∩ set bs0 = {}) ⇒
+ rhsTlNonTms (rules g0) (ntms g0) bs0``,
 
-SRW_TAC [][usefulInv] THEN
+SRW_TAC [][isCnf_def, rhsTlNonTms] THEN
+RES_TAC 
+ THENL[
+       Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+       Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def] THEN
+       METIS_TAC [LENGTH_NIL, EVERY_DEF, DECIDE ``1 ≠ 0``],
+
+       Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+       Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def] THEN
+       METIS_TAC [LENGTH_NIL, EVERY_DEF, DECIDE ``1 ≠ 0``],
+
+       FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+       METIS_TAC [ntmsMem, slemma1_4],
+
+       Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+       Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def] THEN
+       METIS_TAC [LENGTH_NIL, EVERY_DEF, DECIDE ``1 ≠ 0``],
+
+       FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+       METIS_TAC [ntmsMem, slemma1_4]       
+       ]);
+
+
+val aprodsrhsTl = store_thm
+("aprodsrhsTl",
+``rhsTlNonTms ru (ntms (G ru s)) bs0 ⇒ 
+ (set (ntms (G ru s)) ∩ set bs0 = {}) ⇒
+ (set ru' = aProdsRules ntk seen0 NULL (set ru))  ⇒ 
+ rhsTlNonTms ru' (ntms (G ru' s)) bs0``,
+MAGIC);
+
+SRW_TAC [][rhsTlNonTms] THEN
+`rule e r ∈ aProdsRules ntk seen0 NULL (set ru)` by METIS_TAC [mem_in] THEN
+FULL_SIMP_TAC (srw_ss()) [aProdsRules] THEN1
+METIS_TAC [ntmsMem, slemma1_4, rules_def] THEN
+Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN
+`e ∈ (ntms (G ru s))`by METIS_TAC [slemma1_4, rules_def,ntmsMem] THEN
+`B ∈ (ntms (G ru s))` by METIS_TAC [slemma1_4, rules_def,ntmsMem] THEN 
+RES_TAC THEN
+Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+DECIDE_TAC);
+
+
+val l2rrhsTl = store_thm
+("l2rrhsTl",
+``(set (ntms (G ru s)) ∩ set (B::bs) = {}) ⇒
+ rhsTlNonTms ru (ntms (G ru s)) (B::bs) ⇒ 
+ (set ru' = l2rRules A B (set ru)) ⇒
+ rhsTlNonTms ru' (ntms (G ru' s)) (B::bs)``,
+MAGIC);
+
+
+SRW_TAC [][rhsTlNonTms] THEN
+
+`rule e r ∈ l2rRules A B (set ru)` by METIS_TAC [mem_in] THEN
+FULL_SIMP_TAC (srw_ss()) [l2rRules] THEN1
+METIS_TAC [slemma1_4, ntmsMem, rules_def] THEN1
+(FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+SRW_TAC [][]  THEN
+RES_TAC THEN
+Cases_on `y` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+`A ∈ (ntms (G ru s))` by METIS_TAC [slemma1_4, rules_def, ntmsMem] THEN
+RES_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN
+DECIDE_TAC) THEN
+
+FULL_SIMP_TAC (srw_ss()) [bprods] THEN
+SRW_TAC [][] THEN1
+
+(`A ∈ (ntms (G ru s))` by METIS_TAC [slemma1_4, rules_def, ntmsMem] THEN
+ RES_TAC  THEN
+ FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+ SRW_TAC [][] THEN
+ Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]
+ ) THEN
+
+`A ∈ (ntms (G ru s))` by METIS_TAC [slemma1_4, rules_def, ntmsMem] THEN
+ RES_TAC  THEN
+ FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+ SRW_TAC [][] THEN
+Cases_on `a` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]);
+
+
+val r49_rhsTlNonTms = store_thm
+("r49_rhsTlNonTms",
+``(set (ntms g0) ∩ set bs0 = {}) ∧
+ rhsTlNonTms (rules g0) (ntms g0) bs0 ∧ 
+ r49 (bs0,nts0,g0,s0) (bs,nts,g,s) ⇒
+ rhsTlNonTms (rules g) (ntms g) bs0``,
+MAGIC);
+
+SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [r49] THEN
 SRW_TAC [][] THEN
-`(NTS nt) ∈ nonTerminals g` by METIS_TAC [ntmsMem] THEN
-IMP_RES_TAC slemma1_4
+Q.ABBREV_TAC `rules0 = aProdsRules ntk seen0 NULL (set (rules g0))` THEN
+`FINITE rules0`
+by METIS_TAC [FINITE_LIST_TO_SET, finiteaProdsRules] THEN
+`∃r. set r = rules0` by METIS_TAC [listExists4Set] THEN
+Q.ABBREV_TAC `rules1 = l2rRules ntk b (set r)` THEN
+ `∃r'. set r' =  rules1` 
+ by METIS_TAC [listExists4Set, finitel2rRules, FINITE_LIST_TO_SET] THEN
+Cases_on `g0` THEN FULL_SIMP_TAC (srw_ss()) [rules_def, startSym_def] THEN
+`set (b::bs) = b INSERT set bs` by SRW_TAC [][] THEN
+`rhsTlNonTms r (ntms (G r n)) (b::bs)` by METIS_TAC [aprodsrhsTl] THEN
+`set (ntms (G r n)) ∩ (b INSERT set bs) = {}` by MAGIC THEN
+`rhsTlNonTms r' (ntms (G r n)) (b::bs)` by METIS_TAC [l2rrhsTl, mem_in] THEN
+UNABBREV_ALL_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [startSym_def, rules_def] THEN
+SRW_TAC [][] THEN
 MAGIC);
 
-val r49Rtc_usefulInv = store_thm
-("r49Rtc_usefulInv",
-``∀x y. (r49)^* x y ⇒ (x=(bs0,nts0,g0,s0)) ⇒ (y=(bs,nts,g,s)) ⇒
- usefulInv g0 ∧ 
- usefulInv g``,
+
+``(set r = aProdsRules ntk s0 NULL (set (rules g0))) ⇒
+(set (ntms g) ⊆ set (ntms g0))``,
+
+SRW_TAC [][aProdsRules, EXTENSION, EQ_IMP_THM, SUBSET_DEF] THEN
+SRW_TAC [][] THEN
+
+``(set r = l2rRules ntk b (set (rules g0))) ⇒
+(set (ntms g) = set (ntms g0) ∪ {b})``,
+
+
+
+``r49 (b::bs,nts0,g0,s0) (bs,nts,g,s) ⇒
+(set (ntms g) ⊆ set (ntms g0) ∪ {b})``,
+
+SRW_TAC [][r49] THEN
+
+r49 (bs0,nts0,g0,s0) (bs,nts,g,s) ⇒
+(∀e. MEM e bs ⇒ ∀r. MEM (rule e r)
+
+
+val rhsTlNtmsRtc = store_thm
+("rhsTlNtmsRtc",
+``∀x y. (r49)^* x y ⇒ 
+ ∀bs0 nts0 g0 s0. (x = (bs0,nts0,g0,s0)) ⇒ (y = (bs,nts,g,s)) ⇒
+ (set (ntms g0) ∩ set bs0 = {}) ⇒
+ rhsTlNonTms (rules g0) (ntms g0) bs0 ⇒
+ rhsTlNonTms (rules g) (ntms g) bs0``,
+
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
+`∃bs1 nts1 g1 s1. (x' = (bs1, nts1, g1, s1))`by MAGIC THEN
+SRW_TAC [][] THEN
+IMP_RES_TAC r49_rhsTlNonTms THEN
+FULL_SIMP_TAC (srw_ss()) [r49] THEN
+SRW_TAC [][] THEN
+
+
+
+
 
 MAGIC);
-*)
 
 
 val bInv = Define
 `bInv ru ntsl bs = 
-∀e.MEM e bs ⇒ ∀n rst. rule e (NTS n::rst) ∈ ru ⇒ n ∈ set ntsl`;
+∀e.MEM e bs ⇒ 
+∀n rst. rule e (NTS n::rst) ∈ ru ⇒ n ∈ set ntsl`;
 
 val aprods_bInv = store_thm
 ("aprods_bInv",
@@ -3733,17 +3881,16 @@ SRW_TAC [][] THEN
 METIS_TAC [slemma1_4, APPEND, symbol_11, APPEND_ASSOC, ntmsMem]);
 
 
-val noEmptyRules = Define
-`noEmptyRules ru = ¬∃l. rule l [] ∈ ru`;
-
 val l2r_bInv = store_thm
 ("l2r_bInv",
 ``bInv ru (ntms (G ru s)) (b::bs0) ⇒
-(set (ntms (G ru s)) ∩ set (b::bs0) = {}) ⇒
+ rhsTlNonTms ru ⇒
+ (set (ntms (G ru s)) ∩ set (b::bs0) = {}) ⇒
 (set r = l2rRules ntk b (set ru)) ⇒
  bInv r (ntms (G ru s)) (b::bs0)``,
 
-SRW_TAC [][bInv, l2rRules] THEN
+SRW_TAC [][bInv, l2rRules] 
+ THENL[
 
 `rule b (NTS n::rst) ∈ 
  set ru ∪ newAprods ntk b (set ru) ∪
@@ -3766,6 +3913,11 @@ THENL[
       (`NTS n ∈ nonTerminals (G ru s)` by METIS_TAC [rules_def, slemma1_4,
 						     APPEND, APPEND_ASSOC] THEN
        METIS_TAC [ntmsMem]) THEN
+      FULL_SIMP_TAC (srw_ss()) [rhsTlNonTms] THEN
+      RES_TAC THEN
+      
+
+
       Cases_on `a` THEN FULL_SIMP_TAC (srw_ss()) [noEmptyRules] THEN
       SRW_TAC [][] THEN
 
@@ -3958,65 +4110,6 @@ SRW_TAC [][] THEN
 RES_TAC THEN
 METIS_TAC [r49_equiv, MEM]);
 
-
-val rhsTlNonTms = Define
-`rhsTlNonTms ru = 
-∀l r.MEM (rule l r) ru ⇒ ∃h t.(r = h::t) ∧ EVERY isNonTmnlSym t`;
-
-
-val isCnfImprhsTlNonTmnls = store_thm
-("isCnfImprhsTlNonTmnls",
-``isCnf g0 ⇒ rhsTlNonTms (rules g0)``,
-
-SRW_TAC [][isCnf_def, rhsTlNonTms] THEN
-RES_TAC THEN
-Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-METIS_TAC [LENGTH_NIL, EVERY_DEF]);
-
-
-
-val aprodsrhsTl = store_thm
-("aprodsrhsTl",
-``rhsTlNonTms ru ⇒ (∀e.MEM e ru' ⇔ e ∈ aProdsRules ntk seen0 NULL (set ru)) 
-⇒ rhsTlNonTms ru'``,
-
-MAGIC);
-
-val l2rrhsTl = store_thm
-("l2rrhsTl",
-``rhsTlNonTms ru ⇒ (∀e.MEM e ru' ⇔ e ∈ l2rRules A B (set ru)) ⇒
- rhsTlNonTms ru'``,
-
-MAGIC);
-
-val cnfImpAllNtmsTl = store_thm
-("cnfImpAllNtmsTl",
-``isCnf g0 ∧  r49 (b::bs0,nts0,g0,s0) (bs,nts,g,s) ⇒
-rhsTlNonTms (rules g)``,
-
-SRW_TAC [][] THEN
-`rhsTlNonTms (rules g0)` by METIS_TAC [isCnfImprhsTlNonTmnls] THEN
-FULL_SIMP_TAC (srw_ss()) [r49] THEN
-SRW_TAC [][] THEN
-Q.ABBREV_TAC `rules0 = aProdsRules ntk seen0 NULL (set (rules g0))` THEN
-`FINITE rules0`
-by METIS_TAC [FINITE_LIST_TO_SET, finiteaProdsRules] THEN
-`∃r.∀e. MEM e r ⇔ e ∈ rules0` 
- by METIS_TAC [listExists4Set] THEN
-Q.ABBREV_TAC `rules1 = l2rRules ntk b (set r)` THEN
- `∃r'.∀e.MEM e r' ⇔ e ∈ rules1` 
- by METIS_TAC [listExists4Set, finitel2rRules, FINITE_LIST_TO_SET] THEN
-`rhsTlNonTms r` by METIS_TAC [aprodsrhsTl] THEN
-`rhsTlNonTms r'` by METIS_TAC [l2rrhsTl, mem_in] THEN
-UNABBREV_ALL_TAC THEN
-MAGIC);
-
-val rhsTlNtmsRtc = store_thm
-("rhsTlNtmsRtc",
-``rhsTlNtms (rules g0) ∧  (r49)^* (bs0,nts0,g0,s0) (bs,nts,g,s) ⇒
- rhsTlNonTms (rules g)``,
-
-MAGIC);
 
 
 

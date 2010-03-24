@@ -15,38 +15,6 @@ val _ = set_trace "Unicode" 1
 
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
-val derivesImplderives = store_thm
-("derivesImplderives",
-``∀x y. (derives g)^* x y ⇒ isWord y ⇒ (lderives g)^* x y``,
-
-SRW_TAC [][] THEN
-`∃n.NRC (derives g) n x y`
-by
-(IMP_RES_TAC rtc2list_exists' THEN
-Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
-FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-`LENGTH t < LENGTH (h::t)` by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-IMP_RES_TAC listderivNrc THEN
-Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
-
-(FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
- FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
- Q.EXISTS_TAC `0` THEN
- SRW_TAC [][arithmeticTheory.NRC]) THEN
-
-FIRST_X_ASSUM (Q.SPECL_THEN [`y`, `h'`,`derives g`] MP_TAC) THEN SRW_TAC [][] THEN
-IMP_RES_TAC listDerivHdBrk THEN
-RES_TAC THEN
-Q.EXISTS_TAC `SUC m` THEN
- SRW_TAC [][arithmeticTheory.NRC]  THEN
-`h=x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-METIS_TAC []) THEN
-
-IMP_RES_TAC nrc_drdeq_ld THEN
-METIS_TAC [arithmeticTheory.RTC_eq_NRC]);
-
-
-
 (* Greibach Normal Form *)
 
 (*
@@ -284,21 +252,23 @@ METIS_TAC [lemma4_3]
 
 (*********************************************************************************)
 
-val aProdgAll = Define
-`aProdgAll A B g g' =
-  A≠B ∧
-  (set (rules g') = 
-   set (rules g) DIFF {rule A (p ++ [NTS B] ++ s) | p, s |
-		       MEM (rule A (p++ [NTS B] ++ s)) (rules g) } ∪
-    { rule A (p++x++s) | p, x, s | MEM (rule A (p++ [NTS B] ++ s)) (rules g) ∧
-                         MEM (rule B x) (rules g) }) ∧
-  (startSym g = startSym g')`;
+val aProdAllRules = Define
+`aProdAllRules A B PP ru =   
+  ru DIFF {rule A (p ++ [NTS B] ++ s) | p, s |
+	    PP p ∧ (rule A (p++ [NTS B] ++ s)) IN ru } ∪
+   { rule A (p++x++s) | p, x, s | PP p ∧ 
+    (rule A (p++ [NTS B] ++ s)) IN ru ∧ (rule B x) IN ru }`;
 
+val aProdgAll = Define
+`aProdgAll A B PP g g' =
+  A≠B ∧
+  (startSym g = startSym g') ∧
+  (set (rules g') = aProdAllRules A B PP (set (rules g)))`;
 
 
 val derivgImpNewgall = store_thm
 ("derivgImpNewgall",
- ``∀u v. lderives g ⊢ dl ◁ u → v ⇒ aProdgAll A B g g' ⇒ isWord v ⇒ 
+ ``∀u v. lderives g ⊢ dl ◁ u → v ⇒ aProdgAll A B PP g g' ⇒ isWord v ⇒ 
  (lderives g')^* u v``,
 
 completeInduct_on `LENGTH dl` THEN SRW_TAC [][] THEN
@@ -310,10 +280,11 @@ Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
 IMP_RES_TAC listDerivHdBrk THEN
 `h = u` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [lderives_def, aProdgAll] THEN
+FULL_SIMP_TAC (srw_ss()) [lderives_def, aProdgAll, aProdAllRules] THEN
 SRW_TAC [][] THEN
-Cases_on `rule lhs rhs ∈ {rule A (p ++ [NTS B] ++ s) | p, s|
-			  rule A (p ++ [NTS B] ++ s) ∈ rules g}` 
+Cases_on `rule lhs rhs ∈ {rule A (p ++ [NTS B] ++ s) |
+       (p,s) |
+       PP p ∧ rule A (p ++ [NTS B] ++ s) ∈ rules g}`
 THENL[
 
 FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -423,25 +394,25 @@ Cases_on `isWord p`
        
        
 val slemma1_r4all = prove(
-``∀g g'.aProdgAll A B g g' ⇒ ∀l r. MEM (rule l r) (rules g') ⇒ ~(l=A)
+``∀g g'.aProdgAll A B PP g g' ⇒ ∀l r. MEM (rule l r) (rules g') ⇒ ~(l=A)
 	    ⇒
         MEM (rule l r) (rules g)``,
 
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [aProdgAll] THEN
+FULL_SIMP_TAC (srw_ss()) [aProdgAll,aProdAllRules] THEN
 `rule l r ∈ set (rules g) DIFF
       {rule A (p ++ [NTS B] ++ s) |
        (p,s) |
-       rule A (p ++ [NTS B] ++ s) ∈ rules g} ∪
+       PP p ∧ rule A (p ++ [NTS B] ++ s) ∈ rules g} ∪
       {rule A (p ++ x ++ s) | p, x, s |
-       rule A (p ++ [NTS B] ++ s) ∈ rules g ∧
+       PP p ∧ rule A (p ++ [NTS B] ++ s) ∈ rules g ∧
        rule B x ∈ rules g}` by METIS_TAC [mem_in] THEN
  FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][]); 
 
 
 val apg_r3all = prove
-(``∀g g'. aProdgAll A B g g' ⇒ ∀u v.derives g' u v ⇒ RTC (derives g) u v``,
+(``∀g g'. aProdgAll A B PP g g' ⇒ ∀u v.derives g' u v ⇒ RTC (derives g) u v``,
 
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
@@ -452,13 +423,13 @@ Cases_on `~(lhs=A)`
 		  rtc_derives_same_append_left,APPEND_ASSOC,RTC_RTC,RTC_RULES],
 
        SRW_TAC [] [] THEN
-       FULL_SIMP_TAC (srw_ss()) [aProdgAll] THEN
+       FULL_SIMP_TAC (srw_ss()) [aProdgAll,aProdAllRules] THEN
        `rule A rhs ∈ set (rules g) DIFF
        {rule A (p ++ [NTS B] ++ s) |
 	(p,s) |
-	rule A (p ++ [NTS B] ++ s) ∈ rules g} ∪
+	PP p ∧ rule A (p ++ [NTS B] ++ s) ∈ rules g} ∪
        {rule A (p ++ x ++ s) | p, x, s|
-	rule A (p ++ [NTS B] ++ s) ∈ rules g ∧
+	PP p ∧ rule A (p ++ [NTS B] ++ s) ∈ rules g ∧
 	rule B x ∈ rules g}`
        by METIS_TAC [mem_in] THEN
        FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -468,7 +439,7 @@ Cases_on `~(lhs=A)`
 
 val apg_r4all = store_thm (
 "apg_r4all",
-``∀u v.RTC (derives g') u v ⇒  aProdgAll A B g g'
+``∀u v.RTC (derives g') u v ⇒  aProdgAll A B PP g g'
 ⇒ RTC (derives g) u v``,
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
 SRW_TAC [] [RTC_RULES] THEN
@@ -478,7 +449,7 @@ METIS_TAC [RTC_RTC,apg_r3all]);
 
 val lemma4_3all = store_thm
 ("lemma4_3all",
- ``∀g g'.aProdgAll A B g g' ⇒ (language g = language g')``,
+ ``∀g g'.aProdgAll A B PP g g' ⇒ (language g = language g')``,
  
  SRW_TAC [][EQ_IMP_THM, EXTENSION, language_def] THEN
  METIS_TAC [derivesImplderives, lderivesImpDerives,

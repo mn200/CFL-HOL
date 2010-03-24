@@ -16,13 +16,6 @@ fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 (* Lemma 4.4 *)
 
-val isWordRev = store_thm
-("isWordRev",
-``∀l.isWord (REVERSE l) ⇔ isWord l``,
-
-Induct_on `l` THEN SRW_TAC [][] THEN
-METIS_TAC []);
-
 val nonLeftRecRules = Define
 `nonLeftRecRules ru nt =
 {rule nt rhs |rhs| MEM (rule nt rhs) ru ∧ ~(∃s.(rhs = [NTS nt] ++ s))}`;

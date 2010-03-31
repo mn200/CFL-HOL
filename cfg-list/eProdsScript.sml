@@ -29,6 +29,7 @@ e ∈ {rule l r | (rule l r) ∈ (munge g (rules g))}) ∧
 val negr_exists = store_thm
 ("negr_exists",
 ``∀g.∃g'.negr g g'``,
+
 SRW_TAC [][negr] THEN
 MAGIC);
 

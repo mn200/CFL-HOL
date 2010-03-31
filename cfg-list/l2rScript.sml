@@ -1489,7 +1489,7 @@ METIS_TAC [ldres1, lderives_same_append_right, lderives_same_append_left]);
 
 val blkNilgImpNewgd = store_thm
 ("blkNilgImpNewgd",
-``∀dl x.lderives g ⊢ dl ◁ x → y ∧ left2Right A B g g' ∧
+``∀dl x. left2Right A B g g' ∧ lderives g ⊢ dl ◁ x → y ∧
 (ldNumNt (NTS A) dl = 0) ⇒
 derives g' ⊢ dl ◁ x → y``,
 
@@ -1790,12 +1790,12 @@ METIS_TAC [slemma1_4,APPEND_NIL]);
 
 val ntdlgImpNewg = store_thm
 ("ntdlgImpNewg",
-``∀dl.lderives g ⊢ dl ◁ (pfx++[NTS A]++sfx) → y ∧ left2Right A B g g' ∧
-EVERY isTmnlSym pfx ∧
-(∀e. MEM e dl ⇒ ∃sfx. e = pfx ++ [NTS A] ++ sfx) ∧
-(∀e1 e2 p s.(dl = p ++ [e1; e2] ++ s) ⇒ LENGTH e2 ≥ LENGTH e1) ∧
-(LENGTH y ≤ LENGTH y' ⇒ ¬(pfx ++ [NTS A] ≼ y')) ∧
-lderives g y y'
+``∀dl.left2Right A B g g' ∧
+ lderives g ⊢ dl ◁ (pfx++[NTS A]++sfx) → y ∧ 
+ lderives g y y' ∧ EVERY isTmnlSym pfx ∧
+ (∀e. MEM e dl ⇒ ∃sfx. e = pfx ++ [NTS A] ++ sfx) ∧
+ (∀e1 e2 p s.(dl = p ++ [e1; e2] ++ s) ⇒ LENGTH e2 ≥ LENGTH e1) ∧
+ (LENGTH y ≤ LENGTH y' ⇒ ¬(pfx ++ [NTS A] ≼ y'))
 ⇒
 ∃dl'.derives g' ⊢ dl' ◁ (pfx++[NTS A]++sfx) → y'``,
 
@@ -1899,7 +1899,8 @@ METIS_TAC [derives_same_append_left,derives_same_append_right,rulegImpg',res1]);
 
 val ldgrImpNewg = store_thm
 ("ldgrImpNewg",
-``∀x y.lderives g ⊢ dl ◁ x → y ∧ EVERY isTmnlSym y ∧ left2Right A B g g'
+``∀x y.left2Right A B g g' ∧
+ lderives g ⊢ dl ◁ x → y ∧ EVERY isTmnlSym y 
  ⇒
  ∃dl'.derives g' ⊢ dl' ◁ x → y``,
 

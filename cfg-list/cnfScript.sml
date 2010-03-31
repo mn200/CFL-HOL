@@ -14,6 +14,37 @@ val _ = set_trace "Unicode" 1
 
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
+val noeProds = Define
+`noeProds ru = ¬∃l. rule l [] ∈ ru`;
+
+val noUnitProds = Define
+`noUnitProds ru = ¬∃l nt. rule l [NTS nt] ∈ ru`;
+
+val negrImpnoeProds = store_thm
+("negrImpnoeProds",
+``negr g g' ⇒ noeProds (rules g')``,
+
+SRW_TAC [][noeProds, negr_def] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [munge_def]);
+
+
+val upgrImpnoUnitProds = store_thm
+("upgrImpnoUnitProds",
+``upgr g g' ⇒ noUnitProds (rules g')``,
+
+SRW_TAC [][noUnitProds, upgr_def, upgr_rules_def, nonUnitProds_def,
+	   nonUnitProds_def, newProds_def, unitProds_def]);
+
+
+val upgr_noeProds = store_thm
+("upgr_noeProds",
+``noeProds (rules g) ⇒ upgr g g' ⇒ noeProds (rules g')``,
+
+SRW_TAC [][upgr_def, noeProds, upgr_rules_def, newProds_def, nonUnitProds_def,
+	   unitProds_def]);
+
+
 (* Chomsky Normal Form *)
 
 val trans1Tmnl = Define `trans1Tmnl nt t g g' = 
@@ -22,6 +53,36 @@ val trans1Tmnl = Define `trans1Tmnl nt t g g' =
 ((NTS nt) ∉ (nonTerminals g)) ∧ 
 (rules(g')=(delete (rule l r) (rules g)) ++[rule nt [t];rule l (p++[NTS nt]++s)]) ∧ 
 (startSym g' = startSym g)`;
+
+val trans1Tmnl_noeProds = store_thm
+("trans1Tmnl_noeProds",
+``noeProds (rules g) ∧
+trans1Tmnl nt t g g' ⇒
+noeProds (rules g')``,
+
+SRW_TAC [][noeProds, trans1Tmnl] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+`rule l' [] ∈ delete (rule l (p ++ [t] ++ s)) (rules g) ++
+[rule nt [t]; rule l (p ++ [NTS nt] ++ s)]` by METIS_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [memdel]);
+
+
+val trans1Tmnl_noUnitProds = store_thm
+("trans1Tmnl_noUnitProds",
+``noUnitProds (rules g) ∧
+trans1Tmnl nt t g g' ⇒
+noUnitProds (rules g')``,
+
+SRW_TAC [][noUnitProds, trans1Tmnl] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+`rule l' [NTS nt'] ∈ delete (rule l (p ++ [t] ++ s)) (rules g) ++
+[rule nt [t]; rule l (p ++ [NTS nt] ++ s)]` by METIS_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, lreseq] THEN
+SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [memdel]);
 
 
 (* BasicProvers.export_rewrites (["ruleTmnlsAlt"]) *)
@@ -76,6 +137,36 @@ val trans2NT = Define
     (rules g' = delete (rule l r) (rules g) ++ 
      [rule nt [nt1;nt2];rule l (p++[NTS nt]++s)]) 
     ∧ (startSym g' = startSym g)`;
+
+val trans2NT_noeProds = store_thm
+("trans2NT_noeProds",
+``noeProds (rules g) ∧
+trans2NT nt1 nt2 t g g' ⇒
+noeProds (rules g')``,
+
+SRW_TAC [][noeProds, trans2NT] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+`rule l' [] ∈ delete (rule l (p ++ [nt2; t] ++ s)) (rules g) ++
+      [rule nt1 [nt2; t]; rule l (p ++ [NTS nt1] ++ s)]` by METIS_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [memdel]);
+
+
+val trans2NT_noUnitProds = store_thm
+("trans2NT_noUnitProds",
+``noUnitProds (rules g) ∧
+trans2NT nt1 nt2 t g g' ⇒
+noUnitProds (rules g')``,
+
+SRW_TAC [][noUnitProds, trans2NT] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+`rule l' [NTS nt] ∈ delete (rule l (p ++ [nt2; t] ++ s)) (rules g) ++
+      [rule nt1 [nt2; t]; rule l (p ++ [NTS nt1] ++ s)]` by METIS_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, lreseq] THEN
+SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [memdel]);
 
 val cnf_r1 = prove(
 ``∀g g' nt t.trans1Tmnl nt t g g' ⇒ derives g u v ⇒ RTC (derives g') u v``,
@@ -524,23 +615,60 @@ METIS_TAC [lemma4NT,lemma5NT,SET_EQ_SUBSET]
 
 val eqLang = Define `eqLang g g' = (language g = language g')`
 
+val trans1TmnlRtc_noeProds = 
+store_thm("trans1TmnlRtc_noeProds",
+``∀g g'.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g g' ⇒  noeProds (rules g) ⇒
+	  noeProds (rules g')``,
+
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
+METIS_TAC [trans1Tmnl_noeProds]);
+
+val trans2NTRtc_noeProds = store_thm
+("trans2NTRtc_noeProds",
+``∀g g'.RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ⇒ noeProds (rules g)
+⇒ noeProds (rules g')``,
+
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
+METIS_TAC [trans2NT_noeProds]);
+
+
+val trans1TmnlRtc_noUnitProds = 
+store_thm("trans1TmnlRtc_noUnitProds",
+``∀g g'.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g g' ⇒  noUnitProds (rules g) ⇒
+	  noUnitProds (rules g')``,
+
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
+METIS_TAC [trans1Tmnl_noUnitProds]);
+
+val trans2NTRtc_noUnitProds = store_thm
+("trans2NTRtc_noUnitProds",
+``∀g g'.RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ⇒ noUnitProds (rules g)
+⇒ noUnitProds (rules g')``,
+
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
+METIS_TAC [trans2NT_noUnitProds]);
+
+
 (* TERMINATION *)
 val cnf_lemma2 = store_thm("cnf_lemma2",
-``∀g g'.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g g' ⇒  eqLang g g'``,
+``∀g g'.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g g' ⇒  
+			   (language g = language g')``,
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
 SRW_TAC [] [eqLang] THEN
 METIS_TAC [cnf_lemma1]
 )
 
 val cnf_lemma2NT = store_thm("cnf_lemma2NT",
-``∀g g'.RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ⇒  eqLang g g'``,
+``∀g g'.RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ⇒  
+			     (language g = language g')``,
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
 SRW_TAC [] [eqLang] THEN
 METIS_TAC [cnf_lemma1NT]
 )
 
 val cnf_lemma = store_thm("cnf_lemma",
-``∀g g' g''.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g g' ⇒  RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g' g'' ⇒ eqLang g g''``,
+``∀g g' g''.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g g' ⇒  
+RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g' g'' ⇒  (language g = language g'')``,
 METIS_TAC [cnf_lemma2,cnf_lemma2NT,language_def,eqLang]
 );
 
@@ -1273,13 +1401,14 @@ Q.ABBREV_TAC `r=(\x y. ∃nt nt1 nt2. trans2NT nt nt1 nt2 x y)` THEN
 METIS_TAC [RTC_RULES]])
 
 
-val thm4_5 = store_thm("thm4_5",
-``∀g:('a, 'b) grammar.
-INFINITE (UNIV:'a set) ⇒
-∃g'. (cnf g') ∧ (eqLang g g')``,
+val thm4_5 = store_thm
+("thm4_5",
+ ``∀g:('a, 'b) grammar.
+ INFINITE (UNIV:'a set) ⇒
+ [] ∉ language g ⇒
+ ∃g'. (cnf g') ∧ (language g = language g')``,
 SRW_TAC [] [cnf] THEN
-METIS_TAC [cnf,lemma14_b,lemma9_a,lemma9_b,cnf_lemma]
-);
+METIS_TAC [cnf,lemma14_b,lemma9_a,lemma9_b,cnf_lemma]);
 
 val isCnf_def = Define
 `isCnf g = ∀l r.MEM (rule l r) (rules g) ⇒
@@ -1287,21 +1416,52 @@ val isCnf_def = Define
     ((LENGTH r = 1) ∧ EVERY isTmnlSym r)`;
 
 
+
 val cnfisCnfEq = store_thm
 ("cnfisCnfEq",
 ``∀g:('a, 'b) grammar.
  INFINITE (UNIV:'a set) ⇒ 
- [] ∉ language g  ⇒ cnf g ⇒ isCnf g``,
+ [] ∉ language g  ⇒ ∃g':(α,β) grammar.isCnf g'``,
 
-(* 
-∃g'. negr g g' ∧ eqLang g g' 
+SRW_TAC [][] THEN
+`∃g0:(α,β) grammar. negr g g0` by METIS_TAC [negr_exists] THEN
+IMP_RES_TAC thm4_3 THEN
+`∃g1:(α,β) grammar. upgr g0 g1` by METIS_TAC [upgr_exists] THEN
+`noeProds (rules g0)` by METIS_TAC [negrImpnoeProds] THEN
+IMP_RES_TAC upgr_noeProds THEN
+`[] ∉ language g0` by FULL_SIMP_TAC (srw_ss()) [] THEN
+`language g0 = language g1` by METIS_TAC [thm4_4] THEN
+`noUnitProds (rules g1)` by METIS_TAC [upgrImpnoUnitProds] THEN
+`∃g'. (λx y. ∃nt t. trans1Tmnl nt t x y)^* g1 g' ∧
+ (badTmnlRules g' = 0)` by METIS_TAC [lemma9_a] THEN
+IMP_RES_TAC trans1TmnlRtc_noeProds THEN
+IMP_RES_TAC trans1TmnlRtc_noUnitProds THEN
+IMP_RES_TAC lemma9_b THEN
+IMP_RES_TAC trans2NTRtc_noeProds THEN
+IMP_RES_TAC trans2NTRtc_noUnitProds THEN
+IMP_RES_TAC lemma14_b THEN
+IMP_RES_TAC cnf_lemma THEN
+`cnf g''` by METIS_TAC [cnf] THEN
+Q.EXISTS_TAC `g''` THEN
+FULL_SIMP_TAC (srw_ss()) [isCnf_def] THEN
+SRW_TAC [][] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `r` THEN1
+METIS_TAC [noeProds] THEN
 
-∃g''. upgr g' g'' ∧ eqLang g' g'' 
+FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, badTmnlRules, badNtRules] THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [rules_def, SUM_APPEND] THEN
+Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def,
+					    ruleNonTmnls, ruleTmnls] THEN
+FULL_SIMP_TAC (srw_ss()) [noUnitProds] THEN1
+METIS_TAC [] THEN
+Cases_on `h'` THEN FULL_SIMP_TAC (srw_ss()) [ruleNonTmnls] THEN
+Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [ruleNonTmnls] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def,
+					    ruleNonTmnls, ruleTmnls]); 
 
-Prove: negr g g' ∧ upgr g' g'' ⇒ ¬∃l.rule l [] ∈ rules g' ∧ g''
-
-*)
-MAGIC);
 
 
 val _ = export_theory ();

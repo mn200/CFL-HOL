@@ -17,41 +17,6 @@ val _ = set_trace "Unicode" 1
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 
-val elInl2 = store_thm
-("elInl2",
-``∀i l1 l2.
-i ≥ LENGTH l1 ∧ i < LENGTH l2 ⇒ (EL (i-LENGTH l1) (l1++l2) = EL i l2)``,
-
-Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `i` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-RES_TAC THEN
-FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-`n ≥ LENGTH l1` by DECIDE_TAC THEN
-MAGIC);
-
-val elDrop = store_thm
-("elDrop",
-``∀i l. e ∈ l ∧ i < LENGTH l ∧ (∀j. j ≤ i ⇒ EL j l ≠ e) ⇒
-e ∈ DROP (SUC i) l``,
-
-Induct_on `l` THEN SRW_TAC [][] THEN
-Cases_on `i` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-MAGIC);
-
-val allDistinctNewlist = store_thm
-("allDistinctNewlist",
-``∀l:α list. 
-INFINITE (UNIV:'a set) ⇒
-∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧ (set l ∩ set l' = {})``,
-
-Induct_on `l` THEN SRW_TAC [][] THEN1
-METIS_TAC [ALL_DISTINCT] THEN
-`∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧
- (set l ∩ set l' = {})` by METIS_TAC [] THEN
-`FINITE (set (h::l ++ l'))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
-IMP_RES_TAC NOT_IN_FINITE THEN
-MAGIC);
 
 val finiteaProdsRules = store_thm
 ("finiteaProdsRules",
@@ -76,6 +41,74 @@ val finitel2rRules = store_thm
 
 MAGIC);
 
+val allDLenDel = store_thm
+("allDLenDel",
+``∀l. ALL_DISTINCT l ∧ h ∈ l ⇒ (SUC (LENGTH (delete h l)) = LENGTH l)``,
+
+Induct_on `l` THEN SRW_TAC [][delete_def] THEN
+METIS_TAC [notMem_delete_len]);
+
+val allDistinctNewlist = store_thm
+("allDistinctNewlist",
+``∀l:α list. 
+INFINITE (UNIV:'a set) ⇒
+∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧ (set l ∩ set l' = {})``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN1
+METIS_TAC [ALL_DISTINCT] THEN
+`∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧
+ (set l ∩ set l' = {})` by METIS_TAC [] THEN
+`FINITE (set (h::l ++ l'))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+IMP_RES_TAC NOT_IN_FINITE THEN
+`FINITE (set (x::h::l++l'))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+`∃x'.x' ∉ set (x::h::l ++ l')` by METIS_TAC [NOT_IN_FINITE] THEN
+Q.EXISTS_TAC `x'::x::delete h l'` THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss())[] THEN1
+
+(IMP_RES_TAC allDLenDel THEN
+Cases_on `h ∈ l'`  THEN1
+(RES_TAC THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+`LENGTH (delete h l') = LENGTH l'` by METIS_TAC [notMem_delete_len] THEN
+FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+
+FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+METIS_TAC [memdel, alld_delete, not_mem_delete]);
+
+
+val listDivLen = store_thm
+("listDivLen",
+``∀n l. n < LENGTH l ⇒
+∃l1 l2 j.(l = l1 ++ l2) ∧ (LENGTH l1 = n) ∧ (LENGTH l2 = j)``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [APPEND, APPEND_NIL, LENGTH]);
+
+val elDrop = store_thm
+("elDrop",
+``∀i l. e ∈ l ∧ i < LENGTH l ∧ (∀j. j ≤ i ⇒ EL j l ≠ e) ⇒
+e ∈ DROP (SUC i) l``,
+
+SRW_TAC [][] THEN
+IMP_RES_TAC listDivLen THEN
+SRW_TAC [][] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN1
+(IMP_RES_TAC memImpEl THEN
+`i ≤ LENGTH l1` by DECIDE_TAC THEN
+METIS_TAC [EL_APPEND1, DECIDE ``i < l ∧ j ≤ i
+	   ⇒ j < l``])  THEN
+`SUC (LENGTH l1) ≤ LENGTH (l1 ++ l2)` by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+`SUC (LENGTH l1) = 1 + LENGTH l1`by DECIDE_TAC THEN
+`¬(e ∈ DROP 1 (DROP (LENGTH l1) (l1 ++ l2)))` by METIS_TAC [BUTFIRSTN_BUTFIRSTN] THEN
+FULL_SIMP_TAC (srw_ss()) [BUTFIRSTN_LENGTH_APPEND] THEN
+Cases_on `l2` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+SRW_TAC [][] THEN
+`LENGTH l1 ≤ LENGTH l1` by DECIDE_TAC THEN
+METIS_TAC [EL_LENGTH_APPEND, NULL_EQ_NIL, HD,APPEND, APPEND_ASSOC,
+	   NOT_CONS_NIL,CONS]);
+
 
 val takeSubset= store_thm
 ("takeSubset",
@@ -89,7 +122,6 @@ METIS_TAC []);
 val allDNotMem = store_thm
 ("allDNotMem",
 ``∀l. ¬ALL_DISTINCT l ⇔ (∃e.e ∈ l ∧ ∃l1 l2 l3.(l = l1 ++ [e] ++ l2 ++ [e] ++ l3))``,
-
 
 Induct_on `l` THEN SRW_TAC [][EQ_IMP_THM] THEN1
 METIS_TAC [APPEND, APPEND_ASSOC, APPEND_NIL, MEM ,MEM_APPEND, rgr_r9eq] THEN1
@@ -1855,6 +1887,19 @@ val gnfInv = Define
 ∀i. i < LENGTH s ⇒
 ∀r. rule (EL i s) r ∈ ru ⇒ validGnfProd (rule (EL i s) r)`;
 
+val gnfAlt = Define
+`gnfAlt ru s = 
+∀l. l ∈ s ⇒ (∀r. (rule l r) ∈ ru ⇒ validGnfProd (rule l r))`;
+
+val gnfEqAlt = store_thm
+("gnfEqAlt",
+``∀ ru s.gnfInv ru s ⇔ gnfAlt ru s``,
+
+SRW_TAC [][gnfInv, gnfAlt, EQ_IMP_THM] THEN
+METIS_TAC [memImpEl, MEM_EL]);
+
+
+
 val ruleInv = Define
 `ruleInv ru ontms s =
      ∀i.
@@ -2036,47 +2081,11 @@ METIS_TAC [APPEND, APPEND_ASSOC, MEM, MEM_APPEND]);
 val gnfAppend = store_thm
 ("gnfAppend",
 ``∀l1 l2. gnfInv ru (l1 ++ l2) = gnfInv ru l1 ∧ gnfInv ru l2``,
- 
-Induct_on `l1` THEN SRW_TAC [][gnfInv] THEN
+
+Induct_on `l1` THEN SRW_TAC [][gnfEqAlt, gnfAlt] THEN
 Cases_on `l2` THEN SRW_TAC [][] THEN
-SRW_TAC [][EQ_IMP_THM] THENL[
-
-FIRST_X_ASSUM (Q.SPECL_THEN [`i`] MP_TAC) THEN
-FULL_SIMP_TAC (arith_ss) [] THEN
-SRW_TAC [][] THEN
-`SUC (LENGTH l1) < LENGTH (h::l1++h'::t) ∧ (LENGTH (h::l1) = SUC (LENGTH l1))`
-by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-METIS_TAC [EL_APPEND1, DECIDE ``i < l ∧ j ≤ i ⇒ j < l``, APPEND,
-	      APPEND_ASSOC],
-
- FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH (h::l1) + i`] MP_TAC) THEN
-FULL_SIMP_TAC (arith_ss) [] THEN
-SRW_TAC [][] THEN
-`i < LENGTH (h'::t)` by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-`EL i (h'::t) = EL (LENGTH (h::l1) + i) (h::l1 ++ h'::t)`
- by METIS_TAC [elAppendList] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-METIS_TAC [DECIDE ``a+b = b + a``],
-
-
-`i < SUC (LENGTH l1) ∨ (i ≥ SUC (LENGTH l1) ∧ i < SUC (LENGTH l1) + SUC (LENGTH t))` 
-			     by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN1
-(FIRST_X_ASSUM (Q.SPECL_THEN [`i`] MP_TAC) THEN
-FULL_SIMP_TAC (arith_ss) [] THEN
-SRW_TAC [][] THEN
-`SUC (LENGTH l1) < LENGTH (h::l1++h'::t) ∧ (LENGTH (h::l1) = SUC (LENGTH l1))`
-by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-METIS_TAC [EL_APPEND1, DECIDE ``i < l ∧ j ≤ i ⇒ j < l``, APPEND,
-	      APPEND_ASSOC]) THEN
-
-`LENGTH (h::l1) ≤ i` by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-`EL i ((h::(l1 ++ h'::t))) = EL (i - LENGTH (h::l1)) (h'::t)`
-by METIS_TAC [EL_APPEND2, APPEND, APPEND_ASSOC] THEN
-`i < LENGTH (h::(l1 ++ h'::t))` by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-IMP_RES_TAC elInl2 THEN
-FIRST_X_ASSUM (Q.SPECL_THEN [`h::l1`] MP_TAC) THEN 
-FULL_SIMP_TAC (arith_ss) [] THEN
-SRW_TAC [][]]);
+SRW_TAC [][EQ_IMP_THM] THEN
+METIS_TAC [MEM]);
 
 
 

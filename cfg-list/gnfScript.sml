@@ -21,13 +21,51 @@ fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 val finiteaProdsRules = store_thm
 ("finiteaProdsRules",
 ``∀ru. FINITE ru ⇒ FINITE (aProdsRules A l ru)``,
+SRW_TAC[][aProdsRules_def] THEN
+Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
+Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of 
+                        rule N rhs -> if N ≠ A then {}
+				      else { rule A (x ++ r0) | x,r0 |
+					    ?B. B ∈ l ∧ rule B x ∈ ru ∧
+                                                (rhs = NTS B :: r0)}`  THEN
+Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f ru)`
+ THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
+	Cases_on `r` THEN SRW_TAC [][] THEN 
+	Q.MATCH_ABBREV_TAC `FINITE Horrible2` THEN 
+	Q.ABBREV_TAC 
+            `g = \r. case r of 
+	               rule M rr -> if M ∈ l then 
+		                      {rule A (rr ++ r0) | r0 | l' = NTS M :: r0}
+				    else {}` THEN 
+	  Q_TAC SUFF_TAC `Horrible2 = BIGUNION (IMAGE g ru)` 
+            THEN1 (DISCH_THEN SUBST1_TAC THEN 
+		   SRW_TAC [][Abbr`g`] THEN 
+		   Cases_on `r` THEN SRW_TAC [][] THEN 
+		   Cases_on `l'` THEN SRW_TAC [][] THEN1
+                      (Q.MATCH_ABBREV_TAC `FINITE FOO` THEN 
+		       Q_TAC SUFF_TAC `FOO = {}` THEN1 SRW_TAC [][] THEN 
+		       SRW_TAC [][Abbr`FOO`, EXTENSION]) THEN 
+		   Cases_on `h` THEN SRW_TAC [][] THENL [
+                     Q.MATCH_ABBREV_TAC `FINITE FOO` THEN 
+		     Q_TAC SUFF_TAC `FOO = if n = n' then {rule A (l'' ++ t)} 
+					   else {}` THEN
+		     SRW_TAC [][] THEN SRW_TAC [][Abbr`FOO`, EXTENSION],
+		     Q.MATCH_ABBREV_TAC `FINITE FOO` THEN 
+		     Q_TAC SUFF_TAC `FOO = {}` THEN1 SRW_TAC [][] THEN 
+		     SRW_TAC [][Abbr`FOO`, EXTENSION]
+                   ]) THEN 
+	  ONCE_REWRITE_TAC [EXTENSION] THEN 
+	  SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+		   boolSimps.CONJ_ss][EXISTS_rule, 
+				      Abbr`g`, Abbr`Horrible2`] THEN 
+	  SRW_TAC [][EXTENSION] THEN
+	  METIS_TAC []) THEN 
+   ONCE_REWRITE_TAC [EXTENSION] THEN 
+   SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+	    boolSimps.CONJ_ss][EXISTS_rule, 
+			       Abbr`f`, Abbr`Horrible`] THEN 
+   METIS_TAC [])
 
-HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [][] THEN1
-(SRW_TAC [][aProdsRules_def] THEN
- `{rule A (x ++ s) | (x,s) | F}= {}` by SRW_TAC [][EXTENSION] THEN
- SRW_TAC [][]) THEN
-
-MAGIC);
 
 
 val finiteaProdAllRules = store_thm
@@ -84,6 +122,17 @@ val listDivLen = store_thm
 Induct_on `l` THEN SRW_TAC [][] THEN
 Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [APPEND, APPEND_NIL, LENGTH]);
+
+val memImpEl = store_thm
+("memImpEl",
+``∀s0. MEM n s0 ⇒ ∃i. i < LENGTH s0 ∧ (EL i s0 = n)``,
+
+Induct_on `s0` THEN SRW_TAC [][] THEN1
+(Q.EXISTS_TAC `0` THEN SRW_TAC [][]) THEN
+FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+Q.EXISTS_TAC `SUC i` THEN
+SRW_TAC [][]);
 
 val elDrop = store_thm
 ("elDrop",
@@ -203,16 +252,7 @@ SPOSE_NOT_THEN ASSUME_TAC THEN RES_TAC THEN
 FULL_SIMP_TAC (srw_ss()) []);
 
 
-val memImpEl = store_thm
-("memImpEl",
-``∀s0. MEM n s0 ⇒ ∃i. i < LENGTH s0 ∧ (EL i s0 = n)``,
 
-Induct_on `s0` THEN SRW_TAC [][] THEN1
-(Q.EXISTS_TAC `0` THEN SRW_TAC [][]) THEN
-FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-Q.EXISTS_TAC `SUC i` THEN
-SRW_TAC [][]);
 
 val memnonTmnls = store_thm
 ("memnonTmnls",

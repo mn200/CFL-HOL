@@ -1421,12 +1421,13 @@ val cnfisCnfEq = store_thm
 ("cnfisCnfEq",
 ``∀g:('a, 'b) grammar.
  INFINITE (UNIV:'a set) ⇒ 
- [] ∉ language g  ⇒ ∃g':(α,β) grammar.isCnf g'``,
+ [] ∉ language g  ⇒ ∃g':(α,β) grammar.isCnf g' ∧ (language g = language g')``,
 
 SRW_TAC [][] THEN
 `∃g0:(α,β) grammar. negr g g0` by METIS_TAC [negr_exists] THEN
 IMP_RES_TAC thm4_3 THEN
 `∃g1:(α,β) grammar. upgr g0 g1` by METIS_TAC [upgr_exists] THEN
+`language g = language g1` by METIS_TAC [thm4_4] THEN
 `noeProds (rules g0)` by METIS_TAC [negrImpnoeProds] THEN
 IMP_RES_TAC upgr_noeProds THEN
 `[] ∉ language g0` by FULL_SIMP_TAC (srw_ss()) [] THEN

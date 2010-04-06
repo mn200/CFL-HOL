@@ -2,7 +2,8 @@
 open HolKernel boolLib bossLib Parse
 open stringTheory arithmeticTheory relationTheory listTheory;
 
-open pred_setTheory grammarDefTheory containerLemmasTheory;
+open pred_setTheory grammarDefTheory containerLemmasTheory 
+    rich_listTheory;;
 
 val _ = new_theory "eProds";
 
@@ -40,8 +41,28 @@ val finitenegrRules = store_thm
 Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set p))`
  THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
 	Cases_on `r` THEN SRW_TAC [][] THEN 
-	MAGIC) THEN
- MAGIC);
+	Q.ABBREV_TAC `h = \r. case (r : (α,β)rule) of 
+                        rule N rhs -> if ((N ≠ n) ∨ (rhs ≠ l)) then {}
+				      else 
+				      set (MAP (λr'.rule N r') 
+					   (FILTER (\e. ¬NULL e) (munge0 g rhs)))` 
+	THEN
+	Q.MATCH_ABBREV_TAC `FINITE Horrible2` THEN
+	Q_TAC SUFF_TAC `Horrible2 = h (rule n l)` THEN1
+	(DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`h`]) THEN 
+	ONCE_REWRITE_TAC [EXTENSION] THEN 
+	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+		 boolSimps.CONJ_ss][EXISTS_rule, 
+				    Abbr`h`, Abbr`Horrible2`] THEN 
+	SRW_TAC [][EQ_IMP_THM] THEN
+	FULL_SIMP_TAC (srw_ss()) [MEM_MAP, MEM_FILTER] THEN
+	METIS_TAC [NULL_EQ_NIL]) THEN
+
+   ONCE_REWRITE_TAC [EXTENSION] THEN 
+   SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+	    boolSimps.CONJ_ss][EXISTS_rule, 
+			       Abbr`f`, Abbr`Horrible`] THEN 
+   METIS_TAC []);
 
 
 val negr_exists = store_thm

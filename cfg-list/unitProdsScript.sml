@@ -16,7 +16,9 @@ val unitProds = Define
 `unitProds g = {rule l r | ∃nt.(r=[NTS nt]) ∧ MEM (rule l r) (rules g)}`;
 
 (* A->*B where A and B are in nonTerminals g *)
-val allDeps = Define `allDeps g = {(a,b) |  RTC (derives g) [a] [b]}`
+val allDeps = Define `allDeps g = 
+{(a,b) |  RTC (derives g) [a] [b] ∧
+ a ∈ (allSyms g) ∧ b ∈ (allSyms g) }`;
 
 val nonUnitProds = Define 
 `nonUnitProds g = (LIST_TO_SET (rules g)) DIFF (unitProds g)`;
@@ -36,30 +38,143 @@ val upgr = Define
 (startSym g' = startSym g)`;
 
 
+val finiteallDeps = store_thm
+("finiteallDeps",
+``FINITE (allDeps g)``,
+
+SRW_TAC [][allDeps] THEN
+Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
+ Q.ABBREV_TAC `f = \sym:(α,β) symbol. 
+			{ (sym,b) | b | 
+			 (derives g)^* [sym] [b] ∧  b ∈ allSyms g}` THEN
+Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (allSyms g))`
+ THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
+	`FINITE (allSyms g)` by METIS_TAC [FINITE_LIST_TO_SET, finiteAllSyms] THEN
+	SRW_TAC [][] THEN
+	Q.ABBREV_TAC `h = \s:(α,β) symbol. if (derives g)^* [sym] [s] then {(sym,s)}
+                                        	else {}` THEN
+	Q.MATCH_ABBREV_TAC `FINITE Horrible2` THEN
+	Q_TAC SUFF_TAC `Horrible2 = BIGUNION (IMAGE h (allSyms g))` THEN1
+	(DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`h`] THEN 
+	Cases_on `(derives g)^* [sym] [s']` THEN SRW_TAC [][]) THEN
+
+	ONCE_REWRITE_TAC [EXTENSION] THEN 
+	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+		 boolSimps.CONJ_ss][EXISTS_rule, 
+				    Abbr`h`, Abbr`Horrible2`] THEN 
+	METIS_TAC []) THEN
+	ONCE_REWRITE_TAC [EXTENSION] THEN 
+	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+		 boolSimps.CONJ_ss][EXISTS_rule, 
+				    Abbr`f`, Abbr`Horrible`] THEN 
+	METIS_TAC []);
+ 
+
+
+val rulesets_the_same_allSyms = store_thm
+("rulesets_the_same_allSyms",
+``(set ru = set ru') ⇒
+(allSyms (G ru s)  = allSyms (G ru' s))``,
+
+SRW_TAC [][allSyms_def, EQ_IMP_THM, nonTerminals_def, terminals_def]);
+
+
+val finiteunitProds = store_thm
+("finiteunitProds",
+``FINITE (unitProds g)``,
+
+SRW_TAC [][unitProds] THEN
+Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
+Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of 
+                        rule N rhs -> if (∃nt. rhs = [NTS nt]) then {rule N rhs}
+				      else {}`  THEN
+Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set (rules g)))`
+ THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
+	Cases_on `r` THEN SRW_TAC [][]) THEN 
+ ONCE_REWRITE_TAC [EXTENSION] THEN 
+ SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+	    boolSimps.CONJ_ss][EXISTS_rule, 
+			       Abbr`f`, Abbr`Horrible`] THEN 
+   METIS_TAC [] );
+
+
+val finiteallDepsSub = store_thm
+("finiteallDepsSub",
+``FINITE 
+{a | ∃ru. (NTS a,NTS n) ∈ allDeps (G ru (startSym g)) ∧ (set ru = unitProds g)}``,
+
+SRW_TAC [][] THEN
+Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
+SRW_TAC [][] THEN
+ Q.ABBREV_TAC `f = \(a:(α,β) symbol,b:(α,β) symbol). 
+                      if (b ≠ NTS n) then {}
+			  else { e | (NTS e = a) }` THEN
+`FINITE (unitProds g)` by METIS_TAC [finiteunitProds] THEN
+`∃ru. set ru = unitProds g` by METIS_TAC [listExists4Set] THEN
+ Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (allDeps (G ru (startSym g))))`
+ THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN1
+	(`FINITE (allDeps (G ru (startSym g)))` by METIS_TAC [finiteallDeps] THEN
+	 SRW_TAC [][]) THEN	
+	Cases_on `x` THEN 
+	SRW_TAC [][] THEN
+	Cases_on `q` THEN SRW_TAC [][]) THEN
+
+	ONCE_REWRITE_TAC [EXTENSION] THEN 
+	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+		 boolSimps.CONJ_ss][EXISTS_rule, 
+				    Abbr`f`, Abbr`Horrible`] THEN 
+	SRW_TAC [][EQ_IMP_THM] THEN1
+	
+	(Q.EXISTS_TAC `(NTS x, NTS n)` THEN
+	 SRW_TAC [][] THEN
+	 FULL_SIMP_TAC (srw_ss()) [allDeps] THEN
+	 SRW_TAC [][] THEN1
+	 METIS_TAC [rulesets_the_same_RTC_derives, rules_def] THEN
+	 METIS_TAC [rulesets_the_same_allSyms]) THEN
+
+	Cases_on `x'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+	Cases_on `r=NTS n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+	SRW_TAC [][] THEN
+	METIS_TAC []);
+
+
 val finiteupgrRules = store_thm
 ("finiteupgrRules",
 ``FINITE (upgr_rules g)``,
 
- SRW_TAC [][nonUnitProds, unitProds, newProds,upgr_rules] THEN
+SRW_TAC [][upgr_rules] THEN1
+ SRW_TAC [][nonUnitProds] THEN
+`FINITE (nonUnitProds g)` by SRW_TAC [][nonUnitProds] THEN
+Q.ABBREV_TAC `l = nonUnitProds g` THEN
+SRW_TAC [][newProds] THEN
  Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
- Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of 
+ Q.ABBREV_TAC `f = \r. case (r : (α,β) rule) of 
                         rule N rhs -> 
-			{ rule a rhs | a | ∀nt. rhs ≠ [NTS nt] ∧ 
-			 (NTS a,NTS N) ∈ allDeps (G ru (startSym g)) ∧
-			 (set ru =
-			  {rule l k |
-			   ∃nt. (k = [NTS nt]) ∧ rule l k ∈ rules g})} `
+			{ rule a rhs | a | 
+			 ∃ru. (NTS a,NTS N) ∈ allDeps (G ru (startSym g)) ∧
+			 (set ru = unitProds g)} `
  THEN
-Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set (rules g)))`
+Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f l)`
  THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
-	MAGIC
-	) THEN
-
-    ONCE_REWRITE_TAC [EXTENSION] THEN 
-   SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+	Cases_on `r` THEN SRW_TAC [][] THEN
+	Q.MATCH_ABBREV_TAC `FINITE Horrible2` THEN
+	Q.ABBREV_TAC `ad = { a | a|  ∃ru. 
+			    (NTS a,NTS n) ∈ allDeps (G ru (startSym g)) ∧
+			     (set ru = unitProds g)}` THEN
+	Q_TAC SUFF_TAC `Horrible2 = IMAGE (λe.rule e l') ad` THEN1
+	
+	(DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`ad`, Abbr `Horrible2`] THEN 
+	 METIS_TAC [finiteallDepsSub]) THEN
+	
+	ONCE_REWRITE_TAC [EXTENSION] THEN 
+	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+		 boolSimps.CONJ_ss][EXISTS_rule, 
+				    Abbr`Horrible2`, Abbr`ad`]) THEN
+ ONCE_REWRITE_TAC [EXTENSION] THEN 
+ SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
 	    boolSimps.CONJ_ss][EXISTS_rule, 
 			       Abbr`f`, Abbr`Horrible`] THEN 
-   MAGIC); 
+   METIS_TAC [rule_11]); 
 
 
 val upgr_exists = store_thm
@@ -90,9 +205,6 @@ val memNonUnitProds = store_thm
 ``e ∈ nonUnitProds g ⇒ MEM e (rules g)``,
 
 SRW_TAC [][nonUnitProds]);
-
-
-
 
 val gsubDeriv = store_thm
 ("gsubDeriv",
@@ -170,7 +282,8 @@ val upgr_r6 = prove(
 ``RTC (derives g) [NTS x] [NTS y] ⇒ negr g0 g ⇒ 
 (NTS x IN nonTerminals g) ⇒ (NTS y IN nonTerminals g)  ⇒  
 (NTS x,NTS y) IN (allDeps g)``,
-SRW_TAC [] [allDeps] THEN SRW_TAC [] []);
+
+SRW_TAC [] [allDeps] THEN SRW_TAC [] [allSyms_def]);
 
 
 val negr_r16 = prove(
@@ -207,6 +320,7 @@ val upgr_r8 = prove(
 ``negr g0 g ⇒ upgr g g' ⇒
 derives g [NTS lhs] [NTS nt] ⇒ derives g [NTS nt] r ⇒ 
 		    ~(∃n.r=[NTS n]) ⇒ derives g' [NTS lhs] r``,
+
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
 MAP_EVERY Q.EXISTS_TAC [`[]`,`[]`] THEN
@@ -220,7 +334,25 @@ FULL_SIMP_TAC (srw_ss()) [nonUnitProds,allDeps,newProds, upgr_rules,upgr,
 DISJ2_TAC THEN
 Q.EXISTS_TAC `lhs''` THEN
 SRW_TAC [][] THEN
-MAGIC);
+`FINITE (unitProds g)` by METIS_TAC [finiteunitProds] THEN
+`∃ru. set ru = unitProds g` by METIS_TAC [listExists4Set] THEN
+Q.EXISTS_TAC `ru` THEN
+SRW_TAC [][] THEN1
+FULL_SIMP_TAC (srw_ss()) [unitProds] THENL[
+
+`rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
+METIS_TAC [res1, RTC_RULES, rules_def, startSym_def, mem_in],
+
+SRW_TAC [][allSyms_def] THEN
+`rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
+METIS_TAC [startSym_def, rules_def, slemma1_4, symbol_11, mem_in],
+
+SRW_TAC [][allSyms_def] THEN
+`rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
+METIS_TAC [startSym_def, rules_def, slemma1_4, symbol_11, mem_in, APPEND_NIL,
+	   APPEND],
+
+METIS_TAC [mem_in]]);
  
 
 
@@ -293,12 +425,19 @@ val upgr_r14 = prove(
 derives g' [NTS nt2] v ⇒ derives g' [NTS nt1] v``,
 
 SRW_TAC [] [] THEN 
-`∃ru.∀e. e ∈ ru ⇔ e ∈ unitProds g` by MAGIC THEN
-IMP_RES_TAC upgr_r10 THEN
-IMP_RES_TAC upgr_r9 THEN
+`FINITE (unitProds g)` by METIS_TAC [finiteunitProds] THEN
+`∃ru. set ru = unitProds g` by METIS_TAC [listExists4Set] THEN
+`derives (G ru (startSym g)) [NTS nt1] [NTS nt2]` by METIS_TAC [upgr_r10,
+								mem_in] THEN
+`∃nt.(derives (G ru (startSym g)))^* [NTS nt2] [NTS nt] ∧
+		     derives g [NTS nt] v` by METIS_TAC [upgr_r9, mem_in] THEN
 `RTC (derives (G ru (startSym g))) [NTS nt1] [NTS nt]` 
 		     by METIS_TAC [RTC_RULES] THEN
 SRW_TAC [] [derives_def] THEN
+MAP_EVERY Q.EXISTS_TAC [`[]`,`[]`,`v`,`nt1`] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [upgr, upgr_rules] THEN
+FULL_SIMP_TAC (srw_ss()) [derives_def, lreseq] THEN
 MAGIC);
 
 
@@ -311,8 +450,7 @@ FULL_SIMP_TAC (srw_ss()) [unitProds] THEN METIS_TAC [lres],
 
 FULL_SIMP_TAC (srw_ss()) [unitProds] THEN METIS_TAC [lres],
 
-FULL_SIMP_TAC (srw_ss()) [unitProds] THEN METIS_TAC [lres]
-]);
+FULL_SIMP_TAC (srw_ss()) [unitProds] THEN METIS_TAC [lres]]);
 
 
 val up_r2 = prove(

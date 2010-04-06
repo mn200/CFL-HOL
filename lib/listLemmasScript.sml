@@ -1417,6 +1417,115 @@ METIS_TAC [REVERSE_REVERSE, BUTFIRSTN_LENGTH_APPEND, LENGTH_REVERSE,
 	   REVERSE_APPEND, APPEND_ASSOC]);
 
 
+val allDLenDel = store_thm
+("allDLenDel",
+``∀l. ALL_DISTINCT l ∧ h ∈ l ⇒ (SUC (LENGTH (delete h l)) = LENGTH l)``,
+
+Induct_on `l` THEN SRW_TAC [][delete] THEN
+METIS_TAC [notMem_delete_len]);
+
+val listDivLen = store_thm
+("listDivLen",
+``∀n l. n < LENGTH l ⇒
+∃l1 l2 j.(l = l1 ++ l2) ∧ (LENGTH l1 = n) ∧ (LENGTH l2 = j)``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [APPEND, APPEND_NIL, LENGTH]);
+
+val memImpEl = store_thm
+("memImpEl",
+``∀s0. MEM n s0 ⇒ ∃i. i < LENGTH s0 ∧ (EL i s0 = n)``,
+
+Induct_on `s0` THEN SRW_TAC [][] THEN1
+(Q.EXISTS_TAC `0` THEN SRW_TAC [][]) THEN
+FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+Q.EXISTS_TAC `SUC i` THEN
+SRW_TAC [][]);
+
+val elDrop = store_thm
+("elDrop",
+``∀i l. e ∈ l ∧ i < LENGTH l ∧ (∀j. j ≤ i ⇒ EL j l ≠ e) ⇒
+e ∈ DROP (SUC i) l``,
+
+SRW_TAC [][] THEN
+IMP_RES_TAC listDivLen THEN
+SRW_TAC [][] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN1
+(IMP_RES_TAC memImpEl THEN
+`i ≤ LENGTH l1` by DECIDE_TAC THEN
+METIS_TAC [EL_APPEND1, DECIDE ``i < l ∧ j ≤ i
+	   ⇒ j < l``])  THEN
+`SUC (LENGTH l1) ≤ LENGTH (l1 ++ l2)` by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+`SUC (LENGTH l1) = 1 + LENGTH l1`by DECIDE_TAC THEN
+`¬(e ∈ DROP 1 (DROP (LENGTH l1) (l1 ++ l2)))` by METIS_TAC [BUTFIRSTN_BUTFIRSTN] THEN
+FULL_SIMP_TAC (srw_ss()) [BUTFIRSTN_LENGTH_APPEND] THEN
+Cases_on `l2` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+SRW_TAC [][] THEN
+`LENGTH l1 ≤ LENGTH l1` by DECIDE_TAC THEN
+METIS_TAC [EL_LENGTH_APPEND, NULL_EQ_NIL, HD,APPEND, APPEND_ASSOC,
+	   NOT_CONS_NIL,CONS]);
+
+
+val takeSubset= store_thm
+("takeSubset",
+``∀l n. n ≤ LENGTH l ⇒
+ set (TAKE n l) ⊆ set l``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [SUBSET_DEF] THEN
+METIS_TAC []);
+
+val allDNotMem = store_thm
+("allDNotMem",
+``∀l. ¬ALL_DISTINCT l ⇔ 
+ (∃e.e ∈ l ∧ ∃l1 l2 l3.(l = l1 ++ [e] ++ l2 ++ [e] ++ l3))``,
+
+Induct_on `l` THEN SRW_TAC [][EQ_IMP_THM] THEN1
+METIS_TAC [APPEND, APPEND_ASSOC, APPEND_NIL, MEM ,MEM_APPEND, rgr_r9eq] THEN1
+METIS_TAC [APPEND, APPEND_ASSOC, APPEND_NIL, MEM ,MEM_APPEND, rgr_r9eq] THEN
+Cases_on `l1` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [APPEND, APPEND_ASSOC, APPEND_NIL, MEM ,MEM_APPEND, rgr_r9eq]);
+
+
+val TAKE_mem = store_thm
+("TAKE_mem",
+``∀l n. n ≤ LENGTH l ⇒ (∀e. e ∈ (TAKE n l) ⇒ e ∈ l)``,
+
+Induct_on `l`THEN SRW_TAC [][] THEN
+Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC []);
+
+
+val allDTake = store_thm
+("allDTake",
+``∀l n. n ≤ LENGTH l ∧ ALL_DISTINCT l ⇒
+ALL_DISTINCT (TAKE n l)``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+RES_TAC THEN
+SPOSE_NOT_THEN ASSUME_TAC  THEN
+METIS_TAC [TAKE_mem]);
+
+
+val deleteAllD = store_thm
+("deleteAllD",
+``∀l.ALL_DISTINCT l ⇒ ALL_DISTINCT (delete h l)``,
+
+Induct_on `l` THEN SRW_TAC [][delete, ALL_DISTINCT] THEN1
+METIS_TAC [] THEN
+METIS_TAC [MEM_delete]);
+
+val rmDupesImpAllD = store_thm
+("rmDupesImpAllD",
+``∀l.ALL_DISTINCT (rmDupes l)``,
+
+Induct_on `l` THEN SRW_TAC [][rmDupes, ALL_DISTINCT] THEN
+METIS_TAC [rmd_del, not_mem_delete, deleteAllD]);
+
 
 (*val _ =
 val mlDir = ref ("./theoryML/");

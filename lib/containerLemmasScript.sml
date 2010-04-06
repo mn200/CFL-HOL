@@ -58,4 +58,50 @@ store_thm ("interNil",
 SRW_TAC [] [EXTENSION] THEN
 METIS_TAC [mem_in])
 
+
+val listExists4SetMem = store_thm
+("listExists4SetMem",
+``∀s.FINITE s ⇒ ∃r.∀e.MEM e r ⇔ e ∈ s``,
+
+HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [][] THEN1
+METIS_TAC [MEM,mem_in] THEN
+METIS_TAC [MEM, mem_in]);
+
+
+val listExists4Set = store_thm
+("listExists4Set",
+``∀s.FINITE s ⇒ ∃r.set r  = s``,
+
+HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [][] THEN
+Q.EXISTS_TAC `e::r`  THEN
+SRW_TAC [][]);
+
+val allDistinctNewlist = store_thm
+("allDistinctNewlist",
+``∀l:α list. 
+INFINITE (UNIV:'a set) ⇒
+∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧ (set l ∩ set l' = {})``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN1
+METIS_TAC [ALL_DISTINCT] THEN
+`∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧
+ (set l ∩ set l' = {})` by METIS_TAC [] THEN
+`FINITE (set (h::l ++ l'))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+IMP_RES_TAC NOT_IN_FINITE THEN
+`FINITE (set (x::h::l++l'))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+`∃x'.x' ∉ set (x::h::l ++ l')` by METIS_TAC [NOT_IN_FINITE] THEN
+Q.EXISTS_TAC `x'::x::delete h l'` THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss())[] THEN1
+
+(IMP_RES_TAC allDLenDel THEN
+Cases_on `h ∈ l'`  THEN1
+(RES_TAC THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+`LENGTH (delete h l') = LENGTH l'` by METIS_TAC [notMem_delete_len] THEN
+FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+
+FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+METIS_TAC [memdel, alld_delete, not_mem_delete]);
+
+
 val _ = export_theory ();

@@ -32,6 +32,12 @@ val toTmnlSym = Define `toTmnlSym s = TS s`;
 val symToStr_def = Define
 `(symToStr (TS s) = s) ∧ (symToStr (NTS s) = s)`;
 
+val isWordRev = store_thm
+("isWordRev",
+``∀l.isWord (REVERSE l) ⇔ isWord l``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN
+METIS_TAC []);
 
 val sym_r1a = store_thm ("sym_r1a",
 ``isTmnlSym e ⇒ ¬ isNonTmnlSym e``,

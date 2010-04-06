@@ -3492,6 +3492,36 @@ val rulesets_the_same = store_thm
   STRIP_TAC THEN SRW_TAC [][language, EXTENSION] THEN
   METIS_TAC [rulesets_the_same_RTC_derives]);
 
+val derivesImplderives = store_thm
+("derivesImplderives",
+``∀x y. (derives g)^* x y ⇒ isWord y ⇒ (lderives g)^* x y``,
+
+SRW_TAC [][] THEN
+`∃n.NRC (derives g) n x y`
+by
+(IMP_RES_TAC rtc2list_exists' THEN
+Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+`LENGTH t < LENGTH (h::t)` by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+IMP_RES_TAC listderivNrc THEN
+Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+ FULL_SIMP_TAC (srw_ss()) [derives] THEN
+ Q.EXISTS_TAC `0` THEN
+ SRW_TAC [][arithmeticTheory.NRC]) THEN
+
+FIRST_X_ASSUM (Q.SPECL_THEN [`y`, `h'`,`derives g`] MP_TAC) THEN SRW_TAC [][] THEN
+IMP_RES_TAC listDerivHdBrk THEN
+RES_TAC THEN
+Q.EXISTS_TAC `SUC m` THEN
+ SRW_TAC [][arithmeticTheory.NRC]  THEN
+`h=x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+METIS_TAC []) THEN
+
+IMP_RES_TAC nrc_drdeq_ld THEN
+METIS_TAC [arithmeticTheory.RTC_eq_NRC]);
+
 
 val mlDir = "./theoryML/"
 

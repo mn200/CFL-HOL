@@ -266,6 +266,9 @@ val aProdgAll = Define
   (set (rules g') = aProdAllRules A B PP (set (rules g)))`;
 
 
+
+
+
 val derivgImpNewgall = store_thm
 ("derivgImpNewgall",
  ``∀u v. lderives g ⊢ dl ◁ u → v ⇒ aProdgAll A B PP g g' ⇒ isWord v ⇒ 
@@ -682,6 +685,75 @@ val aProds = Define
   ¬MEM A l ∧ 
   (startSym g = startSym g') ∧
   (set (rules g') = aProdsRules A l (set (rules g)))`;
+
+
+
+val finiteaProdsRules = store_thm
+("finiteaProdsRules",
+``∀ru. FINITE ru ⇒ FINITE (aProdsRules A l ru)``,
+
+SRW_TAC[][aProdsRules_def] THEN
+Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
+Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of 
+                        rule N rhs -> if N ≠ A then {}
+				      else { rule A (x ++ r0) | x,r0 |
+					    ?B. B ∈ l ∧ rule B x ∈ ru ∧
+                                                (rhs = NTS B :: r0)}`  THEN
+Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f ru)`
+ THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
+	Cases_on `r` THEN SRW_TAC [][] THEN 
+	Q.MATCH_ABBREV_TAC `FINITE Horrible2` THEN 
+	Q.ABBREV_TAC 
+            `g = \r. case r of 
+	               rule M rr -> if M ∈ l then 
+		                      {rule A (rr ++ r0) | r0 | l' = NTS M :: r0}
+				    else {}` THEN 
+	  Q_TAC SUFF_TAC `Horrible2 = BIGUNION (IMAGE g ru)` 
+	  THEN1 (DISCH_THEN SUBST1_TAC THEN 
+		   SRW_TAC [][Abbr`g`] THEN 
+		   Cases_on `r` THEN SRW_TAC [][] THEN 
+		   Cases_on `l'` THEN SRW_TAC [][] THEN1
+                      (Q.MATCH_ABBREV_TAC `FINITE FOO` THEN 
+		       Q_TAC SUFF_TAC `FOO = {}` THEN1 SRW_TAC [][] THEN 
+		       SRW_TAC [][Abbr`FOO`, EXTENSION]) THEN 
+		   Cases_on `h` THEN SRW_TAC [][] THENL [
+                     Q.MATCH_ABBREV_TAC `FINITE FOO` THEN 
+		     Q_TAC SUFF_TAC `FOO = if n = n' then {rule A (l'' ++ t)} 
+					   else {}` THEN
+		     SRW_TAC [][] THEN SRW_TAC [][Abbr`FOO`, EXTENSION],
+		     Q.MATCH_ABBREV_TAC `FINITE FOO` THEN 
+		     Q_TAC SUFF_TAC `FOO = {}` THEN1 SRW_TAC [][] THEN 
+		     SRW_TAC [][Abbr`FOO`, EXTENSION]
+                   ]) THEN 
+	  ONCE_REWRITE_TAC [EXTENSION] THEN 
+	  SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+		   boolSimps.CONJ_ss][EXISTS_rule, 
+				      Abbr`g`, Abbr`Horrible2`] THEN 
+	  SRW_TAC [][EXTENSION] THEN
+	  METIS_TAC []) THEN 
+   ONCE_REWRITE_TAC [EXTENSION] THEN 
+   SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+	    boolSimps.CONJ_ss][EXISTS_rule, 
+			       Abbr`f`, Abbr`Horrible`] THEN 
+   METIS_TAC []);
+
+val aProdsRulesAllEq = store_thm
+("aProdsRulesAllEq",
+``(aProdsRules  ntk [se]  (set ru0) =
+   aProdAllRules ntk se NULL (set ru0))``,
+
+SRW_TAC [][aProdAllRules_def, aProdsRules_def] THEN
+FULL_SIMP_TAC (srw_ss()) [EXTENSION, NULL_EQ_NIL]);
+
+val finiteaProdAllRules = store_thm
+("finiteaProdAllRules",
+``∀ru. FINITE ru ⇒ FINITE (aProdAllRules A B NULL ru)``,
+
+SRW_TAC [][] THEN
+`aProdAllRules A B NULL ru = aProdsRules A [B] ru` 
+ by (SRW_TAC [][aProdAllRules_def, aProdsRules_def] THEN
+     FULL_SIMP_TAC (srw_ss()) [EXTENSION, NULL_EQ_NIL]) THEN
+METIS_TAC [finiteaProdsRules, FINITE_LIST_TO_SET]);
 
 
 val derivgImpNewgGen = store_thm

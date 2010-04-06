@@ -1,7 +1,8 @@
 (* A theory about regular expressions *)
 open HolKernel boolLib bossLib Parse
 open stringTheory arithmeticTheory relationTheory listTheory;
-open pred_setTheory grammarDefTheory;
+
+open pred_setTheory grammarDefTheory containerLemmasTheory;
 
 val _ = new_theory "eProds";
 
@@ -22,16 +23,33 @@ val munge = Define
 `(munge g p = { rule l r' | ∃r.MEM (rule l r) p ∧ MEM r' (munge0 g r) ∧ ~(r'=[]) })`;
 
 val negr = Define 
-`negr g g' = (∀e.MEM e (rules g') = 
-e ∈ {rule l r | (rule l r) ∈ (munge g (rules g))}) ∧
+`negr g g' = 
+(set (rules g') = munge g (rules g)) ∧
 (startSym g' =  startSym g)`;
+
+val finitenegrRules = store_thm
+("finitenegrRules",
+``FINITE (munge g p)``,
+
+ SRW_TAC [][munge] THEN
+ Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
+ Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of 
+                        rule N rhs -> {rule N rhs' | rhs' | 
+				       rhs' ∈ munge0 g rhs ∧ (rhs' ≠ [])} `
+ THEN
+Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set p))`
+ THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
+	Cases_on `r` THEN SRW_TAC [][] THEN 
+	MAGIC) THEN
+ MAGIC);
+
 
 val negr_exists = store_thm
 ("negr_exists",
 ``∀g.∃g'.negr g g'``,
 
 SRW_TAC [][negr] THEN
-MAGIC);
+METIS_TAC [listExists4Set, startSym_def, rules_def, finitenegrRules]);
 
 val eq_snegr = store_thm("eq_snegr",
 ``negr g g' ⇒ (startSym g = startSym g')``,
@@ -72,13 +90,14 @@ METIS_TAC [rtc_derives_same_append_left,APPEND] ]]);
 
 val negr_r2 = prove(
 ``negr g g' ⇒ derives g' u v ⇒ RTC (derives g) u v``,
+
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
-FULL_SIMP_TAC (srw_ss()) [negr,rules_def] THEN
+FULL_SIMP_TAC (srw_ss()) [negr,rules_def, EXTENSION] THEN
 FULL_SIMP_TAC (srw_ss()) [munge] THEN
 RES_TAC THEN FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
 IMP_RES_TAC negr_r1 THEN
-`derives g [NTS l] r'` by METIS_TAC [res1] THEN
+`derives g [NTS l] r` by METIS_TAC [res1, rule_11] THEN
 METIS_TAC [rtc_derives_same_append_left,rtc_derives_same_append_right,
 	   RTC_RULES]);
 
@@ -87,13 +106,12 @@ val negr_r3 = store_thm("negr_r3",
 ``∀u v.RTC (derives g') u v ⇒ negr g g' ⇒ RTC (derives g) u v``,
 HO_MATCH_MP_TAC RTC_INDUCT THEN
 SRW_TAC [] [RTC_RULES]  THEN
-METIS_TAC [RTC_RTC,negr_r2]
-);
+METIS_TAC [RTC_RTC,negr_r2]);
 
 val negr_r4 = prove(
 ``MEM (rule l r) (rules g) ⇒ negr g g' ⇒
 (∀r'.MEM r' (munge0 g r) ⇒ ~(r'=[]) ⇒  MEM (rule l r') (rules g'))``,
-SRW_TAC [] [negr,rules_def,munge] THEN
+SRW_TAC [] [negr,rules_def,munge,EXTENSION] THEN
 METIS_TAC []);
 
 
@@ -115,9 +133,8 @@ val negr_r6 = prove(
 ``MEM (rule l r) (rules g) ⇒ ~(r'=[]) ⇒ no_rhs g r r' ⇒ negr g g' ⇒
 MEM (rule l r') (rules g')``,
 
-SRW_TAC [] [negr,rules_def,munge,no_rhs] THEN
-METIS_TAC []
-);
+SRW_TAC [] [negr,rules_def,munge,no_rhs,EXTENSION] THEN
+METIS_TAC []);
 
 val negr_r7 = prove(
 ``negr g g' ⇒ 
@@ -126,7 +143,7 @@ SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [no_rhs,derives_def] THEN
 MAP_EVERY Q.EXISTS_TAC [`[]`,`[]`,`v'`,`s`] THEN
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [negr,rules_def,munge] THEN
+FULL_SIMP_TAC (srw_ss()) [negr,rules_def,munge,EXTENSION] THEN
 `(s1=[]) ∧ (s2=[]) ∧ (lhs = s)` by METIS_TAC [slres,slres2] THEN
 `MEM (rule s rhs) (rules g)` by METIS_TAC [] THEN
 `s1++rhs++s2=rhs` by FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -153,7 +170,7 @@ METIS_TAC [negr_r9]);
 val negr_r11 = prove(
 ``MEM sf (munge0 g s) ∧ ~(sf=[]) ⇒ ∃l.MEM (rule l s) (rules g) ⇒ negr g g' ⇒
 MEM (rule l sf) (rules g')``,
-SRW_TAC [] [negr,rules_def,munge] THEN
+SRW_TAC [] [negr,rules_def,munge,EXTENSION] THEN
 METIS_TAC []);
 
 
@@ -165,7 +182,8 @@ Induct_on `s1` THENL[
  SRW_TAC [] [munge0, MEM_MAP] THEN  SRW_TAC [] []]);
 
 val negr_r12b = prove(
-``∀s1 s1' s2 s2'.no_rhs g s1 s1' ⇒ no_rhs g s2 s2' ⇒ no_rhs g s3 s3' ⇒ no_rhs g (s1++s2++s3) (s1'++s2'++s3')``,
+``∀s1 s1' s2 s2'.no_rhs g s1 s1' ⇒ no_rhs g s2 s2' ⇒ no_rhs g s3 s3' ⇒ 
+		      no_rhs g (s1++s2++s3) (s1'++s2'++s3')``,
 SIMP_TAC (srw_ss()) [no_rhs] THEN
 Induct_on `s1` 
 THENL [
@@ -183,8 +201,7 @@ THENL [
        SRW_TAC [] [MEM_MAP,munge0]
     ],
     FULL_SIMP_TAC (srw_ss()) [MEM_MAP,munge0] THEN SRW_TAC [] [] THEN SRW_TAC [] [munge0, MEM_MAP] 
-  ]]
-);
+  ]]);
 
 
 val negr_r13 = prove(
@@ -253,6 +270,7 @@ THENL[
 
 val thm4_3 = store_thm ("thm4_3",
 ``negr g g' ⇒ ~([] IN language g) ⇒ (language g = language g')``,
+
 SRW_TAC [] [language_def,EXTENSION,EQ_IMP_THM]
 THENL[
 `~nullable g [NTS (startSym g)]` by METIS_TAC [nullable] THEN 

@@ -47,6 +47,53 @@ val left2Right = Define
    (startSym g = startSym g') ∧ 
    (set (rules g') = l2rRules A B (set (rules g)))`;
 
+val finitel2rRules = store_thm
+("finitel2rRulese",
+``∀ru. FINITE ru ⇒ FINITE (l2rRules A B ru)``,
+
+SRW_TAC [][l2rRules_def] THEN
+Q_TAC SUFF_TAC `FINITE (newAprods A B ru ∪ bprods A B ru)` THEN1
+SRW_TAC [][] THEN
+
+Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
+Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of 
+                        rule N rhs -> if N ≠ A then {}
+				      else
+					  { rule B a |
+					    (rhs = NTS A :: a)} ∪
+					  {rule B (a ++ [NTS B]) |
+					   (rhs = NTS A :: a) } ∪
+					  {rule A (y ++ [NTS B]) | y |
+					   (y = rhs) ∧ ¬∃rst. ( y = NTS A::rst)}`  
+ THEN
+Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f ru)`
+ THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
+	Cases_on `r` THEN SRW_TAC [][] THEN 
+	Cases_on `∃a.l = NTS A::a` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+	SRW_TAC [][] THEN
+	Q.MATCH_ABBREV_TAC `FINITE FOO` THEN1
+	(Q_TAC SUFF_TAC `FOO = {rule B a}` THEN
+	SRW_TAC [][] THEN SRW_TAC [][Abbr`FOO`, EXTENSION]) THEN1
+	(Q_TAC SUFF_TAC `FOO = {}` THEN
+	SRW_TAC [][] THEN SRW_TAC [][Abbr`FOO`, EXTENSION]) THEN1
+	(Q_TAC SUFF_TAC `FOO = {rule B (a ++ [NTS B]) }` THEN
+	SRW_TAC [][] THEN SRW_TAC [][Abbr`FOO`, EXTENSION]) THEN1
+	(Q_TAC SUFF_TAC `FOO = {}` THEN
+	 SRW_TAC [][] THEN SRW_TAC [][Abbr`FOO`, EXTENSION]) THEN1
+	(Q_TAC SUFF_TAC `FOO = {}` THEN
+	 SRW_TAC [][] THEN SRW_TAC [][Abbr`FOO`, EXTENSION]) THEN
+	(Q_TAC SUFF_TAC `FOO = { rule A (l ++ [NTS B]) }` THEN
+	 SRW_TAC [][] THEN SRW_TAC [][Abbr`FOO`, EXTENSION])) THEN
+
+
+   ONCE_REWRITE_TAC [EXTENSION] THEN 
+   SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+	    boolSimps.CONJ_ss][EXISTS_rule, 
+			       Abbr`f`, Abbr`Horrible`] THEN 
+   FULL_SIMP_TAC (srw_ss()) [recprods_def, newAprods_def, bprods_def] THEN
+   SRW_TAC [][EQ_IMP_THM] THEN
+   METIS_TAC []);
+
 
 val ntfree = Define `ntfree sf nt = ~(MEM (NTS nt) sf)`;
 
@@ -1910,19 +1957,20 @@ Cases_on `ldNumNt (NTS A) dl = 0` THEN1
 METIS_TAC [blkNilgImpNewgd] THEN
 Cases_on `LENGTH dl > 1`
 THENL[
-      `∃dl1 dl2 dl3.
+      `∃(dl1:(α,β) symbol list list) (dl2:(α,β) symbol list list) 
+      (dl3:(α,β) symbol list list).
            (dl = dl1 ++ dl2 ++ dl3) ∧
            (ldNumNt (NTS A) dl1 = 0) ∧
            (∀e1 e2 p s.
-              (dl2 = p ++ [e1; e2] ++ s) ⇒
-              LENGTH e2 ≥ LENGTH e1) ∧
+              (dl2 = p ++ [e1; e2] ++ s) ⇒ LENGTH e2 ≥ LENGTH e1) ∧
            ∃pfx.
-             EVERY isTmnlSym pfx ∧
+	   isWord pfx ∧
              (∀e. MEM e dl2 ⇒ ∃sfx. e = pfx ++ [NTS A] ++ sfx) ∧
              dl2 ≠ ([]:(α,β) symbol list list) ∧
              (dl3 ≠ ([]:(α,β) symbol list list) ⇒
               LENGTH (LAST dl2) ≤ LENGTH (HD dl3) ⇒
-              ¬((pfx ++ [NTS A]) ≼ (HD dl3)))` by  MAGIC (* METIS_TAC [dlsplit] *) THEN
+              ¬((pfx ++ [NTS A]) ≼ (HD dl3)))` by
+      (IMP_RES_TAC dlsplit THEN METIS_TAC []) THEN
       SRW_TAC [][] THEN
       `ldNumNt (NTS A) dl2 > 0` by
       (Cases_on `dl2` THEN
@@ -2435,12 +2483,11 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
 
 val ldNewgImpg = store_thm
 ("ldNewgImpg",
-``∀x y.rderives g' ⊢ dl ◁ x → y ∧ EVERY isTmnlSym y ∧ left2Right A B g g'
+``∀x y.left2Right A B g g' ∧ rderives g' ⊢ dl ◁ x → y ∧ 
+ ¬MEM (NTS B) x ∧ isWord y 
  ⇒
  ∃dl'.derives g ⊢ dl' ◁ x → y``,
 
-MAGIC);
-(*
 completeInduct_on `rdNumNt (NTS B) dl` THEN
 SRW_TAC [][] THEN
 Cases_on `rdNumNt (NTS B) dl = 0` THEN1
@@ -2459,7 +2506,8 @@ THENL[
              dl2 ≠ [] ∧
              (dl3 ≠ [] ⇒
               LENGTH (LAST dl2) ≤ LENGTH (HD dl3) ⇒
-              ¬(isSuffix ([NTS B]++sfx) (HD dl3)))` by MAGIC (* METIS_TAC [dlsplit]*) THEN
+              ¬(isSuffix ([NTS B]++sfx) (HD dl3)))` by 
+      (IMP_RES_TAC dlsplitB THEN METIS_TAC []) THEN
 
       SRW_TAC [][] THEN
       `rdNumNt (NTS B) dl2 > 0` by
@@ -2494,74 +2542,41 @@ THENL[
       `dl3 = HD dl3::TL dl3` by METIS_TAC [CONS,NULL_EQ_NIL] THEN
       `rderives g' (LAST dl2) (HD dl3)` by METIS_TAC [ldMemRel',APPEND_FRONT_LAST,
 						      APPEND_ASSOC,APPEND] THEN
-      `∃dl''. derives g ⊢ dl'' ◁ pfx ++ [NTS A] ++ sfx → HD dl3`
-      by METIS_TAC [ntdlgImpNewg] THEN
-
-
       `LAST dl' = y` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
       `HD dl' = HD dl3` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-      `derives g' ⊢ (dl'' ++ TL dl') ◁ (pfx++[NTS A]++sfx) → y`
-      by METIS_TAC [listderivTrans] THEN
-      Cases_on `dl1=[]` THEN FULL_SIMP_TAC (srw_ss()) []
-      THENL[
-	    SRW_TAC [][] THEN
-	    Q.EXISTS_TAC `dl''++TL dl'`  THEN SRW_TAC [][] THEN
-	    FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	    Cases_on `dl''` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][] THEN
-	    Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) [],
-	    SRW_TAC [][] THEN
-	    Q.EXISTS_TAC `dl''++TL dl'`  THEN SRW_TAC [][] THEN
-	    FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	    Cases_on `dl''` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][] THEN
-	    Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) [],
-
-	    `lderives g ⊢ dl1 ◁ HD dl1 → LAST dl1`
-	    by METIS_TAC [ldsubderivs,APPEND_ASSOC] THEN
-	    `dl2 = HD dl2::TL dl2` by METIS_TAC [CONS,NULL_EQ_NIL] THEN
-	    `lderives g (LAST dl1) (HD dl2)` by METIS_TAC [ldMemRel',APPEND,
-							   APPEND_FRONT_LAST,
-							   APPEND_ASSOC] THEN
-	    `derives g' (LAST dl1) (HD dl2)` by
-	    METIS_TAC [gImpg'Nt0,APPEND_FRONT_LAST,ldNumNtApp] THEN
-	    `derives g' ⊢ dl1 ◁ HD dl1 → LAST dl1` by METIS_TAC [blkNilgImpNewgd] THEN
-	    IMP_RES_TAC ldImprtc2list THEN
-	    `HD dl1 = x` by (Cases_on `dl1` THEN
-			     FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
-	    SRW_TAC [][] THEN
-	    `(derives g')^* (HD dl1) (HD dl2)` by METIS_TAC [RTC_RULES_RIGHT1] THEN
-	    METIS_TAC [RTC_RTC,RTC_RULES,rtc2list_exists'],
-
-	    `HD dl2 = HD (dl2 ++ dl3)` by
-	    (Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
-	    `dl2 ++ dl3 ≠ []` by SRW_TAC [][] THEN
-	    `derives g' (LAST dl1) (HD dl2)` by
-	    METIS_TAC [gImpg'Nt0,APPEND_FRONT_LAST,ldNumNtApp,ldsubderivs,
-		       APPEND_ASSOC] THEN
-	    `derives g' ⊢ dl1 ◁ HD dl1 → LAST dl1` by METIS_TAC [blkNilgImpNewgd,
-								 APPEND_ASSOC,
-								 ldsubderivs] THEN
-	    IMP_RES_TAC ldImprtc2list THEN
-	    `HD dl1 = x` by (Cases_on `dl1` THEN
-			     FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
-	    SRW_TAC [][] THEN
-	    `(derives g')^* (HD dl1) (HD dl2)` by METIS_TAC [RTC_RULES_RIGHT1] THEN
-	    METIS_TAC [RTC_RTC,RTC_RULES,rtc2list_exists']
-	    ],
+      MAGIC,
 
       Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
       Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
       SRW_TAC [][] THEN
       Q.EXISTS_TAC `[h]` THEN SRW_TAC [][]
       ]);
-*)
 
 
 val lemma4_4 = store_thm
 ("lemma4_4",
 ``∀g g'.left2Right A B g g' ⇒ (language g = language g')``,
-MAGIC);
+
+ SRW_TAC [][language_def, EXTENSION, EQ_IMP_THM] 
+THENL[
+      IMP_RES_TAC derivesImpLderives THEN
+      IMP_RES_TAC rtc2list_exists' THEN
+      `∃dl. derives g' ⊢ dl ◁ [NTS (startSym g)] → x` 
+      by METIS_TAC [ldgrImpNewg] THEN
+      Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def, left2Right] THEN
+      SRW_TAC [][] THEN
+      METIS_TAC [rtc2listRtcHdLast, NOT_CONS_NIL, HD],
+      
+      IMP_RES_TAC derivesImpRderives THEN
+      `¬(((NTS B):(α,β) symbol) ∈ [NTS (startSym g')])` by 
+      (FULL_SIMP_TAC (srw_ss()) [left2Right] THEN
+       METIS_TAC [slemma1_4]) THEN
+      IMP_RES_TAC rtc2list_exists' THEN
+      `∃dl. derives g ⊢ dl ◁ [NTS (startSym g')] → x` 
+      by METIS_TAC [ldNewgImpg] THEN
+      Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def, left2Right] THEN
+      SRW_TAC [][] THEN
+      METIS_TAC [rtc2listRtcHdLast, NOT_CONS_NIL, HD]]);
 
 
 

@@ -2,7 +2,7 @@
 open HolKernel boolLib bossLib Parse
 open stringTheory relationTheory listTheory
 open pred_setTheory symbolDefTheory grammarDefTheory listLemmasTheory eProdsTheory
-
+    containerLemmasTheory
 
 val _ = new_theory "unitProds"
 
@@ -25,20 +25,49 @@ val newProds = Define
 `newProds (g:(α,β) grammar) (p':(α,β) rule -> bool) = 
 {rule a r | ∃b ru.(rule b r ∈ p' ∧ 
 		(NTS a,NTS b) IN allDeps (G ru (startSym g)) ∧
-		(∀e.MEM e ru = e ∈ (unitProds g)))}`;
+		(set ru = unitProds g))}`;
 
 val upgr_rules = Define 
 `(upgr_rules g =  (nonUnitProds g) ∪ (newProds g (nonUnitProds g)))`;
 
 val upgr = Define 
-`upgr g g' = (∀e.MEM e (rules g') = e ∈ (upgr_rules g)) ∧
+`upgr g g' = 
+(set (rules g') = upgr_rules g) ∧
 (startSym g' = startSym g)`;
+
+
+val finiteupgrRules = store_thm
+("finiteupgrRules",
+``FINITE (upgr_rules g)``,
+
+ SRW_TAC [][nonUnitProds, unitProds, newProds,upgr_rules] THEN
+ Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
+ Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of 
+                        rule N rhs -> 
+			{ rule a rhs | a | ∀nt. rhs ≠ [NTS nt] ∧ 
+			 (NTS a,NTS N) ∈ allDeps (G ru (startSym g)) ∧
+			 (set ru =
+			  {rule l k |
+			   ∃nt. (k = [NTS nt]) ∧ rule l k ∈ rules g})} `
+ THEN
+Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set (rules g)))`
+ THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
+	MAGIC
+	) THEN
+
+    ONCE_REWRITE_TAC [EXTENSION] THEN 
+   SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
+	    boolSimps.CONJ_ss][EXISTS_rule, 
+			       Abbr`f`, Abbr`Horrible`] THEN 
+   MAGIC); 
+
 
 val upgr_exists = store_thm
 ("upgr_exists",
 ``∀g.∃g'.upgr g g'``,
+
 SRW_TAC [][upgr] THEN
-MAGIC);
+METIS_TAC [finiteupgrRules, listExists4Set, startSym_def, rules_def]);
 
 
 val eq_supgr = prove(
@@ -87,7 +116,7 @@ val upgr_r3 = prove
 derives g' v v' ⇒ RTC (derives g) v v'``,
 
 SRW_TAC [] [derives_def, upgr, rules_def, nonUnitProds,newProds,allDeps,
-	    upgr_rules] 
+	    upgr_rules,EXTENSION] 
 THENL[
  METIS_TAC [res1,derives_same_append_left,derives_same_append_right,RTC_SUBSET],
 
@@ -102,16 +131,14 @@ FULL_SIMP_TAC (srw_ss()) [eq_sneup,startSym_def,rules_def] THEN
 `RTC (derives (G l n)) [NTS lhs] rhs` 
       by METIS_TAC [RTC_RULES_RIGHT1,eq_sneup,eq_snegr,negr_def,
 		    rules_def] THEN
-METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left]
-]);
+METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left]]);
 
 
 val upgr_r2 = prove(
 ``∀u v.RTC (derives g') u v ⇒ negr g0 g ⇒ upgr g g' ⇒ RTC (derives g) u v``,
 HO_MATCH_MP_TAC RTC_INDUCT_RIGHT1 THEN
 SRW_TAC [][] THEN
-METIS_TAC [RTC_RULES,upgr_r3, RTC_RTC]
-);
+METIS_TAC [RTC_RULES,upgr_r3, RTC_RTC]);
 
 
 
@@ -148,8 +175,9 @@ SRW_TAC [] [allDeps] THEN SRW_TAC [] []);
 
 val negr_r16 = prove(
 ``∀v v'.negr g0 g ⇒ derives g v v' ⇒ ~(v'=[])``,
+
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [derives_def,negr_def,munge_def] THEN
+FULL_SIMP_TAC (srw_ss()) [derives_def,negr_def,munge_def,EXTENSION] THEN
 SRW_TAC [][] THEN
 RES_TAC THEN
 FULL_SIMP_TAC (srw_ss()) []);
@@ -157,7 +185,7 @@ FULL_SIMP_TAC (srw_ss()) []);
 
 val negr_r17 = prove(
 ``negr g0 g ⇒ MEM (rule l r) (rules g) ⇒ ~(r=[])``,
-SRW_TAC [] [negr_def,munge_def]);
+SRW_TAC [] [negr_def,munge_def,EXTENSION]);
 
 
 val eqSymsToStr = Define 
@@ -187,7 +215,8 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 `(s1=[]) ∧ (s2=[]) ∧ (s1'=[]) ∧ (s2'=[])` by METIS_TAC [lres] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [nonUnitProds,allDeps,newProds, upgr_rules,upgr] THEN
+FULL_SIMP_TAC (srw_ss()) [nonUnitProds,allDeps,newProds, upgr_rules,upgr,
+			  EXTENSION] THEN
 DISJ2_TAC THEN
 Q.EXISTS_TAC `lhs''` THEN
 SRW_TAC [][] THEN
@@ -203,7 +232,7 @@ val upgr_r9 = prove
 SRW_TAC [] [derives_def] THEN
 FULL_SIMP_TAC (srw_ss()) [lreseq] THEN
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [upgr, upgr_rules] THEN 
+FULL_SIMP_TAC (srw_ss()) [upgr, upgr_rules,EXTENSION] THEN 
 `rule lhs rhs ∈ nonUnitProds g0 ∨
  rule lhs rhs ∈ newProds g0 (nonUnitProds g0)` by METIS_TAC [] 
  THENL[
@@ -232,15 +261,15 @@ FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
 FULL_SIMP_TAC (srw_ss()) [lreseq] THEN
 SRW_TAC [] [rules_def,unitProds] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [] []
-);
+SRW_TAC [] []);
 
 
 val upgr_r12 = prove(
 ``upgr g0 g ⇒ MEM (rule l r) (rules g) ⇒ rule l r ∉ unitProds g0``,
-SRW_TAC [] [unitProds,upgr_rules, upgr] THENL[
+SRW_TAC [] [unitProds,upgr_rules, upgr,EXTENSION] THENL[
 FULL_SIMP_TAC (srw_ss()) [nonUnitProds,unitProds] THEN METIS_TAC [],
-FULL_SIMP_TAC (srw_ss()) [newProds,nonUnitProds,allDeps,unitProds] THEN 
+FULL_SIMP_TAC (srw_ss()) [newProds,nonUnitProds,allDeps,unitProds,
+			  EXTENSION] THEN 
 METIS_TAC []]);
 
 
@@ -249,7 +278,7 @@ val upgr_r13 = prove(
 ``upgr g0 g ⇒ MEM (rule l r) (rules g) ⇒ ∃n.r≠[NTS n]``,
 SRW_TAC [] [] THEN
 `rule l r ∉ unitProds g0` by METIS_TAC [upgr_r12] THEN
-FULL_SIMP_TAC (srw_ss()) [unitProds,upgr, upgr_rules] THEN
+FULL_SIMP_TAC (srw_ss()) [unitProds,upgr, upgr_rules,EXTENSION] THEN
 RES_TAC
 THENL[
       FULL_SIMP_TAC (srw_ss()) [nonUnitProds,unitProds] THEN
@@ -288,8 +317,7 @@ FULL_SIMP_TAC (srw_ss()) [unitProds] THEN METIS_TAC [lres]
 
 val up_r2 = prove(
 ``negr g0 g ⇒ rule lhs rhs ∈ unitProds g ⇒ MEM (rule lhs rhs) (rules g)``,
-SRW_TAC [] [unitProds]
-);
+SRW_TAC [] [unitProds]);
 
 val upgr_r20 = store_thm("upgr_r20",
 ``∀u v.RTC (derives g) u v ⇒ negr g0 g ∧ upgr g g' ⇒ 
@@ -314,7 +342,7 @@ THENL[
 	    SRW_TAC [] [] THEN   
 	    `MEM (rule lhs rhs) (rules g')` 
 	    by (FULL_SIMP_TAC (srw_ss()) [unitProds, upgr, upgr_rules,
-					  nonUnitProds]  THEN
+					  nonUnitProds,EXTENSION]  THEN
 		METIS_TAC []) THEN
 	    FULL_SIMP_TAC (srw_ss()) [nonUnitProds,unitProds] THEN 
 	    METIS_TAC [RTC_SUBSET, res1, derives_append,RTC_RULES],
@@ -338,8 +366,7 @@ val thm4_4 = store_thm("thm4_4",
 SRW_TAC [] [language_def,EXTENSION,EQ_IMP_THM]
 THENL[
 METIS_TAC [upgr_r20,eq_supgr],
-METIS_TAC [upgr_r4,eq_supgr]
-]);
+METIS_TAC [upgr_r4,eq_supgr]]);
 
 
 val _ = export_theory ();

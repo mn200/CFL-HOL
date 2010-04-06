@@ -121,12 +121,12 @@ METIS_TAC [LENGTH_NIL, ruleNonTmnls],
 METIS_TAC [list_lem1, ruleNonTmnls]]],
 `LENGTH r >= 3` by DECIDE_TAC THEN METIS_TAC [ruleNonTmnls,APPEND,list_lem3]])
 
-val badTmnlRules = Define `(badTmnlRules g = SUM (MAP ruleTmnls (rules g)))`
+val badTmnlsCount = Define `(badTmnlsCount g = SUM (MAP ruleTmnls (rules g)))`
 
-val badNtRules = Define `(badNtRules g = SUM  (MAP ruleNonTmnls (rules g)))`
+val badNtmsCount = Define `(badNtmsCount g = SUM  (MAP ruleNonTmnls (rules g)))`
 
 val cnf = Define 
-    `cnf g = (badNtRules g = 0) ∧ (badTmnlRules g = 0)`
+    `cnf g = (badNtmsCount g = 0) ∧ (badTmnlsCount g = 0)`
 
 
 val trans2NT = Define 
@@ -700,9 +700,9 @@ METIS_TAC [lemma10_b]
 *)
 
 val lemma16_b = prove(
-``∀g.(badTmnlRules g = 0) ⇒ (∀r.MEM r (rules g) ⇒ (ruleTmnls r = 0))``,
+``∀g.(badTmnlsCount g = 0) ⇒ (∀r.MEM r (rules g) ⇒ (ruleTmnls r = 0))``,
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [badTmnlRules] THEN
+FULL_SIMP_TAC (srw_ss()) [badTmnlsCount] THEN
 Cases_on `ruleTmnls r = 0` THENL[
 SRW_TAC [] [],
 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
@@ -711,9 +711,9 @@ FULL_SIMP_TAC (srw_ss()) [SUM_APPEND]
 ])
 
 val lemma16_bNT = prove(
-``∀g.(badNtRules g = 0) ⇒ (∀r.MEM r (rules g) ⇒ (ruleNonTmnls r = 0))``,
+``∀g.(badNtmsCount g = 0) ⇒ (∀r.MEM r (rules g) ⇒ (ruleNonTmnls r = 0))``,
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [badNtRules] THEN
+FULL_SIMP_TAC (srw_ss()) [badNtmsCount] THEN
 Cases_on `ruleNonTmnls r = 0` THENL[
 SRW_TAC [] [],
 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
@@ -730,20 +730,20 @@ SRW_TAC [][]);
 
 
 val lemma16_a = prove 
-(``∀g.(badTmnlRules g = 0) ⇒ 
+(``∀g.(badTmnlsCount g = 0) ⇒ 
 (∀r.MEM r (rules g) ⇒ (SUM (MAP ruleTmnls (delete r (rules g))) = 0))``,
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [badTmnlRules] THEN
-`ruleTmnls r = 0` by METIS_TAC [lemma16_b,badTmnlRules] THEN
+FULL_SIMP_TAC (srw_ss()) [badTmnlsCount] THEN
+`ruleTmnls r = 0` by METIS_TAC [lemma16_b,badTmnlsCount] THEN
 METIS_TAC [sumMapDel])
 
 
 val lemma16_aNT = prove 
-(``∀g.(badNtRules g = 0) ⇒ 
+(``∀g.(badNtmsCount g = 0) ⇒ 
 (∀r.MEM r (rules g) ⇒ (SUM (MAP ruleNonTmnls (delete r (rules g))) = 0))``,
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [badNtRules] THEN
-`ruleNonTmnls r = 0` by METIS_TAC [lemma16_bNT,badNtRules] THEN
+FULL_SIMP_TAC (srw_ss()) [badNtmsCount] THEN
+`ruleNonTmnls r = 0` by METIS_TAC [lemma16_bNT,badNtmsCount] THEN
 METIS_TAC [sumMapDel])
 
 
@@ -864,10 +864,10 @@ FULL_SIMP_TAC (srw_ss()) [] THEN METIS_TAC [isTmnlSym_def,isNonTmnlSym_def,sym_r
 )
 
 val lemma12_a = prove 
-(``(badTmnlRules g = 0) ⇒ ~∃g' nt t.trans1Tmnl nt t g g'``,
+(``(badTmnlsCount g = 0) ⇒ ~∃g' nt t.trans1Tmnl nt t g g'``,
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [badTmnlRules,trans1Tmnl] THEN
-`∀r. MEM r (rules g) ⇒ (ruleTmnls r = 0)` by METIS_TAC [lemma16_b,badTmnlRules] THEN
+FULL_SIMP_TAC (srw_ss()) [badTmnlsCount,trans1Tmnl] THEN
+`∀r. MEM r (rules g) ⇒ (ruleTmnls r = 0)` by METIS_TAC [lemma16_b,badTmnlsCount] THEN
 METIS_TAC [slemma12_a_1,isTmnlSym_def]
 )
 
@@ -882,10 +882,10 @@ SRW_TAC [] [SUM_IMAGE_THM] THEN
 )
 
 val lemma12_b = prove (
-``∀g.((badNtRules g = 0) ⇒ ~∃g' nt nt1 nt2.trans2NT nt nt1 nt2 g g')``,
+``∀g.((badNtmsCount g = 0) ⇒ ~∃g' nt nt1 nt2.trans2NT nt nt1 nt2 g g')``,
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [badNtRules,trans2NT] THEN
-`∀r. MEM r (rules g) ⇒ (ruleNonTmnls r = 0)` by METIS_TAC [lemma16_bNT,badNtRules] THEN
+FULL_SIMP_TAC (srw_ss()) [badNtmsCount,trans2NT] THEN
+`∀r. MEM r (rules g) ⇒ (ruleNonTmnls r = 0)` by METIS_TAC [lemma16_bNT,badNtmsCount] THEN
 METIS_TAC [slemma12_a_1NT2,isNonTmnlSym_def,NOT_EXISTS_THM,NOT_FORALL_THM,CONS,APPEND_ASSOC,APPEND])
 
 val lemma13_a = prove (``∀l l' p s nt t.ruleTmnls (rule l (p++[NTS nt]++s)) <= ruleTmnls (rule l' (p++[TS t]++s))``,
@@ -960,9 +960,9 @@ THENL[
       
 
 val lemma6_a = prove 
-(``trans1Tmnl nt t g g' ⇒ (badTmnlRules g' < badTmnlRules g)``,
+(``trans1Tmnl nt t g g' ⇒ (badTmnlsCount g' < badTmnlsCount g)``,
 
-FULL_SIMP_TAC arith_ss [badTmnlRules,trans1Tmnl] THEN
+FULL_SIMP_TAC arith_ss [badTmnlsCount,trans1Tmnl] THEN
 SRW_TAC [] [] THEN1
 
 (ASM_REWRITE_TAC [] THEN
@@ -1084,9 +1084,9 @@ SRW_TAC [] [ruleNonTmnlsAlt] THEN
 (DECIDE_TAC ORELSE METIS_TAC [isNonTmnlSym_def])))]])
 
 val lemma6_b = prove(
-``∀g g'.trans2NT nt nt1 nt2 g g' ⇒ (badNtRules g' < badNtRules g)``,
+``∀g g'.trans2NT nt nt1 nt2 g g' ⇒ (badNtmsCount g' < badNtmsCount g)``,
 
-FULL_SIMP_TAC arith_ss [badNtRules,trans2NT] THEN
+FULL_SIMP_TAC arith_ss [badNtmsCount,trans2NT] THEN
 SRW_TAC [] [] THEN
  ASM_REWRITE_TAC [] THEN
  `~MEM (rule nt [nt1;nt2]) (rules g)` by METIS_TAC [slemma1_4] THEN
@@ -1113,23 +1113,23 @@ SRW_TAC [] [] THEN
  
 
 val lemma7_a = prove 
-(``∀g g'.trans1Tmnl nt t g g' ⇒ (badTmnlRules g > 0)``,
+(``∀g g'.trans1Tmnl nt t g g' ⇒ (badTmnlsCount g > 0)``,
 SRW_TAC [] [] THEN
-`badTmnlRules g' < badTmnlRules g` by METIS_TAC [lemma6_a] THEN
+`badTmnlsCount g' < badTmnlsCount g` by METIS_TAC [lemma6_a] THEN
 FULL_SIMP_TAC arith_ss [LESS_EQ,SUC_NOT])
 
-val lemma7_b = prove (``trans2NT nt nt1 nt2 g g' ⇒ (badNtRules g > 0)``,
+val lemma7_b = prove (``trans2NT nt nt1 nt2 g g' ⇒ (badNtmsCount g > 0)``,
 SRW_TAC [] [] THEN
-`badNtRules g' < badNtRules g` by METIS_TAC [lemma6_b] THEN
+`badNtmsCount g' < badNtmsCount g` by METIS_TAC [lemma6_b] THEN
 FULL_SIMP_TAC arith_ss [LESS_EQ,SUC_NOT])
 
 
 val lemma15_a = prove(
-``∀g g'.(badTmnlRules g = 0) ⇒ 
-(\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y)g g' ⇒ (badTmnlRules g' = 0)``,
+``∀g g'.(badTmnlsCount g = 0) ⇒ 
+(\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y)g g' ⇒ (badTmnlsCount g' = 0)``,
 
 SRW_TAC [] [trans2NT] THEN
-FULL_SIMP_TAC (srw_ss()) [badTmnlRules] THEN
+FULL_SIMP_TAC (srw_ss()) [badTmnlsCount] THEN
 FULL_SIMP_TAC (srw_ss()) [SUM_IMAGE_UNION,FINITE_DIFF,f_diff,FINITE_UNION] THEN
 `~MEM (rule nt [nt1;nt2]) (rules g)` by METIS_TAC [slemma1_4] THEN
 `~MEM (rule l (p++[NTS nt]++s)) (rules g)` by METIS_TAC [slemma1_4] THEN
@@ -1157,7 +1157,7 @@ FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND, isTmnlSym_def]));
 
 val lemma14_b = store_thm("lemma14_b", 
 ``∀g g'.RTC (\x y. ∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ⇒
-(badTmnlRules g = 0) ⇒ (badTmnlRules g' = 0)``,
+(badTmnlsCount g = 0) ⇒ (badTmnlsCount g' = 0)``,
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [] [RTC_RULES] THEN
 METIS_TAC [lemma15_a]);
 
@@ -1215,11 +1215,11 @@ SRW_TAC [][] THEN
 METIS_TAC []);
 
 val lemma8_a = prove(
-``INFINITE (UNIV : 'a set) ⇒ (badTmnlRules g > 0) 
+``INFINITE (UNIV : 'a set) ⇒ (badTmnlsCount g > 0) 
         ⇒ 
      ∃g' (nt:'a) t.trans1Tmnl nt t g g' ``,
 
-SRW_TAC [] [badTmnlRules] THEN
+SRW_TAC [] [badTmnlsCount] THEN
 `∃e.MEM e (rules g) ∧ ruleTmnls e > 0` by METIS_TAC [sumMapGt0] THEN
 `∃l p s t. (e=rule l (p ++ [TS t] ++ s)) ∧ (p ≠ [] ∨ s ≠ [])` 
  by METIS_TAC [slemma12_a_2] THEN
@@ -1243,13 +1243,13 @@ METIS_TAC [sym_r3b,rgr_r9eq,filter_l2]]);
 
 val lemma8_b = prove (
 ``INFINITE (UNIV : 'a set) ⇒
-   (badTmnlRules g = 0) 
-  ⇒ ((badNtRules g > 0) ⇒ 
+   (badTmnlsCount g = 0) 
+  ⇒ ((badNtmsCount g > 0) ⇒ 
   ∃g' nt:'a nt1 nt2.trans2NT nt nt1 nt2 g g')``,
 
-SRW_TAC [] [badNtRules] THEN
-FULL_SIMP_TAC (srw_ss()) [badTmnlRules] THEN
-`∀r.MEM r (rules g) ⇒ (ruleTmnls r = 0)`  by METIS_TAC [lemma16_b,badTmnlRules] THEN
+SRW_TAC [] [badNtmsCount] THEN
+FULL_SIMP_TAC (srw_ss()) [badTmnlsCount] THEN
+`∀r.MEM r (rules g) ⇒ (ruleTmnls r = 0)`  by METIS_TAC [lemma16_b,badTmnlsCount] THEN
 `∃e.MEM e (rules g) ∧ ruleNonTmnls e > 0` by METIS_TAC [sumMapGt0] THEN
 `ruleTmnls e = 0` by METIS_TAC [] THEN
 ` ~∃l p s t. (e = rule l (p ++ [TS t] ++ s)) ∧ (p ≠ [] ∨ s ≠ [])` 
@@ -1340,38 +1340,38 @@ METIS_TAC [startSym_def]]]);
 val lemma11_a = prove(
 ``∀g.INFINITE (UNIV:'a set) ⇒
 		      ~(∃g' (nt:'a) t.trans1Tmnl nt t g g') 
-      ⇒ (badTmnlRules g = 0)``,
+      ⇒ (badTmnlsCount g = 0)``,
 SRW_TAC [] [] THEN
-`~(∃g' nt t.trans1Tmnl nt t g g') ⇒ ~(badTmnlRules g > 0)` by METIS_TAC [MONO_NOT,lemma8_a] THEN
+`~(∃g' nt t.trans1Tmnl nt t g g') ⇒ ~(badTmnlsCount g > 0)` by METIS_TAC [MONO_NOT,lemma8_a] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 RES_TAC THEN
-`badTmnlRules g <= 0` by FULL_SIMP_TAC arith_ss [] THEN
+`badTmnlsCount g <= 0` by FULL_SIMP_TAC arith_ss [] THEN
 FULL_SIMP_TAC arith_ss [LE])
 
 val lemma11_b = prove(
 ``∀g.INFINITE (UNIV:'a set) ⇒
-(badTmnlRules g = 0) ⇒ (~(∃g' nt:'a nt1 nt2.trans2NT nt nt1 nt2 g g') ⇒ (badNtRules g = 0))``,
+(badTmnlsCount g = 0) ⇒ (~(∃g' nt:'a nt1 nt2.trans2NT nt nt1 nt2 g g') ⇒ (badNtmsCount g = 0))``,
 SRW_TAC [] [] THEN
-`~(∃g' nt nt1 nt2.trans2NT nt nt1 nt2 g g') ⇒ ~(badNtRules g > 0)` 
+`~(∃g' nt nt1 nt2.trans2NT nt nt1 nt2 g g') ⇒ ~(badNtmsCount g > 0)` 
     by METIS_TAC [MONO_NOT,lemma8_b] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 RES_TAC THEN
-`badNtRules g <= 0` by FULL_SIMP_TAC arith_ss [] THEN
+`badNtmsCount g <= 0` by FULL_SIMP_TAC arith_ss [] THEN
 FULL_SIMP_TAC arith_ss [LE]
 )
 
 val lemma9_a = store_thm("lemma9_a",
 ``INFINITE (UNIV:'a set) ⇒
    (∃g'.RTC (\x y.∃nt:'a t.trans1Tmnl nt t x y) g g' ∧ 
-        (badTmnlRules g' = 0))``,
-completeInduct_on `badTmnlRules g` THEN
+        (badTmnlsCount g' = 0))``,
+completeInduct_on `badTmnlsCount g` THEN
 Cases_on `v=0` THENL[
 SRW_TAC [][] THEN
 METIS_TAC [RTC_RULES],
 SRW_TAC [] [] THEN
 `∃g' nt t. trans1Tmnl nt t g g'` by  METIS_TAC [MONO_NOT,lemma11_a] THEN
-`(badTmnlRules g' < badTmnlRules g)` by METIS_TAC [lemma6_a] THEN
-`∃g''.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g' g'' ∧ (badTmnlRules g'' = 0)` by  METIS_TAC [] THEN
+`(badTmnlsCount g' < badTmnlsCount g)` by METIS_TAC [lemma6_a] THEN
+`∃g''.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g' g'' ∧ (badTmnlsCount g'' = 0)` by  METIS_TAC [] THEN
 Q.EXISTS_TAC `g''` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Q.ABBREV_TAC `r=(\x y. ∃nt t. trans1Tmnl nt t x y)` THEN
@@ -1382,17 +1382,17 @@ METIS_TAC [RTC_RULES]
 
 val lemma9_b = store_thm("lemma9_b",
 ``INFINITE (UNIV:'a set) ⇒
-(badTmnlRules g = 0) ⇒ 
+(badTmnlsCount g = 0) ⇒ 
       (∃g'.RTC (\x y.∃nt:'a nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ∧ 
-       (badNtRules g' = 0))``,
-completeInduct_on `badNtRules g` THEN
+       (badNtmsCount g' = 0))``,
+completeInduct_on `badNtmsCount g` THEN
 Cases_on `v=0` THENL[
 METIS_TAC [RTC_RULES],
 SRW_TAC [] [] THEN
 `∃g' nt nt1 nt2. trans2NT nt nt1 nt2 g g'` by  METIS_TAC [MONO_NOT,lemma11_b] THEN
-`(badNtRules g' < badNtRules g)` by METIS_TAC [lemma6_b] THEN
+`(badNtmsCount g' < badNtmsCount g)` by METIS_TAC [lemma6_b] THEN
 `∃g''.RTC (\x y.∃nt nt1 nt2.trans2NT nt nt1 nt2 x y) g' g'' ∧ 
-		     (badTmnlRules g' = 0) ∧ (badNtRules g'' = 0)` 
+		     (badTmnlsCount g' = 0) ∧ (badNtmsCount g'' = 0)` 
 		     by  METIS_TAC [lemma15_a] THEN
 Q.EXISTS_TAC `g''` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1420,7 +1420,7 @@ val isCnf_def = Define
 val cnfisCnfEq = store_thm
 ("cnfisCnfEq",
 ``∀g:('a, 'b) grammar.
- INFINITE (UNIV:'a set) ⇒ 
+ INFINITE (UNIV:'a set) ∧
  [] ∉ language g  ⇒ ∃g':(α,β) grammar.isCnf g' ∧ (language g = language g')``,
 
 SRW_TAC [][] THEN
@@ -1434,7 +1434,7 @@ IMP_RES_TAC upgr_noeProds THEN
 `language g0 = language g1` by METIS_TAC [thm4_4] THEN
 `noUnitProds (rules g1)` by METIS_TAC [upgrImpnoUnitProds] THEN
 `∃g'. (λx y. ∃nt t. trans1Tmnl nt t x y)^* g1 g' ∧
- (badTmnlRules g' = 0)` by METIS_TAC [lemma9_a] THEN
+ (badTmnlsCount g' = 0)` by METIS_TAC [lemma9_a] THEN
 IMP_RES_TAC trans1TmnlRtc_noeProds THEN
 IMP_RES_TAC trans1TmnlRtc_noUnitProds THEN
 IMP_RES_TAC lemma9_b THEN
@@ -1451,7 +1451,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `r` THEN1
 METIS_TAC [noeProds] THEN
 
-FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, badTmnlRules, badNtRules] THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, badTmnlsCount, badNtmsCount] THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [rules_def, SUM_APPEND] THEN
 Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def,

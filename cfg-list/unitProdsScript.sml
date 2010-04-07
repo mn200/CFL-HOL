@@ -416,8 +416,7 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [nonUnitProds,unitProds] THEN
       METIS_TAC [],
       FULL_SIMP_TAC (srw_ss()) [nonUnitProds,newProds,allDeps,unitProds] THEN 
-      METIS_TAC []
-      ]);
+      METIS_TAC []]);
 
 
 val upgr_r14 = prove(
@@ -438,7 +437,29 @@ MAP_EVERY Q.EXISTS_TAC [`[]`,`[]`,`v`,`nt1`] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [upgr, upgr_rules] THEN
 FULL_SIMP_TAC (srw_ss()) [derives_def, lreseq] THEN
-MAGIC);
+`rule nt1 v ∈ newProds g (nonUnitProds g)` by
+
+(SRW_TAC [][newProds] THEN
+`rule nt v ∈ nonUnitProds g` by
+(SRW_TAC [][nonUnitProds, unitProds] THEN
+ SPOSE_NOT_THEN ASSUME_TAC THEN
+ SRW_TAC [][] THEN
+ `rule nt2 [NTS nt'] ∈ nonUnitProds g ∪ newProds g (nonUnitProds g)`
+ by METIS_TAC [mem_in] THEN
+ FULL_SIMP_TAC (srw_ss()) [nonUnitProds, unitProds] THEN
+ FULL_SIMP_TAC (srw_ss()) [newProds]) THEN
+
+`(NTS nt1, NTS nt) ∈ allDeps (G ru (startSym g))` by
+(SRW_TAC [][allDeps, allSyms_def] THEN
+FULL_SIMP_TAC (srw_ss()) [nonUnitProds] THEN1
+METIS_TAC [slemma1_4, startSym_def, mem_in ,rules_def] THEN
+`LENGTH [NTS nt] ≥ 1` by SRW_TAC [][] THEN
+Cases_on `nt1 = nt` THEN SRW_TAC [][] THEN
+METIS_TAC [slemma1_4, startSym_def, mem_in ,rules_def,
+	   rtcDerivesInRuleRhsLenGte1, MEM]) THEN
+METIS_TAC []) THEN
+
+FULL_SIMP_TAC (srw_ss()) [EXTENSION]);
 
 
 val up_r1 = prove (

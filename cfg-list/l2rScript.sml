@@ -6,6 +6,7 @@ open stringTheory relationTheory listTheory
 open pred_setTheory symbolDefTheory grammarDefTheory listLemmasTheory
 relationLemmasTheory
 
+open containerLemmasTheory
 
 val _ = new_theory "l2r";
 
@@ -51,7 +52,7 @@ val finitel2rRules = store_thm
 ("finitel2rRulese",
 ``∀ru. FINITE ru ⇒ FINITE (l2rRules A B ru)``,
 
-SRW_TAC [][l2rRules_def] THEN
+SRW_TAC [][l2rRules] THEN
 Q_TAC SUFF_TAC `FINITE (newAprods A B ru ∪ bprods A B ru)` THEN1
 SRW_TAC [][] THEN
 
@@ -90,7 +91,7 @@ Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f ru)`
    SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
 	    boolSimps.CONJ_ss][EXISTS_rule, 
 			       Abbr`f`, Abbr`Horrible`] THEN 
-   FULL_SIMP_TAC (srw_ss()) [recprods_def, newAprods_def, bprods_def] THEN
+   FULL_SIMP_TAC (srw_ss()) [recprods, newAprods, bprods] THEN
    SRW_TAC [][EQ_IMP_THM] THEN
    METIS_TAC []);
 
@@ -1825,6 +1826,32 @@ Cases_on `s1++rhs++s2=[]` THEN1
  SRW_TAC [][]) THEN
 METIS_TAC []);
 
+val elemNotNilRd = store_thm
+("elemNotNilRd",
+``∀dl' e.rderives g ⊢ dl' ◁ e → LAST dl' ∧ e ≠ [] ∧
+(∀e1 e2 p s. (dl' = p ++ [e1; e2] ++ s) ⇒ LENGTH e2 ≥ LENGTH e1)
+⇒
+(LAST dl' ≠ [])``,
+
+Induct_on `dl'` THEN SRW_TAC [][] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+IMP_RES_TAC listDerivHdBrk THEN
+`e=h` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+`(∀e1 e2 p s.(h'::t = p ++ [e1; e2] ++ s) ⇒ LENGTH e2 ≥ LENGTH e1)`
+ by METIS_TAC [APPEND,APPEND_ASSOC] THEN
+FULL_SIMP_TAC (srw_ss()) [rderives_def] THEN
+SRW_TAC [][] THEN
+Cases_on `s1++rhs++s2=[]` THEN1
+(SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+ SRW_TAC [][] THEN
+ Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+ FIRST_X_ASSUM (Q.SPECL_THEN [`[NTS lhs]`,`[]`,`[]`,`t`] MP_TAC) THEN
+ SRW_TAC [][]) THEN
+METIS_TAC []);
+
 val nlrecgImpg' = store_thm
 ("nlrecgImpg'",
 ``left2Right A B g g' ∧ rule A rhs ∈ nonLeftRecRules (rules g) A
@@ -1907,6 +1934,182 @@ THENL[
       SRW_TAC [][] THEN
       METIS_TAC [ldgImpg']
       ]);
+
+
+val g'ImpgSing = store_thm
+("g'ImpgSing",
+``left2Right A B g g' ∧
+rderives g' x (pfx ++ [NTS B] ++ sfx) ∧ ¬(NTS B ∈ x) ∧
+rderives g' (pfx ++ [NTS B] ++ sfx) y' ∧ isWord sfx ∧
+(LENGTH pfx + 1 + LENGTH sfx ≤ LENGTH y' ⇒ ¬isSuffix (NTS B::sfx) y') ⇒
+(derives g)^* x y'``,
+
+SRW_TAC [][rderives_def, left2Right] THEN
+`rule lhs rhs ∈ l2rRules A B (set (rules g))` by METIS_TAC [mem_in] THEN
+`rule lhs' rhs' ∈ l2rRules A B (set (rules g))` by METIS_TAC [mem_in] THEN
+FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
+FULL_SIMP_TAC (srw_ss()) [l2rRules] THEN SRW_TAC [][] THEN1
+
+METIS_TAC [slemma1_4, startSym_def, rules_def, MEM, MEM_APPEND, rgr_r9eq] THEN1
+
+METIS_TAC [slemma1_4, startSym_def, rules_def, MEM, MEM_APPEND, rgr_r9eq] THEN1
+
+METIS_TAC [slemma1_4, startSym_def, rules_def, MEM, MEM_APPEND, rgr_r9eq] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+SRW_TAC [][] THEN
+ METIS_TAC [slemma1_4, startSym_def, rules_def, MEM, MEM_APPEND, rgr_r9eq,
+	    listNtEq']) THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+SRW_TAC [][] THEN
+ METIS_TAC [slemma1_4, startSym_def, rules_def, MEM, MEM_APPEND, rgr_r9eq,
+	    listNtEq']) THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+SRW_TAC [][] THEN
+`(s1++y = pfx) ∧ (sfx=s2)` by METIS_TAC [listNtEq', APPEND_ASSOC] THEN
+SRW_TAC [][] THEN
+ `(s1'= s1++y) ∧ (lhs'=B) ∧ (s2=s2')` by METIS_TAC [listNtEq', APPEND_ASSOC] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [bprods] THEN
+SRW_TAC [][] THEN1
+(`(derives g) (s1++[NTS A]++s2) (s1 ++ [NTS A] ++ rhs' ++s2)`
+ by METIS_TAC [res1, derives_same_append_left, derives_same_append_right,
+	       APPEND, APPEND_ASSOC] THEN
+ `(derives g) (s1 ++ [NTS A] ++ rhs' ++ s2) (s1 ++ y ++ rhs' ++ s2)` 
+ by METIS_TAC [res1, derives_same_append_left, derives_same_append_right,
+	       APPEND, APPEND_ASSOC] THEN
+ METIS_TAC [RTC_RULES]) THEN
+
+ FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+ FULL_SIMP_TAC (srw_ss()) [isSuffix_def, REVERSE_APPEND, IS_PREFIX_APPEND] THEN
+ METIS_TAC [APPEND, APPEND_ASSOC]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [bprods] THEN SRW_TAC [][]);
+
+
+
+val ntdlNewgImpg = store_thm
+("ntdlNewgImpg",
+
+``left2Right A B g g' ∧ rderives g' ⊢ dl ◁ (pfx ++ [NTS B] ++ sfx) → y ∧
+isWord sfx ∧  
+(∀e. e ∈ dl ⇒ ∃pfx. e = pfx ++ [NTS B] ++ sfx) ∧
+(∀e1 e2 p s.
+ (dl = p ++ [e1; e2] ++ s) ⇒ LENGTH e2 ≥ LENGTH e1) ∧
+rderives g' x (pfx ++ [NTS B] ++ sfx) ∧
+¬MEM (NTS B) x ∧
+rderives g' y y' ∧ 
+(LENGTH y ≤ LENGTH y' ⇒ ¬isSuffix ([NTS B] ++ sfx) y') ⇒
+(derives g)^*  x  y'``,
+
+SRW_TAC [][] THEN
+IMP_RES_TAC ldBstream THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`y`,`pfx`,`[]:(α,β) symbol list`,`g'`] MP_TAC) THEN
+SRW_TAC [][] THEN
+Cases_on `LENGTH dl' > 1`
+THENL[
+      `ntderivr (NTS B) dl'` by METIS_TAC [ntderivr] THEN
+      `∃dl''. derives g ⊢ dl'' ◁ [NTS A] → ([NTS A] ++ FRONT y'')` 
+      by METIS_TAC [ntdlg'Impg] THEN
+      `LAST dl' = y''` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+      `LAST (MAP (λe. addLast e sfx) (MAP (addFront pfx) dl')) = y` by
+      FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+      `dl' ≠ []` by (Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+      `dl' = FRONT dl' ++ [y'']`by METIS_TAC [APPEND_FRONT_LAST] THEN
+      `y = LAST (MAP (λe. addLast e sfx) (MAP (addFront pfx) (FRONT dl'++[y''])))`
+      by METIS_TAC [] THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      FULL_SIMP_TAC (srw_ss()) [addFront_def,addLast_def] THEN
+      SRW_TAC [][] THEN
+      `LAST dl' ≠ []` by METIS_TAC [elemNotNilRd,MEM] THEN
+      Cases_on `LAST dl'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
+      FULL_SIMP_TAC (srw_ss()) [rderives_def] THEN
+      SRW_TAC [][] THEN
+      `rule lhs rhs ∈ l2rRules A B (set (rules g))` by METIS_TAC [mem_in,
+								  left2Right] THEN
+      FULL_SIMP_TAC (srw_ss()) [l2rRules] THEN1
+      METIS_TAC [slemma1_4, rules_def, startSym_def, rgr_r9eq,left2Right,
+		 MEM, MEM_APPEND] THEN1
+
+      (FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+      SRW_TAC [][] THEN
+      `(s1 ++ y = pfx) ∧ (sfx = s2)` by METIS_TAC [listNtEq', APPEND_ASSOC] THEN
+      SRW_TAC [][] THEN
+      `MEM (h::t) dl'` by METIS_TAC [memld] THEN
+      FULL_SIMP_TAC (srw_ss()) [ntderivr] THEN
+      `LAST (h::t) = NTS B` by METIS_TAC [] THEN
+      `rule lhs' rhs' ∈ l2rRules A B (set (rules g))` by METIS_TAC [mem_in,
+								    left2Right] THEN
+      FULL_SIMP_TAC (srw_ss()) [l2rRules] THEN
+      Q.ABBREV_TAC `l = h::t` THEN
+      `l = FRONT l ++ [NTS B]` by METIS_TAC [APPEND_FRONT_LAST, NOT_CONS_NIL] THEN
+       SRW_TAC [][] THEN1
+
+       (`(s2=s2') ∧ (B = lhs') ∧ (s1' = s1 ++ y ++ FRONT (LAST dl'))`
+       by METIS_TAC [APPEND_ASSOC, listNtEq'] THEN
+       METIS_TAC [slemma1_4, rules_def, startSym_def, rgr_r9eq,left2Right]) THEN1
+
+       (FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+	SRW_TAC [][] THEN
+	`(s2=s2') ∧ (B = lhs') ∧ (s1' = s1 ++ y ++ FRONT (LAST dl'))`
+       by METIS_TAC [APPEND_ASSOC, listNtEq'] THEN
+       SRW_TAC [][] THEN
+       FULL_SIMP_TAC (srw_ss()) [isSuffix_def, REVERSE_APPEND, IS_PREFIX_APPEND] THEN
+	`LENGTH (h::t) = LENGTH (FRONT (LAST dl') ++ [NTS B])` by METIS_TAC [] THEN
+	FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+       METIS_TAC [APPEND_ASSOC, APPEND]) THEN
+
+
+       FULL_SIMP_TAC (srw_ss()) [bprods] THEN
+       SRW_TAC [][] THEN1
+       (`(s2=s2')  ∧ (s1' = s1 ++ y ++ FRONT (LAST dl'))`
+       by METIS_TAC [APPEND_ASSOC, listNtEq'] THEN
+       SRW_TAC [][] THEN
+       `(derives g)^* [NTS A] (NTS A::FRONT (LAST dl'))`
+       by METIS_TAC [memld, rtc2list_mem, RTC_RULES] THEN
+       `(derives g)^* ([NTS A]++rhs') (NTS A::FRONT (LAST dl')++rhs')`
+       by METIS_TAC [rtc_derives_same_append_right, APPEND, APPEND_ASSOC] THEN
+       `(derives g)^* (s1++[NTS A]++rhs'++s2) 
+             (s1++NTS A::FRONT (LAST dl')++rhs'++s2)`
+       by METIS_TAC [rtc_derives_same_append_right, APPEND, APPEND_ASSOC,
+		     rtc_derives_same_append_left] THEN
+       `(derives g)^* (NTS A::FRONT (LAST dl')++rhs') (y++FRONT (LAST dl')++rhs')`
+       by METIS_TAC [derives_same_append_right, APPEND, APPEND_ASSOC,
+		     res1, RTC_RULES] THEN
+       `(derives g)^* (s1++NTS A::FRONT (LAST dl')++rhs'++s2) 
+	     (s1++y++FRONT (LAST dl')++rhs'++s2)`
+       by METIS_TAC [rtc_derives_same_append_right, APPEND, APPEND_ASSOC,
+		     res1, RTC_RULES,rtc_derives_same_append_left] THEN
+       `(derives g) (s1 ++ [NTS A] ++ s2) (s1 ++ [NTS A] ++ rhs' ++ s2)`
+       by METIS_TAC [res1, derives_same_append_right, derives_same_append_left,
+		     APPEND, APPEND_ASSOC] THEN
+       `(derives g)^* (s1 ++ [NTS A] ++ s2) 
+         (s1++ y ++ FRONT (LAST dl') ++ rhs'++s2)` by
+       METIS_TAC [RTC_RULES,APPEND, APPEND_ASSOC,
+		  RTC_RTC] THEN
+       METIS_TAC [rtc2list_exists', APPEND_ASSOC, APPEND]) THEN
+       
+       (`(s2=s2') ∧ (s1' = s1 ++ y ++ FRONT (LAST dl'))`
+       by METIS_TAC [APPEND_ASSOC, listNtEq'] THEN
+       SRW_TAC [][] THEN
+       `LENGTH (h::t) = LENGTH (FRONT (LAST dl') ++ [NTS B])` by METIS_TAC [] THEN
+       FULL_SIMP_TAC (srw_ss()) [isSuffix_def, REVERSE_APPEND, IS_PREFIX_APPEND] THEN
+	FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+	METIS_TAC [APPEND_ASSOC, APPEND])) THEN
+
+       FULL_SIMP_TAC (srw_ss()) [bprods] THEN
+       SRW_TAC [][],
+
+      Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+      Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+      SRW_TAC [][] THEN
+      FULL_SIMP_TAC (srw_ss()) [addFront_def, addLast_def] THEN
+      SRW_TAC [][] THEN
+      METIS_TAC [g'ImpgSing]]);
+
+
 
 
 val ldNumNtAppEq = store_thm
@@ -2004,6 +2207,7 @@ THENL[
 							   APPEND_ASSOC] THEN
       `∃sfx.HD dl2 = pfx++[NTS A]++sfx` by METIS_TAC [MEM,CONS,NULL_EQ_NIL] THEN
       `dl3 = HD dl3::TL dl3` by METIS_TAC [CONS,NULL_EQ_NIL] THEN
+
       `lderives g (LAST dl2) (HD dl3)` by METIS_TAC [ldMemRel',APPEND_FRONT_LAST,
 						     APPEND_ASSOC,APPEND] THEN
       `∃dl''. derives g' ⊢ dl'' ◁ pfx ++ [NTS A] ++ sfx → HD dl3`
@@ -2481,10 +2685,187 @@ Cases_on `rdNumNt (NTS B) (h'::h''::t') = 0` THEN1
        ]);
 
 
+
+val dlNotMemB = store_thm
+("dlNotMemB",
+``∀dl x y. 
+left2Right A B g g' ∧ (rderives g') ⊢ dl ◁ x → y ∧ ¬MEM (NTS B) x ∧
+(rdNumNt (NTS B) dl = 0) ⇒
+¬MEM (NTS B) y``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+ (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+  SRW_TAC [][]) THEN
+IMP_RES_TAC listDerivHdBrk THEN
+`h = x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+`rdNumNt (NTS B) (h'::t) =0` by METIS_TAC [rdNumNtApp, APPEND, APPEND_ASSOC] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`h'`,`y`] MP_TAC) THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [rderives_def] THEN
+SRW_TAC [][] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [left2Right] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+
+`rule lhs rhs ∈ l2rRules A B (set (rules g))` by METIS_TAC [mem_in] THEN
+FULL_SIMP_TAC (srw_ss()) [l2rRules] THEN1
+
+METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+ SRW_TAC [][] THEN
+ `rdNumNt (NTS B) [s1++y'++[NTS B]++s2] = 0` by METIS_TAC [rdNumNtApp, APPEND,
+							   APPEND_ASSOC] THEN
+ METIS_TAC [rnnSing, APPEND, APPEND_ASSOC]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [bprods] THEN
+METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def] THEN
+
+FULL_SIMP_TAC (srw_ss()) []);
+
+
+
+val dlNotMemBrdNum = store_thm
+("dlNotMemBrdNum",
+``∀dl x. 
+left2Right A B g g' ∧ (rderives g') ⊢ dl ◁ x → y ∧ 
+(LENGTH (FILTER (\e.e=NTS B) x) = 1) ∧
+rightntm (NTS B) x ∧
+(∀e. e ∈ dl ⇒ ∃pfx. e = pfx ++ [NTS B] ++ sfx) ∧
+rderives g' y z ∧ isWord sfx ∧ 
+(LENGTH y ≤ LENGTH z ⇒ ¬isSuffix ([NTS B] ++ sfx) z) ⇒
+¬MEM (NTS B) z``,
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+
+ (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [rderives_def] THEN
+SRW_TAC [][] THEN
+`(s1 = pfx) ∧(lhs = B) ∧ (s2=sfx)` by METIS_TAC [listNtEq'] THEN
+SRW_TAC [][] THEN1
+(SPOSE_NOT_THEN ASSUME_TAC THEN
+ FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+ SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND] THEN
+ DECIDE_TAC) THEN1
+(FULL_SIMP_TAC (srw_ss()) [left2Right] THEN
+`rule B rhs ∈ l2rRules A B (set (rules g))` by METIS_TAC [mem_in] THEN
+FULL_SIMP_TAC (srw_ss()) [l2rRules] THEN1
+METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def, left2Right] THEN1
+(FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+ METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def, left2Right]) THEN
+FULL_SIMP_TAC (srw_ss()) [bprods] THEN1
+METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def, APPEND,
+	   APPEND_ASSOC] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+FULL_SIMP_TAC (srw_ss()) [isSuffix_def, REVERSE_APPEND, IS_PREFIX_APPEND] THEN
+METIS_TAC [APPEND, APPEND_ASSOC]) THEN
+
+SPOSE_NOT_THEN ASSUME_TAC THEN
+ FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+ SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND] THEN
+ DECIDE_TAC) THEN
+
+IMP_RES_TAC listDerivHdBrk THEN
+`h = x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [rightntm] THEN
+SRW_TAC [][] THEN
+`sfx = sfx'` by METIS_TAC [listNtEq'] THEN
+SRW_TAC [][] THEN
+
+`LENGTH (FILTER (λe. e = NTS B) h') = 1` by
+
+(`∃pfx. h' = pfx ++ [NTS B] ++ sfx` by METIS_TAC [MEM] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [rderives_def] THEN
+SRW_TAC [][] THEN
+`(s1' = pfx) ∧(lhs'=B) ∧(s2'=sfx)` by METIS_TAC [listNtEq'] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND] THEN
+`(LENGTH (FILTER (λe. e = NTS B) pfx) = 0) ∧
+(LENGTH (FILTER (λe. e = NTS B) s2') = 0)`  by DECIDE_TAC THEN
+
+`¬(MEM (NTS B) s2)` by
+(SPOSE_NOT_THEN ASSUME_TAC THEN FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+ SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [left2Right] THEN
+`rule B rhs' ∈ l2rRules A B (set (rules g))` by METIS_TAC [mem_in] THEN
+FULL_SIMP_TAC (srw_ss()) [l2rRules] THEN1
+METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def, left2Right] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+ SRW_TAC [][] THEN
+ METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def, left2Right]) THEN
+
+
+FULL_SIMP_TAC (srw_ss()) [bprods] THEN1
+(Cases_on `rhs'=[]`THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+(SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND]) THEN
+`rhs' = FRONT rhs' ++ [LAST rhs']` by METIS_TAC [APPEND_FRONT_LAST] THEN
+SRW_TAC [][] THEN
+`pfx' = pfx ++ FRONT rhs'` by METIS_TAC [lastElemEq, APPEND_ASSOC,
+					 APPEND_11] THEN
+SRW_TAC [][] THEN
+`(¬MEM (NTS B) rhs')` by  
+ METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def, left2Right,
+	    APPEND, APPEND_ASSOC] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND, filter_l2] THEN
+METIS_TAC [MEM, MEM_APPEND]) THEN
+
+SRW_TAC [][] THEN
+` pfx ++ a  = pfx'` by METIS_TAC [lastElemEq, APPEND_ASSOC, APPEND_11] THEN
+SRW_TAC [][] THEN
+`(¬MEM (NTS B) a)` by  
+ METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def, left2Right,
+	    APPEND, APPEND_ASSOC] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND, filter_l2] THEN
+METIS_TAC [MEM, MEM_APPEND]) THEN
+METIS_TAC []);
+
+val rdFilterLen = store_thm
+("rdFilterLen",
+``left2Right A B g g' ∧ rderives g' x y ∧ ¬MEM (NTS B) x ∧
+MEM (NTS B) y ⇒
+ (LENGTH (FILTER (\e.e=NTS B) y) = 1)``,
+
+SRW_TAC [][rderives_def, left2Right] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND] THEN
+`LENGTH (FILTER (λe. e = NTS B) s1) = 0` by SRW_TAC [][filter_l2] THEN
+`LENGTH (FILTER (λe. e = NTS B) s2) = 0` by SRW_TAC [][filter_l2] THEN
+SRW_TAC [][] THEN
+`rule lhs rhs ∈ l2rRules A B (set (rules g))` by METIS_TAC [mem_in] THEN
+
+FULL_SIMP_TAC (srw_ss()) [l2rRules] THEN1
+
+METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [newAprods] THEN
+ SRW_TAC [][] THEN
+ `¬MEM (NTS B) y` by METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND, filter_l2]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [bprods] THEN
+METIS_TAC [slemma1_4, rgr_r9eq, rules_def, startSym_def]);
+
+
+
+
 val ldNewgImpg = store_thm
 ("ldNewgImpg",
 ``∀x y.left2Right A B g g' ∧ rderives g' ⊢ dl ◁ x → y ∧ 
- ¬MEM (NTS B) x ∧ isWord y 
+ ¬MEM (NTS B) x ∧ ¬MEM (NTS B) y
  ⇒
  ∃dl'.derives g ⊢ dl' ◁ x → y``,
 
@@ -2542,9 +2923,46 @@ THENL[
       `dl3 = HD dl3::TL dl3` by METIS_TAC [CONS,NULL_EQ_NIL] THEN
       `rderives g' (LAST dl2) (HD dl3)` by METIS_TAC [ldMemRel',APPEND_FRONT_LAST,
 						      APPEND_ASSOC,APPEND] THEN
-      `LAST dl' = y` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-      `HD dl' = HD dl3` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-      MAGIC,
+
+      `dl1 ≠ []` by
+      (Cases_on `dl1` THEN Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+       SRW_TAC [][] THEN
+       METIS_TAC [listderiv_def, MEM, MEM_APPEND, HD]) THEN
+      `rderives g' ⊢ dl1 ◁ HD dl1 → LAST dl1`
+      by METIS_TAC [ldsubderivs,APPEND_ASSOC] THEN
+      `HD dl1 = x` by (Cases_on `dl1` THEN
+		       FULL_SIMP_TAC (srw_ss()) [listderiv_def]) THEN
+      SRW_TAC [][] THEN
+      `¬MEM (NTS B) (LAST dl1)` by METIS_TAC [dlNotMemB] THEN
+      `dl2 = HD dl2::TL dl2` by METIS_TAC [CONS,NULL_EQ_NIL] THEN
+      `rderives g' (LAST dl1) (HD dl2)` by METIS_TAC [ldMemRel',APPEND,
+						     APPEND_FRONT_LAST,
+						     APPEND_ASSOC] THEN
+      `(LENGTH (FILTER (\e.e=NTS B) (HD dl2)) = 1)` 
+      by METIS_TAC [rdFilterLen,MEM, MEM_APPEND] THEN
+
+      `rderives g' ⊢ dl2 ◁ HD dl2 → LAST dl2`
+      by METIS_TAC [ldsubderivs,APPEND_ASSOC] THEN
+      `dl3 ≠ []`
+      by (SRW_TAC [][] THEN
+	  SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
+	  FULL_SIMP_TAC (srw_ss()) [] THEN
+	  `LAST dl2 = y` by METIS_TAC [listderiv_def,APPEND_FRONT_LAST,APPEND_ASSOC,
+				       lastElemEq,last_append] THEN
+	  `∃sfx.y = pfx++[NTS A]++sfx`by METIS_TAC [MEM_APPEND,MEM,
+						    APPEND_FRONT_LAST] THEN
+	  SRW_TAC [][] THEN
+	  FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
+      `rderives g' (LAST dl2) (HD dl3)` by METIS_TAC [ldMemRel',APPEND_FRONT_LAST,
+						      APPEND_ASSOC,APPEND] THEN
+      `MEM (HD dl2) dl2` by METIS_TAC [memld] THEN
+      `rightntm (NTS B) (HD dl2)` by METIS_TAC [rightntm] THEN           
+      `¬(NTS B ∈ (HD dl3))` by METIS_TAC [dlNotMemBrdNum, NOT_CONS_NIL] THEN
+      `derives g ⊢ dl1 ◁ HD dl1 → LAST dl1` by METIS_TAC [blkNilNewgImpg] THEN
+      `∃dl'. derives g ⊢ dl' ◁ HD dl3 → y` by METIS_TAC [] THEN
+      `(derives g)^* (LAST dl1) (HD dl3)` by METIS_TAC [ntdlNewgImpg] THEN
+      IMP_RES_TAC rtc2list_exists' THEN
+      METIS_TAC [listderivTrans],
 
       Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
       Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
@@ -2571,6 +2989,11 @@ THENL[
       `¬(((NTS B):(α,β) symbol) ∈ [NTS (startSym g')])` by 
       (FULL_SIMP_TAC (srw_ss()) [left2Right] THEN
        METIS_TAC [slemma1_4]) THEN
+      `¬(((NTS B):(α,β) symbol) ∈ x)` by 
+	 (SPOSE_NOT_THEN ASSUME_TAC THEN
+	  FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+	  SRW_TAC [][] THEN
+	  FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
       IMP_RES_TAC rtc2list_exists' THEN
       `∃dl. derives g ⊢ dl ◁ [NTS (startSym g')] → x` 
       by METIS_TAC [ldNewgImpg] THEN

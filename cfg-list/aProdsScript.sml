@@ -692,7 +692,7 @@ val finiteaProdsRules = store_thm
 ("finiteaProdsRules",
 ``∀ru. FINITE ru ⇒ FINITE (aProdsRules A l ru)``,
 
-SRW_TAC[][aProdsRules_def] THEN
+SRW_TAC[][aProdsRules] THEN
 Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
 Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of 
                         rule N rhs -> if N ≠ A then {}
@@ -742,7 +742,7 @@ val aProdsRulesAllEq = store_thm
 ``(aProdsRules  ntk [se]  (set ru0) =
    aProdAllRules ntk se NULL (set ru0))``,
 
-SRW_TAC [][aProdAllRules_def, aProdsRules_def] THEN
+SRW_TAC [][aProdAllRules, aProdsRules] THEN
 FULL_SIMP_TAC (srw_ss()) [EXTENSION, NULL_EQ_NIL]);
 
 val finiteaProdAllRules = store_thm
@@ -751,7 +751,7 @@ val finiteaProdAllRules = store_thm
 
 SRW_TAC [][] THEN
 `aProdAllRules A B NULL ru = aProdsRules A [B] ru` 
- by (SRW_TAC [][aProdAllRules_def, aProdsRules_def] THEN
+ by (SRW_TAC [][aProdAllRules, aProdsRules] THEN
      FULL_SIMP_TAC (srw_ss()) [EXTENSION, NULL_EQ_NIL]) THEN
 METIS_TAC [finiteaProdsRules, FINITE_LIST_TO_SET]);
 

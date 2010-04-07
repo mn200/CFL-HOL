@@ -26,7 +26,9 @@ val negrImpnoeProds = store_thm
 
 SRW_TAC [][noeProds, negr_def] THEN
 SPOSE_NOT_THEN ASSUME_TAC THEN
-FULL_SIMP_TAC (srw_ss()) [munge_def]);
+FULL_SIMP_TAC (srw_ss()) [munge_def, EXTENSION] THEN
+RES_TAC THEN
+FULL_SIMP_TAC (srw_ss()) []);
 
 
 val upgrImpnoUnitProds = store_thm
@@ -34,7 +36,7 @@ val upgrImpnoUnitProds = store_thm
 ``upgr g g' ⇒ noUnitProds (rules g')``,
 
 SRW_TAC [][noUnitProds, upgr_def, upgr_rules_def, nonUnitProds_def,
-	   nonUnitProds_def, newProds_def, unitProds_def]);
+	   nonUnitProds_def, newProds_def, unitProds_def, EXTENSION]);
 
 
 val upgr_noeProds = store_thm
@@ -42,7 +44,7 @@ val upgr_noeProds = store_thm
 ``noeProds (rules g) ⇒ upgr g g' ⇒ noeProds (rules g')``,
 
 SRW_TAC [][upgr_def, noeProds, upgr_rules_def, newProds_def, nonUnitProds_def,
-	   unitProds_def]);
+	   unitProds_def, EXTENSION]);
 
 
 (* Chomsky Normal Form *)

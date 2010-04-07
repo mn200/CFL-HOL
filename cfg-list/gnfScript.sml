@@ -2493,7 +2493,8 @@ val ugImpcnf = store_thm
  ``usefulnts g0 g1 ∧ isCnf g0 ⇒ isCnf g1``,
 
 Cases_on `g0` THEN
-SRW_TAC [][usefulnts_def, startSym_def, rules_def] THEN
+SRW_TAC [][usefulnts_def, startSym_def, rules_def, usefulntsRules_def,
+	   EXTENSION] THEN
 FULL_SIMP_TAC (srw_ss()) [isCnf_def, rules_def] THEN
 SRW_TAC [][] THEN
 METIS_TAC []);

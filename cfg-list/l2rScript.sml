@@ -49,7 +49,7 @@ val left2Right = Define
    (set (rules g') = l2rRules A B (set (rules g)))`;
 
 val finitel2rRules = store_thm
-("finitel2rRulese",
+("finitel2rRules",
 ``∀ru. FINITE ru ⇒ FINITE (l2rRules A B ru)``,
 
 SRW_TAC [][l2rRules] THEN

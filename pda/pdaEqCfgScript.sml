@@ -4,7 +4,7 @@ open pred_setTheory stringTheory containerTheory relationTheory
 listTheory rich_listTheory optionTheory markerTheory
 
 open listLemmasTheory relationLemmasTheory
-     grammarDefTheory pdaDefTheory symbolDefTheory
+     grammarDefTheory pdaDefTheory symbolDefTheory gnfTheory
 
 val _ = new_theory "pdaEqCfg"
 
@@ -18,11 +18,6 @@ Theorem 5.3 If L is a CFL, then there exists a PDA M such that
 L=N(M), empty stack acceptance.
 *)
 
-
-val validGnfProd = Define `validGnfProd (rule l r) = 
-    ∃ts ntsl.(r = ts::ntsl) ∧ isTmnlSym ts ∧ EVERY isNonTmnlSym ntsl`;
-
-val isGnf = Define `isGnf g = EVERY validGnfProd (rules g)`;
 
 
 val trans = Define
@@ -108,7 +103,7 @@ val transMemRule = store_thm
      ⇒ 
     ∃nts.(h'=NTS nts) ∧ ∃ts.(h=TS ts) ∧ EVERY isNonTmnlSym sl ∧
 			(MEM (rule nts (h::sl)) (rules g))``,
-Cases_on `g` THEN SRW_TAC [][rules_def, isGnf, grammar2pda, LET_THM] THEN
+Cases_on `g` THEN SRW_TAC [][rules_def, isGnf_def, grammar2pda, LET_THM] THEN
 METIS_TAC [transMemList]);
 
 val idcImpEvTmnl = store_thm
@@ -169,7 +164,7 @@ THENL[
 			`q'=q` by METIS_TAC [transStateEq] THEN
 			SRW_TAC [][] THEN
 			Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def, 
-								    isGnf] THEN
+								    isGnf_def] THEN
 			`∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧ 
 			EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`  
 			by METIS_TAC [transMemList] THEN
@@ -329,7 +324,7 @@ THENL[
 			`q'=q` by METIS_TAC [transStateEq] THEN
 			SRW_TAC [][] THEN
 			Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def, 
-								    isGnf] THEN
+								    isGnf_def] THEN
 			`∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧ 
 			EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`  
 			by METIS_TAC [transMemList] THEN
@@ -354,7 +349,7 @@ THENL[
 			`q'=q` by METIS_TAC [transStateEq] THEN
 			SRW_TAC [][] THEN
 			Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def, 
-								    isGnf] THEN
+								    isGnf_def] THEN
 			`∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧ 
 			EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`  
 			by METIS_TAC [transMemList] THEN
@@ -418,7 +413,7 @@ THENL[
       EVERY isNonTmnlSym s` by METIS_TAC [] THEN
       FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
       SRW_TAC [][] THEN
-      Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [isGnf, rules_def] THEN
+      Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [isGnf_def, rules_def] THEN
       `validGnfProd (rule lhs rhs)`by METIS_TAC [EVERY_APPEND, EVERY_DEF,
 						 rgr_r9eq] THEN
       FULL_SIMP_TAC (srw_ss()) [validGnfProd] THEN
@@ -508,7 +503,7 @@ THENL[
        FIRST_X_ASSUM (Q.SPECL_THEN [`[]`, `[NTS (startSym g)]`] MP_TAC) THEN
        SRW_TAC [][] THEN
        FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
-       FULL_SIMP_TAC (srw_ss()) [lderives_def, lreseq, isGnf] THEN
+       FULL_SIMP_TAC (srw_ss()) [lderives_def, lreseq, isGnf_def] THEN
        SRW_TAC [][] THEN
        `validGnfProd (rule (startSym g) (x' ++ y))` 
        by METIS_TAC [rgr_r9eq, EVERY_APPEND, EVERY_DEF] THEN
@@ -552,7 +547,7 @@ THENL[
 	     by METIS_TAC [rtc2list_distrib_append_snd, APPEND, APPEND_ASSOC,
 			   NOT_CONS_NIL] THEN
 	     FULL_SIMP_TAC (srw_ss()) [rtc2list_def, lderives_def] THEN
-	     Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [isGnf, rules_def, 
+	     Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [isGnf_def, rules_def, 
 							 startSym_def] THEN
 	     `validGnfProd (rule lhs rhs)` by METIS_TAC [rgr_r9eq, EVERY_APPEND,
 							 EVERY_DEF] THEN
@@ -604,7 +599,7 @@ THENL[
 			 by METIS_TAC [rtc2listRtcHdLast, NOT_CONS_NIL, HD,
 				       LAST_APPEND, LAST, NOT_CONS_NIL, APPEND] THEN
 			 METIS_TAC [gnfNotLastTmns, EVERY_APPEND, EVERY_DEF,
-				    sym_r1b, isGnf, APPEND, APPEND_ASSOC,rules_def],
+				    sym_r1b, isGnf_def, APPEND, APPEND_ASSOC,rules_def],
 
 			 FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `[NTS lhs]++s2`] 
 					MP_TAC) THEN

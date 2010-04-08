@@ -5,7 +5,7 @@ listTheory rich_listTheory optionTheory arithmeticTheory
 
 
 open listLemmasTheory relationLemmasTheory grammarDefTheory
-     arithmeticLemmasTheory symbolDefTheory
+     arithmeticLemmasTheory symbolDefTheory cnfTheory
 
 val _ = new_theory "pumpingLemma";
 
@@ -14,10 +14,6 @@ val _ = set_trace "Unicode" 1
 
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
-val isCnf = Define
-`isCnf g = ∀l r.MEM (rule l r) (rules g) ⇒
-    ((LENGTH r = 2) ∧ EVERY isNonTmnlSym r) ∨
-    ((LENGTH r = 1) ∧ EVERY isTmnlSym r)`;
 
 val cnfvwNotNil = store_thm
 ("cnfvwNotNil",
@@ -36,7 +32,7 @@ FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `(LENGTH rhs = 2) ∧ EVERY isNonTmnlSym rhs ∨
-	     (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf] THEN
+	     (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf_def] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (arith_ss) []);
 
@@ -49,7 +45,7 @@ Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
 SRW_TAC [][] THEN
 `(LENGTH rhs = 2) ∧ EVERY isNonTmnlSym rhs ∨
-	     (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf] THEN
+	     (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf_def] THEN
 SRW_TAC [][] THEN FULL_SIMP_TAC (arith_ss) []  THEN
 METIS_TAC [LENGTH_NIL, DECIDE ``0 ≠ 2``, DECIDE ``0 ≠ 1``]);
 
@@ -65,7 +61,7 @@ Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
 SRW_TAC [][] THEN
  `(LENGTH rhs = 2) ∧ EVERY isNonTmnlSym rhs ∨
- (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf]
+ (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf_def]
  THENL[
        METIS_TAC [LENGTH_NIL, DECIDE ``0 ≠ 2``, DECIDE ``0 ≠ 1``],
        METIS_TAC [LENGTH_NIL, DECIDE ``0 ≠ 2``, DECIDE ``0 ≠ 1``],
@@ -130,7 +126,7 @@ FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 SRW_TAC [][]
 THENL[
-      FULL_SIMP_TAC (srw_ss()) [lderives_def, isCnf] THEN
+      FULL_SIMP_TAC (srw_ss()) [lderives_def, isCnf_def] THEN
       SRW_TAC [][] THEN
       RES_TAC
       THENL[
@@ -178,7 +174,7 @@ METIS_TAC []
        FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
        SRW_TAC [][] THEN
        `(LENGTH rhs = 2) ∧ EVERY isNonTmnlSym rhs ∨
-       (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf] THEN
+       (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf_def] THEN
        `(s1=x1) ∧(x2=[NTS lhs]++s2)`by METIS_TAC [symListDiv] THEN
        FULL_SIMP_TAC (srw_ss()) [] THEN
        SRW_TAC [][] THEN
@@ -189,7 +185,7 @@ METIS_TAC []
        FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
        SRW_TAC [][] THEN
        `(LENGTH rhs = 2) ∧ EVERY isNonTmnlSym rhs ∨
-       (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf] THEN
+       (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf_def] THEN
        `(s1=x1) ∧(x2=[NTS lhs]++s2)`by METIS_TAC [symListDiv] THEN
        FULL_SIMP_TAC (srw_ss()) [] THEN
        SRW_TAC [][] THEN
@@ -199,7 +195,7 @@ METIS_TAC []
        FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
        SRW_TAC [][] THEN
        `(LENGTH rhs = 2) ∧ EVERY isNonTmnlSym rhs ∨
-       (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf]
+       (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs` by METIS_TAC [isCnf_def]
        THENL[
 	     `(s1=x1) ∧(x2=[NTS lhs]++s2)`by METIS_TAC [symListDiv] THEN
 	     FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -550,7 +546,7 @@ SRW_TAC [][] THEN
 `¬symRepProp ((s1++rhs++s2)::t')` by METIS_TAC [spropApp,TL,NOT_CONS_NIL] THEN
 `(LENGTH rhs = 2) ∧ EVERY isNonTmnlSym rhs ∨
     (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs`
-by METIS_TAC [isCnf]
+by METIS_TAC [isCnf_def]
 THENL[
       `x++y = (s1 ++ [NTS lhs] ++ s2)`
       by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
@@ -1327,7 +1323,7 @@ SRW_TAC [][] THEN
  by METIS_TAC [listDerivHdBrk,listderiv_def,HD] THEN
 FULL_SIMP_TAC (srw_ss()) [lderives_def,lreseq] THEN
  `(LENGTH h' = 2) ∧ EVERY isNonTmnlSym h' ∨
-    (LENGTH h' = 1) ∧ EVERY isTmnlSym h'` by METIS_TAC [isCnf,lderives_def,
+    (LENGTH h' = 1) ∧ EVERY isTmnlSym h'` by METIS_TAC [isCnf_def,lderives_def,
 							APPEND_NIL,lreseq]
 THENL[
 
@@ -1716,7 +1712,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
 SRW_TAC [][] THEN
 `((LENGTH (v++[NTS B]++w) = 2) ∧ EVERY isNonTmnlSym (v++[NTS B]++w)) ∨
 (LENGTH (v++[NTS B]++w) = 1) ∧ EVERY isTmnlSym (v++[NTS B]++w)`
-by METIS_TAC [isCnf] THEN
+by METIS_TAC [isCnf_def] THEN
 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def] THEN
 (* nonTmnl rule*)
 `v=[]` by
@@ -1824,7 +1820,7 @@ SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
 `((LENGTH rhs = 2) ∧ EVERY isNonTmnlSym rhs) ∨
 (LENGTH rhs = 1) ∧ EVERY isTmnlSym rhs`
-by METIS_TAC [isCnf] THEN1
+by METIS_TAC [isCnf_def] THEN1
 (* nonTmnl rule *)
 
 (FULL_SIMP_TAC (srw_ss()) [list_lem2] THEN
@@ -2274,6 +2270,7 @@ val pumpCfg = store_thm
    ∃n. n > 0 ∧
        ∀z. z ∈ language g ∧ LENGTH z ≥ n ⇒
            ∃u v w x y.
+	     (z = u ++ v ++ w ++ x ++ y) ∧
              LENGTH v + LENGTH x ≥ 1 ∧
              LENGTH v + LENGTH w + LENGTH x ≤ n ∧
              ∀i. u++FLAT (lpow v i)++w++FLAT (lpow x i)++y ∈ language g``,

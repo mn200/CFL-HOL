@@ -56,7 +56,7 @@ METIS_TAC []);
 
 val memld = store_thm
 ("memld",
-``R ⊢ dl ◁ x ↝ y ⇒ MEM x dl ∧ MEM y dl``,
+``R ⊢ dl ◁ x → y ⇒ MEM x dl ∧ MEM y dl``,
 
 Cases_on `dl` THEN SRW_TAC [][listderiv_def] THEN
 Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN

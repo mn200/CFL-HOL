@@ -10,9 +10,11 @@ containerLemmasTheory setLemmasTheory relationLemmasTheory
 
 val _ = new_theory "grammarDef";
 
-val _ = Globals.linewidth := 60
-
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
+
+val _ = Globals.linewidth := 60
+val _ = diminish_srw_ss ["list EQ"];
 
 
 (* 14/05/07 AB *)
@@ -22,8 +24,6 @@ fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 Theory of context free grammar.
 Based on Chapter 4, Hopcroft & Ullman.
 *)
-val _ = overload_on ("IN", ``MEM``);
-
 (* e.g. S -> E * E becomes (Node S [E, *, E]) *)
 val _ = Hol_datatype
 `rule = rule of 'nts => ('nts,'ts) symbol list`;
@@ -1300,21 +1300,20 @@ FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
 SRW_TAC [][]
 THENL[
       MAP_EVERY Q.EXISTS_TAC [`dl1++[x'']`,`dl2`] THEN
-      SRW_TAC [][last_append]
+      SRW_TAC [][last_append] THEN
+      FULL_SIMP_TAC (arith_ss) []
       THENL[
 	    METIS_TAC [rtc2list_append_right],
-	    Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [],
-	    FULL_SIMP_TAC (arith_ss) []
+	    Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) []
 	    ],
 
       MAP_EVERY Q.EXISTS_TAC [`dl1`,`dl2++[y']`] THEN
-      SRW_TAC [][last_append]
+      SRW_TAC [][last_append] THEN
+      FULL_SIMP_TAC (arith_ss) []
       THENL[
 	    METIS_TAC [rtc2list_append_right],
-	    Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) [],
-	    FULL_SIMP_TAC (arith_ss) []
-	    ]
-      ]);
+	    Cases_on `dl2` THEN FULL_SIMP_TAC (srw_ss()) []
+	    ]]);
 
 
 
@@ -1358,12 +1357,13 @@ val rtc2list_isolate_NT = store_thm(
     SRW_TAC[][] THEN
     Q.EXISTS_TAC `dl' ++ [rhs2]` THEN
     SRW_TAC [][rtc2list_append_right] THEN
-      Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [],
+      Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+    FULL_SIMP_TAC (srw_ss()++ARITH_ss) [],
 
     MAP_EVERY Q.EXISTS_TAC [`pfx''`, `LAST dl'`, `sfx2`] THEN
     SRW_TAC [][] THEN Q.EXISTS_TAC `dl'` THEN
     SRW_TAC [ARITH_ss][]
-  ])
+  ]);
 
 
 val RTC_empty_nonrepeat_rule = prove(
@@ -1635,6 +1635,7 @@ val rtc2list_isolate_NT' = store_thm(
     Q.EXISTS_TAC `dl' ++ [rhs2]` THEN
     SRW_TAC [][rtc2list_append_right] THENL[
       Cases_on `dl'` THEN FULL_SIMP_TAC (srw_ss()) [],
+      DECIDE_TAC,
       `(FRONT dl ++
        [pfx'' ++ LAST dl' ++ sfx''; pfx'' ++ rhs2 ++ sfx'']) =
       dl ++ [pfx'' ++ rhs2 ++ sfx'']`
@@ -1651,7 +1652,6 @@ val rtc2list_isolate_NT' = store_thm(
 	by METIS_TAC [APPEND_FRONT_LAST,APPEND] THEN
     METIS_TAC [derivSubsetAppend,APPEND_NIL]
   ])
-
 
 val no_repeats' = prove(
   ``derives g ⊢ d0 ◁ [NTS N] → [] ⇒

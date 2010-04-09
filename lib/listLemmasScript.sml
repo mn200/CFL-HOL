@@ -13,6 +13,8 @@ fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 (* 14/05/07 AB *)
 val _ = Globals.linewidth := 60
+val _ = diminish_srw_ss ["list EQ"];
+val _ = overload_on ("IN", ``MEM``);
 
 
 val list_l1 = store_thm ("list_l1",
@@ -1419,7 +1421,7 @@ METIS_TAC [REVERSE_REVERSE, BUTFIRSTN_LENGTH_APPEND, LENGTH_REVERSE,
 
 val allDLenDel = store_thm
 ("allDLenDel",
-``∀l. ALL_DISTINCT l ∧ h ∈ l ⇒ (SUC (LENGTH (delete h l)) = LENGTH l)``,
+``∀l. ALL_DISTINCT l ∧ MEM h l ⇒ (SUC (LENGTH (delete h l)) = LENGTH l)``,
 
 Induct_on `l` THEN SRW_TAC [][delete] THEN
 METIS_TAC [notMem_delete_len]);
@@ -1525,6 +1527,34 @@ val rmDupesImpAllD = store_thm
 
 Induct_on `l` THEN SRW_TAC [][rmDupes, ALL_DISTINCT] THEN
 METIS_TAC [rmd_del, not_mem_delete, deleteAllD]);
+
+
+val allDistinctNewlist = store_thm
+("allDistinctNewlist",
+``∀l:α list. 
+INFINITE (UNIV:'a set) ⇒
+∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧ (set l ∩ set l' = {})``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN1
+METIS_TAC [ALL_DISTINCT] THEN
+`∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧
+ (set l ∩ set l' = {})` by METIS_TAC [] THEN
+`FINITE (set (h::l ++ l'))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+IMP_RES_TAC NOT_IN_FINITE THEN
+`FINITE (set (x::h::l++l'))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+`∃x'.x' ∉ set (x::h::l ++ l')` by METIS_TAC [NOT_IN_FINITE] THEN
+Q.EXISTS_TAC `x'::x::delete h l'` THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss())[] THEN1
+
+(IMP_RES_TAC allDLenDel THEN
+Cases_on `h ∈ l'`  THEN1
+(RES_TAC THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+`LENGTH (delete h l') = LENGTH l'` by METIS_TAC [notMem_delete_len] THEN
+FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+
+FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+METIS_TAC [memdel, alld_delete, not_mem_delete]);
 
 
 (*val _ =

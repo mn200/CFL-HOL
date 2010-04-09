@@ -4,10 +4,11 @@ open pred_setTheory listLemmasTheory;
 
 val _ = new_theory "symbolDef";
 
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 val _ = Globals.linewidth := 60
+val _ = diminish_srw_ss ["list EQ"];
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 val _ = Hol_datatype `symbol = NTS of 'nts | TS of 'ts`;
 
@@ -200,12 +201,14 @@ val (star_rules, star_ind, star_cases) = Hol_reln
 (* Language denoted by a rexp *)
 (* lang :: a rexp => a list set *)
 (* Includes nonterms as well *)
+(*
 val lang_def = Define
 `(lang EmptyLang = {}) ∧
 (lang (Atom tmnl) = {[symToStr tmnl]}) ∧
 (lang (Union r s) = lang r UNION lang s) ∧
 (lang (Conc r s) = conc (lang r) (lang s)) ∧
 (lang (Star r) = star (lang r))`;
+*)
 
 
 val listCompLens = store_thm ("listCompLens",

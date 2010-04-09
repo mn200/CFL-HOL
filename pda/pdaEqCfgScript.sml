@@ -8,10 +8,11 @@ open listLemmasTheory relationLemmasTheory
 
 val _ = new_theory "pdaEqCfg"
 
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
-
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+val _ = diminish_srw_ss ["list EQ"];
 
 (*
 Theorem 5.3 If L is a CFL, then there exists a PDA M such that
@@ -89,7 +90,7 @@ val transMemList = store_thm
 Induct_on `l` THEN SRW_TAC [][] 
 THENL[
       Cases_on `h''` THEN Cases_on `l'` THEN
-      FULL_SIMP_TAC (srw_ss()) [trans, validGnfProd] THEN
+      FULL_SIMP_TAC (srw_ss()) [trans, validGnfProd_def] THEN
       SRW_TAC [][] THEN
       METIS_TAC [isTmnlSym_def],
 
@@ -416,7 +417,7 @@ THENL[
       Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [isGnf_def, rules_def] THEN
       `validGnfProd (rule lhs rhs)`by METIS_TAC [EVERY_APPEND, EVERY_DEF,
 						 rgr_r9eq] THEN
-      FULL_SIMP_TAC (srw_ss()) [validGnfProd] THEN
+      FULL_SIMP_TAC (srw_ss()) [validGnfProd_def] THEN
       SRW_TAC [][] THEN
       `MEM (NTS nts) (s1 ++ ts::ntsl ++ s2)` by METIS_TAC [MEM_APPEND, MEM] THEN
       FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
@@ -507,7 +508,7 @@ THENL[
        SRW_TAC [][] THEN
        `validGnfProd (rule (startSym g) (x' ++ y))` 
        by METIS_TAC [rgr_r9eq, EVERY_APPEND, EVERY_DEF] THEN
-       FULL_SIMP_TAC (srw_ss()) [validGnfProd] THEN
+       FULL_SIMP_TAC (srw_ss()) [validGnfProd_def] THEN
        SRW_TAC [] [] THEN
        Q_TAC SUFF_TAC `ID (grammar2pda g q) (q,x',[NTS (startSym g)]) (q,[],y)` THEN1
        METIS_TAC [RTC_RULES] THEN
@@ -551,7 +552,7 @@ THENL[
 							 startSym_def] THEN
 	     `validGnfProd (rule lhs rhs)` by METIS_TAC [rgr_r9eq, EVERY_APPEND,
 							 EVERY_DEF] THEN
-	     FULL_SIMP_TAC (srw_ss()) [validGnfProd] THEN
+	     FULL_SIMP_TAC (srw_ss()) [validGnfProd_def] THEN
 	     SRW_TAC [][] THEN
 	     `s1 ++ ts::ntsl ++ s2 = s1++[ts]++(ntsl++s2)` by METIS_TAC [APPEND, 
 							    APPEND_ASSOC] THEN

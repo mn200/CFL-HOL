@@ -10,10 +10,11 @@ open containerLemmasTheory
 
 val _ = new_theory "l2r";
 
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
-
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+val _ = diminish_srw_ss ["list EQ"];
 
 (* Lemma 4.4 *)
 

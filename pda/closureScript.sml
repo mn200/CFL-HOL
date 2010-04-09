@@ -8,10 +8,12 @@ open listLemmasTheory relationLemmasTheory
 
 val _ = new_theory "closure"
 
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
+
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
-
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+val _ = diminish_srw_ss ["list EQ"];
 
 
 (* Disjoint *)
@@ -1746,11 +1748,6 @@ METIS_TAC [res1, derives_same_append_left, derives_same_append_right,
  FULL_SIMP_TAC (srw_ss()) [lreseq] THEN
  METIS_TAC [slemma1_4]));
 
-
-val (star_rules, star_ind, star_cases) = Hol_reln
-`(star A []) ∧   
-(∀s. s ∈ A ⇒ star A s) ∧  
-(∀s1 s2. s1 ∈ A ∧ (star A s2) ⇒ star A (s1 ++ s2))`;
 
 
 val starImpgrcl = store_thm

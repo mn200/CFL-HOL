@@ -11,10 +11,11 @@ open containerLemmasTheory cnfTheory eProdsTheory generatingGrammarTheory
 
 val _ = new_theory "gnf";
 
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
-
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+val _ = diminish_srw_ss ["list EQ"];
 
 
 val exists_triple = store_thm

@@ -9,9 +9,11 @@ open listLemmasTheory containerLemmasTheory relationLemmasTheory
 
 val _ = new_theory "pdaDef"
 
-val _ = Globals.linewidth := 60
-
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
+
+val _ = Globals.linewidth := 60
+val _ = diminish_srw_ss ["list EQ"];
 
 
 val SUBSET_FINITE' =
@@ -146,7 +148,7 @@ val stkSyms_list_eqresult = store_thm(
 
 
 val states = Define
-`states p = {p.start:'state} UNION set p.final UNION
+`states p = {p.start} UNION set p.final UNION
              { q | ?out isym ssym.
                       MEM ((isym,ssym,q),out) p.next }
 	     UNION
@@ -160,8 +162,6 @@ val statesList' = Define
 
 val statesList = Define
 `statesList p = p.start:'state::p.final ++ statesList' p.next`;
-
-val _ = overload_on ("states",``\m.statesList m``);
 
 
 val pdastk = Define `pdastk (state,inp,stk) = stk`;
@@ -1512,10 +1512,13 @@ THENL[
        `(FRONT ((q,i,s)::(t ++ [x]))) = ((q,i,s)::t)`
        by METIS_TAC [APPEND,APPEND_ASSOC,frontAppendFst] THEN
        `(∀qx ix sx.
+               MEM (qx,ix,sx) (((q,i,s)::t)) ⇒
+               LENGTH s ≤ LENGTH sx)` by (FULL_SIMP_TAC (srw_ss()) [] THEN
+					  METIS_TAC []) THEN
+       `(∀qx ix sx.
                MEM (qx,ix,sx) (FRONT ((q,i,s)::t)) ⇒
-               LENGTH s ≤ LENGTH sx)` by METIS_TAC [APPEND_FRONT_LAST,MEM,
-						    frontAppendFst,APPEND,
-						    APPEND_ASSOC,
+               LENGTH s ≤ LENGTH sx)` by METIS_TAC [APPEND_FRONT_LAST,
+						    frontAppendFst,NOT_CONS_NIL,
 						    MEM_APPEND] THEN
        `(s = []) ∨ ∃p. r' = p ++ TL s` by METIS_TAC [] THEN
        SRW_TAC [][] THEN
@@ -1711,9 +1714,12 @@ val lem1 = store_thm
  `ID p (q',q'',r') (q0,i0,s0)` by
 (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
  SRW_TAC [][] THEN
+`rtc2list (ID p) (FRONT ((q,inp,stk)::t) ++ [(q0,i0,s0)])`
+		  by METIS_TAC [NOT_CONS_NIL] THEN
+`(FRONT ((q,inp,stk)::t)) ≠ []` by SRW_TAC [][] THEN
  `rtc2list (ID p) (FRONT (FRONT ((q,inp,stk)::t)) ++
 		   [(q',q'',s0' ++ stk1)] ++ [(q0,i0,s0)])`
- by METIS_TAC [APPEND,APPEND_FRONT_LAST,NOT_CONS_NIL] THEN
+ by METIS_TAC [APPEND_ASSOC,APPEND_FRONT_LAST,NOT_CONS_NIL,APPEND] THEN
  `rtc2list (ID p) ([(q',q'',s0' ++ stk1)] ++ [(q0,i0,s0)])`
  by METIS_TAC [rtc2list_distrib_append_snd,MEM,MEM_APPEND,APPEND_ASSOC] THEN
  FULL_SIMP_TAC (srw_ss()) []) THEN

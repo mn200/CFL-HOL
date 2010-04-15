@@ -9,8 +9,6 @@ open listLemmasTheory relationLemmasTheory grammarDefTheory
 
 val _ = new_theory "pumpingLemma";
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 val _ = diminish_srw_ss ["list EQ"];

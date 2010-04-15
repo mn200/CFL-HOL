@@ -10,8 +10,6 @@ val _ = new_theory "eProds";
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
 val nullable = Define `nullable g sl = RTC (derives g) sl []`;
 
 val munge0 = Define `

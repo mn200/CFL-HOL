@@ -11,7 +11,6 @@ val _ = new_theory "parseTree";
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 val _ = Hol_datatype 
 `ptree = Leaf of 'ts | Node of 'nts => ptree list`;
@@ -40,12 +39,22 @@ val ptheight_def = Define`  (ptheight (Leaf tmnl) = 0) ∧
 (ptheightl (h::t) = ptheight h + ptheightl t) `;
 val _ = export_rewrites ["ptheight_def"];
 
+val root = Define
+`(root (Leaf tm) = TS tm) ∧
+ (root (Node x ptl) =  NTS x)`;
+
+val fringe_defn = Hol_defn "fringe_defn"
+    `(fringe (Leaf tm) = [tm]) ∧
+(fringe (Node x ptl) = FLAT (MAP fringe ptl))`;
+
+
+
 val ptsize_better = prove(
   ``ptsize (Node nt ptlist) = 1 + SUM (MAP ptsize ptlist)``,
   SRW_TAC [][] THEN Induct_on `ptlist` THEN
   SRW_TAC [][]);
 
-val ptheight_better = prove(
+val ptheight_better = store_thm("ptheight_better",
   ``ptheight (Node nt ptlist) = 1 + SUM (MAP ptheight ptlist)``,
   SRW_TAC [][] THEN Induct_on `ptlist` THEN
   SRW_TAC [][]);
@@ -55,6 +64,15 @@ val ptsizel_append = store_thm ("ptsizel_append",
 Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [ptsize_def] THEN
 DECIDE_TAC);
+
+val (fringe_def, fringe_ind) = tprove (fringe_defn,
+WF_REL_TAC (`measure ptsize`) THEN
+SRW_TAC [] [] THEN
+FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ptsizel_append] THEN
+DECIDE_TAC);
+
+val _ = save_thm ("fringe_def",fringe_def)
+val _ = save_thm ("fringe_ind",fringe_ind)
 
 
 val size_nonzero = prove(
@@ -80,12 +98,9 @@ val checkRules = Define `(checkRules [] rls = T) ∧
 (checkRules (h::t) rls = (MEM h rls) ∧ checkRules t rls)`;
 
 
-val ptreeNodeSym = Define 
-`(ptreeNodeSym (Node  nt tl) = NTS nt) ∧
-(ptreeNodeSym (Leaf tm) = TS tm)`;
 
 val ptreeSubtSyms = Define 
-`(ptreeSubtSyms (Node nt tl) = MAP ptreeNodeSym tl) ∧
+`(ptreeSubtSyms (Node nt tl) = MAP ptree2Sym tl) ∧
 (ptreeSubtSyms (Leaf  tm) = [])`;
 
 val ptreeSubtree = Define 
@@ -227,6 +242,32 @@ FULL_SIMP_TAC (srw_ss()) [getSyms_append] THEN
 Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [getSymbols] THEN
 Induct_on `x` THEN FULL_SIMP_TAC (srw_ss()) [getSymbols]);
 
+
+val getSymsEqRoot = store_thm
+("getSymsEqRoot",
+``∀ptl.getSymbols ptl = MAP root ptl``,
+
+Induct_on `ptl` THEN SRW_TAC [][root, getSymbols] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [root, getSymbols]);
+
+
+val sym2ptree = Define
+`(sym2ptree (TS s) = Leaf s) ∧
+ (sym2ptree (NTS n) = Node n [])`;
+
+val getSymsTmsEq = store_thm
+("getSymsTmsEq",
+``EVERY isTmnlSym x ⇒ 
+(getSymbols (MAP Leaf (MAP ts2str x)) = x)``,
+
+Induct_on `x` THEN SRW_TAC [][isTmnlSym_def, getSymbols, ts2str_def]);
+
+val fringeTmsEq = store_thm
+("fringeTmsEq",
+``EVERY isTmnlSym x ⇒ 
+(MAP TS (FLAT (MAP fringe (MAP Leaf (MAP ts2str x)))) = x)``,
+
+Induct_on `x` THEN SRW_TAC [][ts2str_def, isTmnlSym_def, fringe_def]);
 
 
 val mlDir = ref ("./theoryML/");

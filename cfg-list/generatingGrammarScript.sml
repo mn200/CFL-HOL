@@ -9,8 +9,6 @@ val _ = new_theory "generatingGrammar";
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
 val usefulntsRules = Define
 `usefulntsRules g = 
 {rule l r | MEM (rule l r) (rules g) ∧ gaw g (NTS l) ∧ EVERY (gaw g) r}`;

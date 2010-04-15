@@ -4,8 +4,6 @@ open regexpTheory grammarDefTheory listLemmasTheory
 
 val _ = new_theory "firstSetDef"
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
-
 val _ = set_trace "Unicode" 1;
 
 val _ = Globals.linewidth := 60

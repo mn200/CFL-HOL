@@ -12,11 +12,8 @@ lrGrammarDefTheory validItemInvTheory macStepTheory complDefTheory
 
 val _ = new_theory "termination"
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
 
 val _ = Globals.linewidth := 60
-
-
 
 val stepDoRedInit = store_thm ("stepDoRedInit",
 ``(auggr g st eof = SOME ag) ==>

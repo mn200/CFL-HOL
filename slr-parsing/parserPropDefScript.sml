@@ -3,7 +3,7 @@ open HolKernel boolLib bossLib Parse BasicProvers Defn
 open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory boolSimps optionTheory
 
-open regexpTheory grammarDefTheory boolLemmasTheory listLemmasTheory
+open symbolDefTheory grammarDefTheory boolLemmasTheory listLemmasTheory
 whileLemmasTheory parseTreeTheory yaccDefTheory
 parseProp1DefTheory parseProp2DefTheory
 
@@ -191,35 +191,6 @@ SRW_TAC [][leaves_eq_inv_def, leaves_def, stacktreeleaves_def] THEN
 FULL_SIMP_TAC (srw_ss()) [validStates_def, initItems_def] THEN
 METIS_TAC [validItl_initProds2Items, validItl_iclosure]
 ]])
-
-
-val lem1 = store_thm ("lem1",
-``(!t.
-            MEM t ptl /\ isNode t ==>
-            RTC (derives g) [ptree2Sym t] (leaves t)) ==> 
-            RTC (derives g) (MAP ptree2Sym ptl) (cleaves ptl)``,
-Induct_on `ptl` THEN  SRW_TAC [] [ptree2Sym_def, leaves_def, RTC_RULES] THEN
-Cases_on `h` THEN SRW_TAC [] [ptree2Sym_def, leaves_def] THEN
-FULL_SIMP_TAC (srw_ss() ++ DNF_ss) [isNode_def, ptree2Sym_def, leaves_def] 
-THENL[
-`RTC (derives g) [(TS s)] [(TS s)]` by METIS_TAC [RTC_RULES] THEN
-METIS_TAC [derives_append, APPEND],
-METIS_TAC [derives_append, APPEND]])
-
-
-
-val vpt_rtcd = store_thm ("vpt_rtcd",
-``!g t.validptree g t ==> 
-RTC (derives g) [ptree2Sym t] (leaves t)``,
-HO_MATCH_MP_TAC validptree_ind THEN SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [validptree] THEN
-`derives g [NTS n] (MAP ptree2Sym ptl)` by METIS_TAC [res1, getSymsEqptree2Sym] THEN
-Q_TAC SUFF_TAC `RTC (derives g) (MAP ptree2Sym ptl) (leaves (Node n ptl))` 
-THENL[
-SRW_TAC [] [ptree2Sym_def] THEN METIS_TAC [RTC_RULES, getSymsEqptree2Sym],
-METIS_TAC [lem1, leaves_def]])
-
-
 
 
 val _ = export_theory ();

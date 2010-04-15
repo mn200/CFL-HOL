@@ -10,8 +10,6 @@ containerLemmasTheory setLemmasTheory relationLemmasTheory
 
 val _ = new_theory "grammarDef";
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
 
 val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];

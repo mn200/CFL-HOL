@@ -42,8 +42,6 @@ val iclosure1 = Define `(iclosure1 g [] = []) /\
 (iclosure1 g ((item s (l1,NTS nt::l2))::il) = 
 (getItems (rules g) nt ++ [(item s (l1,NTS nt::l2))] ++ iclosure1 g il))`
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w) 
-
 
 val iclosure_defn = Hol_defn 
 "iclosure_defn" 
@@ -1699,7 +1697,7 @@ THENL[
       METIS_TAC [mdMem,mdMemExists,MEM]
       ])
       
-
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w) 
 
 val iclosureMemIc1 = store_thm
 ("iclosureMemIc1",

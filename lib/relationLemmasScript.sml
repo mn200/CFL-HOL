@@ -7,8 +7,6 @@ containerTheory pred_setTheory rich_listTheory
 
 open pred_setTheory listLemmasTheory containerLemmasTheory setLemmasTheory
 
-
-
 val _ = new_theory "relationLemmas";
 
 val _ = Globals.linewidth := 60

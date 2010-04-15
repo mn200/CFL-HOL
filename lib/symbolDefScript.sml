@@ -171,7 +171,8 @@ val conc_def = Define `(conc [] (b::bs) = (b::bs)) ∧ (conc (a::as) (b::bs) = (
 *)
 
 val conc_def = Define
-`conc as bs = {s | ∃u v. u ∈ as ∧ v ∈ bs ∧ (s = u ++ v)}`;
+`conc (as:α list -> bool) (bs:α list -> bool) = 
+ {s | ∃u v. u IN as ∧ v IN bs ∧ (s = u ++ v)}`;
 
 (* Union *)
 val union_def = Define
@@ -194,7 +195,7 @@ val starn_def = Define
 (* Define A* + prove alternate defn of * *)
 
 val (star_rules, star_ind, star_cases) = Hol_reln
-`(star A []) ∧
+`(star (A:α list -> bool) []) ∧
 (∀s. s ∈ A ⇒ star A s) ∧
 (∀s1 s2. s1 ∈ A ∧ (star A s2) ⇒ star A (s1 ++ s2))`;
 
@@ -905,6 +906,11 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
        by METIS_TAC [memImpLdNts] THEN
 METIS_TAC [MEM, APPEND, MEM_APPEND, ldNtsApp]);
 
+val everyTmMapTs = store_thm
+("everyTmMapTs",
+``∀l.EVERY isTmnlSym (MAP TS l)``,
+
+SRW_TAC [][EVERY_MEM, MEM_MAP, isTmnlSym_def]);
 
 
 val _ = export_theory ();

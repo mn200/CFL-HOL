@@ -8,8 +8,6 @@ val _ = new_theory "reachableGrammar";
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
 val rgrRules = Define
     `rgrRules g = 
     { rule l r | MEM (rule l r) (rules g) ∧ 

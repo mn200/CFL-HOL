@@ -6,9 +6,6 @@ val _ = new_theory "arithmeticLemmas";
 
 val _ = Globals.linewidth := 60
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
-
 val powGt = store_thm
 ("powGt",
 ``1 ≤ k ∧ m ≥ 2 ** k ⇒ m > 2**(k-1)``,

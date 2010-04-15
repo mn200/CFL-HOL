@@ -9,8 +9,6 @@ open containerLemmasTheory
 
 val _ = new_theory "listLemmas";
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
 (* 14/05/07 AB *)
 val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];

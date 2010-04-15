@@ -7,8 +7,8 @@ open listLemmasTheory relationLemmasTheory
      grammarDefTheory pdaDefTheory symbolDefTheory parseTreeTheory
      treeDerivTheory
 
-val _ = new_theory "closure"
 
+val _ = new_theory "closure"
 
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
@@ -483,12 +483,11 @@ val substGr = Define
       MAP (substRule (TS tm,NTS (startSym gsub))) (rules g)) (startSym g)`;
 
 val replace = Define
-`(replace [] sym s = {[]}) ∧
+`(replace [] sym (s:(β, γ) symbol list -> bool) = {[]}) ∧
  (replace ((NTS x)::rst) sym s = IMAGE (CONS (NTS x)) (replace rst sym s)) ∧
  (replace (TS t::rst) sym s = 
   if t ≠ sym then IMAGE (CONS (TS t)) (replace rst sym s)
   else conc s (replace rst sym s))`;
-
 
 val substlEqNil = store_thm
 ("substlEqNil",
@@ -644,21 +643,21 @@ DISJOINT (nonTerminals g) (nonTerminals gsub) ⇒
 (derives gsub)^* [root t] (MAP TS (fringe t))``,
 
 HO_MATCH_MP_TAC validptree_ind THEN SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [root, validptree] THEN
+FULL_SIMP_TAC (srw_ss()) [root_def, validptree] THEN
 `MEM (rule n (getSymbols ptl)) (rules gsub)` by METIS_TAC [memRulegsub] THEN
  `∀e.MEM e ptl ∧ isNode e ⇒  root e ∈ nonTerminals gsub`
  by (SRW_TAC [][] THEN
      Cases_on `e` THEN 
-     FULL_SIMP_TAC (srw_ss()) [isNode_def, root] THEN
+     FULL_SIMP_TAC (srw_ss()) [isNode_def, root_def] THEN
      SRW_TAC [][slemma1_4] THEN
      `MEM (NTS n') (getSymbols ptl)` by METIS_TAC [memGetSyms] THEN
      METIS_TAC [rgr_r9eq]) THEN
 `∀t. MEM t ptl ⇒ (derives gsub)^* [root t] (MAP TS (fringe t))`
  by (SRW_TAC [][] THEN
      Cases_on `t` THEN 
-     FULL_SIMP_TAC (srw_ss()++boolSimps.ETA_ss) [fringe_def, root] THEN
+     FULL_SIMP_TAC (srw_ss()++boolSimps.ETA_ss) [fringe_def, root_def] THEN
      RES_TAC THEN
-     FULL_SIMP_TAC (srw_ss()++boolSimps.ETA_ss) [fringe_def, root, isNode_def]) THEN
+     FULL_SIMP_TAC (srw_ss()++boolSimps.ETA_ss) [fringe_def, root_def, isNode_def]) THEN
 FULL_SIMP_TAC (srw_ss()) [validptree] THEN
 `(derives gsub)^* [NTS n] (MAP TS (FLAT (MAP fringe ptl)))` 
 by METIS_TAC [getSymsEqRoot, ptlRtcd, res1, RTC_RULES] THEN
@@ -677,7 +676,7 @@ val vptSbgrImpGr = store_thm
 
 HO_MATCH_MP_TAC validptree_ind THEN 
 SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()++boolSimps.ETA_ss) [validptree, root, fringe_def] THEN
+FULL_SIMP_TAC (srw_ss()++boolSimps.ETA_ss) [validptree, root_def, fringe_def] THEN
 
 Q.ABBREV_TAC `fr:('a,'b) symbol list = MAP TS (FLAT (MAP fringe ptl))` THEN
 Q_TAC SUFF_TAC 
@@ -687,7 +686,7 @@ Q_TAC SUFF_TAC
 THENL[
       SRW_TAC [][Abbr `fr`] THEN
       Q.EXISTS_TAC `Node n ts` THEN
-      SRW_TAC [boolSimps.ETA_ss][root, validptree, fringe_def] THEN
+      SRW_TAC [boolSimps.ETA_ss][root_def, validptree, fringe_def] THEN
       FULL_SIMP_TAC (srw_ss()) [substGr, rules_def] THEN1
       (FULL_SIMP_TAC (srw_ss()) [DISJOINT_DEF, EXTENSION] THEN
        METIS_TAC [slemma1_4]) THEN
@@ -769,7 +768,7 @@ THENL[
 				  SRW_TAC [][nonTerminals_def,startSym_def]) THEN
 			      `(derives gsub)^* [NTS (startSym gsub)]
 			      (MAP TS (fringe (Node (startSym gsub) l)))`
-			      by METIS_TAC [vptgsubInLang, root] THEN
+			      by METIS_TAC [vptgsubInLang, root_def] THEN
 			      FULL_SIMP_TAC (srw_ss()++boolSimps.ETA_ss) 
 			      [language_def,fringe_def] THEN
 			      METIS_TAC [everyTmMapTs],
@@ -786,7 +785,7 @@ THENL[
 				       APPEND_ASSOC,APPEND,
 				       symbol_11]) THEN
 			`root (Node n' l) ∈ nonTerminals g` 
-			by METIS_TAC [sbgNtsIng, symbol_11, root] THEN
+			by METIS_TAC [sbgNtsIng, symbol_11, root_def] THEN
 			`MEM (Node n' l) ptl` by METIS_TAC [isSfxMem, MEM] THEN
 			`EVERY (isTmnlSym:('a, 'b) symbol -> bool) 
             		  (MAP TS (fringe (Node n' l)))`
@@ -804,9 +803,9 @@ THENL[
 			      [fringe_def] THEN
 			      METIS_TAC [replaceApp],
 
-			      FULL_SIMP_TAC (srw_ss()) [root] THEN
+			      FULL_SIMP_TAC (srw_ss()) [root_def] THEN
 			      Cases_on `t'` THEN
-			      FULL_SIMP_TAC (srw_ss()) [root] THEN
+			      FULL_SIMP_TAC (srw_ss()) [root_def] THEN
 			      SRW_TAC [][] THEN			      
 			      Cases_on `ts` THEN SRW_TAC [][getSymbols_def] THEN
 			      FULL_SIMP_TAC (srw_ss()) [substitutel]
@@ -1679,15 +1678,9 @@ THENL[
       ]);
 
 
-
-
 val _ = export_theory();
       
 
 
-
-
-
-      
 
 

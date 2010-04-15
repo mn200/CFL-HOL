@@ -7,6 +7,9 @@ open listLemmasTheory relationLemmasTheory
      grammarDefTheory pdaDefTheory symbolDefTheory gnfTheory
      containerLemmasTheory
 
+
+open boolLemmasTheory
+
 val _ = new_theory "pdaEqCfg"
 
 val _ = Globals.linewidth := 60
@@ -17,8 +20,6 @@ val _ = diminish_srw_ss ["list EQ"];
 Theorem 5.3 If L is a CFL, then there exists a PDA M such that
 L=N(M), empty stack acceptance.
 *)
-
-
 
 val trans = Define
 `trans q (rule l r) : (('b,'isym) symbol,('b,'isym)symbol,'state) trans =  
@@ -794,74 +795,64 @@ Q.MATCH_ABBREV_TAC `FINITE P1` THEN
 				    Abbr`h`, Abbr`P1`]  THEN
 	METIS_TAC []);
 
-(*
+
+
+val finitentslImage = store_thm
+("finitentslImage",
+``(ntslComp = { (q,A,p) | q ∈ statesList m ∧ p ∈ statesList m ∧  
+	  A ∈ stkSymsList m m.next }) ⇒
+ FINITE { ntsl | ntsl ⊆ (IMAGE NTS ntslComp) }``,
+
+METIS_TAC [IMAGE_FINITE, finitentslComp, FINITE_POW, POW_DEF]); 
+
+
+val finElemSet2List = store_thm
+("finElemSet2List",
+``∀s1. FINITE s1 ⇒ (∀e. e ∈ s1 ⇒ FINITE e) ⇒ (∃s2. IMAGE set s2 = s1)``,
+
+HO_MATCH_MP_TAC FINITE_INDUCT THEN
+SRW_TAC [][] THEN
+`∃s2. IMAGE set s2 = s1` by METIS_TAC [] THEN
+`∃l. (set l = e)` by METIS_TAC [listExists4Set] THEN
+Q.EXISTS_TAC `l INSERT s2` THEN
+SRW_TAC [][]);
+
 val finitentslCond = store_thm
 ("finitentslCond",
-``FINITE { ntsl | ntsl |  ntslCond m (q1,q2) ntsl ∧
+``FINITE { ntsl | ntsl |  ntslCond m (q1,q2) ntsl ∧ (LENGTH ntsl = n) ∧
 	          EVERY (λe. e ∈ stkSymsList m m.next) (MAP transSym ntsl) }``,
 
 SRW_TAC [][ntslCond] THEN
 Q.MATCH_ABBREV_TAC `FINITE P` THEN
 Q.ABBREV_TAC `ntslComp = { (q,A,p) | q ∈ statesList m ∧ p ∈ statesList m ∧  
 			  A ∈ stkSymsList m m.next }` THEN
-Q_TAC SUFF_TAC `P ⊆ { l | EVERY (λe. e ∈ (IMAGE NTS ntslComp)) l }` THEN1
+Q_TAC SUFF_TAC `P ⊆ { l | EVERY (λe. e ∈ (IMAGE NTS ntslComp)) l ∧
+                          (LENGTH l = n)}` THEN1
  
  (SRW_TAC [][] THEN
-  Q_TAC SUFF_TAC `FINITE {l | EVERY (λe. ∃x. (e = NTS x) ∧ x ∈ ntslComp) l}` THEN1
+  Q_TAC SUFF_TAC `FINITE {l | EVERY (λe. ∃x. (e = NTS x) ∧ x ∈ ntslComp) l ∧
+ (LENGTH l = n)}` THEN1
   METIS_TAC [SUBSET_FINITE] THEN  
   Q.MATCH_ABBREV_TAC `FINITE P1` THEN
-  `FINITE ntslComp` by METIS_TAC [finitentslComp] THEN
-  
+  `FINITE ntslComp` by METIS_TAC [finitentslComp] THEN  
   Q.ABBREV_TAC `S1 = { ntsl | ntsl ⊆ (IMAGE NTS ntslComp) }` THEN
+  Q.ABBREV_TAC `p = (λe. ∃x. (e = NTS x) ∧ x ∈ ntslComp)` THEN
 
-  `FINITE S1` by MAGIC THEN
-
-  `∃S2. IMAGE set S2 = S1` by MAGIC THEN
+  `FINITE {x | p x}` by
+  (SRW_TAC [][Abbr `p`] THEN
+  Q.MATCH_ABBREV_TAC `FINITE P2` THEN
+  Q_TAC SUFF_TAC `P2 = IMAGE NTS ntslComp` THEN
+  SRW_TAC [][Abbr `P2`, Abbr `ntslComp`] THEN
+  SRW_TAC [][IMAGE_DEF, EXTENSION]) THEN
   
-  Q.ABBREV_TAC `f = \e. IMAGE (\e1.e++e1) S2` THEN
+  `FINITE {l | EVERY p l ∧ (LENGTH l ≤ n)}` by METIS_TAC [finite_length_limited] THEN
+  `{l | EVERY p l ∧ LENGTH l ≤ n} = P1 ∪ {l | EVERY p l ∧ LENGTH l < n}`
+  by
+  (SRW_TAC [][Abbr `P1`] THEN
+  SRW_TAC [][EXTENSION, EQ_IMP_THM] THEN
+  FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+  METIS_TAC [FINITE_UNION]) THEN
 
-  Q_TAC SUFF_TAC `P1 ⊆ BIGUNION (IMAGE f S2)` THEN1
-
-  SRW_TAC [][] THEN
-  `FINITE g` by MAGIC
-  METIS_TAC [FINITE_LIST_TO_SET, IMAGE_FINITE, FINITE_BIGUNION, SUBSET_FINITE]
-  MAGIC
-
-
-  UNABBREV_ALL_TAC THEN
-  SRW_TAC [][SUBSET_DEF, EXTENSION] THEN
-  FULL_SIMP_TAC (srw_ss()) [IMAGE_DEF, EXTENSION, EVERY_MEM] THEN
-  
-  METIS_TAC []
-  
-
-
-
-(*  
-  Q.ABBREV_TAC `P2 = { s | s ⊆ IMAGE NTS ntslComp }` THEN
-  `FINITE P2` by MAGIC THEN
-  `∃l. (P2 = set l)` by METIS_TAC [listExists4Set] THEN
-
-  `∃l'. (LENGTH l = LENGTH l') ∧ 
-  (∀i. i < LENGTH l ⇒ (EL i l = set (EL i l')))` by MAGIC THEN
-  
-
-  Q.ABBREV_TAC `f = \e.set (MAP set (MAP (\e1.(e++e1)) l'))` THEN
-  
-  Q_TAC SUFF_TAC `P1 ⊆ BIGUNION (BIGUNION (BIGUNION (set MAP f l')))`
-
-
-  `FINITE { q | q ∈ statesList m }` by MAGIC THEN
-  `FINITE { (q,A,p) | q ∈ statesList m ∧ p ∈ statesList m ∧  
-	   A ∈ stkSymsList m m.next }` by METIS_TAC [finiteDuo] THEN
-  
-  Q_TAC SUFF_TAC `P1 ⊆ (IMAGE NTS ntslComp) x (IMAGE NTS ntslComp)`
-  
-  Q.ABBREV_TAC `f = \e. `
-
-*)
-
-  MAGIC) THEN
   UNABBREV_ALL_TAC THEN
   SRW_TAC [][EXTENSION, SUBSET_DEF] THEN
   `∀e. MEM e x ⇒ ∃e0.(e = NTS e0) ∧ ∃q A p. (e0=(q,A,p)) ∧
@@ -917,235 +908,48 @@ THENL[
 	Cases_on `q''` THEN Cases_on `r` THEN
 	FULL_SIMP_TAC (srw_ss()) [],
 	
+	(* TS case, similar to above *)
 
-      Q.MATCH_ABBREV_TAC `FINITE P` THEN
-      Q.ABBREV_TAC `f =  \r:((δ, γ) symbol, β, α) trans. 
-      case r of
-      ((isymo,A,q),q1,mrhs) -> 
-      case isymo of 
-	  NONE -> {}
-	|| (SOME p) -> 
-	  case p of 
-	      (NTS n) -> {}
-	    || (TS t) -> if (mrhs=[])
-			     then {rule (q,A,q1) [t]}
-			 else {}` THEN
-      Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set m.next))`
-      THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
-	     Cases_on `r` THEN
-	     Cases_on `r'` THEN
-	     Cases_on `q` THEN
-	     Cases_on `r'` THEN
-	     SRW_TAC [][]) THEN
+	(* 3rd case *)
+	Q.MATCH_ABBREV_TAC `FINITE P` THEN
+	Q.ABBREV_TAC `f = \r:((δ, γ) symbol, β, α) trans. 
+			     case r of
+				 ((isymo,A,q),q1,mrhs) -> 
+				 case isymo of 
+				     NONE -> ({}:(α # β # α, γ) rule -> bool)
+				     || SOME (NTS t) -> {}
+				     || SOME (TS s) -> 
+				     { rule (q,A,p) (TS ts::mrhs) | mrhs ≠ [] ∧ 
+				      ntslCond m (q1,p) mrhs ∧ p ∈ statesList m}` THEN
+	Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set m.next))` THEN1
 
-	ONCE_REWRITE_TAC [EXTENSION] THEN 
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
-		 boolSimps.CONJ_ss][EXISTS_rule, 
-				    Abbr`f`, Abbr`P`] THEN
-	SRW_TAC [][EQ_IMP_THM] THEN1
-	(Q.EXISTS_TAC `((NONE,A,q),q1,[])` THEN
-	SRW_TAC [][]) THEN
+	DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
+	
 	Cases_on `r` THEN
 	Cases_on `r'` THEN
 	Cases_on `q` THEN
 	Cases_on `r'` THEN
 	FULL_SIMP_TAC (srw_ss()) [] THEN
-	Cases_on `q''` THEN Cases_on `r` THEN
-	FULL_SIMP_TAC (srw_ss()) []	
+	Cases_on `q''` THEN 
+	FULL_SIMP_TAC (srw_ss()) [] THEN
+	Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+
+	Q.MATCH_ABBREV_TAC `FINITE P1` THEN
+	Q.ABBREV_TAC `i: α -> (α # β # α, γ) rule -> bool = 
+        \p. {rule (r'',q,p) (TS ts::L) | L |
+        L ≠ [] ∧ ntslCond m (q',p) L}` THEN
+	Q_TAC SUFF_TAC `P1 = BIGUNION (IMAGE i (set (statesList m)))` THEN1
+
+	DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`i`] THEN 
 
 	
-	Q.MATCH_ABBREV_TAC `FINITE P` THEN
-	Q.ABBREV_TAC `P1:((α#β#α),γ) symbol list -> bool 
-			     = {ntsl |
-			     ∃q1 q2. ntslCond m (q1,q2) ntsl ∧
-			     EVERY (λe. e ∈ stkSymsList m m.next)
-			     (MAP transSym ntsl)}` THEN
-	Q_TAC SUFF_TAC `P ⊆ { rule (q,A,p) ntsl | ntsl ∈ P1 ∧
-			     q ∈ statesList m ∧ p ∈ statesList m ∧
-			     A ∈ stkSymsList m m.next }` THEN
-
-	SRW_TAC [][] THEN
-	METIS_TAC [finitentslCond]
-
-	`FINITE`
-
+	
 	
 	
 
 	);
       
       
-(*                                  `
-
-val finiteNtslCond = store_thm
-("finiteNtslCond",
-``∀m q' ql mrhs. FINITE { ((rule l r):(α # β # α, γ) rule) | 
-			 ntslCond m (q',ql,mrhs) r }``,
-
-SRW_TAC [][] THEN
-Q.MATCH_ABBREV_TAC `FINITE Horrible1` THEN
-FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
-
-
-``FINITE
- { r | (frmState (HD r) = q') ∧ (toState (LAST r) = ql) ∧
-  (∀e1 e2 p s. (r = p ++ [e1; e2] ++ s) ⇒ adj e1 e2) ∧
-  (∀e. e ∈ r ⇒ toState e ∈ statesList m) ∧
-  ∀e. e ∈ r ⇒ frmState e ∈ statesList m}``
-
-SRW_TAC [][] THEN
-Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
-`h = `
-
-
-``FINITE { NTS (st,sym,st') | frmState (HD r) = } ``
-
-
-Q.ABBREV_TAC 
-  THEN
- 
-Q_TAC SUFF_TAC `Horrible =  (IMAGE (λe.rule l e) f)`
- THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
-	SRW_TAC [][] THEN
-	) THEN
-
-	ONCE_REWRITE_TAC [EXTENSION] THEN 
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
-		 boolSimps.CONJ_ss][EXISTS_rule, 
-				    Abbr`f`, Abbr`Horrible`]);
-	
-
-val finiteR2 = store_thm
-("finiteR2",
-``FINITE { rule l r | p2gtrans m (rule l r) }``,
-
-Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
-Q.ABBREV_TAC `f = \r. case r of
-((isymo,ssym,q),q',mrhs) -> if (((isymo,ssym,q),q',mrhs) ∈ m.next) then 
- {rule l ntsl | l,ntsl |
- ∃p.((l = (q,ssym,p)) ∧ q ∈ statesList m ∧
- q' ∈ statesList m ∧ p ∈ statesList m ∧
- ((ntsl = []) ∧ (isymo = NONE) ∧ (q' = p) ∧
-  (mrhs = []) ∨
-  (∃ts.
-   (ntsl = [TS ts]) ∧ (isymo = SOME (TS ts)) ∧
-   (q' = p) ∧ (mrhs = [])) ∨
-  ∃h t.
-  ((ntsl = h::t) ∧ t ≠ []) ∧
-  ((∃ts.
-    (h = TS ts) ∧ (isymo = SOME (TS ts)) ∧
-    (MAP transSym t = mrhs) ∧
-    ntslCond m (q',p,mrhs) t) ∨
-   (isymo = NONE) ∧ (MAP transSym ntsl = mrhs) ∧
-   ntslCond m (q',p,mrhs) ntsl))) } else  {}` THEN
-Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set m.next))`
- THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN 
-	Cases_on `r` THEN 
-	Cases_on `r'` THEN
-	Cases_on `q` THEN
-	Cases_on `r'` THEN
-	SRW_TAC [][] THEN
-	Q.MATCH_ABBREV_TAC `FINITE Horrible2` THEN
-	Cases_on `r` THEN1
-	(Cases_on `q''` 
-	THENL[
-	
-	      Q_TAC SUFF_TAC `Horrible2 = 
-	      { rule (r'',q,q') ([]:((α # β # α),γ) symbol list) }` THEN
-	      SRW_TAC [][] THEN
-	      SRW_TAC [][Abbr `Horrible2`, EXTENSION] THEN
-	      SRW_TAC [][EQ_IMP_THM] THEN
-	      METIS_TAC [memStateRule],
-
-	      FULL_SIMP_TAC (srw_ss()) [NOT_SOME_NONE] THEN
-	      Cases_on `x`  THEN
-	      FULL_SIMP_TAC (srw_ss()) [] THEN
-	      THENL[
-		    SRW_TAC [][Abbr `Horrible2`] THEN
-		    Q.MATCH_ABBREV_TAC `FINITE blah` THEN
-		    `blah= {}` by SRW_TAC [][EXTENSION, Abbr `blah`] THEN
-		    METIS_TAC [FINITE_EMPTY],
-
-		    Q_TAC SUFF_TAC `Horrible2 = { rule (r'',q,q') [TS t] }` THEN
-		    SRW_TAC [][] THEN
-		    UNABBREV_ALL_TAC THEN
-		    SRW_TAC [][EXTENSION] THEN
-		    METIS_TAC [memStateRule]
-		    ]]) THEN
-
-	Cases_on `q''` THEN
-	FULL_SIMP_TAC (srw_ss()) []
-	THENL[
-	      Q.ABBREV_TAC `h = \st. 
-	      if ∧ ntslCond m (q',p,h::t) ntsl)`
-	      then { rule l }
-
-
-
-	SRW_TAC [][]
-	Q.ABBREV_TAC `h  = \sym:(δ,γ) symbol option. 
-	case sym of
-	    NONE -> if (r=[])  
-			then 
-		    else {}
-		      || SOME v -> if (r=[]) then 
-				  else { rule (r'',q,p) ntsl |
-					p ∈ statesList m ∧
-					∃h t.
-					((ntsl = h::t) ∧ t ≠ []) ∧
-					((∃ts. (v = TS ts) ∧
-					  (h = TS ts) ∧ (q'' = SOME (TS ts)) ∧
-					  (MAP transSym t = r) ∧
-					  ntslCond m (q',p,r) t) ∨
-					 (q'' = NONE) ∧ (MAP transSym ntsl = r) ∧
-					 ntslCond m (q',p,r) ntsl) }` THEN
-	Q_TAC SUFF_TAC `Horrible2 = BIGUNION (IMAGE h {q''})`
-	THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`h`] THEN
-	       Cases_on `q''` THEN SRW_TAC [][] THEN
-	       Cases_on `x` THEN SRW_TAC [][] THEN
-	       MAGIC
-	       
-	       ) THEN
-	ONCE_REWRITE_TAC [EXTENSION] THEN 
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
-		 boolSimps.CONJ_ss][EXISTS_rule, 
-				    Abbr`h`, Abbr`Horrible2`] THEN
-	Cases_on `q''` THEN Cases_on `x` THEN SRW_TAC [][] THEN
-	SRW_TAC [][EQ_IMP_THM] THEN
-	METIS_TAC [memStateRule]
-	SRW_TAC [][EQ_IMP_THM, p2gtrans] THEN1
-
-
-	) THEN
-
- ONCE_REWRITE_TAC [EXTENSION] THEN 
- SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss, 
-	  boolSimps.CONJ_ss][EXISTS_rule, 
-			     Abbr`f`, Abbr`Horrible`] THEN
-SRW_TAC [][EQ_IMP_THM, p2gtrans] THEN1
-
-(Q.EXISTS_TAC `((NONE,ssym,q),p,[])` THEN
-SRW_TAC [][]) THEN1
-
-(Q.EXISTS_TAC `((SOME (TS ts),ssym,q),p,[])` THEN
-SRW_TAC [][]) THEN1
-
-(Q.EXISTS_TAC `((SOME (TS ts),ssym,q),q',MAP transSym t)` THEN
-SRW_TAC [][]) THEN1
-
-(Q.EXISTS_TAC `((NONE,ssym,q),q',MAP transSym (h::t))` THEN
-SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) []) THEN
-Cases_on `r` THEN 
-Cases_on `r'` THEN
-Cases_on `q` THEN
-Cases_on `r'` THEN
-SRW_TAC [][] THEN
-Cases_on `x` THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
-METIS_TAC []);
-*)
 
 val p2gGrExists = store_thm
 ("p2gGrExists",

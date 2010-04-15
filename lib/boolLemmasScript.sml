@@ -40,7 +40,7 @@ SRW_TAC [DNF_ss][Once EXTENSION, EQ_IMP_THM] THEN
 Cases_on `x` THEN SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 MAP_EVERY Q.EXISTS_TAC [`{ h'::t | P h'}`, `t`] THEN SRW_TAC [][]);
 
-val finite_length_limited = prove(
+val finite_length_limited = store_thm("finite_length_limited",
 ``FINITE { x | P x } ==> !n. FINITE { l | EVERY P l /\ LENGTH l <= n }``,
 STRIP_TAC THEN Induct THEN1 SRW_TAC [CONJ_ss][LENGTH_NIL] THEN
 ASM_SIMP_TAC (srw_ss() ++ DNF_ss) [ih]);

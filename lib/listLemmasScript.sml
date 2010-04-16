@@ -13,6 +13,7 @@ val _ = new_theory "listLemmas";
 val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];
 val _ = overload_on ("IN", ``MEM``);
+val _ = overload_on ("NOTIN", ``\x l. ~(MEM x l)``);
 
 
 val list_l1 = store_thm ("list_l1",
@@ -1480,7 +1481,7 @@ METIS_TAC []);
 
 val allDNotMem = store_thm
 ("allDNotMem",
-``∀l. ¬ALL_DISTINCT l ⇔ 
+``∀l. ¬ALL_DISTINCT l ⇔
  (∃e.e ∈ l ∧ ∃l1 l2 l3.(l = l1 ++ [e] ++ l2 ++ [e] ++ l3))``,
 
 Induct_on `l` THEN SRW_TAC [][EQ_IMP_THM] THEN1
@@ -1529,7 +1530,7 @@ METIS_TAC [rmd_del, not_mem_delete, deleteAllD]);
 
 val allDistinctNewlist = store_thm
 ("allDistinctNewlist",
-``∀l:α list. 
+``∀l:α list.
 INFINITE (UNIV:'a set) ⇒
 ∃l'. LENGTH l' ≥ LENGTH l ∧ ALL_DISTINCT l' ∧ (set l ∩ set l' = {})``,
 

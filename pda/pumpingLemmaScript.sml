@@ -2181,13 +2181,6 @@ Q.ABBREV_TAC `k = LENGTH (distinctldNts dl)` THEN
 METIS_TAC [inpLen]);
 
 
-val islpowTmnl = store_thm
-("islpowTmnl",
-``∀l.EVERY isTmnlSym l ⇒ EVERY isTmnlSym (FLAT (lpow l i))``,
-
-Induct_on `i` THEN SRW_TAC [][lpow_def,REPLICATE] THEN
-FULL_SIMP_TAC (srw_ss()) [lpow_def,REPLICATE]);
-
 
 val rtcDerivesReplEnd = store_thm
 ("rtcDerivesReplEnd",

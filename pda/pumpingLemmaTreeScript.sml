@@ -14,6 +14,13 @@ val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 
 
+val notMemFilter = store_thm
+("notMemFilter",
+``∀l. ¬(e ∈ l) ⇒ ¬(e ∈ FILTER P l)``,
+
+Induct_on `l` THEN SRW_TAC [][FILTER] THEN
+FULL_SIMP_TAC (srw_ss()) []);
+
 val treeSyms_defn = Hol_defn "treeSyms_defn"
 `(treeSyms (Leaf tm) =  ([TS tm]:(α,β) symbol list)) ∧
 (treeSyms (Node n t) =  (NTS n) :: (FLAT (MAP treeSyms t)))`;
@@ -443,14 +450,6 @@ Cases_on `EL i' ptl` THEN SRW_TAC [][subtree]) THEN
 METIS_TAC [isSubtree, subtreeTrans]) THEN
 METIS_TAC []);
 
-
-
-val notMemFilter = store_thm
-("notMemFilter",
-``∀l. ¬(e ∈ l) ⇒ ¬(e ∈ FILTER P l)``,
-
-Induct_on `l` THEN SRW_TAC [][FILTER] THEN
-FULL_SIMP_TAC (srw_ss()) []);
 
 val inpLen = store_thm
 ("inpLen",

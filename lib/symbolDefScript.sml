@@ -912,6 +912,12 @@ val everyTmMapTs = store_thm
 
 SRW_TAC [][EVERY_MEM, MEM_MAP, isTmnlSym_def]);
 
+val islpowTmnl = store_thm
+("islpowTmnl",
+``∀l.EVERY isTmnlSym l ⇒ EVERY isTmnlSym (FLAT (lpow l i))``,
+
+Induct_on `i` THEN SRW_TAC [][lpow_def,REPLICATE] THEN
+FULL_SIMP_TAC (srw_ss()) [lpow_def,REPLICATE]);
 
 val _ = export_theory ();
 

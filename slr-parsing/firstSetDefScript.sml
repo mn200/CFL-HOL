@@ -1,12 +1,16 @@
 open HolKernel boolLib bossLib Parse BasicProvers Defn
-open listTheory containerTheory pred_setTheory arithmeticTheory relationTheory markerTheory
-open regexpTheory grammarDefTheory listLemmasTheory
+
+open listTheory containerTheory pred_setTheory arithmeticTheory
+relationTheory markerTheory
+
+open symbolDefTheory grammarDefTheory listLemmasTheory
 
 val _ = new_theory "firstSetDef"
 
 val _ = set_trace "Unicode" 1;
 
 val _ = Globals.linewidth := 60
+val _ = diminish_srw_ss ["list EQ"];
 
 val firstSet = Define
 `firstSet g sym =
@@ -296,7 +300,8 @@ val ntderive_list_exists = prove(
                      ALL_DISTINCT nlist``,      
   HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN1
     (POP_ASSUM (Q.SPEC_THEN `[]` MP_TAC) THEN 
-		SRW_TAC [][]) THEN 
+		SRW_TAC [][] THEN
+		FULL_SIMP_TAC (srw_ss()) [nullable_def]) THEN 
   `∃N rhs pfx sfx. 
       MEM (rule N rhs) (rules g) ∧
       (sf1 = pfx ++ [NTS N] ++ sfx) ∧
@@ -353,11 +358,11 @@ val ntderive_list_exists = prove(
          by METIS_TAC [nullable_APPEND, RTC_RULES, res1,
 		       nullable_def] THEN 
       FULL_SIMP_TAC (srw_ss()) [nullable_APPEND] THEN 
-      FIRST_X_ASSUM (Q.SPECL_THEN [`pfx ++ [NTS N] ++ y1`, `sfx'`]
+      FIRST_X_ASSUM (Q.SPECL_THEN [`pfx ++ [NTS N] ++ y1`, `s`]
 				  MP_TAC) THEN 
       SRW_TAC [][nullable_APPEND]
     ]
-  ])
+  ]);
 
 val lemma =  SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) [] 
 		       ntderive_list_exists 
@@ -398,7 +403,7 @@ THENL[
 	      FULL_SIMP_TAC (srw_ss()) [firstSetList]) THEN
       SRW_TAC [][] THEN
       METIS_TAC [first_first1,containerLemmasTheory.mem_in]	
-      ])
+      ]);
 		
 
 

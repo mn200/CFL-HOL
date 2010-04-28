@@ -3,7 +3,8 @@ open HolKernel boolLib bossLib Parse BasicProvers Defn
 open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory
 
-open regexpTheory grammarDefTheory listLemmasTheory firstSetDefTheory
+open symbolDefTheory grammarDefTheory listLemmasTheory firstSetDefTheory
+    relationLemmasTheory
 
 val _ = new_theory "followSetDef"
 
@@ -12,8 +13,7 @@ fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
 val _ = set_trace "Unicode" 1;
 
 val _ = Globals.linewidth := 60
-
-
+val _ = diminish_srw_ss ["list EQ"];
 
 val followSet = Define 
 `followSet g sym = 
@@ -26,10 +26,10 @@ val followRuleML_defn = Hol_defn "followRuleML_defn"
 if (~(MEM sym sn) ∧ sym ∈ (allSyms g)) then
     if ((NTS l) IN (nonTerminalsML g)) then
 	if (h=sym) then
-	      LIST_TO_SET (firstSet1 g [] t) ∪ 
+	      set (firstSet1 g [] t) ∪ 
               followRuleML g sn sym (rule l t) ∪
 	     (if nullableML g [] t then 
-		BIGUNION (LIST_TO_SET 
+		BIGUNION (set 
 	            (MAP (followRuleML g (sym::sn) (NTS l)) 
                       (rules g))) 
               else {})
@@ -40,7 +40,7 @@ else {})`
 
 val (followRuleML,followRuleML_ind) = 
 tprove (followRuleML_defn,
-WF_REL_TAC (`inv_image  (((measure (\(g,sn). CARD ((allSyms g) DIFF (LIST_TO_SET sn))))) LEX (measure (\r.LENGTH (ruleRhs r)))) (\(g,sn,sym,r).(g,sn),r)`) THEN
+WF_REL_TAC (`inv_image  (((measure (\(g,sn). CARD ((allSyms g) DIFF (set sn))))) LEX (measure (\r.LENGTH (ruleRhs r)))) (\(g,sn,sym,r).(g,sn),r)`) THEN
 SRW_TAC [] [] THEN
 `FINITE (allSyms g)` 
     by METIS_TAC [FINITE_LIST_TO_SET,finiteAllSyms] THEN
@@ -80,104 +80,78 @@ THENL[
 
 
 val followSetML = Define `followSetML g sym = 
-BIGUNION (LIST_TO_SET (MAP (followRuleML g [] sym) (rules g)))`
+BIGUNION (set (MAP (followRuleML g [] sym) (rules g)))`
 
-val fruleMLIsTmnl = store_thm 
-("fruleMLIsTmnl",
-``s IN followRuleML g sn e r ==> isTmnlSym s``,
-MAGIC)
 
-val followRuleEq1 = mk_thm ([], 
-``!g sn sym r.((s IN (followRuleML g sn sym r))) ==> (s IN (followSet g sym))``)
-
-val _ = save_thm ("followRuleEq1", followRuleEq1)
-
-(*DOES NOT WORK WITH THE NEW HOL VERSION. FIX IT SO THAT IT DOES! *)
-
-(*
 val followRuleEq1 = store_thm ("followRuleEq1",
 ``∀g sn sym r.
-     s ∈ (followRuleML g sn sym r) ==> MEM r (rules g)
-        ==>
+     s ∈ (followRuleML g sn sym r) ⇒      
+     (∀rl rh.(r = rule rl rh) ⇒ ∃rh'. (MEM (rule rl rh') (rules g)) ∧
+                                     ∃pfx.(rh' = pfx ++ rh))
+        ⇒
        s ∈ (followSet g sym)``,
-HO_MATCH_MP_TAC followRuleML_ind THEN
-SRW_TAC [] [] THENL[
-FULL_SIMP_TAC (srw_ss()) [followRuleML],
 
+HO_MATCH_MP_TAC followRuleML_ind THEN
+SRW_TAC [] [] THEN1
+FULL_SIMP_TAC (srw_ss()) [followRuleML] THEN
 SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [followRuleML, LET_THM] THEN
+FULL_SIMP_TAC (srw_ss()) [followRuleML] THEN
 Cases_on `~MEM sym sn ∧ sym IN allSyms g` THEN 
-FULL_SIMP_TAC (srw_ss()) [followRuleML] THEN
-Cases_on `NTS l ∈ nonTerminalsML g` THEN 
-FULL_SIMP_TAC (srw_ss()) [followRuleML] THEN
-Cases_on `h=sym` THEN 
-FULL_SIMP_TAC (srw_ss()) [followRuleML] THEN
-Cases_on `nullableML g [] t` THEN 
-FULL_SIMP_TAC (srw_ss()) [followRuleML] THEN
-SRW_TAC [][] THENL[
+FULL_SIMP_TAC (srw_ss()) [] THEN
+ FULL_SIMP_TAC (srw_ss()) [] THEN
+
+ Cases_on `NTS l ∈ nonTerminalsML g` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+ Cases_on `h=sym` THEN FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] 
+ THENL[
 
   FULL_SIMP_TAC (srw_ss()) [firstSetML_def] THEN
   `s IN (firstSetList g t)` 
       by METIS_TAC [firstSet1Eq1, firstSetML_def] THEN
   FULL_SIMP_TAC (srw_ss()) [firstSetList_def, followSet] THEN
   SRW_TAC [][] THEN
-  `MEM (h::t) (MAP (ruleRhs) (rules g))` by (SRW_TAC [] [] THEN
+  `MEM (pfx++h::t) (MAP (ruleRhs) (rules g))` by (SRW_TAC [] [] THEN
   FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ruleRhs_def] THEN 
   METIS_TAC []) THEN
-  Q.EXISTS_TAC `(h::t)` THEN SRW_TAC [] [] THEN  
-  `RTC (derives g) (h::t) ([h]++[TS fst]++rst)` 
-      by METIS_TAC [APPEND, APPEND_ASSOC, 
+  Q.EXISTS_TAC `(pfx++h::t)` THEN SRW_TAC [] [] THEN  
+  `RTC (derives g) (pfx++h::t) (pfx++[h]++[TS fst]++rst)` 
+      by METIS_TAC [APPEND, APPEND_ASSOC, rtc_derives_same_append_right,
 		    rtc_derives_same_append_left] THEN
   METIS_TAC [APPEND, APPEND_ASSOC],
 
-  FULL_SIMP_TAC (srw_ss()) [firstSetML_def] THEN
-  `s IN (firstSetList g t)` 
-      by METIS_TAC [firstSet1Eq1, firstSetML_def] THEN
-  FULL_SIMP_TAC (srw_ss()) [firstSetList_def, followSet] THEN
-  Q.EXISTS_TAC `(h::t)` THEN
-  `RTC (derives g) (h::t) ([h]++[TS fst]++rst)` 
-      by METIS_TAC [APPEND, APPEND_ASSOC, 
-		    rtc_derives_same_append_left] THEN
-  `MEM (h::t) (MAP (ruleRhs) (rules g))` 
-      by (SRW_TAC [] [] THEN
-	  FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ruleRhs_def] THEN 
-	  METIS_TAC []) THEN
   METIS_TAC [APPEND, APPEND_ASSOC],
 
-  `MEM (h::t) (MAP (ruleRhs) (rules g))` 
-      by (SRW_TAC [] [] THEN
-	  FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ruleRhs_def] THEN 
-	  METIS_TAC []) THEN
-  SRW_TAC [] [followSet] THEN
-  `isTmnlSym s` by METIS_TAC [fruleMLIsTmnl] THEN
-  Cases_on `s` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def] THEN
+  Cases_on `nullableML g [] t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+  FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
   SRW_TAC [][] THEN
-  Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) []THEN
-  FULL_SIMP_TAC (srw_ss()) [followRuleML]
+  FIRST_X_ASSUM (Q.SPECL_THEN [`a`] MP_TAC) THEN SRW_TAC [][] THEN
+  Cases_on `a` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+  `s ∈ followSet g (NTS l)` by METIS_TAC [APPEND_NIL, APPEND,MEM] THEN
+  FULL_SIMP_TAC (srw_ss()) [followSet] THEN
+  SRW_TAC [][] THEN
+  Q.EXISTS_TAC `s''` THEN SRW_TAC [][] THEN
+  `derives g (pfx'++[NTS l]++ [TS ts]++sfx) 
+ (pfx'++pfx ++ h::t++[TS ts]++sfx)` by
+  METIS_TAC [derives_same_append_left, derives_same_append_right,APPEND_ASSOC,
+  res1, APPEND] THEN
+  `(derives g)^* t []` by METIS_TAC [nullableML, nullableEq, nullable_def] THEN
+  `(derives g)^* (pfx' ++ pfx ++ h::t ++ [TS ts] ++ sfx) 
+ (pfx' ++ pfx ++ [h] ++ [TS ts] ++ sfx)` 
+  by  METIS_TAC [APPEND, APPEND_ASSOC, rtc_derives_same_append_left,
+  rtc_derives_same_append_right,APPEND_NIL] THEN
+  METIS_TAC [RTC_RULES, RTC_RTC, APPEND_ASSOC],
+
+  METIS_TAC [APPEND, APPEND_ASSOC]
+  ]);
 
 
-Cases_on `~MEM (NTS l) sn` THEN FULL_SIMP_TAC (srw_ss()) [followRuleML] THEN
-Cases_on `~(NTS l = sym)` THEN FULL_SIMP_TAC (srw_ss()) [followRuleML] THEN
-FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
-`s IN followRuleML g (NTS l::sn) (NTS l) a` by METIS_TAC [] THEN
-RES_TAC THEN
-SRW_TAC [] [followSet] THEN
-`nullable g t` by METIS_TAC [nullableEq1] THEN
-FULL_SIMP_TAC (srw_ss()) [nullable_def, followSet] THEN
-Q.EXISTS_TAC `s'` THEN
-`RTC (derives g) [NTS l] ([h]++t)` by METIS_TAC [res1, RTC_MONOTONE, APPEND, CONS, RTC_RULES] THEN
-`RTC (derives g) ([h]++t) [h]` by 
-METIS_TAC [APPEND, APPEND_NIL, rtc_derives_same_append_left] THEN
-`RTC (derives g) [NTS l] [h]` by METIS_TAC [RTC_RTC] THEN
-METIS_TAC [rtc_derives_same_append_left, rtc_derives_same_append_right, APPEND_ASSOC, RTC_RTC]
-]])
-
-*)
+  
 val followSetEq1 = store_thm ("followSetEq1",
 ``!g sym.s IN (followSetML g sym) ==> s IN (followSet g sym)``,
-FULL_SIMP_TAC (srw_ss()) [followSetML] THEN SRW_TAC [] [] THEN
-METIS_TAC [followRuleEq1, MEM_MAP]
-)
+FULL_SIMP_TAC (srw_ss()) [followSetML] THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
+SRW_TAC [][] THEN
+Cases_on `y` THEN
+METIS_TAC [followRuleEq1, APPEND, APPEND_NIL]);
 
 
 val followSetMem = store_thm ("followSetMem", 
@@ -199,7 +173,57 @@ THENL[
 		    FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ruleRhs_def] THEN
 		    METIS_TAC [],
 			  
-		    METIS_TAC []]])
+		    METIS_TAC []]]);
+
+
+``s ∈ followSet g sym ⇒ s ∈ followSetML g sym``,
+
+SRW_TAC [][followSet] THEN
+FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
+Cases_on `y` THEN FULL_SIMP_TAC  (srw_ss()) [] THEN
+SRW_TAC [][]
+
+``TS ts ∈ followRuleML g [] sym (rule s l)``
+
+``∀x y. (derives g)^* x y ⇒ 
+∀pfx sfx m. (x = pfx++m++sfx) ⇒ MEM m (MAP ruleRhs (rules g)) ⇒
+∀p s sym ts. (y = pfx ++ p ++ [sym] ++ [TS ts] ++ s ++ sfx) ⇒
+TS ts ∈ followSetML g sym``
+
+
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN1
+`m = p ++ [sym]++[TS ts]++s`by METIS_TAC [APPEND_11, APPEND_ASSOC] THEN
+SRW_TAC [][] THEN
+MAGIC
+
+
+FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
+SRW_TAC [][] THEN
+`MEM rhs (MAP ruleRhs (rules g))` by MAGIC THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`s1`,`s2`,`rhs`] MP_TAC) THEN SRW_TAC [][] THEN
+
+
+``∀pfx m sfx dl y.
+derives g ⊢ dl ◁ (pfx ++ m ++ sfx) → y ⇒
+∀p s sym ts.(y = pfx ++ p ++ [sym] ++ [TS ts] ++ s ++ sfx)  ⇒
+(∀e. MEM e dl ⇒ ∃m'.(e= pfx ++ m' ++ sfx)) ⇒
+(∀e1 e2. ∃pd sd. (dl = pd ++ [e1;e2] ++ sd) ⇒ LENGTH e2 ≥ LENGTH e1)
+⇒
+TS ts ∈ followSetML g sym``
+
+Induct_on `dl` THEN SRW_TAC [][] THEN1
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+SRW_TAC [][] THEN
+MAGIC
+
+
+
+IMP_RES_TAC 
 
 
 

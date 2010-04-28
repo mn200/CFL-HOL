@@ -18,7 +18,8 @@ val firstSet = Define
 
 
 val firstSet1_defn = Hol_defn "firstSet1_defn" `
-  (firstSet1 g sn [] = []) ∧
+  (firstSet1 (g:(α,β) grammar) (sn:(α,β) symbol list) ([]:(α,β) symbol list) = 
+   []:(α,β) symbol list) ∧
   (firstSet1 g sn (TS ts :: rest) = [TS ts]) ∧
   (firstSet1 g sn (NTS nt :: rest) =
      rmDupes 
@@ -29,7 +30,7 @@ val firstSet1_defn = Hol_defn "firstSet1_defn" `
 	      FLAT (MAP (firstSet1 g (NTS nt::sn)) r))
      ++ (if nullableML g [] [NTS nt] then 
 	    firstSet1 g sn rest
-	 else []))`
+	 else []))`;
 
 
 val (firstSet1,firstSet1_ind) = tprove (
@@ -78,10 +79,10 @@ val (firstSet1,firstSet1_ind) = tprove (
     DECIDE_TAC
   ]);
 
-val firstSetML = Define `firstSetML g sym = firstSet1 g [] [sym]`
+val firstSetML = Define `firstSetML g sym = firstSet1 g [] [sym]`;
 
 val getRhsNilMem = store_thm ("getRhsNilMem",
-``(getRhs nt (rules g) =[]) = ~(?r.MEM (rule nt r) (rules g))``,
+``(getRhs nt (rules g) =[]) = ~(∃r.MEM (rule nt r) (rules g))``,
 SRW_TAC [] [EQ_IMP_THM] THEN
 Cases_on `g` THEN
 FULL_SIMP_TAC (srw_ss()) [rules_def] THEN
@@ -90,17 +91,17 @@ SRW_TAC [] [getRhs_def] THEN
 SRW_TAC [] [] THEN
 Cases_on `h` THEN
 FULL_SIMP_TAC (srw_ss()) [getRhs_def] THEN
-Cases_on `nt=s` THEN
+Cases_on `nt=n` THEN
 SRW_TAC [] [] THEN
-METIS_TAC [getRhsDistrib,APPEND,APPEND_eq_NIL])
+METIS_TAC [getRhsDistrib,APPEND,APPEND_eq_NIL]);
 
 val getRhsNilRtc = store_thm ("getRhsNilRtc",
-``(getRhs nt (rules g) = []) ==>
-      (!l.RTC (derives g) [NTS nt] l ==> (l=[NTS nt]))``,
+``(getRhs nt (rules g) = []) ⇒
+      (∀l.RTC (derives g) [NTS nt] l ⇒ (l=[NTS nt]))``,
 SRW_TAC [] [EQ_IMP_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES1] THEN
 FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq,getRhsNilMem] THEN
-METIS_TAC [])
+METIS_TAC []);
 
 
 val MEM_getRhs = store_thm(
@@ -112,10 +113,10 @@ val MEM_getRhs = store_thm(
 
 val firstSetList = Define
 `firstSetList g l =
-      {TS fst | ?rst. RTC (derives g) l ([TS fst] ++ rst)}`
+      {TS fst | ∃rst. RTC (derives g) l ([TS fst] ++ rst)}`
 
 val firstSet1Eq1 = store_thm ("firstSet1Eq1",
-  ``∀g sn l. MEM s (firstSet1 g sn l) ==> s ∈ firstSetList g l``,
+  ``∀g sn l. MEM s (firstSet1 g sn l) ⇒ s ∈ firstSetList g l``,
   HO_MATCH_MP_TAC firstSet1_ind THEN 
   SRW_TAC [] [firstSet1, rmd_mem_list] THENL[
     SIMP_TAC (srw_ss()) [firstSetList] THEN METIS_TAC [RTC_RULES],
@@ -171,9 +172,9 @@ val firstSet1Eq1 = store_thm ("firstSet1Eq1",
     `(derives g)^* (l' ++ l) ((TS fst :: rst) ++ l)`
        by METIS_TAC [rtc_derives_same_append_right] THEN
     METIS_TAC [RTC_RULES, APPEND, APPEND_ASSOC]
-    ])
+    ]);
 
-open rich_listTheory
+open rich_listTheory;
 
 
 val ntderive_def = Define`
@@ -190,17 +191,17 @@ val ntderive_def = Define`
         nullable g pfx ∧
         ntderive g tok (N2 :: Ns))
 `;
-val _ = export_rewrites ["ntderive_def"]
+val _ = export_rewrites ["ntderive_def"];
 
 val ntderive_APPEND = store_thm(
   "ntderive_APPEND",
-  ``∀l1 l2. ntderive g tok (l1 ++ l2) ∧ ¬(l2 = []) ==>
+  ``∀l1 l2. ntderive g tok (l1 ++ l2) ∧ ¬(l2 = []) ⇒
             ntderive g tok l2``,
   Induct THEN1 SRW_TAC [][] THEN 
   Cases_on `l1` THEN SRW_TAC [][] THENL [
     Cases_on `l2` THEN FULL_SIMP_TAC (srw_ss()) [],
     METIS_TAC [APPEND]
-  ])
+  ]);
 
 val MEM_FLAT = prove(
   ``MEM e (FLAT l) = ∃l0. MEM l0 l ∧ MEM e l0``,
@@ -209,7 +210,7 @@ val MEM_FLAT = prove(
 val nullable_TS = prove(
   ``nullable g (TS s :: rest) = F``,
   SRW_TAC [][nullable_def] THEN 
-  METIS_TAC [notTlRtcDerives])
+  METIS_TAC [notTlRtcDerives]);
 
 val firstset1_nullable_append = prove(
   ``MEM t (firstSet1 g sn sfx) ∧ nullable g pfx ⇒
@@ -259,13 +260,13 @@ val ntderive_firstset1 = prove(
       SRW_TAC [][EXTENSION] THEN 
       METIS_TAC [symbol_11]
     ]
-  ])
+  ]);
 
 val nullable_NIL = store_thm(
   "nullable_NIL",
   ``nullable g []``,
   SRW_TAC [][nullable_def])
-val _ = export_rewrites ["nullable_NIL"]
+val _ = export_rewrites ["nullable_NIL"];
       
 val split_killer = prove(
   ``∀y p s. 
@@ -277,13 +278,13 @@ val split_killer = prove(
   METIS_TAC []);
 
 val isolate_last = prove(
-  ``∀l e. MEM e l ==>
+  ``∀l e. MEM e l ⇒
           ∃pfx sfx. (l = pfx ++ [e] ++ sfx) ∧
                     ¬MEM e sfx``,
-  Induct THEN SRW_TAC [][] THEN METIS_TAC [APPEND])
+  Induct THEN SRW_TAC [][] THEN METIS_TAC [APPEND]);
 
 val ALL_DISTINCT_APPEND = prove(
-  ``ALL_DISTINCT (l1 ++ l2) ==> ALL_DISTINCT l1 ∧ ALL_DISTINCT l2``,
+  ``ALL_DISTINCT (l1 ++ l2) ⇒ ALL_DISTINCT l1 ∧ ALL_DISTINCT l2``,
   Induct_on `l1` THEN SRW_TAC [][]);
 
 val ntderive_list_exists = prove(
@@ -292,7 +293,7 @@ val ntderive_list_exists = prove(
        ∀tok rest. (sf2 = TS tok :: rest) ∧
                   (∀pfx sfx. nullable g pfx ⇒ 
                              ¬(sf1 = pfx ++ [TS tok] ++ sfx))
-                 ==> 
+                 ⇒ 
                   ∃nlist pfx sfx. 
                      (sf1 = pfx ++ [NTS (HD nlist)] ++ sfx) ∧
                      nullable g pfx ∧
@@ -308,11 +309,11 @@ val ntderive_list_exists = prove(
       (sf1' = pfx ++ rhs ++ sfx)`
      by METIS_TAC [derives_def] THEN 
   SRW_TAC [][] THEN 
-  Cases_on `∀p s. nullable g p ==> 
+  Cases_on `∀p s. nullable g p ⇒ 
                   ¬(pfx ++ rhs ++ sfx = p ++ [TS tok] ++ s)`
   THENL [
     FULL_SIMP_TAC (srw_ss()) [] THEN
-    REPEAT (Q.PAT_ASSUM `!x. P x` (K ALL_TAC)) THEN 
+    REPEAT (Q.PAT_ASSUM `∀x. P x` (K ALL_TAC)) THEN 
     RULE_ASSUM_TAC (SIMP_RULE (srw_ss()) [split_killer]) THEN 
     FULL_SIMP_TAC (srw_ss()) [] THENL [
       SRW_TAC [][] THEN METIS_TAC [APPEND_ASSOC],
@@ -369,7 +370,7 @@ val lemma =  SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) []
 val first_first1 = prove(
   ``TS t ∈ firstSetList g sf ⇒ TS t ∈ set (firstSet1 g [] sf)``,
   SRW_TAC [][firstSetList] THEN 
-  Cases_on `∀p s. nullable g p ==> ¬(sf = p ++ [TS t] ++ s)` THENL[
+  Cases_on `∀p s. nullable g p ⇒ ¬(sf = p ++ [TS t] ++ s)` THENL[
     `∃nlist pfx sfx. 
         (sf = pfx ++ [NTS (HD nlist)] ++ sfx) ∧
         nullable g pfx ∧ ntderive g t nlist ∧
@@ -407,13 +408,13 @@ THENL[
 		
 
 
-val _ = save_thm ("firstSet1",firstSet1)
-val _ = save_thm ("firstSet1_ind",firstSet1_ind)
+val _ = save_thm ("firstSet1",firstSet1);
+val _ = save_thm ("firstSet1_ind",firstSet1_ind);
 
 
 
-val _ = save_thm ("firstSet1",firstSet1)
-val _ = save_thm ("firstSet1_ind",firstSet1_ind)
+val _ = save_thm ("firstSet1",firstSet1);
+val _ = save_thm ("firstSet1_ind",firstSet1_ind);
 
 
 val mlDir = "./theoryML/"

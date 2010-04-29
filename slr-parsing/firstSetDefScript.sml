@@ -268,7 +268,8 @@ val nullable_NIL = store_thm(
   SRW_TAC [][nullable_def])
 val _ = export_rewrites ["nullable_NIL"];
       
-val split_killer = prove(
+val split_killer = store_thm
+("split_killer",
   ``∀y p s. 
     (x ++ y = p ++ [E] ++ s) = 
     (∃x2. (x = p ++ [E] ++ x2) ∧ (s = x2 ++ y)) ∨
@@ -277,15 +278,14 @@ val split_killer = prove(
   Cases_on `p` THEN SRW_TAC [][] THEN1 METIS_TAC [] THEN 
   METIS_TAC []);
 
-val isolate_last = prove(
+val isolate_last = store_thm
+("isolate_last",
   ``∀l e. MEM e l ⇒
           ∃pfx sfx. (l = pfx ++ [e] ++ sfx) ∧
                     ¬MEM e sfx``,
   Induct THEN SRW_TAC [][] THEN METIS_TAC [APPEND]);
 
-val ALL_DISTINCT_APPEND = prove(
-  ``ALL_DISTINCT (l1 ++ l2) ⇒ ALL_DISTINCT l1 ∧ ALL_DISTINCT l2``,
-  Induct_on `l1` THEN SRW_TAC [][]);
+
 
 val ntderive_list_exists = prove(
   ``∀sf1 sf2.

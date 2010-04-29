@@ -100,7 +100,47 @@ val nonTerminalsList = Define
 `nonTerminalsList s rl = s::nonTmnls rl`;
 
 
+val nonTerminalsML =  Define `
+  (nonTerminalsML (G [] s) = {NTS s}) ∧
+  (nonTerminalsML (G (rule l r::rs) s) =
+          LIST_TO_SET (FILTER isNonTmnlSym (NTS l :: r)) UNION
+          nonTerminalsML (G rs s))`;
 
+
+val terminalsML = Define 
+`(terminalsML (G [] s) = LIST_TO_SET []) ∧
+(terminalsML (G (rule l r::rs) s) = 
+LIST_TO_SET (FILTER isTmnlSym r) UNION terminalsML (G rs s))`;
+
+
+val nonTerminalsEq = store_thm ("nonTerminalsEq",
+``nonTerminals g = nonTerminalsML g``,
+Cases_on `g` THEN
+Induct_on `l` THEN
+SRW_TAC [] [nonTerminals, nonTerminalsML] THEN
+Cases_on `h` THEN
+FULL_SIMP_TAC (srw_ss()) [rule_nonterminals,nonTerminalsML,isNonTmnlSym_def,
+			  nonTerminals] THEN
+`nonTerminalsML (G l n) = 
+NTS n INSERT BIGUNION (IMAGE rule_nonterminals (set l))` by SRW_TAC [] [] THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+Q.ABBREV_TAC `a = BIGUNION (IMAGE rule_nonterminals (set l))` THEN
+SRW_TAC [] [filter_seteq,insert_union,isNonTmnlSym_def]);
+
+
+val terminalsEq = store_thm ("terminalsEq",
+``terminals g = terminalsML g``,
+Cases_on `g` THEN
+Induct_on `l` THEN
+SRW_TAC [] [terminals, terminalsML] THEN
+Cases_on `h` THEN
+FULL_SIMP_TAC (srw_ss()) [terminalsML,isTmnlSym_def,terminals, 
+			  rule_terminals] THEN
+`terminalsML (G l n) = BIGUNION (IMAGE rule_terminals (set l))` 
+			     by SRW_TAC [] [] THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+Q.ABBREV_TAC `a = BIGUNION (IMAGE rule_terminals (set l))` THEN
+SRW_TAC [] [filter_seteq,insert_union,isTmnlSym_def]);
 
 val allSyms = Define
 `allSyms g = nonTerminals g ∪ terminals g`;
@@ -3520,6 +3560,53 @@ METIS_TAC []) THEN
 IMP_RES_TAC nrc_drdeq_ld THEN
 METIS_TAC [arithmeticTheory.RTC_eq_NRC]);
 
+
+val lhsWithLastSym = Define `
+  (lhsWithLastSym sym [] = []) ∧
+  (lhsWithLastSym sym ((rule l [])::rs) = rmDupes (lhsWithLastSym sym rs)) ∧
+  (lhsWithLastSym sym ((rule l r)::rs) =
+        if (LAST r =  sym) then rmDupes ((NTS l) :: lhsWithLastSym sym rs)
+        else rmDupes (lhsWithLastSym sym rs))`;
+
+val last_l1 = prove(
+  ``∀sym l r. ~(lhsWithLastSym  sym [rule l r] = []) ⇒ (∃pfx.pfx++[sym]=r)``,
+  REPEAT GEN_TAC THEN Cases_on `r` THEN
+  SRW_TAC [][lhsWithLastSym, rmDupes] THEN
+  Q.EXISTS_TAC `FRONT (h::t)` THEN
+  SRW_TAC [][APPEND_FRONT_LAST]);
+
+val lwls_r1 = store_thm ("lwls_r1",
+`` ~(lhsWithLastSym sym (rule s l::rs)=([] :(α, β) symbol list)) ⇒
+ (~(lhsWithLastSym sym [rule s l] = ([] :(α, β) symbol list))
+    ∨ ~(lhsWithLastSym (sym:(α, β) symbol) rs = ([] :(α, β) symbol list)))``,
+SRW_TAC [] [] THEN
+Cases_on `l` THENL[
+FULL_SIMP_TAC (srw_ss()) [lhsWithLastSym] THEN
+METIS_TAC [rmd_r2,listNotEmpty],
+METIS_TAC [rmDupes,lhsWithLastSym]]);
+
+
+val notNullLhsLastSym = store_thm ("notNullLhsLastSym",
+``∀sym rs.~(lhsWithLastSym (sym:(α, β) symbol) (rs:(α,β) rule list) = 
+	    ([] :(α, β) symbol list)) ⇒
+    (∃l pfx.MEM (rule l (pfx++[sym])) rs)``,
+SRW_TAC [] [] THEN
+Induct_on `rs` THEN
+SRW_TAC [] [lhsWithLastSym] THEN
+
+SRW_TAC [] [] THEN
+Cases_on `h` THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+IMP_RES_TAC lwls_r1 THEN
+METIS_TAC [last_l1]);
+
+val symInGr = store_thm ("symInGr",
+``∀(sym:(α,β) symbol) (g:(α,β) grammar).
+~(lhsWithLastSym sym (rules g)=[]:(α,β) symbol list) ⇒ sym IN (allSyms g)``,
+SRW_TAC [] [] THEN
+IMP_RES_TAC notNullLhsLastSym THEN
+Cases_on `sym` THEN
+METIS_TAC [allNtSymsInGr,allTmSymsInGr,notNullLhsLastSym,APPEND_NIL]);
 
 val mlDir = "./theoryML/"
 

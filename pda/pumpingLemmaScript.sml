@@ -2252,8 +2252,6 @@ METIS_TAC [MEM, NOT_CONS_NIL, LENGTH_NIL, DECIDE ``LENGTH l ≠ 0 ⇒ LENGTH l �
 METIS_TAC [MEM, NOT_CONS_NIL, LENGTH_NIL, DECIDE ``LENGTH l ≠ 0 ⇒ LENGTH l ≥ 1``]]);
 
 
-val allNonUseless = Define
-`allNonUseless g = (∀e.e ∈ (allSyms g) ⇒ gaw g e)`;
 
 val pumpCfg = store_thm
 ("pumpCfg",

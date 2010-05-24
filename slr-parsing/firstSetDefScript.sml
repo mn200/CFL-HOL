@@ -416,54 +416,6 @@ val _ = save_thm ("firstSet1_ind",firstSet1_ind);
 val _ = save_thm ("firstSet1",firstSet1);
 val _ = save_thm ("firstSet1_ind",firstSet1_ind);
 
-val followML_defn = Hol_defn "followML"
-  `(followG g sn N = followrs g sn N (rules g)) ∧
-   (followrs g sn N [] = {}) ∧
-   (followrs g sn N (r::rs) =
-      followr g sn N (ruleLhs r) (ruleRhs r) ∪
-      followrs g sn N rs) ∧
-   (followr g sn N M [] = {}) ∧
-   (followr g sn N M (TS t::rest) = followr g sn N M rest) ∧
-   (followr g sn N M (NTS P :: rest) =
-      (if N = P then
-         firstSetList g rest ∪
-         (if nullableML g [] rest then
-            if M ∈ sn ∨ NTS M ∉ nonTerminals g ∨
-               ¬(IMAGE NTS (set sn) ⊆ nonTerminals g) then {}
-            else followG g (N::sn) M
-          else {})
-       else {}) ∪ followr g sn N M rest)`
-
-val easy_def = Define`
-  (easy (INL _) = 0) ∧
-  (easy (INR (INL (_, _, _, rs))) = LENGTH rs) ∧
-  (easy (INR (INR (_, _, _, _, syms))) = LENGTH syms)
-`
-
-val cg_def = Define`
-  (cg (INL _) = 2) ∧
-  (cg (INR (INL _)) = 1) ∧
-  (cg (INR (INR _)) = 0)
-`;
-
-val tricky_def = Define`
-  tricky (g,sn) = CARD (nonTerminals g) - LENGTH sn
-`;
-
-val gsn_def = Define`
-  (gsn (INL (g,sn,_)) = (g,sn)) ∧
-  (gsn (INR (INL (g,sn,_))) = (g,sn)) ∧
-  (gsn (INR (INR (g,sn,_))) = (g,sn))`
-
-val (followML_def, followML_ind) = tprove(
-  followML_defn,
-  WF_REL_TAC `inv_image (measure tricky LEX $< LEX measure easy)
-                        (λx. (gsn x, cg x, x))` THEN
-  SRW_TAC [][gsn_def, cg_def, easy_def, tricky_def] THEN1 DECIDE_TAC THEN
-  ...
-
-
-
 
 
 

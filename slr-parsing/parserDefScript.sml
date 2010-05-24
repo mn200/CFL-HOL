@@ -9,9 +9,14 @@ parse:: lrmachine -> string -> parse option
 *)
 
 open HolKernel boolLib bossLib Parse BasicProvers Defn
-open stringTheory relationTheory pred_setTheory listTheory  boolSimps optionTheory
-open grammarDefTheory listLemmasTheory regexpTheory whileLemmasTheory
-open setLemmasTheory parseTreeTheory containerTheory Defn arithmeticTheory whileTheory markerTheory boolLemmasTheory
+
+open stringTheory relationTheory pred_setTheory listTheory boolSimps
+optionTheory
+
+open grammarDefTheory listLemmasTheory symbolDefTheory whileLemmasTheory
+
+open setLemmasTheory parseTreeTheory containerTheory Defn
+arithmeticTheory whileTheory markerTheory boolLemmasTheory
 
 val _ = new_theory "parserDef"
 

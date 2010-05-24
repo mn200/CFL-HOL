@@ -1,0 +1,125 @@
+val inpLen = store_thm
+("inpLen",
+``∀g t. validptree g t ⇒
+ isCnf g  ⇒ 
+(¬∃t0 t1. symRepProp t0 t1 t) ⇒
+ ∀k. (k = LENGTH (distinctNtms t)) ⇒
+ (LENGTH (leaves t) ≤ 2**(k - 1))``,
+
+completeInduct_on `height t` THEN SRW_TAC [][] THEN
+ Cases_on `t` THEN1 FULL_SIMP_TAC (srw_ss()) [validptree] THEN
+FULL_SIMP_TAC (srw_ss()) [validptree, height_def, isCnf_def] THEN
+ Q.ABBREV_TAC `r = getSymbols l` THEN
+ ` isWord r ∧ (LENGTH r = 1) ∨
+ EVERY isNonTmnlSym r ∧ (LENGTH r = 2)` by METIS_TAC [] THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [list_lem1]  THEN
+ SRW_TAC [][] THEN
+ Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def] THEN
+ SRW_TAC [][leaves_def] THEN
+ `l = [Leaf t]` by METIS_TAC [getSymsTm] THEN
+ SRW_TAC [][leaves_def, distinctNtms, treeSyms, rmDupes, delete_def]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [list_lem2] THEN
+Cases_on `e1` THEN Cases_on `e2` THEN SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+`∃t' t''.l = [Node n' t'; Node n'' t'']` by METIS_TAC [getSymsNtm] THEN
+SRW_TAC [][] THEN
+
+Q.ABBREV_TAC `t = Node n [Node n' t'; Node n'' t'']` THEN
+Q.ABBREV_TAC `t1 = Node n' t'` THEN
+Q.ABBREV_TAC `t2 = Node n'' t''` THEN
+Q.ABBREV_TAC `d = distinctNtms t` THEN
+Q.ABBREV_TAC `d1 = distinctNtms t1` THEN
+Q.ABBREV_TAC `d2 = distinctNtms t2` THEN
+Q.ABBREV_TAC `l = LENGTH (leaves t)` THEN
+Q.ABBREV_TAC `l1 = LENGTH (leaves t1)` THEN
+Q.ABBREV_TAC `l2 = LENGTH (leaves t2)` THEN
+
+`(subtree t [0] = SOME t1)` by SRW_TAC [][subtree, Abbr `t`, Abbr `t1`] THEN
+`(subtree t [1] = SOME t2)` by SRW_TAC [][subtree, Abbr `t`, Abbr `t2`] THEN
+`¬∃s0 s1. symRepProp s0 s1 t1` by METIS_TAC [subtreeNotSymProp, MEM] THEN
+`¬∃s0 s1. symRepProp s0 s1 t2` by METIS_TAC [subtreeNotSymProp, MEM] THEN
+
+`height t1 < 1 + max 0 (MAP (λa. height a) [t1; t2])` by 
+(SRW_TAC [][max] THEN FULL_SIMP_TAC (arith_ss) []) THEN
+`height t2 < 1 + max 0 (MAP (λa. height a) [t1; t2])` by 
+(SRW_TAC [][max] THEN FULL_SIMP_TAC (arith_ss) []) THEN
+
+`l1 ≤ 2 ** (LENGTH d1 - 1)` by METIS_TAC [isNode_def, MEM] THEN
+`l2 ≤ 2 ** (LENGTH d2 - 1)` by METIS_TAC [isNode_def, MEM] THEN
+`leaves t = leaves t1 ++ leaves t2` by 
+SRW_TAC [][Abbr `t`, Abbr `t1`, Abbr `t2`, leaves_def] THEN
+`l = l1 + l2` by METIS_TAC [LENGTH_APPEND] THEN
+SRW_TAC [][] THEN
+
+`¬MEM (NTS n) (treeSyms t1) ∧ ¬MEM (NTS n) (treeSyms t2)` by
+(`∀e. e ∈ [t1; t2] ⇒ ¬(NTS n ∈ treeSyms e)` by METIS_TAC [notSymRepImpTreeSyms] THEN
+ FULL_SIMP_TAC (srw_ss()) []) THEN
+
+`LENGTH d1 ≤ LENGTH d - 1` by
+
+(SRW_TAC [][Abbr `d1`, Abbr `d`, Abbr `t1`, Abbr `t`] THEN
+SRW_TAC [][distinctNtms] THEN
+SRW_TAC [][rmDupes_lts_card] THEN
+Q.MATCH_ABBREV_TAC `CARD (set s0) ≤ CARD (set s) - 1` THEN
+Q_TAC SUFF_TAC `CARD (set s0) < CARD (set s)` THEN
+FULL_SIMP_TAC (arith_ss) [] THEN
+Q_TAC SUFF_TAC `set s0 ⊂ set s` THEN1
+ METIS_TAC [CARD_PSUBSET, FINITE_LIST_TO_SET] THEN
+UNABBREV_ALL_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [treeSyms, rmDupes, delete_def, isNonTmnlSym_def] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND, isNonTmnlSym_def] THEN
+`delete (NTS n) (FILTER isNonTmnlSym (FLAT (MAP (λa. treeSyms a) t'))) =
+(FILTER isNonTmnlSym (FLAT (MAP (λa. treeSyms a) t')))`
+ by METIS_TAC [delete_not_mem,FILTER_APPEND,notMemFilter,
+	       MEM, MEM_APPEND] THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [PSUBSET_DEF, EXTENSION, SUBSET_DEF, EQ_IMP_THM] THEN
+SRW_TAC [][] THEN1
+METIS_TAC [rmd_r2, MEM, MEM_APPEND, delete_not_mem, delete_append] THEN
+Q.EXISTS_TAC `NTS n` THEN
+SRW_TAC [][] THEN
+METIS_TAC [rmd_r2, MEM, MEM_APPEND, delete_not_mem, delete_append, 
+	   delete_mem_list]) THEN
+
+`LENGTH d2 ≤ LENGTH d - 1` by
+
+(SRW_TAC [][Abbr `d2`, Abbr `d`, Abbr `t2`, Abbr `t`] THEN
+SRW_TAC [][distinctNtms] THEN
+SRW_TAC [][rmDupes_lts_card] THEN
+Q.MATCH_ABBREV_TAC `CARD (set s0) ≤ CARD (set s) - 1` THEN
+Q_TAC SUFF_TAC `CARD (set s0) < CARD (set s)` THEN
+FULL_SIMP_TAC (arith_ss) [] THEN
+Q_TAC SUFF_TAC `set s0 ⊂ set s` THEN1
+ METIS_TAC [CARD_PSUBSET, FINITE_LIST_TO_SET] THEN
+UNABBREV_ALL_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [treeSyms, rmDupes, delete_def] THEN
+FULL_SIMP_TAC (srw_ss()) [FILTER_APPEND, isNonTmnlSym_def] THEN
+`delete (NTS n) (FILTER isNonTmnlSym (FLAT (MAP (λa. treeSyms a) t''))) =
+(FILTER isNonTmnlSym (FLAT (MAP (λa. treeSyms a) t'')))`
+ by METIS_TAC [delete_not_mem,FILTER_APPEND,notMemFilter,
+	       MEM, MEM_APPEND] THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [PSUBSET_DEF, EXTENSION, SUBSET_DEF, EQ_IMP_THM] THEN
+SRW_TAC [][] THEN1
+METIS_TAC [rmd_r2, MEM, MEM_APPEND, delete_not_mem, delete_append, 
+	   delete_mem_list, FILTER_APPEND] THEN
+Q.EXISTS_TAC `NTS n` THEN
+SRW_TAC [][rmDupes] THEN
+METIS_TAC [rmd_r2, MEM, MEM_APPEND, delete_not_mem, delete_append, 
+	   delete_mem_list, FILTER_APPEND]) THEN
+
+`l1 ≤ 2 ** ((LENGTH d - 1)-1)` by METIS_TAC [powLe] THEN
+`l2 ≤ 2 ** ((LENGTH d - 1)-1)` by METIS_TAC [powLe] THEN
+`l1 + l2 ≤ 2*2 ** ((LENGTH d − 1) - 1)` by DECIDE_TAC THEN
+`l1 + l2 ≤ 2 ** (((LENGTH d - 1) - 1) + 1)` by METIS_TAC [powMult] THEN
+`LENGTH d ≥ 2` by
+(SRW_TAC [][Abbr `d`, Abbr `t`, Abbr `t1`, Abbr `t2`] THEN
+FULL_SIMP_TAC (srw_ss()) [treeSyms] THEN
+SRW_TAC [][distinctNtms, treeSyms, rmDupes, delete_def, delete_append,
+	   FILTER_APPEND, isNonTmnlSym_def] THEN
+DECIDE_TAC) THEN
+Cases_on `LENGTH d` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `LENGTH d` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+FULL_SIMP_TAC (srw_ss()++ARITH_ss) []);

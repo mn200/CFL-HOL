@@ -1555,6 +1555,74 @@ FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
 FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
 METIS_TAC [memdel, alld_delete, not_mem_delete]);
 
+val notMemFilter = store_thm
+("notMemFilter",
+``∀l. ¬(e ∈ l) ⇒ ¬(e ∈ FILTER P l)``,
+
+Induct_on `l` THEN SRW_TAC [][FILTER] THEN
+FULL_SIMP_TAC (srw_ss()) []);
+
+val max = Define
+`(max n [] = n) ∧
+(max n (x::xs) = if (n ≥ x) then max n xs else max x xs)`;
+
+val maxMapElem = store_thm
+("maxMapElem",
+``∀l n. (max n (MAP f l) = n') ⇒ 
+(∃e. MEM e l ∧ (f e = n')) ∨ (n = n')``,
+
+Induct_on `l` THEN SRW_TAC [][max] THEN
+FULL_SIMP_TAC (srw_ss()) [max] THEN
+METIS_TAC []);
+
+
+val maxMinVal = store_thm
+("maxMinVal",
+``∀n l. max n l ≥ n``,
+Induct_on `l` THEN SRW_TAC [][max] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`h`] MP_TAC)  THEN
+SRW_TAC [][] THEN
+DECIDE_TAC);
+
+val maxElemVals = store_thm
+("maxElemVals",
+``∀n l. (max n l = n) ⇒ (∀e. e ∈ l ⇒ (e ≤ n))``,
+
+Induct_on `l` THEN SRW_TAC [][max] THEN
+RES_TAC THEN
+FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+METIS_TAC [maxMinVal]);
+
+val maxValLe = store_thm
+("maxValLe",
+``∀n e l. n ≥ e ⇒ e ≤ max n l``,
+
+Induct_on `l` THEN SRW_TAC [][max] THEN
+FULL_SIMP_TAC (arith_ss) []);
+
+
+val maxElemVals' = store_thm
+("maxElemVals'",
+``∀n n' l. (max n l = n') ⇒ (∀e. e ∈ l ⇒ (e ≤ n'))``,
+
+Induct_on `l` THEN SRW_TAC [][max] THEN
+RES_TAC THEN
+FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+METIS_TAC [maxMinVal, DECIDE ``a ≥ b ⇔ b ≤ a``, maxValLe]);
+
+
+val maxGtElem = store_thm
+("maxGtElem",
+``∀p s. e > n ⇒ n < max 0 (p ++ [e] ++ s)``,
+
+SRW_TAC [][] THEN
+SPOSE_NOT_THEN ASSUME_TAC THEN
+`n ≥ max 0 (p ++ [e] ++ s)` by DECIDE_TAC THEN
+`∀e'. e' ∈ (p++[e]++s) ⇒ e' ≤ max 0 (p ++ [e] ++ s)` by METIS_TAC [maxElemVals'] THEN
+FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+`e ≤ max 0 (p ++ [e] ++ s)` by METIS_TAC [] THEN
+DECIDE_TAC);
+
 
 (*val _ =
 val mlDir = ref ("./theoryML/");

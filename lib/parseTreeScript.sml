@@ -270,6 +270,42 @@ val fringeTmsEq = store_thm
 Induct_on `x` THEN SRW_TAC [][ts2str_def, isTmnlSym_def, fringe_def]);
 
 
+
+val height_defn = Hol_defn "height_defn"
+`(height (Leaf tm) = 0) ∧
+ (height (Node n l) = 1 + max 0 (MAP height l))`;
+
+
+val (height_def, height_ind) = tprove (height_defn,
+WF_REL_TAC (`measure ptsize`) THEN
+SRW_TAC [] [] THEN
+FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ptsizel_append] THEN
+DECIDE_TAC);
+
+val _ = save_thm ("height_def",height_def)
+val _ = save_thm ("height_ind",height_ind)
+
+val getSymsNtm = store_thm
+("getSymsNtm",
+``(getSymbols l = [NTS n1; NTS n2]) ⇒ ∃t1 t2. (l = [Node n1 t1; Node n2 t2])``,
+
+SRW_TAC [][] THEN
+`LENGTH l = 2` by METIS_TAC [getSyms_len, list_lem2] THEN
+FULL_SIMP_TAC (srw_ss()) [list_lem2] THEN
+SRW_TAC [][] THEN
+Cases_on `e1` THEN Cases_on `e2` THEN 
+FULL_SIMP_TAC (srw_ss()) [getSymbols]);
+
+val getSymsTm = store_thm
+("getSymsTm",
+``(getSymbols l = [TS t]) ⇒  (l = [Leaf t])``,
+
+SRW_TAC [][] THEN
+`LENGTH l = 1` by METIS_TAC [getSyms_len, list_lem1] THEN
+FULL_SIMP_TAC (srw_ss()) [list_lem1] THEN
+SRW_TAC [][] THEN
+Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [getSymbols]);
+
 val mlDir = ref ("./theoryML/");
 (*
 val _ =

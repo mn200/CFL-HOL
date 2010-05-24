@@ -1,0 +1,9 @@
+val symRepProp = Define
+`symRepProp dl =
+    ∃p tsl B sfx v w s.
+     (dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ s) ∧
+     EVERY isTmnlSym tsl ∧
+     ∃s0 s1.(s = s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx] ++ s1) ∧
+     EVERY isTmnlSym v ∧
+     (∀e.MEM e s0 ⇒ ∃p0 p1 nt.(e = tsl ++ p0 ++ [NTS nt] ++ p1 ++ sfx) ∧
+      EVERY isTmnlSym p0)`;

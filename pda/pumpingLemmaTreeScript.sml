@@ -14,13 +14,6 @@ val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 
 
-val notMemFilter = store_thm
-("notMemFilter",
-``∀l. ¬(e ∈ l) ⇒ ¬(e ∈ FILTER P l)``,
-
-Induct_on `l` THEN SRW_TAC [][FILTER] THEN
-FULL_SIMP_TAC (srw_ss()) []);
-
 val treeSyms_defn = Hol_defn "treeSyms_defn"
 `(treeSyms (Leaf tm) =  ([TS tm]:(α,β) symbol list)) ∧
 (treeSyms (Node n t) =  (NTS n) :: (FLAT (MAP treeSyms t)))`;
@@ -76,21 +69,6 @@ val lastExpProp = Define
 ∃n ptl.(t1 = Node n ptl) ∧ 
 (∀e. e ∈ ptl ⇒ ¬∃st0 st1. symRepProp st0 st1 e)`;
 
-
-val max = Define
-`(max n [] = n) ∧
-(max n (x::xs) = if (n ≥ x) then max n xs else max x xs)`;
-
-val height_defn = Hol_defn "height_defn"
-`(height (Leaf tm) = 0) ∧
- (height (Node n l) = 1 + max 0 (MAP height l))`;
-
-
-val (height_def, height_ind) = tprove (height_defn,
-WF_REL_TAC (`measure ptsize`) THEN
-SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ptsizel_append] THEN
-DECIDE_TAC);
 
 
 val subtreeApp = store_thm
@@ -189,65 +167,6 @@ SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [root_def] THEN
 SRW_TAC [][] THEN
 METIS_TAC [isSubtree, subtreeTrans, option_CLAUSES,root_def]));
-
-
-
-val maxMapElem = store_thm
-("maxMapElem",
-``∀l n. (max n (MAP f l) = n') ⇒ 
-(∃e. MEM e l ∧ (f e = n')) ∨ (n = n')``,
-
-Induct_on `l` THEN SRW_TAC [][max] THEN
-FULL_SIMP_TAC (srw_ss()) [max] THEN
-METIS_TAC []);
-
-
-val maxMinVal = store_thm
-("maxMinVal",
-``∀n l. max n l ≥ n``,
-Induct_on `l` THEN SRW_TAC [][max] THEN
-FIRST_X_ASSUM (Q.SPECL_THEN [`h`] MP_TAC)  THEN
-SRW_TAC [][] THEN
-DECIDE_TAC);
-
-val maxElemVals = store_thm
-("maxElemVals",
-``∀n l. (max n l = n) ⇒ (∀e. e ∈ l ⇒ (e ≤ n))``,
-
-Induct_on `l` THEN SRW_TAC [][max] THEN
-RES_TAC THEN
-FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-METIS_TAC [maxMinVal]);
-
-val maxValLe = store_thm
-("maxValLe",
-``∀n e l. n ≥ e ⇒ e ≤ max n l``,
-
-Induct_on `l` THEN SRW_TAC [][max] THEN
-FULL_SIMP_TAC (arith_ss) []);
-
-
-val maxElemVals' = store_thm
-("maxElemVals'",
-``∀n n' l. (max n l = n') ⇒ (∀e. e ∈ l ⇒ (e ≤ n'))``,
-
-Induct_on `l` THEN SRW_TAC [][max] THEN
-RES_TAC THEN
-FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-METIS_TAC [maxMinVal, DECIDE ``a ≥ b ⇔ b ≤ a``, maxValLe]);
-
-
-val maxGtElem = store_thm
-("maxGtElem",
-``∀p s. e > n ⇒ n < max 0 (p ++ [e] ++ s)``,
-
-SRW_TAC [][] THEN
-SPOSE_NOT_THEN ASSUME_TAC THEN
-`n ≥ max 0 (p ++ [e] ++ s)` by DECIDE_TAC THEN
-`∀e'. e' ∈ (p++[e]++s) ⇒ e' ≤ max 0 (p ++ [e] ++ s)` by METIS_TAC [maxElemVals'] THEN
-FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-`e ≤ max 0 (p ++ [e] ++ s)` by METIS_TAC [] THEN
-DECIDE_TAC);
 
 
 val subtreeHeight = store_thm
@@ -354,25 +273,6 @@ SRW_TAC [][subtree] THEN
 Cases_on `EL i l'` THEN SRW_TAC [][subtree]) THEN
 METIS_TAC [subtreeNotSymProp, isSubtree]));
 
-val getSymsNtm = store_thm
-("getSymsNtm",
-``(getSymbols l = [NTS n1; NTS n2]) ⇒ ∃t1 t2. (l = [Node n1 t1; Node n2 t2])``,
-
-SRW_TAC [][] THEN
-`LENGTH l = 2` by METIS_TAC [getSyms_len, list_lem2] THEN
-FULL_SIMP_TAC (srw_ss()) [list_lem2] THEN
-SRW_TAC [][] THEN
-Cases_on `e1` THEN Cases_on `e2` THEN FULL_SIMP_TAC (srw_ss()) [getSymbols_def]);
-
-val getSymsTm = store_thm
-("getSymsTm",
-``(getSymbols l = [TS t]) ⇒  (l = [Leaf t])``,
-
-SRW_TAC [][] THEN
-`LENGTH l = 1` by METIS_TAC [getSyms_len, list_lem1] THEN
-FULL_SIMP_TAC (srw_ss()) [list_lem1] THEN
-SRW_TAC [][] THEN
-Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [getSymbols_def]);
 
 val cnfTree = store_thm
 ("cnfTree",
@@ -495,9 +395,9 @@ Q.ABBREV_TAC `l2 = LENGTH (leaves t2)` THEN
 `¬∃s0 s1. symRepProp s0 s1 t2` by METIS_TAC [subtreeNotSymProp, MEM] THEN
 
 `height t1 < 1 + max 0 (MAP (λa. height a) [t1; t2])` by 
-(SRW_TAC [][max] THEN FULL_SIMP_TAC (arith_ss) []) THEN
+(SRW_TAC [][max_def] THEN FULL_SIMP_TAC (arith_ss) []) THEN
 `height t2 < 1 + max 0 (MAP (λa. height a) [t1; t2])` by 
-(SRW_TAC [][max] THEN FULL_SIMP_TAC (arith_ss) []) THEN
+(SRW_TAC [][max_def] THEN FULL_SIMP_TAC (arith_ss) []) THEN
 
 `l1 ≤ 2 ** (LENGTH d1 - 1)` by METIS_TAC [isNode_def, MEM] THEN
 `l2 ≤ 2 ** (LENGTH d2 - 1)` by METIS_TAC [isNode_def, MEM] THEN

@@ -1,0 +1,23 @@
+val ntProp = Define
+`ntProp dl p s tsl B sfx n1 n2=
+(dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ [tsl++[NTS n1;NTS n2]++sfx] ++ s) ∧
+ EVERY isTmnlSym tsl ∧
+ ((n1=B) ∨
+   ∃r1 r2 v w.
+   (s=r1++[(tsl ++ v ++ [NTS B] ++ w ++ sfx)]++r2) ∧ EVERY isTmnlSym v)`;
+
+val lastExpProp = Define
+`lastExpProp (g,dl,z) =
+(∃p s tsl B sfx n1 n2.
+ ntProp dl p s tsl B sfx n1 n2 ∧
+  ∃dl1 dl2 dl3 v w.
+  lderives g ⊢ dl1 ◁ [NTS n1;NTS n2] → (v++[NTS B]++w) ∧
+  ∃rst.lderives g ⊢ dl2 ◁  (v++[NTS B]++w) → (v++rst) ∧
+  ∃rst'.lderives g ⊢ dl3 ◁ sfx → rst' ∧
+  (z = tsl++v++rst++rst') ∧
+  distElemSubset dl dl1 ∧
+  distElemSubset dl dl2 ∧
+  distElemSubset dl dl3 ∧
+  (∀e.MEM e dl1 ⇒ MEM (tsl ++ e ++ sfx) dl) ∧
+  (∀e.MEM e dl2 ⇒ MEM (tsl ++ e ++sfx) dl) ∧
+  ¬symRepProp dl1 ∧ ¬symRepProp dl2 ∧ ¬(symRepProp (dl1++(TL dl2))))`;

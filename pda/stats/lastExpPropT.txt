@@ -1,0 +1,5 @@
+val lastExpProp = Define
+`lastExpProp t = 
+∃t0 t1. symRepProp t0 t1 t ∧ 
+∃n ptl.(t1 = Node n ptl) ∧ 
+(∀e. e ∈ ptl ⇒ ¬∃st0 st1. symRepProp st0 st1 e)`;

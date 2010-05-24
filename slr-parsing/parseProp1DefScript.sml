@@ -3,7 +3,7 @@ open HolKernel boolLib bossLib Parse BasicProvers Defn
 open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory boolSimps optionTheory pairTheory whileTheory
 
-open regexpTheory grammarDefTheory boolLemmasTheory listLemmasTheory
+open symbolDefTheory grammarDefTheory boolLemmasTheory listLemmasTheory
 parseTreeTheory yaccDefTheory whileLemmasTheory
 
 val _ = new_theory "parseProp1Def";

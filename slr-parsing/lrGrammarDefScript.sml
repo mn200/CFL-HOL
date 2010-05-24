@@ -3,7 +3,7 @@ open HolKernel boolLib bossLib Parse BasicProvers Defn
 open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory boolSimps optionTheory rich_listTheory
 
-open regexpTheory grammarDefTheory boolLemmasTheory listLemmasTheory
+open symbolDefTheory grammarDefTheory boolLemmasTheory listLemmasTheory
 setLemmasTheory whileLemmasTheory parseTreeTheory followSetDefTheory
 yaccDefTheory parseProp1DefTheory parseProp2DefTheory
 

@@ -1,0 +1,266 @@
+val pumpCfg = store_thm
+("pumpCfg",
+``∀g.
+   isCnf (g:('a,'b) grammar)  ⇒
+   ∃n. n > 0 ∧
+       ∀z. z ∈ language g ∧ LENGTH z ≥ n ⇒
+           ∃u v w x y.
+	     (z = u ++ v ++ w ++ x ++ y) ∧
+             LENGTH v + LENGTH x ≥ 1 ∧
+             LENGTH v + LENGTH w + LENGTH x ≤ n ∧
+             ∀i. u++FLAT (lpow v i)++w++FLAT (lpow x i)++y ∈ language g``,
+
+SRW_TAC [][] THEN
+ Q.ABBREV_TAC `k=LENGTH (ntms g)` THEN
+Q.EXISTS_TAC `2**k` THEN
+SRW_TAC [][] THEN1 SRW_TAC [][Abbr`k`, GREATER_DEF] THEN
+`∃t. validptree g t ∧ (root t = NTS (startSym g)) ∧ (z = MAP TS (leaves t))` 
+ by METIS_TAC [ptLangThm, fringeEqLeaves] THEN
+SRW_TAC [][] THEN
+Q.ABBREV_TAC `z:(α,β) symbol list = MAP TS (leaves t)` THEN
+Q.ABBREV_TAC `k0 = LENGTH (distinctNtms t)` THEN
+`isNode t` by (Cases_on `t` THEN FULL_SIMP_TAC (srw_ss())[validptree, 
+							  isNode_def]) THEN
+`k0 ≥ 1` by METIS_TAC [numd] THEN
+`k0 ≤ k` by METIS_TAC [numdLeqNtms] THEN
+`1 ≤ k0`by DECIDE_TAC THEN
+`k ≠ 0`by DECIDE_TAC THEN
+ `LENGTH z ≥ 2 ** k0` by METIS_TAC [powGtTrans] THEN
+ `LENGTH z > 2**(k0-1)` by METIS_TAC [powGt] THEN
+`∃t0' t1'. symRepProp  t0' t1' t` by METIS_TAC [inpLeninv, LENGTH_MAP] THEN
+IMP_RES_TAC symPropImpLastExp THEN
+FULL_SIMP_TAC (srw_ss()) [lastExpProp] THEN
+SRW_TAC [][] THEN
+`validptree g (Node n ptl)` by METIS_TAC [symRepProp, vptSubtree, isNode_def] THEN
+`isNode t0` by
+(Cases_on `t0` THEN FULL_SIMP_TAC (srw_ss()) [symRepProp, rootRep, root_def,
+					     isNode_def]) THEN
+`validptree g (Node n ptl)` by METIS_TAC [symRepProp, vptSubtree, isNode_def] THEN
+`validptree g t0` by 
+(FULL_SIMP_TAC (srw_ss()) [symRepProp, rootRep] THEN
+ METIS_TAC [vptSubtree, isSubEqImpSub]) THEN
+
+`∃n1 n2 ptl1 ptl2. (ptl = [Node n1 ptl1; Node n2 ptl2])` by 
+(`∃n1 t1 n2 t2. (ptl = [Node n1 t1; Node n2 t2]) ∨ ∃ts. ptl = [Leaf ts]` 
+by METIS_TAC [isNode_def, cnfTree] THEN1
+METIS_TAC [] THEN
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [symRepProp, rootRep] THEN
+`t0 = Leaf ts` by METIS_TAC [leafSubt] THEN
+SRW_TAC [][] THEN
+METIS_TAC [isNode_def]) THEN
+
+SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+Q.ABBREV_TAC `t1 = Node n1 ptl1` THEN
+Q.ABBREV_TAC `t2 = Node n2 ptl2` THEN
+Q.ABBREV_TAC `l1 = distinctNtms (Node n1 ptl1)` THEN
+Q.ABBREV_TAC `l2 = distinctNtms (Node n2 ptl2)` THEN
+`validptree g t1` by METIS_TAC [validptree, MEM, isNode_def] THEN
+`LENGTH (leaves t1) ≤ 2 ** (LENGTH l1 - 1)` by METIS_TAC [inpLen] THEN
+`validptree g t2` by METIS_TAC [validptree, MEM, isNode_def] THEN
+`LENGTH (leaves t2) ≤ 2 ** (LENGTH l2 - 1)` by METIS_TAC [inpLen] THEN
+`∃p.(subtree (Node n [t1; t2]) p = SOME t0) ∧ p ≠ []`
+by  METIS_TAC [symRepProp, isSubtree, rootRep] THEN
+`∃p'. (subtree t p' = SOME (Node n [t1; t2]))` by  
+(FULL_SIMP_TAC (srw_ss()) [symRepProp] THEN
+ `((Node n [t1; t2]) = t) ∨ isSubtree (Node n [t1; t2]) t` 
+ by METIS_TAC [isSubEqImpSub] THEN
+ SRW_TAC [][] THEN
+ METIS_TAC [subtree, isSubtree]) THEN
+Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+FULL_SIMP_TAC (srw_ss()) [subtree] THEN
+Cases_on `h < 2` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+`(h = 0) ∨ (h = 1)` by DECIDE_TAC THEN SRW_TAC [][]
+THENL[
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      `∃pfx sfx. (derives g)^* [root t] (((MAP TS pfx):(α,β) symbol list) ++ 
+					 [NTS n] ++ 
+					 (MAP TS sfx):(α,β) symbol list) ∧ 
+	   (leaves t = pfx ++ leaves (Node n [t1; t2]) ++ sfx)`
+      by METIS_TAC [vptSubtD, root_def] THEN
+      `∃pfx' sfx'.(derives g)^* [NTS n1] (((MAP TS pfx'):(α,β) symbol list)
+					  ++ [root t0] ++ 
+					  MAP TS sfx':(α,β) symbol list) ∧
+	   (leaves t1 = pfx' ++ leaves t0 ++ sfx')` 
+      by METIS_TAC [vptSubtD, root_def] THEN
+      `LENGTH (leaves t2) ≥ 1` by METIS_TAC [cnfTreeLeaves] THEN
+      FULL_SIMP_TAC (srw_ss()) [leaves_def] THEN
+      MAP_EVERY Q.EXISTS_TAC [`MAP TS pfx`,`MAP TS pfx'`,`MAP TS (leaves t0)`,
+			      `MAP TS sfx'++ MAP TS (leaves t2)`,`MAP TS sfx`] THEN
+      SRW_TAC [][] THEN
+      FULL_SIMP_TAC (arith_ss) [] THEN1      
+      (`isSubtreeEq t1 t` by 
+      (FULL_SIMP_TAC (srw_ss())[isSubEqImpSub, symRepProp, isNode_def] THEN
+       SRW_TAC [][isSubtree] THEN
+       `(subtree (Node n [t1; t2]) [0] = SOME t1)` by SRW_TAC [][subtree] THEN
+       METIS_TAC [MEM, subtreeTrans, isSubtree]) THEN      
+      `LENGTH l1 ≤ k0` by METIS_TAC [isSubEqImpSub, distSymsLenSub] THEN
+      `LENGTH l1 ≤ k` by DECIDE_TAC THEN
+      `isSubtreeEq t2 t` by 
+      (FULL_SIMP_TAC (srw_ss())[isSubEqImpSub, symRepProp, isNode_def] THEN
+       SRW_TAC [][isSubtree] THEN
+       `(subtree (Node n [t1; t2]) [1] = SOME t2)` by SRW_TAC [][subtree] THEN
+       METIS_TAC [MEM, subtreeTrans, isSubtree]) THEN      
+      `LENGTH l2 ≤ k0` by METIS_TAC [isSubEqImpSub, distSymsLenSub] THEN
+      `LENGTH l2 ≤ k` by DECIDE_TAC THEN       
+      `LENGTH pfx' + (LENGTH sfx' + LENGTH (leaves t0)) ≤ 2 ** (k − 1)` 
+       by METIS_TAC [powLe] THEN
+       `LENGTH (leaves t2) ≤ 2 ** (k − 1)` by METIS_TAC [powLe] THEN      
+      `LENGTH pfx' + (LENGTH sfx' + LENGTH (leaves t0)) + 
+      LENGTH (leaves t2) ≤ 2*2 ** (k − 1)` by DECIDE_TAC THEN
+      `LENGTH pfx' + (LENGTH sfx' + LENGTH (leaves t0)) + 
+      LENGTH (leaves t2) ≤ 2 ** (k − 1 + 1)` 
+      by METIS_TAC [powMult] THEN
+      `k - 1 + 1 = k` by DECIDE_TAC THEN
+      `LENGTH pfx' + (LENGTH sfx' + LENGTH (leaves t0)) + 
+      LENGTH (leaves t2) ≤ 2 ** k` 
+      by METIS_TAC [] THEN
+      FULL_SIMP_TAC (srw_ss()) [leaves_def] THEN
+      METIS_TAC [LENGTH_APPEND, APPEND_ASSOC, ADD_SYM]) THEN
+
+      `(derives g)^* [root t1] ((MAP TS (leaves t1)):(α,β) symbol list)` by 
+      METIS_TAC [vptRtcd,fringeEqLeaves] THEN
+      `(derives g)^* [root t2] ((MAP TS (leaves t2)):(α,β) symbol list)` by
+      METIS_TAC [vptRtcd,fringeEqLeaves] THEN
+      `root t0 = NTS n` by METIS_TAC [symRepProp, rootRep, root_def] THEN
+      `(derives g)^* [root t0] ((MAP TS (leaves t0)):(α,β) symbol list)` by
+      METIS_TAC [vptRtcd,fringeEqLeaves] THEN
+      Cases_on `t0` THEN FULL_SIMP_TAC (srw_ss()) [root_def] THEN
+      SRW_TAC [][] THEN
+      `root t1 = NTS n1` by METIS_TAC [root_def] THEN
+      `root t2 = NTS n2` by METIS_TAC [root_def] THEN
+      SRW_TAC [][] THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      
+      `derives g [NTS n] [NTS n1;NTS n2]` by 
+      (`isSubtreeEq (Node n [t1; t2]) t` by
+      (SRW_TAC [][isSubEqImpSub, isSubtree] THEN
+      Cases_on `p'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+      METIS_TAC [MEM]) THEN
+      `validptree g (Node n [t1;t2])` by METIS_TAC [isNode_def,vptSubtree] THEN
+      FULL_SIMP_TAC (srw_ss()) [validptree, Abbr `t1`, Abbr `t2`,
+				getSymbols_def] THEN
+      METIS_TAC [res1]) THEN
+      `(derives g)^* [NTS n1;NTS n2]
+	 (MAP TS pfx' ++ [NTS n] ++ MAP TS sfx'++[NTS n2])`
+      by METIS_TAC [rtc_derives_same_append_right, APPEND] THEN
+      `(derives g)^* [NTS n] (MAP TS pfx' ++ [NTS n] ++ MAP TS sfx'++[NTS n2])`
+      by METIS_TAC [APPEND,RTC_RULES,APPEND_ASSOC] THEN
+      `isWord ((MAP TS (leaves (Node n l))):(α,β) symbol list)` 
+      by METIS_TAC [everyTmMapTs] THEN
+      `(derives g)^* (MAP TS sfx' ++ [NTS n2])  (MAP TS sfx' ++ MAP TS (leaves t2))`
+      by METIS_TAC [rtc_derives_same_append_left] THEN
+      `isWord ((MAP TS sfx' ++ MAP TS (leaves t2)):(α,β) symbol list)`
+      by METIS_TAC [everyTmMapTs, EVERY_APPEND] THEN
+      Q.ABBREV_TAC `p = MAP TS pfx'` THEN
+      Q.ABBREV_TAC `s = MAP TS sfx' ++ [NTS n2]` THEN
+     `(derives g)^* [NTS n] (p ++ [NTS n] ++ s)` by METIS_TAC [APPEND_ASSOC] THEN				      
+     Q.ABBREV_TAC `x:(α,β) symbol list = (MAP TS (leaves (Node n l)))` THEN
+     Q.ABBREV_TAC `x':(α,β) symbol list = (MAP TS sfx' ++ MAP TS (leaves t2))` THEN
+      `(derives g)^* [NTS n] (FLAT (lpow p i) ++ x ++ FLAT (lpow x' i))`
+				      by METIS_TAC [rtcDReplEnd] THEN
+    SRW_TAC [][language_def, EXTENSION] THEN
+    `(derives g)^* (MAP TS pfx ++ [NTS n] ++ MAP TS sfx)
+         (MAP TS pfx ++ (FLAT (lpow p i) ++ x ++ FLAT (lpow x' i)) ++
+	  MAP TS sfx)` by METIS_TAC [rtc_derives_same_append_left,
+				     rtc_derives_same_append_right] THEN
+    METIS_TAC [APPEND_ASSOC,RTC_RTC,everyTmMapTs,islpowTmnl,EVERY_APPEND],
+
+    
+    (* t0 is in the second subtree *)
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      `∃pfx sfx. (derives g)^* [root t] (((MAP TS pfx):(α,β) symbol list) ++ 
+					 [NTS n] ++ 
+					 (MAP TS sfx):(α,β) symbol list) ∧ 
+	   (leaves t = pfx ++ leaves (Node n [t1; t2]) ++ sfx)`
+      by METIS_TAC [vptSubtD, root_def] THEN
+      `∃pfx' sfx'.(derives g)^* [NTS n2] (((MAP TS pfx'):(α,β) symbol list)
+					  ++ [root t0] ++ 
+					  MAP TS sfx':(α,β) symbol list) ∧
+	   (leaves t2 = pfx' ++ leaves t0 ++ sfx')` 
+      by METIS_TAC [vptSubtD, root_def] THEN
+      `LENGTH (leaves t1) ≥ 1` by METIS_TAC [cnfTreeLeaves] THEN
+      FULL_SIMP_TAC (srw_ss()) [leaves_def] THEN
+      MAP_EVERY Q.EXISTS_TAC [`MAP TS pfx`,`MAP TS (leaves t1)++MAP TS pfx'`,
+			      `MAP TS (leaves t0)`,`MAP TS sfx'`,`MAP TS sfx`] THEN
+      SRW_TAC [][] THEN
+      FULL_SIMP_TAC (arith_ss) [] THEN1      
+      (`isSubtreeEq t2 t` by 
+      (FULL_SIMP_TAC (srw_ss())[isSubEqImpSub, symRepProp, isNode_def] THEN
+       SRW_TAC [][isSubtree] THEN
+       `(subtree (Node n [t1; t2]) [1] = SOME t2)` by SRW_TAC [][subtree] THEN
+       METIS_TAC [MEM, subtreeTrans, isSubtree]) THEN      
+       `LENGTH l2 ≤ k0` by METIS_TAC [isSubEqImpSub, distSymsLenSub] THEN
+      `LENGTH l2 ≤ k` by DECIDE_TAC THEN
+      `isSubtreeEq t1 t` by 
+      (FULL_SIMP_TAC (srw_ss())[isSubEqImpSub, symRepProp, isNode_def] THEN
+       SRW_TAC [][isSubtree] THEN
+       `(subtree (Node n [t1; t2]) [0] = SOME t1)` by SRW_TAC [][subtree] THEN
+       METIS_TAC [MEM, subtreeTrans, isSubtree]) THEN      
+      `LENGTH l1 ≤ k0` by METIS_TAC [isSubEqImpSub, distSymsLenSub] THEN
+      `LENGTH l1 ≤ k` by DECIDE_TAC THEN       
+      `LENGTH pfx' + (LENGTH sfx' + LENGTH (leaves t0)) ≤ 2 ** (k − 1)` 
+       by METIS_TAC [powLe] THEN
+       `LENGTH (leaves t1) ≤ 2 ** (k − 1)` by METIS_TAC [powLe] THEN      
+      `LENGTH pfx' + (LENGTH sfx' + LENGTH (leaves t0)) + 
+      LENGTH (leaves t1) ≤ 2*2 ** (k − 1)` by DECIDE_TAC THEN
+      `LENGTH pfx' + (LENGTH sfx' + LENGTH (leaves t0)) + 
+      LENGTH (leaves t1) ≤ 2 ** (k − 1 + 1)` 
+      by METIS_TAC [powMult] THEN
+      `k - 1 + 1 = k` by DECIDE_TAC THEN
+      `LENGTH pfx' + (LENGTH sfx' + LENGTH (leaves t0)) + 
+      LENGTH (leaves t1) ≤ 2 ** k` 
+      by METIS_TAC [] THEN
+      FULL_SIMP_TAC (srw_ss()) [leaves_def] THEN
+      METIS_TAC [LENGTH_APPEND, APPEND_ASSOC, ADD_SYM]) THEN
+
+      `(derives g)^* [root t1] ((MAP TS (leaves t1)):(α,β) symbol list)` by 
+      METIS_TAC [vptRtcd,fringeEqLeaves] THEN
+      `(derives g)^* [root t2] ((MAP TS (leaves t2)):(α,β) symbol list)` by
+      METIS_TAC [vptRtcd,fringeEqLeaves] THEN
+      `root t0 = NTS n` by METIS_TAC [symRepProp, rootRep, root_def] THEN
+      `(derives g)^* [root t0] ((MAP TS (leaves t0)):(α,β) symbol list)` by
+      METIS_TAC [vptRtcd,fringeEqLeaves] THEN
+      Cases_on `t0` THEN FULL_SIMP_TAC (srw_ss()) [root_def] THEN
+      SRW_TAC [][] THEN
+      `root t1 = NTS n1` by METIS_TAC [root_def] THEN
+      `root t2 = NTS n2` by METIS_TAC [root_def] THEN
+      SRW_TAC [][] THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      
+      `derives g [NTS n] [NTS n1;NTS n2]` by 
+      (`isSubtreeEq (Node n [t1; t2]) t` by
+      (SRW_TAC [][isSubEqImpSub, isSubtree] THEN
+      Cases_on `p'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+      METIS_TAC [MEM]) THEN
+      `validptree g (Node n [t1;t2])` by METIS_TAC [isNode_def,vptSubtree] THEN
+      FULL_SIMP_TAC (srw_ss()) [validptree, Abbr `t1`, Abbr `t2`,
+				getSymbols_def] THEN
+      METIS_TAC [res1]) THEN
+      `(derives g)^* [NTS n1;NTS n2]
+	 ([NTS n1] ++ MAP TS pfx' ++ [NTS n] ++ MAP TS sfx')`
+      by METIS_TAC [rtc_derives_same_append_left, APPEND] THEN
+      `(derives g)^* [NTS n] ([NTS n1]++MAP TS pfx' ++ [NTS n] ++ MAP TS sfx')`
+      by METIS_TAC [APPEND,RTC_RULES,APPEND_ASSOC] THEN
+      `isWord ((MAP TS (leaves (Node n l))):(α,β) symbol list)` 
+      by METIS_TAC [everyTmMapTs] THEN
+      `(derives g)^* [NTS n] 
+	 (((MAP TS (leaves t1)):(α,β) symbol list) ++ 
+	 MAP TS pfx' ++ [NTS n] ++ MAP TS sfx')` 
+      by METIS_TAC [rtc_derives_same_append_right, APPEND_ASSOC,RTC_RTC] THEN
+
+      Q.ABBREV_TAC `p = ((MAP TS (leaves t1)):(α,β) symbol list) ++MAP TS pfx'` THEN
+      Q.ABBREV_TAC `s = MAP TS sfx'` THEN
+     Q.ABBREV_TAC `x:(α,β) symbol list = (MAP TS (leaves (Node n l)))` THEN
+     Q.ABBREV_TAC `x':(α,β) symbol list = MAP TS sfx'` THEN
+     `(derives g)^* x' x'`by METIS_TAC [RTC_RULES] THEN
+      `(derives g)^* [NTS n] (FLAT (lpow p i) ++ x ++ FLAT (lpow x' i))`
+				      by METIS_TAC [rtcDReplEnd, everyTmMapTs,
+						    EVERY_APPEND] THEN
+    SRW_TAC [][language_def, EXTENSION] THEN
+    `(derives g)^* (MAP TS pfx ++ [NTS n] ++ MAP TS sfx)
+         (MAP TS pfx ++ (FLAT (lpow p i) ++ x ++ FLAT (lpow x' i)) ++
+	  MAP TS sfx)` by METIS_TAC [rtc_derives_same_append_left,
+				     rtc_derives_same_append_right] THEN
+    METIS_TAC [APPEND_ASSOC,RTC_RTC,everyTmMapTs,islpowTmnl,EVERY_APPEND]]);

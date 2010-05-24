@@ -919,5 +919,6 @@ val islpowTmnl = store_thm
 Induct_on `i` THEN SRW_TAC [][lpow_def,REPLICATE] THEN
 FULL_SIMP_TAC (srw_ss()) [lpow_def,REPLICATE]);
 
+
 val _ = export_theory ();
 

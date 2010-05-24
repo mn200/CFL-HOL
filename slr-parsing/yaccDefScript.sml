@@ -4,7 +4,7 @@ open listTheory containerTheory pred_setTheory arithmeticTheory
 relationTheory markerTheory containerTheory pairTheory boolSimps
 optionTheory rich_listTheory
 
-open regexpTheory parseTreeTheory grammarDefTheory listLemmasTheory
+open symbolDefTheory parseTreeTheory grammarDefTheory listLemmasTheory
 firstSetDefTheory followSetDefTheory containerLemmasTheory
 setLemmasTheory boolLemmasTheory whileLemmasTheory
 

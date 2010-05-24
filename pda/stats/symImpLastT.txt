@@ -1,0 +1,68 @@
+val symPropImpLastExp = store_thm
+("symPropImpLastExp",
+``∀t t0 t1. symRepProp t0 t1 t ⇒ lastExpProp t``,
+
+completeInduct_on `height t` THEN
+SRW_TAC [][] THEN
+Cases_on `t` THEN1
+(FULL_SIMP_TAC (srw_ss()) [lastExpProp, symRepProp, isSubtreeEq] THEN
+ Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [subtree] THEN
+Cases_on `t0` THEN Cases_on `t1` THEN 
+FULL_SIMP_TAC (srw_ss()) [rootRep, root_def, isSubtree] THEN
+Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [subtree]) THEN
+ 
+`isSubtreeEq t1 (Node n l) ∧ rootRep t0 t1` by METIS_TAC [symRepProp] THEN
+FULL_SIMP_TAC (srw_ss()) [isSubEqImpSub] THEN
+SRW_TAC [][] THEN1
+
+(`(root t0 = NTS n) ∧ isSubtree t0 (Node n l)` by METIS_TAC [rootRep, root_def] THEN
+`height t0 < height (Node n l)` by METIS_TAC [subtreeHeight, isSubtree] THEN
+Cases_on `∃s0 s1 t'.symRepProp s0 s1 t' ∧ isSubtree t' (Node n l)` THEN1
+
+(FULL_SIMP_TAC (srw_ss()) [symRepProp, rootRep, isSubEqImpSub] THEN
+SRW_TAC [][] THEN1
+(`height s1 < height (Node n l)` by METIS_TAC [subtreeHeight, isSubtree] THEN
+`lastExpProp s1` by METIS_TAC [subtreeTrans] THEN
+ METIS_TAC [subtreeLastExp]) THEN
+`height t' < height (Node n l)` by METIS_TAC [subtreeHeight, isSubtree] THEN
+`lastExpProp t'` by METIS_TAC [subtreeTrans] THEN
+ METIS_TAC [subtreeLastExp]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][] THEN
+SRW_TAC [][lastExpProp] THEN
+Q.EXISTS_TAC `t0` THEN
+Q.EXISTS_TAC `Node n l` THEN
+SRW_TAC [][] THEN
+`isSubtree e (Node n l)` by
+(SRW_TAC [][isSubtree] THEN
+IMP_RES_TAC memImpEl THEN
+Q.EXISTS_TAC `[i]` THEN
+SRW_TAC [][subtree] THEN
+Cases_on `EL i l` THEN FULL_SIMP_TAC (srw_ss()) [subtree]) THEN
+METIS_TAC []) THEN
+
+(`(root t0 = root t1) ∧ isSubtree t0 t1` by METIS_TAC [rootRep, root_def] THEN
+`height t1 < height (Node n l)` by METIS_TAC [subtreeHeight, isSubtree] THEN
+Cases_on `∃s0 s1.symRepProp s0 s1 t1 ∧ isSubtree t1 (Node n l)` THEN1
+
+ (FULL_SIMP_TAC (srw_ss()) [] THEN
+  `lastExpProp t1` by METIS_TAC [subtreeTrans] THEN
+  METIS_TAC [subtreeLastExp]) THEN
+
+FULL_SIMP_TAC (srw_ss()) [] THEN
+SRW_TAC [][lastExpProp] THEN
+Q.EXISTS_TAC `t0` THEN
+Q.EXISTS_TAC `t1` THEN
+SRW_TAC [][] THEN
+Cases_on `t1` THEN1 
+ (Cases_on `t0` THEN FULL_SIMP_TAC (srw_ss()) [root_def, rootRep, isSubtree] THEN
+  Cases_on `p'` THEN FULL_SIMP_TAC (srw_ss()) [subtree]) THEN
+SRW_TAC [][] THEN
+IMP_RES_TAC memImpEl THEN
+`isSubtree e (Node n' l')` by
+(SRW_TAC [][isSubtree] THEN
+Q.EXISTS_TAC `[i]` THEN
+SRW_TAC [][subtree] THEN
+Cases_on `EL i l'` THEN SRW_TAC [][subtree]) THEN
+METIS_TAC [subtreeNotSymProp, isSubtree]));

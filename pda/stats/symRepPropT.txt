@@ -1,0 +1,11 @@
+val isSubtree = Define
+`isSubtree st t = ∃p. p ≠ [] ∧ (subtree t p = SOME st)`;
+
+val isSubtreeEq = Define
+`isSubtreeEq st t =  ∃p.(subtree t p = SOME st)`;
+
+val rootRep = Define
+`rootRep st t = (root st = root t) ∧  isSubtree st t`;
+
+val symRepProp = Define
+`symRepProp t0 t1 t = isSubtreeEq t1 t ∧ rootRep t0 t1`;

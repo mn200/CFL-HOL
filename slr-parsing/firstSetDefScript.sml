@@ -416,8 +416,23 @@ val _ = save_thm ("firstSet1_ind",firstSet1_ind);
 val _ = save_thm ("firstSet1",firstSet1);
 val _ = save_thm ("firstSet1_ind",firstSet1_ind);
 
-
-
+val followML_defn = Hol_defn "followML"
+  `(followG g sn N = followrs g sn N (rules g)) ∧
+   (followrs g sn N [] = {}) ∧
+   (followrs g sn N (r::rs) =
+      followr g sn N (ruleLhs r) (ruleRhs r) ∪
+      followrs g sn N rs) ∧
+   (followr g sn N M [] = {}) ∧
+   (followr g sn N M (TS t::rest) = followr g sn N M rest) ∧
+   (followr g sn N M (NTS P :: rest) =
+      (if N = P then
+         firstSetList g rest ∪
+         (if nullableML g [] rest then
+            if M ∈ sn ∨ (* NTS M ∉ nonTerminals g ∨ *)
+               ¬(IMAGE NTS (set sn) ⊆ nonTerminals g) then {}
+            else followG g (N::sn) M
+          else {})
+       else {}) ∪ followr g sn N M rest)`
 
 
 val mlDir = "./theoryML/"

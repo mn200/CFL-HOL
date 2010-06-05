@@ -22,28 +22,31 @@ val followSet = Define
 
 
 val followML_defn = Hol_defn "followML"
-  `(followG g sn N = followrs g sn N (rules g)) ∧
-   (followrs g sn N [] = {}) ∧
-   (followrs g sn N (r::rs) =
-      followr g sn N (ruleLhs r) (ruleRhs r) ∪
-      followrs g sn N rs) ∧
-   (followr g sn N M [] = {}) ∧
-   (followr g sn N M (TS t::rest) = followr g sn N M rest) ∧
-   (followr g sn N M (NTS P :: rest) =
+  `(followG g sn N = followrs g sn N (LENGTH (rules g) - 1)) ∧
+   (followrs g sn N 0 = 
+    followr g sn N 0 (LENGTH (ruleRhs (EL 0 (rules g))))) ∧
+   (followrs g sn N i =
+      followr g sn N i (LENGTH (ruleRhs (EL i (rules g)))) ∪
+      followrs g sn N (i - 1)) ∧
+   (followr g sn N i 0 = {}) ∧
+   (followr g sn N i rhsLen = 
+    case (TAKE rhsLen (ruleRhs (EL i (rules g)))) of
+       (TS t::rest) -> followr g sn N i (rhsLen - 1) 
+    || (NTS P :: rest) ->
       (if N = P then
          firstSetList g rest ∪
          (if nullableML g [] rest then
-            if M ∈ sn ∨ NTS M ∉ nonTerminals g ∨
-               ¬(IMAGE NTS (set sn) ⊆ nonTerminals g) then {}
-            else followG g (N::sn) M
+            if  N ∈ sn then {}
+            else followG g (N::sn) (ruleLhs (EL i (rules g)))
           else {})
-       else {}) ∪ followr g sn N M rest)`
+       else {}) ∪ followr g sn N i (rhsLen - 1))`;
+
 
 val easy_def = Define`
   (easy (INL _) = 0) ∧
-  (easy (INR (INL (_, _, _, rs))) = LENGTH rs) ∧
-  (easy (INR (INR (_, _, _, _, syms))) = LENGTH syms)
-`
+  (easy (INR (INL (_, _, _, i))) = i) ∧
+  (easy (INR (INR (_, _, _, _, i))) = i)
+`;
 
 val cg_def = Define`
   (cg (INL _) = 2) ∧
@@ -51,85 +54,78 @@ val cg_def = Define`
   (cg (INR (INR _)) = 0)
 `;
 
+
+val validSeen = Define 
+`validSeen (g:(α, β) grammar) (sn:α list) = 
+{ (NTS e):(α, β) symbol | MEM e sn ∧ NTS e ∈ nonTerminals g }`;
+
 val tricky_def = Define`
-  tricky (g,sn) = CARD (nonTerminals g) - LENGTH sn
-`;
+  tricky (g,sn) = CARD (nonTerminals g) - CARD (validSeen g sn)
+  `;
 
 val gsn_def = Define`
   (gsn (INL (g,sn,_)) = (g,sn)) ∧
   (gsn (INR (INL (g,sn,_))) = (g,sn)) ∧
   (gsn (INR (INR (g,sn,_))) = (g,sn))`
 
+
+
+val takeMem = store_thm
+("takeMem",
+``∀l l' n.(TAKE n l = l') ⇒ (∀e. e ∈ l' ⇒ e ∈ l)``,
+
+Induct_on `l` THEN SRW_TAC [][] THEN1
+METIS_TAC [MEM] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [TAKE_def] THEN
+METIS_TAC [MEM]);
+
+
+tgoal followML_defn
+
+``∀i l. (EL i l = x) ⇒ x ∈ l``
+
+
+
+``NTS P ∈ ruleRhs (EL i (rules g)) ⇒ NTS P ∈ nonTerminals g``,
+
+SRW_TAC [][] THEN
+Cases_on `EL i (rules g)` THEN
+FULL_SIMP_TAC (srw_ss()) [ruleRhs_def] THEN
+METIS_TAC [slemma1_4, rgr_r9eq, ]
+
 val (followML_def, followML_ind) = tprove(
   followML_defn,
   WF_REL_TAC `inv_image (measure tricky LEX $< LEX measure easy)
                         (λx. (gsn x, cg x, x))` THEN
-  SRW_TAC [][gsn_def, cg_def, easy_def, tricky_def] THEN1 DECIDE_TAC THEN
-  ...
+  SRW_TAC [][gsn_def, cg_def, easy_def, tricky_def] THEN
+
+`NTS P ∈ ruleRhs (EL i (rules g))` by METIS_TAC [MEM, takeMem] THEN
+`NTS P ∈ nonTerminals g` by MAGIC THENL[
+SRW_TAC [][validSeen] THEN
+`{e | ((e = P) ∨ e ∈ sn) ∧ NTS e ∈ nonTerminals g} =
+{P} ∪ {e | e ∈ sn ∧ NTS e ∈ nonTerminals g}` by (SRW_TAC [][EXTENSION] THEN
+						 METIS_TAC []) THEN
+`{P} ∩ {e | e ∈ sn ∧ NTS e ∈ nonTerminals g} = {}`
+by (SRW_TAC [][EXTENSION] THEN METIS_TAC []) THEN
+`FINITE {e | e ∈ sn ∧ NTS e ∈ nonTerminals g}` by MAGIC THEN
+`CARD {e | ((e = P) ∨ e ∈ sn) ∧ NTS e ∈ nonTerminals g} + 0 =
+CARD {P} + CARD {e | e ∈ sn ∧ NTS e ∈ nonTerminals g}` by 
+			  METIS_TAC [CARD_UNION,FINITE_SING,
+				     FINITE_LIST_TO_SET,CARD_EMPTY] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+DECIDE_TAC,
+
+Q_TAC SUFF_TAC `CARD (validSeen g sn) < CARD (nonTerminals g)` THEN1
+DECIDE_TAC THEN
+`FINITE (nonTerminals g)` by MAGIC THEN
+Q_TAC SUFF_TAC `validSeen g sn ⊂ nonTerminals g` THEN1 METIS_TAC [CARD_PSUBSET]
+
+`FINITE (validSeen g sn)`
+``
 
 
-
-
-
-val followRuleML_defn = Hol_defn "followRuleML_defn"
-`(followRuleML g sn sym (rule l []) = {}) ∧
-(followRuleML g sn sym (rule l (h::t)) = 
-if (~(MEM sym sn) ∧ sym ∈ (allSyms g)) then
-    if ((NTS l) IN (nonTerminalsML g)) then
-	if (h=sym) then
-	      set (firstSet1 g [] t) ∪ 
-              followRuleML g sn sym (rule l t) ∪
-	     (if nullableML g [] t then 
-		BIGUNION (set 
-	            (MAP (followRuleML g (sym::sn) (NTS l)) 
-                      (rules g))) 
-              else {})
-	else followRuleML g sn sym (rule l t)
-    else {}
-else {})`;
-
-val (followRuleML,followRuleML_ind) = 
-tprove (followRuleML_defn,
-WF_REL_TAC (`inv_image  (((measure (\(g,sn). CARD ((allSyms g) DIFF (set sn))))) LEX
-                   (measure (\r.LENGTH (ruleRhs r)))) (\(g,sn,sym,r).(g,sn),r)`) THEN
-SRW_TAC [] [] THEN
-`FINITE (allSyms g)` 
-    by METIS_TAC [FINITE_LIST_TO_SET,finiteAllSyms] THEN
-SRW_TAC [] [FINITE_INSERT,FINITE_LIST_TO_SET] 
-THENL[
-      `sym ∈ allSyms g` by METIS_TAC [symInGr] THEN
-      `((allSyms g) ∩ (sym INSERT set sn)) 
-         = ((sym INSERT set sn) ∩ (allSyms g))` 
-	  by METIS_TAC [INTER_COMM] THEN
-      ASM_REWRITE_TAC [] THEN
-      FULL_SIMP_TAC (srw_ss()) [INSERT_INTER] THEN
-      SRW_TAC [] [ADD1] THEN
-      `(allSyms g) ∩ set sn = (set sn) ∩ (allSyms g)` 
-	  by METIS_TAC [INTER_COMM] THEN
-      ASM_REWRITE_TAC [] THEN
-      DECIDE_TAC,
-
-      `sym IN allSyms g` by METIS_TAC [symInGr] THEN
-      `~(sym ∈ set sn)` by FULL_SIMP_TAC list_ss [] THEN
-      `~(sym ∈ ((allSyms g) ∩ (set sn)))` 
-	  by METIS_TAC [IN_INTER] THEN
-      `~(allSyms g = set sn)` by METIS_TAC [] THEN
-      `CARD (allSyms g) - CARD (allSyms g ∩ set sn) 
-         = CARD ((allSyms g) DIFF (set sn))` 
-	  by METIS_TAC [CARD_DIFF,FINITE_LIST_TO_SET,
-			FINITE_INSERT] THEN
-      ASM_REWRITE_TAC [] THEN
-      `sym ∈ (allSyms g DIFF set sn)` 
-	  by (FULL_SIMP_TAC (srw_ss()) [DIFF_DEF] THEN 
-	      METIS_TAC []) THEN
-      `~((allSyms g DIFF set sn)={})` 
-	  by METIS_TAC [MEMBER_NOT_EMPTY] THEN
-      `~(CARD (allSyms g DIFF set sn)=0)` 
-	  by METIS_TAC [CARD_EQ_0,FINITE_DIFF] THEN
-      DECIDE_TAC]);
-
-val followSetML = Define `followSetML g sym = 
-BIGUNION (set (MAP (followRuleML g [] sym) (rules g)))`;
 
 
 val followRuleEq1 = store_thm ("followRuleEq1",

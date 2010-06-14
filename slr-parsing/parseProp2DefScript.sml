@@ -13,8 +13,10 @@ val _ = diminish_srw_ss ["list EQ"];
 (* 2. All the trees associated with nonterminal symbols on the stack
 correspond to a rule in the grammar*)
 
-val stacktreeleaves = Define `(stacktreeleaves [] = []) ∧
-(stacktreeleaves (((sym, itl),tree)::rst) = (leaves tree)++stacktreeleaves rst )`;
+val stacktreeleaves = Define 
+`(stacktreeleaves [] = []) ∧
+(stacktreeleaves (((sym, itl),tree)::rst) = 
+ MAP TS (leaves tree) ++ stacktreeleaves rst )`;
 
 val leaves_eq_inv = Define 
 `leaves_eq_inv orig sl stl = (stacktreeleaves stl ++ sl = orig)`;
@@ -49,7 +51,7 @@ METIS_TAC [stacktreeleaves, APPEND, APPEND_ASSOC]
 
 
 val stl_map = store_thm ("stl_map",
-``∀l.stacktreeleaves l = leaves (Node n (MAP SND l))``,
+``∀l.stacktreeleaves l = MAP TS (leaves (Node n (MAP SND l)))``,
 Induct_on `l` THEN SRW_TAC  [] [stacktreeleaves, leaves_def] THEN
 Cases_on `h` THEN 
 Cases_on `q` THEN Cases_on `r` THEN 
@@ -103,7 +105,7 @@ Cases_on `stl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [REVERSE_DEF, APPEND_NIL, APPEND]]);
 
 val stlEq = store_thm ("stlEq",
-``∀stl.(stacktreeleaves stl) = FLAT (MAP leaves (MAP SND stl))``,
+``∀stl.(stacktreeleaves stl) = MAP TS (FLAT (MAP leaves (MAP SND stl)))``,
 Induct_on `stl` THEN SRW_TAC [] [stacktreeleaves, MAP, FLAT] THEN
 Cases_on `h` THEN Cases_on `q` THEN 
 FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def]
@@ -112,7 +114,8 @@ FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def]
 
 val red_stkleaves = store_thm ("red_stkleaves", 
 ``(doReduce m (sym::rst,stl,(s, itl)::csl) r = 
-SOME (sl',stl',csl')) ⇒ ((stacktreeleaves (REVERSE stl)) = stacktreeleaves (REVERSE stl'))``,
+SOME (sl',stl',csl')) ⇒ ((stacktreeleaves (REVERSE stl)) = 
+			 stacktreeleaves (REVERSE stl'))``,
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM, Abbrev_def] THEN
 Cases_on `isNonTmnlSym sym` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -144,10 +147,12 @@ Cases_on `addRule stl r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `FST m (SND (HD (pop ((s,itl)::csl) (LENGTH (ruleRhs r)))))
                (NTS (ruleLhs r)) =
              []` THEN
-Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r))` THEN FULL_SIMP_TAC (srw_ss()) []);
+Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r))` THEN 
+			 FULL_SIMP_TAC (srw_ss()) []);
 
 
-(* 3. Leaves of all the ptrees on the stack + the remaining input symbols = original symbol list *)
+(* 3. Leaves of all the ptrees on the stack + the remaining input symbols =
+ original symbol list *)
 val leaves_eq_invthm = store_thm ("leaves_eq_invthm",
 ``∀m g.(m=slrmac g) ⇒ leaves_eq_inv orig sl (REVERSE stl) ⇒ 
 ((parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))) 
@@ -157,23 +162,22 @@ FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM, leaves_eq_inv] THEN
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss() ++ DNF_ss) [option_case_rwt, list_case_rwt, pairTheory.FORALL_PROD] THEN
 Cases_on `getState m itl e` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `v1` THEN FULL_SIMP_TAC (srw_ss()) [] THENL[
-(* 4 subgoals *)
+Cases_on `v1` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
 
-METIS_TAC [red_stkleaves, red_sym, APPEND],
+METIS_TAC [red_stkleaves, red_sym, APPEND] THEN1
 
-METIS_TAC [red_stkleaves, red_sym, APPEND],
+METIS_TAC [red_stkleaves, red_sym, APPEND] THEN
 
 Cases_on `isNonTmnlSym e` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-`stl' = (((e,l),Leaf (symToStr e))::stl)` by SRW_TAC [] [] THEN
+`stl' = (((e,l),Leaf (ts2str e))::stl)` by SRW_TAC [] [] THEN
 `sl'=h::t` by SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `e` THEN 
-FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def,symToStr_def] 
+FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def,ts2str_def] 
 THENL[
+METIS_TAC [isNonTmnlSym_def],
 FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def, stl_append] THEN
-METIS_TAC [APPEND, CONS, APPEND_ASSOC,symToStr_def],
-METIS_TAC [isNonTmnlSym_def]]]);
+METIS_TAC [APPEND, CONS, APPEND_ASSOC,ts2str_def]]);
 
 
 val _ = export_theory ();

@@ -16,8 +16,8 @@ val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];
 
 val followSet = Define 
-`followSet g sym = 
-{ TS ts | ∃s.MEM s (MAP ruleRhs (rules g)) ∧ 
+`followSet (g:(α,β) grammar) (sym:(α,β) symbol) = 
+{ (TS ts):(α,β) symbol | ∃s.MEM s (MAP ruleRhs (rules g)) ∧ 
           ∃pfx sfx.RTC (derives g) s (pfx++[sym]++[TS ts]++sfx) }`;
 
 
@@ -81,6 +81,10 @@ Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [TAKE_def] THEN
 METIS_TAC [MEM]);
 
 
+
+val _ = export_theory ();
+
+(*
 tgoal followML_defn
 
 ``∀i l. (EL i l = x) ⇒ x ∈ l``
@@ -325,6 +329,7 @@ val ntderive'_list_exists = prove(
 
 val lemma' =  SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) [] 
 		       ntderive'_list_exists 
+*)
 
 
 (*
@@ -384,6 +389,7 @@ IMP_RES_TAC
 val mlDir = ref ("./theoryML/");
 
 
+
 (*
 val _ =
  let open EmitML
@@ -403,5 +409,3 @@ val _ =
     :: [])
  end;
 *)
-
-val _ = export_theory ();

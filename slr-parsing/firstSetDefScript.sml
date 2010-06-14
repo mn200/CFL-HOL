@@ -212,7 +212,7 @@ val nullable_TS = prove(
   SRW_TAC [][nullable_def] THEN
   METIS_TAC [notTlRtcDerives]);
 
-val firstset1_nullable_append = prove(
+val firstset1_nullable_append = store_thm("firstset1_nullable_append",
   ``MEM t (firstSet1 g sn sfx) ∧ nullable g pfx ⇒
     MEM t (firstSet1 g sn (pfx ++ sfx))``,
   Induct_on `pfx` THEN SRW_TAC [][] THEN
@@ -223,13 +223,13 @@ val firstset1_nullable_append = prove(
 	 FULL_SIMP_TAC (srw_ss()) [nullable_TS]) THEN
   SRW_TAC [][firstSet1, rmd_mem_list, GSYM nullableEq]);
 
-val firstset1_cons_I = prove(
+val firstset1_cons_I = store_thm("firstset1_cons_I",
   ``MEM tok (firstSet1 g sn [h]) ⇒
     MEM tok (firstSet1 g sn (h :: t))``,
   Cases_on `h` THEN SRW_TAC [][firstSet1]);
 
 
-val ntderive_firstset1 = prove(
+val ntderive_firstset1 = store_thm("ntderive_firstset1",
   ``∀sn. ntderive g tok ns ∧ ALL_DISTINCT ns ∧
          (IMAGE NTS (set ns) ∩ set sn = {}) ⇒
          MEM (TS tok) (firstSet1 g sn [NTS (HD ns)])``,
@@ -287,7 +287,7 @@ val isolate_last = store_thm
 
 
 
-val ntderive_list_exists = prove(
+val ntderive_list_exists = store_thm("ntderive_list_exists",
   ``∀sf1 sf2.
        (derives g)^* sf1 sf2 ⇒
        ∀tok rest. (sf2 = TS tok :: rest) ∧
@@ -367,7 +367,7 @@ val ntderive_list_exists = prove(
 
 val lemma =  SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) []
 		       ntderive_list_exists
-val first_first1 = prove(
+val first_first1 = store_thm("first_first1",
   ``TS t ∈ firstSetList g sf ⇒ TS t ∈ set (firstSet1 g [] sf)``,
   SRW_TAC [][firstSetList] THEN
   Cases_on `∀p s. nullable g p ⇒ ¬(sf = p ++ [TS t] ++ s)` THENL[

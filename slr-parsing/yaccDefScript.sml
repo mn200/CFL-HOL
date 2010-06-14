@@ -2030,7 +2030,7 @@ THENL[
 
 
 val getstate_red = store_thm ("getstate_red", 
-``∀m itl sym g.(m = (sgoto g, reduce g)) ⇒ isTmnlSym sym ⇒
+``∀m itl sym g.(m = (sgoto g, reduce g)) ⇒
 validItl g itl ⇒ (getState m itl sym = REDUCE r) ⇒ MEM r (rules g)``,
 
 SRW_TAC [] [] THEN

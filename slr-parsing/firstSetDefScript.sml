@@ -366,7 +366,10 @@ val ntderive_list_exists = store_thm("ntderive_list_exists",
   ]);
 
 val lemma =  SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) []
-		       ntderive_list_exists
+		       ntderive_list_exists;
+
+val _ = save_thm ("lemma",lemma);
+
 val first_first1 = store_thm("first_first1",
   ``TS t ∈ firstSetList g sf ⇒ TS t ∈ set (firstSet1 g [] sf)``,
   SRW_TAC [][firstSetList] THEN

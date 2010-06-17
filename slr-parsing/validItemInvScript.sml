@@ -626,7 +626,6 @@ val validItemInvReduceStlNotNil = store_thm(
 parseInv (ag,stl,csl) ⇒
  (getState m (itemlist csl) h = REDUCE r) ⇒
  validItemInv (ag,stl',csl')``,
-
 MAGIC);
 (*
 Cases_on `stl` THEN
@@ -792,7 +791,6 @@ SRW_TAC [] [] THEN
                     METIS_TAC  [APPEND, APPEND_ASSOC]		    
 		    ]
 	     ]]);
-
 *)
 
 (* validItem holds after a parse step *)
@@ -855,20 +853,19 @@ SRW_TAC [] [] THEN
 	    SRW_TAC [] [stackSyms_def, stkItl] THEN
 	    `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
 	    FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM] THEN
-	    Cases_on `sgoto ag (initItems ag (rules ag)) (TS t)` THEN
-	    Cases_on `reduce ag (initItems ag (rules ag)) (ts2str (TS t))` THEN
+	    Cases_on `sgoto ag (initItems ag (rules ag)) ((TS t):(α,β) symbol)` THEN
+	    Cases_on `reduce ag (initItems ag (rules ag)) (ts2str ((TS t):(α,β) symbol))` THEN
 	    FULL_SIMP_TAC (srw_ss()) []
-MAGIC
             THENL[
-		  Cases_on `LENGTH t=0` THEN
+		  Cases_on `LENGTH t''=0` THEN
 		  FULL_SIMP_TAC (srw_ss()) [],
 
 		  SRW_TAC [] [] THEN
 		  FULL_SIMP_TAC (srw_ss()) [sgoto_def, nextState_def, trans_def] THEN
-		  Cases_on `moveDot (initItems ag (rules ag)) (TS s)` THEN
+		  Cases_on `moveDot (initItems ag (rules ag)) ((TS t):(α,β) symbol)` THEN
 		  FULL_SIMP_TAC (srw_ss()) [iclosure],
 
-		  Cases_on `itemEqRuleList (h::t) (h'::t'')` THEN
+		  Cases_on `itemEqRuleList (h::t'') (h'::t''')` THEN
 		  FULL_SIMP_TAC (srw_ss()) []
 		  ]
 	    ],
@@ -879,54 +876,61 @@ MAGIC
 	Cases_on `t'` THEN
 	Cases_on `getState m r' h'` THEN
 	FULL_SIMP_TAC (srw_ss()) [] THEN
-	SRW_TAC [] []
-        THENL[
+	SRW_TAC [] [] THEN1
 	      
-	      IMP_RES_TAC validItemInvReduceStlNotNil THEN
-	      FIRST_X_ASSUM (Q.SPECL_THEN [`st`] MP_TAC) THEN
-	      SRW_TAC [] [] THEN
-	      FIRST_X_ASSUM (Q.SPECL_THEN [`[]`,`h'`] MP_TAC) THEN
-	      SRW_TAC [] [] THEN
-	      FIRST_X_ASSUM (Q.SPECL_THEN [`g`,`eof`] MP_TAC) THEN
-	      SRW_TAC [] [] THEN
-	      FIRST_X_ASSUM (Q.SPECL_THEN [`stl'`,`sl'`, `r''`, `csl'`] MP_TAC) THEN
-	      SRW_TAC [] [] THEN
-	      FULL_SIMP_TAC (srw_ss()) [itemlist_def],
+	(IMP_RES_TAC validItemInvReduceStlNotNil THEN
+	 FIRST_X_ASSUM (Q.SPECL_THEN [`st`] MP_TAC) THEN
+	 SRW_TAC [] [] THEN
+	 FIRST_X_ASSUM (Q.SPECL_THEN [`[]`,`h'`] MP_TAC) THEN
+	 SRW_TAC [] [] THEN
+	 FIRST_X_ASSUM (Q.SPECL_THEN [`g`,`eof`] MP_TAC) THEN
+	 SRW_TAC [] [] THEN
+	 FIRST_X_ASSUM (Q.SPECL_THEN [`stl'`,`sl'`, `r''`, `csl'`] MP_TAC) THEN
+	 SRW_TAC [] [] THEN
+	 FULL_SIMP_TAC (srw_ss()) [itemlist_def]) THEN1
+	
+	(IMP_RES_TAC validItemInvReduceStlNotNil THEN
+	 FIRST_X_ASSUM (Q.SPECL_THEN [`st`] MP_TAC) THEN
+	 SRW_TAC [] [] THEN
+	 FIRST_X_ASSUM (Q.SPECL_THEN [`h::t''`,`h'`] MP_TAC) THEN
+	 SRW_TAC [] [] THEN
+	 FIRST_X_ASSUM (Q.SPECL_THEN [`g`,`eof`] MP_TAC) THEN
+	 SRW_TAC [] [] THEN
+	 FIRST_X_ASSUM (Q.SPECL_THEN [`stl'`,`sl'`, `r''`, `csl'`] MP_TAC) THEN
+	 SRW_TAC [] [] THEN
+	 FULL_SIMP_TAC (srw_ss()) [itemlist_def]) THEN
 
-	      IMP_RES_TAC validItemInvReduceStlNotNil THEN
-	      FIRST_X_ASSUM (Q.SPECL_THEN [`st`] MP_TAC) THEN
+	Cases_on `h'` THEN 
+	FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def] THEN
+	SRW_TAC [] [push_def] THEN
+	FULL_SIMP_TAC (srw_ss()) [validItemInv, tmnlSym_def] THEN
+	SRW_TAC [] [] THEN
+	Cases_on `stk` THEN
+	SRW_TAC [] [] THEN
+	FULL_SIMP_TAC (srw_ss()) [IS_PREFIX] THEN
+	SRW_TAC [] [] THEN
+	`m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
+	FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM] THEN
+	Cases_on `sgoto ag  r' ((TS t'):(α,β) symbol)` THEN
+	Cases_on `reduce ag  r' (ts2str ((TS t'):(α,β) symbol))` THEN
+	FULL_SIMP_TAC (srw_ss()) [] THEN1
+	(Cases_on `LENGTH t''''=0` THEN
+	 FULL_SIMP_TAC (srw_ss()) []) 
+	THENL[
+	      
 	      SRW_TAC [] [] THEN
-	      FIRST_X_ASSUM (Q.SPECL_THEN [`h::t''`,`h'`] MP_TAC) THEN
-	      SRW_TAC [] [] THEN
-	      FIRST_X_ASSUM (Q.SPECL_THEN [`g`,`eof`] MP_TAC) THEN
-	      SRW_TAC [] [] THEN
-	      FIRST_X_ASSUM (Q.SPECL_THEN [`stl'`,`sl'`, `r''`, `csl'`] MP_TAC) THEN
-	      SRW_TAC [] [] THEN
-	      FULL_SIMP_TAC (srw_ss()) [itemlist_def],
-
-	      Cases_on `h'` THEN 
-	      FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def] THEN
-	      SRW_TAC [] [push_def] THEN
-	      FULL_SIMP_TAC (srw_ss()) [validItemInv, tmnlSym_def] THEN
-	      SRW_TAC [] [] THEN
-	      Cases_on `stk` THEN
-	      SRW_TAC [] [] THEN
-	      FULL_SIMP_TAC (srw_ss()) [IS_PREFIX] THEN
-	      SRW_TAC [] [] THEN
-	      `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
-	      FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM] THEN
-	      Cases_on `sgoto ag  r' (TS t')` THEN
-	      Cases_on `reduce ag  r' (sym2Str (TS t'))` THEN
-	      FULL_SIMP_TAC (srw_ss()) []
-              THENL[
-		  Cases_on `LENGTH t'''=0` THEN
-		  FULL_SIMP_TAC (srw_ss()) [],
-
-
-		  SRW_TAC [] [] THEN
-		  FULL_SIMP_TAC (srw_ss()) [parseInv,stackValid,itemlist_def] THEN
-		  `IS_PREFIX (REVERSE t ++ [((q',r'),r)]) (h::t')
-                   ∨ IS_PREFIX (h::t') (REVERSE t ++ [((q',r'),r)])`
+	      FULL_SIMP_TAC (srw_ss()) [parseInv,stackValid,itemlist_def] THEN
+	      Cases_on ` REVERSE t ++ [((q',r'),r)] ++
+	      [((((TS t'):(α,β) symbol),h'::t''''),
+		Leaf (ts2str ((TS t'):(α,β) symbol)))]` THEN
+	      FULL_SIMP_TAC (srw_ss()) [] THEN
+	      SRW_TAC [][] THEN
+	      FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND] THEN
+	      SRW_TAC [][] THEN
+	      
+		    
+		  `IS_PREFIX (REVERSE t ++ [((q',r'),r)]) (h::t''''')
+                   ∨ IS_PREFIX (h::t''''') (REVERSE t ++ [((q',r'),r)])`
 		      by METIS_TAC [IS_PREFIX_APPEND2]
 		  THENL[
 			RES_TAC THEN

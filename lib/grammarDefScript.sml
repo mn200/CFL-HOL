@@ -1407,7 +1407,7 @@ val rtc2list_isolate_NT = store_thm(
   ]);
 
 
-val RTC_empty_nonrepeat_rule = prove(
+val RTC_empty_nonrepeat_rule = store_thm("RTC_empty_nonrepeat_rule",
   ``∀sf1 sf2.
        RTC (derives g) sf1 sf2 ⇒
        (sf2 = []) ⇒
@@ -1694,7 +1694,7 @@ val rtc2list_isolate_NT' = store_thm(
     METIS_TAC [derivSubsetAppend,APPEND_NIL]
   ])
 
-val no_repeats' = prove(
+val no_repeats' = store_thm("no_repeats'",
   ``derives g ⊢ d0 ◁ [NTS N] → [] ⇒
     ∃d. derives g ⊢ d ◁ [NTS N] → [] ∧
         ((derivNts d) ⊆ (derivNts d0)) ∧

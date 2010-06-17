@@ -32,8 +32,8 @@ G (MAP (ruleNt2Nt' nt nt') p) (rename nt nt' s) `;
 
 
 val grNt2Nt'R = Define 
-`grNt2Nt'R (g'':('a,'b) grammar) (nt:'a,nt':'a) (g:('a,'b) grammar) g' = 
-   (NTS nt' ∉ nonTerminals g'') ∧ (grNt2Nt' nt nt' g = g')`;
+`grNt2Nt'R (nt:'a,nt':'a) (g:('a,'b) grammar) g' = 
+   (NTS nt' ∉ nonTerminals g) ∧ (grNt2Nt' nt nt' g = g')`;
 
 val renameListSame = store_thm
 ("renameListSame",
@@ -295,10 +295,11 @@ Induct_on `l` THEN SRW_TAC [][] THEN
 SRW_TAC [][ruleNt2Nt', rename] THEN
 METIS_TAC []);
 
+
 val grNt2Nt'RSymInRuleG' = store_thm
 ("grNt2Nt'RSymInRuleG'",
 ``(nt ≠ nt') ⇒ (NTS nt ∈ nonTerminals g)
-       ⇒ grNt2Nt'R g'' (nt,nt') g g0 
+       ⇒ grNt2Nt'R (nt,nt') g g0 
          ⇒ 
 	 ∃rhs.
          MEM (rule nt' rhs) (rules g0) ∨
@@ -318,12 +319,10 @@ val grNt2Nt'RSymInG' = store_thm
 ("grNt2Nt'RSymInG'",
 ``(nt ≠ nt') ⇒ (NTS nt ∈ nonTerminals g)
        ⇒ 
-       grNt2Nt'R g'' (nt,nt') g g0 ⇒ (NTS nt') ∈ nonTerminals g0``,
+       grNt2Nt'R (nt,nt') g g0 ⇒ (NTS nt') ∈ nonTerminals g0``,
 
 SRW_TAC [][] THEN
 METIS_TAC [slemma1_4, grNt2Nt'RSymInRuleG']);
-
-
 
 
 val ruleNt2Nt'Mem1' = store_thm
@@ -348,7 +347,7 @@ METIS_TAC [symbol_11]);
 
 val grNt2Nt'RNtSame = store_thm
 ("grNt2Nt'RNtSame",
-``∀l.(nt ≠ nt') ⇒ grNt2Nt'R g'' (nt,nt') g g0 
+``∀l.(nt ≠ nt') ⇒ grNt2Nt'R (nt,nt') g g0 
      ⇒ 
     ∀e.(NTS e) ∈ (nonTerminals g) ∧ (NTS e ≠ NTS nt) ⇒ (NTS e) ∈ nonTerminals g0``,
 
@@ -360,7 +359,7 @@ METIS_TAC [slemma1_4, ruleNt2Nt'Mem2', ruleNt2Nt'Mem1',symbol_11, rename]);
 
 val grNt2Nt'RNtInNewg = store_thm
 ("grNt2Nt'RNtInNewg",
-``∀l.(nt ≠ nt') ∧ grNt2Nt'R g'' (nt,nt') g g0 
+``∀l.(nt ≠ nt') ∧ grNt2Nt'R (nt,nt') g g0 
      ⇒ 
     ∀e.(NTS e) ∈ (nonTerminals g0) ⇒ (e=nt') ∨ 
                                       (NTS e) ∈ nonTerminals g ∧ (e ≠ nt)``,
@@ -381,7 +380,7 @@ Cases_on `n=nt` THEN SRW_TAC [][]);
 
 val grNt2Nt'RNts = store_thm
 ("grNt2Nt'RNts",
-``grNt2Nt'R g'' (nt,nt') g g0 ⇒ (nt ≠ nt') ⇒
+``grNt2Nt'R (nt,nt') g g0 ⇒ (nt ≠ nt') ⇒
     NTS nt ∈ nonTerminals g
    ⇒
 (nonTerminals g0 = (NTS nt') INSERT ((nonTerminals g) DELETE (NTS nt)))``,
@@ -401,7 +400,7 @@ val grNt2Nt'RAll = store_thm
    (s=(nonTerminals (g:('a,'b) grammar)) ∩ (nonTerminals (g'':('a,'b) grammar))) ⇒
     INFINITE (UNIV:'a set)
          ⇒
-        ∃g'.RTC (\x y.∃nt nt'.grNt2Nt'R g'' (nt,nt') x y) g g' ∧
+        ∃g'.RTC (\x y.∃nt nt'.grNt2Nt'R (nt,nt') x y) g g' ∧
 	    (language g = language g') ∧
             DISJOINT (nonTerminals g') (nonTerminals g'')``,
 
@@ -417,7 +416,7 @@ SRW_TAC [][] THEN
  by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET, FINITE_UNION] THEN
  `∃nt'.nt' ∉ IMAGE stripNts (nonTerminals g'' ∪ nonTerminals g)` 
  by METIS_TAC [NOT_IN_FINITE, IMAGE_FINITE] THEN
-`∃g0.grNt2Nt'R g'' (nt,nt') g g0` by (SRW_TAC [][grNt2Nt'R] THEN
+`∃g0.grNt2Nt'R (nt,nt') g g0` by (SRW_TAC [][grNt2Nt'R] THEN
 				      FULL_SIMP_TAC (srw_ss()) [] THEN 
 				      METIS_TAC [stripNts]) THEN
 `NTS nt' ∉  nonTerminals g` by (FULL_SIMP_TAC (srw_ss()) [INSERT_DEF, INTER_DEF,
@@ -441,7 +440,7 @@ FIRST_X_ASSUM (Q.SPECL_THEN [`g0`, `g''`] MP_TAC) THEN
 SRW_TAC [][] THEN 
 Q.EXISTS_TAC `g'` THEN
 SRW_TAC [][] THEN1
-(Q.ABBREV_TAC `r=(λx y. ∃nt nt'. grNt2Nt'R g'' (nt,nt') x y)` THEN
+(Q.ABBREV_TAC `r=(λx y. ∃nt nt'. grNt2Nt'R (nt,nt') x y)` THEN
 `r g g0` by (SRW_TAC [] [Abbr `r`] THEN METIS_TAC []) THEN
 METIS_TAC [RTC_RULES]) THEN
 METIS_TAC [grNt2Nt'R, nt2nt'LangEq]);
@@ -452,15 +451,16 @@ val disjoint = store_thm
 ``INFINITE (UNIV:'a set) 
        ⇒ 
       ∃g'.(language (g:('a,'b) grammar) = language g') ∧
-          DISJOINT (nonTerminals g') (nonTerminals g'')``,
+          DISJOINT (nonTerminals g) (nonTerminals g')``,
 
 SRW_TAC [][] THEN
-`FINITE (nonTerminals g ∩ nonTerminals g'')` 
+`FINITE (nonTerminals g ∩ nonTerminals g)` 
  by METIS_TAC [finiteNtsList, FINITE_LIST_TO_SET, INTER_FINITE] THEN
- `∃g'.(λx y. ∃nt nt'. grNt2Nt'R g'' (nt,nt') x y)^* g g' ∧ 
+ `∃g'.(λx y. ∃nt nt'. grNt2Nt'R (nt,nt') x y)^* g g' ∧ 
      (language g = language g') ∧
-     DISJOINT (nonTerminals g') (nonTerminals g'')` by METIS_TAC [grNt2Nt'RAll] THEN
-METIS_TAC []);
+     DISJOINT (nonTerminals g') (nonTerminals g)` by METIS_TAC [grNt2Nt'RAll] THEN
+FULL_SIMP_TAC (srw_ss()) [DISJOINT_DEF, EXTENSION] THEN
+METIS_TAC [DISJOINT_INSERT]);
 
 
 

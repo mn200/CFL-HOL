@@ -173,8 +173,9 @@ ONCE_ASM_REWRITE_TAC [] THEN
 SRW_TAC [] [stackSyms_def, ruleRhs_def]);
 
 
-val validStlItems = Define `(validStlItems stl [] = T) ∧
-(validStlItems stl (e::t) =  
+val validStlItems = Define 
+`(validStlItems stl [] = T) ∧
+(validStlItems stl ((e::t):('nts,'ts) item list) =  
 (isSuffix (itemFstRhs e) (stackSyms stl)) ∧ validStlItems stl t)`;
 
 val validStlItemsStack = Define 

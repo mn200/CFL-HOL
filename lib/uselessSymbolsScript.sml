@@ -1,6 +1,8 @@
 open HolKernel Parse boolLib bossLib
 
-open grammarDefTheory relationTheory listTheory
+open grammarDefTheory relationTheory listTheory symbolDefTheory
+
+open listLemmasTheory
 
 val gaw = gaw_def
 val derives = derives_def
@@ -79,6 +81,69 @@ METIS_TAC [key_result]]);
 val term_syms_gen_words = store_thm ("term_syms_gen_words",
   ``EVERY isTmnlSym w ⇒ EVERY (gaw g) w``,
   METIS_TAC [RTC_RULES, sub_result_rev])
+
+
+val gaw_rhs = store_thm ("gaw_rhs",
+``!lhs rhs.MEM (rule lhs rhs) (rules g) ==>
+(!nt.nt IN nonTerminals g ==> ?w. RTC (derives g) [nt] w /\ EVERY isTmnlSym w) ==> 
+EVERY (gaw g) rhs``,
+Induct_on `rhs` THEN SRW_TAC [] [] THEN
+FULL_SIMP_TAC (srw_ss()) [] THENL[
+
+Cases_on `h` THEN 
+METIS_TAC [term_syms_gen_words, EVERY_DEF, isTmnlSym_def, slemma1_4, APPEND, gaw],
+
+`!e.MEM e (h::rhs) ==> e IN (allSyms g)` by METIS_TAC [ruleRhsInAllSyms] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+`!e.MEM e rhs ==> e IN allSyms g` by METIS_TAC [] THEN
+`FINITE (LIST_TO_SET (rules g))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+`FINITE (allSyms g)` by METIS_TAC [finiteAllSyms] THEN
+`!e. e IN allSyms g = MEM e (SET_TO_LIST (allSyms g))` by METIS_TAC [MEM_SET_TO_LIST] THEN
+`!e. MEM e rhs ==> gaw g e` by METIS_TAC [gawAllSyms] THEN
+METIS_TAC [EVERY_MEM]]);
+
+
+
+val gaw_rderives_single = store_thm ("gaw_rderives_single", 
+``!a b.(gaw g) a ==> rderives g [a] b ==> 
+(!nt.nt IN (nonTerminals g) ==> gaw g nt) ==> EVERY (gaw g) b``,
+
+Induct_on `b` THEN SRW_TAC [] [gaw, rderives_def, lreseq] THENL[
+Cases_on `h` THEN1  
+METIS_TAC [RTC_RULES, isTmnlSym_def, EVERY_DEF, slemma1_4, APPEND, APPEND_NIL] THEN
+Q.EXISTS_TAC `[TS t]` THEN
+SRW_TAC [][RTC_RULES, derives_def, isTmnlSym_def],
+
+`gaw g (NTS lhs)` by METIS_TAC [gaw] THEN
+`EVERY (gaw g) (h::b)` by METIS_TAC [gaw_rhs] THEN
+FULL_SIMP_TAC (srw_ss()) []]);
+
+val gaw_rderives = store_thm ("gaw_rderives", 
+``!a b.EVERY (gaw g) a ==> rderives g a b ==> 
+(!nt.nt IN (nonTerminals g) ==> gaw g nt) ==> EVERY (gaw g) b``,
+SRW_TAC [] [gaw, rderives_def] THEN
+`(NTS lhs) IN nonTerminals g` by METIS_TAC [slemma1_4] THEN
+FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND, gaw] THEN
+METIS_TAC [gaw_rderives_single, gaw, rdres1]);
+
+val gaw_rtc_rderives = store_thm("gaw_rtc_rderives",
+``!a b.RTC (rderives g) a b ==> EVERY (gaw g) a ==> 
+(!nt.nt IN (nonTerminals g) ==> gaw g nt) ==> EVERY (gaw g) b``,
+HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [] [] THEN
+`EVERY (gaw g) a'` by METIS_TAC [gaw_rderives] THEN
+METIS_TAC []);
+
+val gaw_l1 = store_thm ("gaw_l1",
+``!pfx sfx.RTC (rderives g) [NTS (startSym g)] (pfx ++ r1 ++ [NTS nt] ++ r2 ++ sfx) ==> 
+(!nt.nt IN (nonTerminals g) ==> gaw g nt) ==>
+?w.RTC (rderives g) (r2++sfx) w /\ EVERY isTmnlSym w``,
+SRW_TAC [] [] THEN
+`(NTS (startSym g)) IN (nonTerminals g)` by METIS_TAC [slemma1_4] THEN
+`gaw g (NTS (startSym g))` by METIS_TAC [] THEN
+`EVERY (gaw g) (pfx ++ r1 ++ [NTS nt] ++ r2 ++ sfx)` by METIS_TAC [EVERY_DEF, gaw_rtc_rderives] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+`EVERY (gaw g) (r2++sfx)` by FULL_SIMP_TAC (srw_ss()) [] THEN
+METIS_TAC [EVERY_DEF, EVERY_APPEND, gaw, sub_result, derivesImpRderives, rderivesImpDerives]);
 
 val _ = export_theory()
 

@@ -16,6 +16,10 @@ val _ = Hol_datatype `symbol = NTS of 'nts | TS of 'ts`;
 val isTmnlSym_def = Define
 `(isTmnlSym sym = (∃s.sym = (TS s)))`;
 
+val isTmnlSymML_def = Define
+`(isTmnlSymML (TS _) = T) ∧
+ (isTmnlSymML (NTS _) = F)`;
+
 val _ = overload_on ("isWord", ``EVERY isTmnlSym``)
 
 val isNonTmnlSym_def = Define
@@ -30,8 +34,6 @@ val ts2str = Define `ts2str (TS s) = s`
 
 val toTmnlSym = Define `toTmnlSym s = TS s`;
 
-val symToStr_def = Define
-`(symToStr (TS s) = s) ∧ (symToStr (NTS s) = s)`;
 
 val isWordRev = store_thm
 ("isWordRev",

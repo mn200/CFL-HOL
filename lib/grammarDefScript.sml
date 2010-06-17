@@ -36,7 +36,7 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.INCONSISTENT, 2)),
 
 (* grammar = (V, T, P, S) *)
 val _ = Hol_datatype
-`grammar = G of ('nts,'ts)rule list => 'nts`;
+`grammar = G of ('nts,'ts) rule list => 'nts`;
 
 val ruleRhs = Define `ruleRhs (rule l r) = r`;
 
@@ -587,12 +587,15 @@ val finiteAllSyms = store_thm ("finiteAllSyms",
 SRW_TAC [] [allSyms] THEN
 METIS_TAC [finiteNtsList,finiteTerminals])
 
-val nullable = Define `nullable g sl = RTC (derives g) sl []`;
+val nullable = Define 
+`nullable g sl = RTC (derives g) sl []`;
 
-val getRhs = Define `(getRhs l [] = []) ∧
-(getRhs l ((rule l' r)::rs) = if (l=l') then ([r]++getRhs l rs) else getRhs l rs)`
+val getRhs = Define 
+`(getRhs l [] = []) ∧ (getRhs l ((rule l' r)::rs)
+= if (l=l') then ([r]++getRhs l rs) else getRhs l rs)`
 
-val derivesNull = Define `(derivesNull g (TS ts) = T) ∧
+val derivesNull = Define 
+`(derivesNull g (TS ts) = T) ∧
 (derivesNull g (NTS nt) = MEM (rule nt []) (rules g))`;
 
 val numNonTmnls = Define

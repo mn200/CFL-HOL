@@ -306,6 +306,25 @@ FULL_SIMP_TAC (srw_ss()) [list_lem1] THEN
 SRW_TAC [][] THEN
 Cases_on `e` THEN FULL_SIMP_TAC (srw_ss()) [getSymbols]);
 
+
+val mapFringeLeaves = store_thm
+("mapFringeLeaves",
+``∀ptl. (∀t.t ∈ ptl ⇒ (fringe t = leaves t)) ⇒ 
+ (FLAT (MAP (λa. fringe a) ptl) = cleaves ptl)``,
+
+Induct_on `ptl` THEN SRW_TAC [][leaves_def]);
+
+
+
+val fringeEqLeaves = store_thm
+("fringeEqLeaves",
+``∀t. (fringe t = leaves t)``,
+
+HO_MATCH_MP_TAC fringe_ind THEN SRW_TAC [][] THEN
+SRW_TAC [][fringe_def, leaves_def] THEN
+METIS_TAC [mapFringeLeaves]);
+
+
 val mlDir = ref ("./theoryML/");
 (*
 val _ =

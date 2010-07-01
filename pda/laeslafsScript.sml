@@ -1234,7 +1234,7 @@ METIS_TAC [HD, rtc2listRtcHdLast, NOT_CONS_NIL, rtc2list_def,
 
 val thm51 = store_thm 
 ("thm51",
-``INFINITE (SYMUNIV : 'ssym set) ∧ INFINITE (STUNIV : 'state set) 
+``INFINITE (U1 : 'ssym set) ∧ INFINITE (U2 : 'state set) 
       ⇒
      ∀m.∃m'. (lafs (m:('isym, 'ssym, 'state) pda) = 
              laes (m':('isym, 'ssym, 'state) pda))``,
@@ -1242,13 +1242,13 @@ val thm51 = store_thm
 SRW_TAC [] [EQ_IMP_THM, EXTENSION] THEN
 `FINITE (stkSyms m)` 
      by METIS_TAC [finiteStkSyms, FINITE_LIST_TO_SET] THEN
-`?x0.x0 IN SYMUNIV ∧ ~(x0 IN (stkSyms m))` 
+`?x0.x0 IN U1 ∧ ~(x0 IN (stkSyms m))` 
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_ssym_exists] THEN
 `FINITE (states m)` 
      by METIS_TAC [finiteStates, FINITE_LIST_TO_SET] THEN
-`?q0.q0 IN STUNIV ∧ ~(q0 IN (states m))` 
+`?q0.q0 IN U2 ∧ ~(q0 IN (states m))` 
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists] THEN
-`∃qe.qe ∈ STUNIV ∧ (qe ∉ (q0 INSERT states m))` 
+`∃qe.qe ∈ U2 ∧ (qe ∉ (q0 INSERT states m))` 
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists,
 		  FINITE_INSERT] THEN
 `(q0 ≠ qe) ∧ (qe ∉ states m)` by FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1770,20 +1770,20 @@ METIS_TAC [RTC_CASES2]);
 
 val thm52 = store_thm
 ("thm52",
-``INFINITE (SYMUNIV : 'ssym set) ∧ INFINITE (STUNIV : 'state set) 
+``INFINITE (U1 : 'ssym set) ∧ INFINITE (U2 : 'state set) 
      ⇒
    ∀m.∃m'.laes (m:('isym, 'ssym, 'state) pda) = 
           lafs (m':('isym, 'ssym, 'state) pda)``,
 SRW_TAC [] [EQ_IMP_THM, EXTENSION] THEN
 `FINITE (stkSyms m)` 
      by METIS_TAC [finiteStkSyms, FINITE_LIST_TO_SET] THEN
-`∃x0.x0 IN SYMUNIV ∧ x0 ∉ stkSyms m` 
+`∃x0.x0 IN U1  ∧ x0 ∉ stkSyms m` 
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_ssym_exists] THEN
 `FINITE (states m)` 
      by METIS_TAC [finiteStates, FINITE_LIST_TO_SET] THEN
-`∃q0'.q0' IN STUNIV ∧ q0' ∉ states m` 
+`∃q0'.q0' IN U2  ∧ q0' ∉ states m` 
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists] THEN
-`∃qf.qf IN STUNIV ∧ qf ∉ (q0' INSERT states m)` 
+`∃qf.qf IN U2  ∧ qf ∉ (q0' INSERT states m)` 
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists,
 		  FINITE_INSERT] THEN
 FULL_SIMP_TAC (srw_ss()) [INSERT_DEF] THEN

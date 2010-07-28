@@ -1182,10 +1182,11 @@ SRW_TAC [][] THEN
 `f h > 0` by DECIDE_TAC THEN
 METIS_TAC []);
 
+
 val lemma8_a = prove(
-``INFINITE (UNIV : 'a set) ⇒ (badTmnlsCount g > 0)
+``INFINITE (UNIV : 'nts set) ⇒ (badTmnlsCount (g:('nts,'ts) grammar) > 0)
         ⇒
-     ∃g' (nt:'a) t.trans1Tmnl nt t g g' ``,
+     ∃g' (nt:'nts) t.trans1Tmnl nt t g g' ``,
 
 SRW_TAC [] [badTmnlsCount] THEN
 `∃e.MEM e (rules g) ∧ ruleTmnls e > 0` by METIS_TAC [sumMapGt0] THEN
@@ -1210,10 +1211,10 @@ METIS_TAC [sym_r3b,rgr_r9eq,filter_l2]]);
 
 
 val lemma8_b = prove (
-``INFINITE (UNIV : 'a set) ⇒
-   (badTmnlsCount g = 0)
+``INFINITE (UNIV : 'nts set) ⇒
+   (badTmnlsCount (g:('nts,'ts) grammar) = 0)
   ⇒ ((badNtmsCount g > 0) ⇒
-  ∃g' nt:'a nt1 nt2.trans2NT nt nt1 nt2 g g')``,
+  ∃g' nt:'nts nt1 nt2.trans2NT nt nt1 nt2 g g')``,
 
 SRW_TAC [] [badNtmsCount] THEN
 FULL_SIMP_TAC (srw_ss()) [badTmnlsCount] THEN
@@ -1306,19 +1307,19 @@ METIS_TAC [startSym_def]]]);
 
 
 val lemma11_a = prove(
-``∀g.INFINITE (UNIV:'a set) ⇒
-		      ~(∃g' (nt:'a) t.trans1Tmnl nt t g g')
+``∀g.INFINITE (UNIV:'nts set) ⇒
+		      ~(∃g' (nt:'nts) t.trans1Tmnl nt t g g')
       ⇒ (badTmnlsCount g = 0)``,
 SRW_TAC [] [] THEN
 `~(∃g' nt t.trans1Tmnl nt t g g') ⇒ ~(badTmnlsCount g > 0)` by METIS_TAC [MONO_NOT,lemma8_a] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 RES_TAC THEN
 `badTmnlsCount g <= 0` by FULL_SIMP_TAC arith_ss [] THEN
-FULL_SIMP_TAC arith_ss [LE])
+FULL_SIMP_TAC arith_ss [LE]);
 
 val lemma11_b = prove(
-``∀g.INFINITE (UNIV:'a set) ⇒
-(badTmnlsCount g = 0) ⇒ (~(∃g' nt:'a nt1 nt2.trans2NT nt nt1 nt2 g g') ⇒ (badNtmsCount g = 0))``,
+``∀g.INFINITE (UNIV:'nts set) ⇒
+(badTmnlsCount g = 0) ⇒ (~(∃g' nt:'nts nt1 nt2.trans2NT nt nt1 nt2 g g') ⇒ (badNtmsCount g = 0))``,
 SRW_TAC [] [] THEN
 `~(∃g' nt nt1 nt2.trans2NT nt nt1 nt2 g g') ⇒ ~(badNtmsCount g > 0)`
     by METIS_TAC [MONO_NOT,lemma8_b] THEN
@@ -1326,36 +1327,39 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 RES_TAC THEN
 `badNtmsCount g <= 0` by FULL_SIMP_TAC arith_ss [] THEN
 FULL_SIMP_TAC arith_ss [LE]
-)
+);
 
 val lemma9_a = store_thm("lemma9_a",
-``INFINITE (UNIV:'a set) ⇒
-   (∃g'.RTC (\x y.∃nt:'a t.trans1Tmnl nt t x y) g g' ∧
-        (badTmnlsCount g' = 0))``,
+``INFINITE (UNIV:'nts set) ⇒
+   ∃(g':('nts,'ts) grammar).
+     RTC (\x y.∃(nt:'nts) (t:('nts,'ts) symbol).
+	  trans1Tmnl nt t x y) (g:('nts,'ts) grammar) g' ∧
+        (badTmnlsCount g' = 0)``,
 completeInduct_on `badTmnlsCount g` THEN
-Cases_on `v=0` THENL[
-SRW_TAC [][] THEN
-METIS_TAC [RTC_RULES],
+Cases_on `v=0` THEN1
+(SRW_TAC [][] THEN
+ METIS_TAC [RTC_RULES]) THEN
 SRW_TAC [] [] THEN
 `∃g' nt t. trans1Tmnl nt t g g'` by  METIS_TAC [MONO_NOT,lemma11_a] THEN
 `(badTmnlsCount g' < badTmnlsCount g)` by METIS_TAC [lemma6_a] THEN
-`∃g''.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g' g'' ∧ (badTmnlsCount g'' = 0)` by  METIS_TAC [] THEN
+`∃g''.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g' g'' ∧ (badTmnlsCount g'' = 0)` 
+		     by  METIS_TAC [] THEN
 Q.EXISTS_TAC `g''` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-Q.ABBREV_TAC `r=(\x y. ∃nt t. trans1Tmnl nt t x y)` THEN
+Q.ABBREV_TAC `(r : ('nts,'ts) grammar -> ('nts,'ts) grammar -> bool) =
+(\x y. ∃nt t. trans1Tmnl nt t x y)` THEN
 `r g g'` by (SRW_TAC [] [Abbr `r`] THEN METIS_TAC []) THEN
-METIS_TAC [RTC_RULES]
-])
+METIS_TAC [RTC_RULES]);
 
 
 val lemma9_b = store_thm("lemma9_b",
-``INFINITE (UNIV:'a set) ⇒
+``INFINITE (UNIV:'nts set) ⇒
 (badTmnlsCount g = 0) ⇒
-      (∃g'.RTC (\x y.∃nt:'a nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ∧
+      (∃g'.RTC (\x y.∃nt:'nts nt1 nt2.trans2NT nt nt1 nt2 x y) g g' ∧
        (badNtmsCount g' = 0))``,
 completeInduct_on `badNtmsCount g` THEN
-Cases_on `v=0` THENL[
-METIS_TAC [RTC_RULES],
+Cases_on `v=0` THEN1
+METIS_TAC [RTC_RULES] THEN
 SRW_TAC [] [] THEN
 `∃g' nt nt1 nt2. trans2NT nt nt1 nt2 g g'` by  METIS_TAC [MONO_NOT,lemma11_b] THEN
 `(badNtmsCount g' < badNtmsCount g)` by METIS_TAC [lemma6_b] THEN
@@ -1364,15 +1368,16 @@ SRW_TAC [] [] THEN
 		     by  METIS_TAC [lemma15_a] THEN
 Q.EXISTS_TAC `g''` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-Q.ABBREV_TAC `r=(\x y. ∃nt nt1 nt2. trans2NT nt nt1 nt2 x y)` THEN
+Q.ABBREV_TAC `r : ('nts,α) grammar -> ('nts,α) grammar -> bool =
+			 (\x y. ∃nt nt1 nt2. trans2NT nt nt1 nt2 x y)` THEN
 `r g g'` by (SRW_TAC [] [Abbr `r`] THEN METIS_TAC []) THEN
-METIS_TAC [RTC_RULES]])
+METIS_TAC [RTC_RULES])
 
 
 val thm4_5 = store_thm
 ("thm4_5",
- ``∀g:('a, 'b) grammar.
- INFINITE (UNIV:'a set) ⇒
+ ``∀g:('nts, 'ts) grammar.
+ INFINITE (UNIV:'nts set) ⇒
  [] ∉ language g ⇒
  ∃g'. (cnf g') ∧ (language g = language g')``,
 SRW_TAC [] [cnf] THEN
@@ -1387,14 +1392,15 @@ val isCnf_def = Define
 
 val cnfisCnfEq = store_thm
 ("cnfisCnfEq",
-``∀g:('a, 'b) grammar.
- INFINITE (UNIV:'a set) ∧
- [] ∉ language g  ⇒ ∃g':(α,β) grammar.isCnf g' ∧ (language g = language g')``,
+``∀g:('nts, 'ts) grammar.
+ INFINITE (UNIV:'nts set) ∧
+ [] ∉ language g  ⇒ 
+ ∃g':('nts,'ts) grammar.isCnf g' ∧ (language g = language g')``,
 
 SRW_TAC [][] THEN
-`∃g0:(α,β) grammar. negr g g0` by METIS_TAC [negr_exists] THEN
+`∃g0:('nts,'ts) grammar. negr g g0` by METIS_TAC [negr_exists] THEN
 IMP_RES_TAC thm4_3 THEN
-`∃g1:(α,β) grammar. upgr g0 g1` by METIS_TAC [upgr_exists] THEN
+`∃g1:('nts,'ts) grammar. upgr g0 g1` by METIS_TAC [upgr_exists] THEN
 `language g = language g1` by METIS_TAC [thm4_4] THEN
 `noeProds (rules g0)` by METIS_TAC [negrImpnoeProds] THEN
 IMP_RES_TAC upgr_noeProds THEN

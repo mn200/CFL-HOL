@@ -7,6 +7,8 @@ arithmeticTheory rich_listTheory
 open grammarDefTheory listLemmasTheory symbolDefTheory setLemmasTheory
 containerTheory relationLemmasTheory unitProdsTheory eProdsTheory
 
+open reachableGrammarTheory
+
 val _ = new_theory "cnf";
 
 val _ = Globals.linewidth := 60

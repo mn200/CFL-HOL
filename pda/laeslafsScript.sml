@@ -24,8 +24,8 @@ If L is L(M2) for some PDA M2, then L is N(M1) for some PDA, M1.
 *)
 
 
-(* 
-{ ((NONE,ssym,q),(qe,[])) | MEM q p.final ∧ 
+(*
+{ ((NONE,ssym,q),(qe,[])) | MEM q p.final ∧
                             ssym IN (x0 INSERT stkSyms p) }
 *)
 val fst1 = Define
@@ -42,20 +42,20 @@ val finalStateTrans = Define
 *)
  val newStateTrans = Define
 `(newStateTrans ns  [] = []) ∧
-(newStateTrans ns (s::rst) = 
+(newStateTrans ns (s::rst) =
        ((NONE:'isym option,s:'ssym,ns:'state),(ns,[]:'ssym list))::
                                newStateTrans ns rst)`;
 
 
-val newm = Define 
-`newm (p:('isym, 'ssym, 'state) pda) 
-      (q0:'state,x0:'ssym,qe:'state) = 
+val newm = Define
+`newm (p:('isym, 'ssym, 'state) pda)
+      (q0:'state,x0:'ssym,qe:'state) =
 let d = [((NONE:'isym option,x0,q0),(p.start,p.ssSym::[x0]))] ++
         p.next ++
         finalStateTrans qe p.final (x0::stkSymsList p p.next)  ++
         newStateTrans qe (x0::stkSymsList p p.next)
 in
-      <| start := q0;  ssSym := x0;  
+      <| start := q0;  ssSym := x0;
          next := d; final := ([]:'state list) |>`;
 
 
@@ -65,10 +65,10 @@ valid in the new PDA.
 *)
 val idLafsImpLaes = store_thm
 ("idLafsImpLaes",
-``∀x y. (m:('i,'s,'st)pda) ⊢ x → y ∧ 
+``∀x y. (m:('i,'s,'st)pda) ⊢ x → y ∧
   ¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
-  ¬(qe ∈ states m) 
+  ¬(qe ∈ states m)
       ⇒
     newm m (q0',x0,qe) ⊢ x → y``,
 
@@ -134,7 +134,7 @@ val newmQeRule = store_thm
   FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
   SRW_TAC [][nstApp, newStateTrans] THEN
   METIS_TAC [APPEND])
-  
+
 
 
 val idNewmQe = store_thm
@@ -167,7 +167,7 @@ val idcNewmPopStkQe = store_thm
 Induct_on `stk` THEN
 SRW_TAC [][Once RTC_CASES1] THEN
 Q.EXISTS_TAC `(qe,inp,stk)` THEN
-SRW_TAC [][] 
+SRW_TAC [][]
 THENL[
    Cases_on `inp` THEN SRW_TAC [][ID_def] THEN
    METIS_TAC [newmQeRule, MEM, ID_def, APPEND],
@@ -182,7 +182,7 @@ val fstApp = store_thm
            finalStateTrans ns fsl p1 ++
            finalStateTrans ns fsl p2``,
 
-Induct_on `p1` THEN Induct_on `p2` THEN 
+Induct_on `p1` THEN Induct_on `p2` THEN
 SRW_TAC [][finalStateTrans]);
 
 
@@ -192,7 +192,7 @@ val newmFstRule = store_thm
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
    MEM q m.final ∧
-  (MEM h (stkSymsList m m.next) ∨ (h=x0)) 
+  (MEM h (stkSymsList m m.next) ∨ (h=x0))
        ⇒
      newm m (q0',x0,qe) ⊢ (q,inp,h::t) → (qe,inp,t)``,
 
@@ -263,13 +263,13 @@ val idcMemStkSyms = store_thm
         ⇒
     (∀e.MEM e st' ⇒ MEM e (stkSymsList m m.next))``,
 
-Q_TAC SUFF_TAC 
-  `!x y. (ID m)^* x y ==> 
+Q_TAC SUFF_TAC
+  `!x y. (ID m)^* x y ==>
          !q s0 stk q' s1 stk'.
             (x = (q,s0,stk)) ∧ (y = (q',s1,stk')) ∧
             (∀e.MEM e stk ⇒ MEM e (stkSymsList m m.next)) ⇒
-              (∀e.MEM e stk' ⇒ MEM e (stkSymsList m m.next))` 
-  THEN1 METIS_TAC [] THEN 
+              (∀e.MEM e stk' ⇒ MEM e (stkSymsList m m.next))`
+  THEN1 METIS_TAC [] THEN
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN1
 METIS_TAC [] THEN
 Cases_on `x'` THEN
@@ -301,11 +301,11 @@ val stkSymsFst = store_thm
       ⇒
     MEM e sl``,
 Induct_on `sl` THEN Induct_on `stl` THEN
-SRW_TAC [][finalStateTrans, stkSymsList'_def] 
+SRW_TAC [][finalStateTrans, stkSymsList'_def]
 THENL[
 METIS_TAC [MEM, MEM_APPEND, APPEND],
 
-FULL_SIMP_TAC (srw_ss()) [fst1, stkSymsList'_def, ssymslApp, 
+FULL_SIMP_TAC (srw_ss()) [fst1, stkSymsList'_def, ssymslApp,
                           finalStateTrans] THEN
 METIS_TAC [MEM, MEM_APPEND, APPEND]
 ]);
@@ -316,7 +316,7 @@ val stkSymsNst = store_thm
 ``∀sl.∀e.MEM e (stkSymsList' (newStateTrans q sl))
       ⇒
     MEM e sl``,
-Induct_on `sl` THEN 
+Induct_on `sl` THEN
 SRW_TAC [][newStateTrans, stkSymsList'_def] THEN
 METIS_TAC [MEM, MEM_APPEND, APPEND]);
 
@@ -331,12 +331,12 @@ val memOldmStkSyms = store_thm
         ⇒
        (e=x0) ∨ MEM e (stkSymsList m m.next))``,
 
-SRW_TAC [] [stkSymsList_def] 
+SRW_TAC [] [stkSymsList_def]
 THENL[
    FULL_SIMP_TAC (srw_ss()) [newm, LET_THM],
 
    FULL_SIMP_TAC (srw_ss()) [newm, LET_THM, ssymslApp,
-                             stkSymsList'_def] 
+                             stkSymsList'_def]
    THENL[
 	 FULL_SIMP_TAC (srw_ss()) [stkSymsList_def] THEN
 	 METIS_TAC [stkSymsFst, MEM],
@@ -357,12 +357,12 @@ val lafsImpLaes = store_thm
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [lafs_def] THEN
 SRW_TAC [][newm, LET_THM] THEN
-Q.MATCH_ABBREV_TAC `x ∈ laes <| start := q0'; 
+Q.MATCH_ABBREV_TAC `x ∈ laes <| start := q0';
                                 ssSym := x0;
 				next := d';
-				final := [] |>` THEN 
+				final := [] |>` THEN
 Q.MATCH_ABBREV_TAC `x ∈ laes m'` THEN
-`IDC m' (q0',x,[x0]) (m.start,x,m.ssSym::[x0])` by 
+`IDC m' (q0',x,[x0]) (m.start,x,m.ssSym::[x0])` by
 (SRW_TAC [][] THEN
 SRW_TAC [] [Once RTC_CASES1] THEN
 Q.EXISTS_TAC `(m.start,x,[m.ssSym;x0])` THEN
@@ -370,9 +370,9 @@ SRW_TAC [][ID_def] THEN
 Cases_on `x` THEN SRW_TAC [][ID_def] THEN
 UNABBREV_ALL_TAC THEN
 SRW_TAC [][]) THEN
-`IDC m' (m.start,x,[m.ssSym]) (state,[],stack)` 
+`IDC m' (m.start,x,[m.ssSym]) (state,[],stack)`
    by METIS_TAC [idcLafsImpLaes, newm, LET_THM, APPEND] THEN
-`IDC m' (m.start,x,[m.ssSym]++[x0]) (state,[],stack++[x0])` 
+`IDC m' (m.start,x,[m.ssSym]++[x0]) (state,[],stack++[x0])`
   by METIS_TAC [idcStackInsert, APPEND, newm, LET_THM] THEN
 
 `(MEM x0 (stkSymsList m' m'.next) ∧
@@ -387,8 +387,8 @@ SRW_TAC [][]) THEN
           MEM e (stkSymsList m m.next) ∨ (e = x0))`
   by METIS_TAC  [MEM, MEM_APPEND] THEN
 `¬(stack++[x0] = [])` by SRW_TAC [][] THEN
-`IDC m' (state,[],stack++[x0]) (qe,[],[])` 
-      by METIS_TAC [idcNewmPopStk, newm, 
+`IDC m' (state,[],stack++[x0]) (qe,[],[])`
+      by METIS_TAC [idcNewmPopStk, newm,
                     LET_THM, APPEND] THEN
 SRW_TAC [][laes_def] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -408,7 +408,7 @@ val newmStartRule = store_thm
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m)
        ⇒
-  MEM ((NONE,x0,q0'),m.start,[m.ssSym; x0]) 
+  MEM ((NONE,x0,q0'),m.start,[m.ssSym; x0])
        (newm m (q0',x0,qe)).next``,
 
 SRW_TAC [][newm, LET_THM]);
@@ -484,7 +484,7 @@ METIS_TAC [memFslFst, stEqNst, slNstNil, slFslNil]);
 
 val notSomeInpMemFst = store_thm (
 "notSomeInpMemFst",
-``∀fsl sl'.¬MEM ((SOME h,h',q),q',sl) 
+``∀fsl sl'.¬MEM ((SOME h,h',q),q',sl)
                 (finalStateTrans qe fsl sl')``,
 
 Induct_on `fsl` THEN Induct_on `sl'` THEN
@@ -516,7 +516,7 @@ METIS_TAC [memFst1]);
 
 val notSomeInpMemNst = store_thm (
 "notSomeInpMemNst",
-``∀fsl sl'.¬MEM ((SOME h,h',q),q',sl) 
+``∀fsl sl'.¬MEM ((SOME h,h',q),q',sl)
                 (newStateTrans qe sl')``,
 
 Induct_on `sl'` THEN
@@ -528,7 +528,7 @@ val notSomeMemNewm = store_thm
 ("notSomeMemNewm",
  ``¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
-  ¬(qe ∈ states m) 
+  ¬(qe ∈ states m)
       ⇒
     ¬MEM ((SOME h,h',q),qe,sl) (newm m (q0',x0,qe)).next``,
 
@@ -551,14 +551,14 @@ SRW_TAC [][newm, LET_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 FULL_SIMP_TAC (srw_ss()) [states_def] THEN
 METIS_TAC [memFslFst,slNstNil,toStEqNst]);
-    
+
 
 
 val notSomeMemQeNewm = store_thm
 ("notSomeMemQeNewm",
  ``¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
-  ¬(qe ∈ states m) 
+  ¬(qe ∈ states m)
       ⇒
     ¬MEM ((SOME h,h',qe),q,sl) (newm m (q0',x0,qe)).next``,
 
@@ -569,14 +569,14 @@ METIS_TAC [notSomeInpMemFst, notSomeInpMemNst, memToQeNewm]);
 
 
 
-val listQeTransInpSame = store_thm 
+val listQeTransInpSame = store_thm
 ("listQeTransInpSame",
 ``∀dl qe inp stk inp' stk'.
   ¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0' = qe) ∧
-  ID (newm m (q0',x0,qe)) ⊢ 
+  ID (newm m (q0',x0,qe)) ⊢
         dl ◁  (qe,inp,stk) → (qe,inp',stk')
         ⇒
       (inp=inp')``,
@@ -589,13 +589,13 @@ Cases_on `h` THEN
 Cases_on `r` THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`q'`,`r'`] MP_TAC) THEN
 SRW_TAC [][] THEN
-Cases_on `inp` THEN Cases_on `stk` THEN 
+Cases_on `inp` THEN Cases_on `stk` THEN
 FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
 METIS_TAC [notSomeMemQeNewm, memToQeNewm]);
 
 
 
-val idFsToQeInpSame = store_thm 
+val idFsToQeInpSame = store_thm
 ("idFsToQeInpSame",
 ``∀dl qe inp stk inp' stk'.
   ¬(x0 ∈ stkSyms m) ∧
@@ -607,12 +607,12 @@ val idFsToQeInpSame = store_thm
         ⇒
       (inp=inp')``,
 SRW_TAC [][newm, LET_THM] THEN
-Cases_on `inp` THEN Cases_on `stk` THEN 
+Cases_on `inp` THEN Cases_on `stk` THEN
 FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
 FULL_SIMP_TAC (srw_ss()) [states_def] THEN
 METIS_TAC [notSomeInpMemFst, notSomeInpMemNst]);
 
-val idFromQeInpSame = store_thm 
+val idFromQeInpSame = store_thm
 ("idFromQeInpSame",
 ``∀dl qe inp stk inp' stk'.
   ¬(x0 ∈ stkSyms m) ∧
@@ -623,21 +623,21 @@ val idFromQeInpSame = store_thm
         ⇒
       (inp=inp') ∧ (q'=qe)``,
 SRW_TAC [][newm, LET_THM] THEN
-Cases_on `inp` THEN Cases_on `stk` THEN 
+Cases_on `inp` THEN Cases_on `stk` THEN
 FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
 FULL_SIMP_TAC (srw_ss()) [states_def] THEN
 METIS_TAC [notSomeInpMemFst, notSomeInpMemNst,
 	   toStEqFst, toStEqNst]);
 
 
-val listQeTrans = store_thm 
+val listQeTrans = store_thm
 ("listQeTrans",
 ``∀dl qe inp stk st inp' stk'.
   ¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0' = qe) ∧
-  ID (newm m (q0',x0,qe)) ⊢ 
+  ID (newm m (q0',x0,qe)) ⊢
         dl ◁  (qe,inp,stk) → (st,inp',stk')
         ⇒
       (st=qe)``,
@@ -650,7 +650,7 @@ Cases_on `h` THEN
 Cases_on `r` THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`q`,`q'`,`r'`] MP_TAC) THEN
 SRW_TAC [][] THEN
-Cases_on `inp` THEN Cases_on `stk` THEN 
+Cases_on `inp` THEN Cases_on `stk` THEN
 FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
 METIS_TAC [notSomeMemQeNewm, memToQeNewm]);
 
@@ -673,7 +673,7 @@ THENL[
 Cases_on `q=qe` THEN
 SRW_TAC [][] THEN
 METIS_TAC [transStIsFs, APPEND, memToQeNewm],
-   
+
 METIS_TAC [notSomeMemNewm],
 
 METIS_TAC [notSomeMemNewm],
@@ -681,15 +681,15 @@ METIS_TAC [notSomeMemNewm],
 Cases_on `q=qe` THEN
 SRW_TAC [][] THEN
 METIS_TAC [transStIsFs, APPEND, memToQeNewm]]);
-  
-val listFsExists = store_thm 
+
+val listFsExists = store_thm
 ("listFsExists",
 ``∀dl q inp stk qe inp' stk'.
   ¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0' = qe) ∧
-  ID (newm m (q0',x0,qe)) ⊢ 
+  ID (newm m (q0',x0,qe)) ⊢
         dl ◁  (q,inp,stk) → (qe,inp',stk') ∧ ¬(q=qe)
         ⇒
      ∃qf sk.MEM (qf,inp',sk) dl ∧ MEM qf m.final``,
@@ -707,7 +707,7 @@ Cases_on `¬(q'=qe)` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
 METIS_TAC [] THEN1 METIS_TAC [] THEN
 `q''=inp` by METIS_TAC [idQeTrans] THEN
 SRW_TAC [][] THEN
-`inp=inp'` by METIS_TAC [listQeTransInpSame, HD, 
+`inp=inp'` by METIS_TAC [listQeTransInpSame, HD,
 			 listderiv_def] THEN
 Cases_on `inp` THEN
 Cases_on `stk` THEN
@@ -716,14 +716,14 @@ SRW_TAC [][] THEN
 METIS_TAC [transStIsFs]);
 
 
-val listQeOnly = store_thm 
+val listQeOnly = store_thm
 ("listQeOnly",
 ``∀dl inp stk qe q' inp' stk'.
   ¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0' = qe) ∧
-  ID (newm m (q0',x0,qe)) ⊢ 
+  ID (newm m (q0',x0,qe)) ⊢
         dl ◁  (qe,inp,stk) → (q',inp,stk')
         ⇒
     (∀e.MEM e dl ⇒ ∃i sk.(e=(qe,inp,sk)))``,
@@ -732,7 +732,7 @@ Induct_on `dl` THEN SRW_TAC [][] THEN
 SRW_TAC [][listderiv_def] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 SRW_TAC [][] THEN
-Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] 
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) []
 THENL[
   Cases_on `h` THEN
   Cases_on `r` THEN
@@ -745,23 +745,23 @@ THENL[
   Cases_on `r` THEN
   FIRST_X_ASSUM (Q.SPECL_THEN [`r'`, `qe`] MP_TAC) THEN
   SRW_TAC [][] THEN
-  `(q=qe) ∧ (q''=inp)` by METIS_TAC [listQeTransInpSame, 
+  `(q=qe) ∧ (q''=inp)` by METIS_TAC [listQeTransInpSame,
 				     listQeTrans, rtc2list_exists',
 				     RTC_RULES] THEN
   METIS_TAC []]);
 
-    
 
 
 
-val listFsExists' = store_thm 
+
+val listFsExists' = store_thm
 ("listFsExists'",
 ``∀dl q inp stk qe inp' stk'.
   ¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0' = qe) ∧
-  ID (newm m (q0',x0,qe)) ⊢ 
+  ID (newm m (q0',x0,qe)) ⊢
         dl ◁  (q,inp,stk) → (qe,inp',stk') ∧ ¬(q=qe)
         ⇒
      ∃p s qf sk.(dl = p ++ [(qf,inp',sk)] ++ s) ∧
@@ -781,21 +781,21 @@ Cases_on `¬(q'=qe)` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
 METIS_TAC [APPEND] THEN
 `q''=inp` by METIS_TAC [idQeTrans] THEN
 SRW_TAC [][] THEN
-`inp=inp'` by METIS_TAC [listQeTransInpSame, HD, 
+`inp=inp'` by METIS_TAC [listQeTransInpSame, HD,
 			 listderiv_def] THEN
 Cases_on `inp` THEN
 Cases_on `stk` THEN
 FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
 SRW_TAC [][] THEN
-`MEM q m.final` by METIS_TAC [transStIsFs] 
+`MEM q m.final` by METIS_TAC [transStIsFs]
 THENL[
 `(ID (newm m (q0',x0,q')))^*
             (q',[],sl ++ t') (q',[],stk')`
   by METIS_TAC [rtc2list_def, rtc2listRtcHdLast, HD] THEN
 `ID (newm m (q0',x0,q')) ⊢ ((q',[],sl ++ t')::t) ◁
-            (q',[],sl ++ t') → (q',[],stk')` 
+            (q',[],sl ++ t') → (q',[],stk')`
     by METIS_TAC [listderiv_def, HD] THEN
-`∀e. MEM e ((q',[],sl ++ t')::t) ⇒ ∃i sk. e = (q',[],sk)` 
+`∀e. MEM e ((q',[],sl ++ t')::t) ⇒ ∃i sk. e = (q',[],sk)`
     by METIS_TAC [listQeOnly] THEN
 
 MAP_EVERY Q.EXISTS_TAC [`[]`, `((q',[],sl ++ t')::t)`,
@@ -807,9 +807,9 @@ METIS_TAC [MEM],
             (q',h::t',sl ++ t'') (q',h::t',stk')`
   by METIS_TAC [rtc2list_def, rtc2listRtcHdLast, HD] THEN
 `ID (newm m (q0',x0,q')) ⊢ ((q',h::t',sl ++ t'')::t) ◁
-            (q',h::t',sl ++ t'') → (q',h::t',stk')` 
+            (q',h::t',sl ++ t'') → (q',h::t',stk')`
     by METIS_TAC [listderiv_def, HD] THEN
-`∀e. MEM e ((q',h::t',sl ++ t'')::t) ⇒ ∃i sk. e = (q',h::t',sk)` 
+`∀e. MEM e ((q',h::t',sl ++ t'')::t) ⇒ ∃i sk. e = (q',h::t',sk)`
     by METIS_TAC [listQeOnly] THEN
 MAP_EVERY Q.EXISTS_TAC [`[]`, `((q',h::t',sl ++ t'')::t)`,
 			`q`, `h'::t''`] THEN
@@ -824,9 +824,9 @@ val idcNewmFinalToQe = store_thm
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0'=qe) ∧
-  (ID (newm m (q0',x0,qe)))^* (st,inp,sk) (qe,inp',sk') 
+  (ID (newm m (q0',x0,qe)))^* (st,inp,sk) (qe,inp',sk')
      ⇒
-   (st = qe) ∨ 
+   (st = qe) ∨
    ∃y st' i s.(ID (newm m (q0',x0,qe)))^* (st,inp,sk) y ∧
             (ID (newm m (q0',x0,qe)))^* y (qe,inp',sk') ∧
             (y = (st',i,s)) ∧ MEM st' m.final``,
@@ -835,7 +835,7 @@ SRW_TAC [][] THEN
 `∃dl.ID (newm m (q0',x0,qe)) ⊢ dl ◁ (st,inp,sk) → (qe,inp',sk')`
    by METIS_TAC [rtc2list_exists'] THEN
 Cases_on `st=qe` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-`∃qf i sk. MEM (qf,i,sk) dl ∧ MEM qf m.final` 
+`∃qf i sk. MEM (qf,i,sk) dl ∧ MEM qf m.final`
     by METIS_TAC [listFsExists] THEN
 METIS_TAC [rtc2list_mem]);
 
@@ -846,9 +846,9 @@ val idcNewmFinalToQe' = store_thm
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0'=qe) ∧
-  (ID (newm m (q0',x0,qe)))^* (st,inp,sk) (qe,inp',sk') 
+  (ID (newm m (q0',x0,qe)))^* (st,inp,sk) (qe,inp',sk')
      ⇒
-   (st = qe) ∨ 
+   (st = qe) ∨
    ∃y st' i s sk''.
          (ID (newm m (q0',x0,qe)))^* (st,inp,sk) y ∧
          (ID (newm m (q0',x0,qe))) y (qe,inp',sk'') ∧
@@ -862,21 +862,21 @@ Cases_on `st=qe` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 `∃p s qf sk.
            (dl = p ++ [(qf,inp',sk)] ++ s) ∧
            MEM qf m.final ∧
-           ∀e. MEM e s ⇒ ∃i sk. e = (qe,i,sk)` 
+           ∀e. MEM e s ⇒ ∃i sk. e = (qe,i,sk)`
     by METIS_TAC [listFsExists'] THEN
 SRW_TAC [][] THEN
 Cases_on `s` THEN FULL_SIMP_TAC (srw_ss()) []
 THENL[
       SRW_TAC [][] THEN
       FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-      `(qf,inp',sk'') = (qe,inp',sk')` 
+      `(qf,inp',sk'') = (qe,inp',sk')`
 	  by METIS_TAC [last_append, NOT_CONS_NIL, LAST_DEF] THEN
       FULL_SIMP_TAC (srw_ss()) [states_def],
-      
+
       `∃i sk. h = (qe,i,sk)` by METIS_TAC [] THEN
       SRW_TAC [][] THEN
       MAP_EVERY Q.EXISTS_TAC [`qf`, `inp'`, `sk''`, `sk'''`] THEN
-      SRW_TAC [][] 
+      SRW_TAC [][]
       THENL[
          METIS_TAC [rtc2list_mem, listderiv_def, MEM, MEM_APPEND],
 
@@ -885,10 +885,10 @@ THENL[
             ([(qf,inp',sk'')] ++ (qe,i,sk''')::t)`
 	     by METIS_TAC [NOT_CONS_NIL, APPEND,APPEND_ASSOC,
 			   rtc2list_distrib_append_snd] THEN
-	 Cases_on `t` THEN 
+	 Cases_on `t` THEN
 	 FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
-	 `newm m (q0',x0,qe) ⊢ (qf,inp',sk'') → (qe,i,sk''')` 
-	     by METIS_TAC [rtc2list_def, 
+	 `newm m (q0',x0,qe) ⊢ (qf,inp',sk'') → (qe,i,sk''')`
+	     by METIS_TAC [rtc2list_def,
 			   rtc2list_distrib_append_snd,
 			   MEM, MEM_APPEND, APPEND,listderiv_def] THEN
 	 METIS_TAC [idFsToQeInpSame],
@@ -898,7 +898,7 @@ THENL[
             ((qe,i,sk''')::t)`
 	     by METIS_TAC [NOT_CONS_NIL,
 			   rtc2list_distrib_append_snd] THEN
-	     Cases_on `t` THEN 
+	     Cases_on `t` THEN
 	     FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
 	     Cases_on `h` THEN
 	     Cases_on `r` THEN
@@ -909,7 +909,7 @@ THENL[
 	    by METIS_TAC [NOT_CONS_NIL, APPEND,APPEND_ASSOC,
 			  rtc2list_distrib_append_snd] THEN
 	    FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
-	    
+
 	    `i=inp'` by METIS_TAC [idFsToQeInpSame] THEN
 	    SRW_TAC [][] THEN
 	    `(p ++ [(qf,i,sk'')] ++ (q,i,sk''')::(q,i,r')::t') =
@@ -937,13 +937,13 @@ SRW_TAC [] [newm, LET_THM] THEN
 Cases_on `inp` THEN Cases_on `stk` THEN
 FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
 SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [] 
+FULL_SIMP_TAC (srw_ss()) []
 THENL[
 
 FULL_SIMP_TAC (srw_ss()) [stkSyms_def] THEN
 METIS_TAC [],
 
-METIS_TAC [toStEqFst], 
+METIS_TAC [toStEqFst],
 
 METIS_TAC [toStEqNst],
 
@@ -952,12 +952,12 @@ METIS_TAC [],
 
 METIS_TAC [notSomeInpMemFst],
 
-METIS_TAC [notSomeInpMemNst], 
+METIS_TAC [notSomeInpMemNst],
 
 FULL_SIMP_TAC (srw_ss()) [stkSyms_def] THEN
 METIS_TAC [],
 
-METIS_TAC [toStEqFst], 
+METIS_TAC [toStEqFst],
 
 METIS_TAC [toStEqNst]]);
 
@@ -970,7 +970,7 @@ val newmNullStkStQeLd = store_thm
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0' = qe) ∧
-  ID (newm m (q0',x0,qe)) ⊢ 
+  ID (newm m (q0',x0,qe)) ⊢
         dl ◁  (q,inp,stk) → (state,[],[]) ∧
   MEM x0 stk
        ⇒
@@ -980,7 +980,7 @@ Induct_on `dl` THEN SRW_TAC [][] THEN
 SRW_TAC [][listderiv_def] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 SRW_TAC [][] THEN
-Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] 
+Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) []
 THENL[
 
       SRW_TAC [][] THEN METIS_TAC [MEM],
@@ -1005,7 +1005,7 @@ val newmNullStkStQe = store_thm
        ⇒
      (state=qe)``,
 SRW_TAC [][] THEN
-`∃dl.ID (newm m (q0',x0,qe)) ⊢ dl ◁ 
+`∃dl.ID (newm m (q0',x0,qe)) ⊢ dl ◁
                                (q,inp,stk++[x0]) → (state,[],[])`
    by METIS_TAC [rtc2list_exists'] THEN
 METIS_TAC [newmNullStkStQeLd, MEM, MEM_APPEND]);
@@ -1020,7 +1020,7 @@ val idNewmImpOldm = store_thm
   newm m (q0',x0,qe) ⊢ (q,i,s) → (q',i',s') ∧
   q' ∈ states m
         ⇒
-    (q=q0') ∨ 
+    (q=q0') ∨
     (q ∈ states m ∧
     m ⊢ (q,i,s) → (q',i',s'))``,
 
@@ -1048,7 +1048,7 @@ val idStatesMem = store_thm
 Cases_on `s` THEN Cases_on `stk` THEN
 SRW_TAC [][newm, LET_THM, ID_def] THEN
 FULL_SIMP_TAC (srw_ss()) [states_def] THEN
-METIS_TAC [toStEqFst, toStEqNst, notSomeInpMemNst, 
+METIS_TAC [toStEqFst, toStEqNst, notSomeInpMemNst,
 	   notSomeInpMemFst]);
 
 
@@ -1065,7 +1065,7 @@ val idcNewmImpOldm = store_thm
         ⇒
     (ID m)^* (q,i,s) (q',i',s')``,
 
-Q_TAC SUFF_TAC 
+Q_TAC SUFF_TAC
   `∀x y. (ID (newm m (q0',x0,qe)))^* x y ⇒
          ¬(x0 ∈ stkSyms m) ⇒
          ¬(q0' ∈ states m) ⇒
@@ -1075,8 +1075,8 @@ Q_TAC SUFF_TAC
             (x = (q,s0,stk)) ∧ (y = (q',s1,stk')) ∧
              q' ∈ states m ∧ q ∈ (states m)
                    ⇒
-        	(ID m)^* (q,s0,stk) (q',s1,stk')` THEN1 
-METIS_TAC [] THEN 
+        	(ID m)^* (q,s0,stk) (q',s1,stk')` THEN1
+METIS_TAC [] THEN
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [RTC_RULES] THEN
@@ -1086,7 +1086,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 RES_TAC THEN
 `q'' ∈ states m ∨ (q'' = qe)` by METIS_TAC [idStatesMem]
 THENL[
-      `∃l.ID (newm m (q0',x0,qe)) ⊢ l ◁ 
+      `∃l.ID (newm m (q0',x0,qe)) ⊢ l ◁
                           (q'',q''',r') → (q',s1,stk')`
 	    by METIS_TAC [rtc2list_exists'] THEN
       `q'' ∈ states m` by METIS_TAC [idStatesMem] THEN
@@ -1094,7 +1094,7 @@ THENL[
 
 
       SRW_TAC [][] THEN
-      `∃l.ID (newm m (q0',x0,q'')) ⊢ l ◁ 
+      `∃l.ID (newm m (q0',x0,q'')) ⊢ l ◁
                           (q'',q''',r') → (q',s1,stk')`
 	    by METIS_TAC [rtc2list_exists'] THEN
       METIS_TAC [listQeTrans]
@@ -1124,17 +1124,17 @@ val newmFstStep = store_thm
   ¬(q0' ∈ states m) ∧
   ¬(qe ∈ states m) ∧
   ¬(q0' = qe) ∧
-   (ID (newm m (q0',x0,qe)))^* 
+   (ID (newm m (q0',x0,qe)))^*
           (q0',i,[x0]) (q',i',s') ∧
    ¬(q0' = q')
-         ⇒ 
+         ⇒
      ID (newm m (q0',x0,qe))
-          (q0',i,[x0]) (m.start,i,m.ssSym::[x0]) ∧ 
-    (ID (newm m (q0',x0,qe)))^* 
+          (q0',i,[x0]) (m.start,i,m.ssSym::[x0]) ∧
+    (ID (newm m (q0',x0,qe)))^*
           (m.start,i,m.ssSym::[x0]) (q',i',s')``,
 
 SRW_TAC [][] THEN
-SPOSE_NOT_THEN ASSUME_TAC 
+SPOSE_NOT_THEN ASSUME_TAC
 THENL[
    FULL_SIMP_TAC (srw_ss()) [Once RTC_CASES1] THEN
    SRW_TAC [][] THEN
@@ -1157,7 +1157,7 @@ val newmssSym = store_thm
 ("newmssSym",
 ``¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
-  ¬(qe ∈ states m) 
+  ¬(qe ∈ states m)
           ⇒
     ((newm m (q0',x0,qe)).ssSym=x0)``,
 SRW_TAC [][newm, LET_THM]);
@@ -1166,7 +1166,7 @@ val newmstart = store_thm
 ("newmstart",
 ``¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
-  ¬(qe ∈ states m) 
+  ¬(qe ∈ states m)
           ⇒
     ((newm m (q0',x0,qe)).start=q0')``,
 SRW_TAC [][newm, LET_THM]);
@@ -1198,11 +1198,11 @@ SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `¬((newm m (q0',x0,qe)).start=qe)` by METIS_TAC [newmstart] THEN
 `∃y i st' s sk''.
-         (ID (newm m (q0',x0,qe)))^* 
+         (ID (newm m (q0',x0,qe)))^*
              ((newm m (q0',x0,qe)).start,x,[x0]) y ∧
           newm m (q0',x0,qe) ⊢ y → (qe,[],sk'') ∧
          (ID (newm m (q0',x0,qe)))^* (qe,[],sk'') (qe,[],[]) ∧
-         (y = (st',i,s)) ∧ MEM st' m.final` 
+         (y = (st',i,s)) ∧ MEM st' m.final`
     by METIS_TAC [idcNewmFinalToQe'] THEN
 SRW_TAC [][] THEN
 `i=[]` by METIS_TAC [idFsToQeInpSame] THEN
@@ -1217,13 +1217,13 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
     (ID (newm m (q0',x0,qe)))^* (m.start,x,[m.ssSym; x0])
                                  (st',[],s)`
     by METIS_TAC [newmFstStep] THEN
-`(ID m)^* (m.start,x,[m.ssSym; x0]) (st',[],s)` 
+`(ID m)^* (m.start,x,[m.ssSym; x0]) (st',[],s)`
      by METIS_TAC [idcNewmImpOldm] THEN
 `m.ssSym ≠ x0` by FULL_SIMP_TAC (srw_ss()) [stkSyms_def] THEN
 IMP_RES_TAC idcStkPop THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`[m.ssSym]`] MP_TAC) THEN
 SRW_TAC [][] THEN
-`∃l. ID m ⊢ l ◁ (m.start,x,[m.ssSym; x0]) → (st',[],s)` 
+`∃l. ID m ⊢ l ◁ (m.start,x,[m.ssSym; x0]) → (st',[],s)`
     by METIS_TAC [rtc2list_exists'] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`s`, `[]`, `st'`, `m.start`,`l`,
 			     `[]`,`x`] MP_TAC) THEN
@@ -1232,23 +1232,23 @@ METIS_TAC [HD, rtc2listRtcHdLast, NOT_CONS_NIL, rtc2list_def,
 	   listderiv_def]);
 
 
-val thm51 = store_thm 
+val thm51 = store_thm
 ("thm51",
-``INFINITE (U1 : 'ssym set) ∧ INFINITE (U2 : 'state set) 
+``INFINITE univ(:'ssym) ∧ INFINITE univ(:'state)
       ⇒
-     ∀m.∃m'. (lafs (m:('isym, 'ssym, 'state) pda) = 
+     ∀m.∃m'. (lafs (m:('isym, 'ssym, 'state) pda) =
              laes (m':('isym, 'ssym, 'state) pda))``,
 
 SRW_TAC [] [EQ_IMP_THM, EXTENSION] THEN
-`FINITE (stkSyms m)` 
+`FINITE (stkSyms m)`
      by METIS_TAC [finiteStkSyms, FINITE_LIST_TO_SET] THEN
-`?x0.x0 IN U1 ∧ ~(x0 IN (stkSyms m))` 
+`?x0.x0 IN U1 ∧ ~(x0 IN (stkSyms m))`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_ssym_exists] THEN
-`FINITE (states m)` 
+`FINITE (states m)`
      by METIS_TAC [finiteStates, FINITE_LIST_TO_SET] THEN
-`?q0.q0 IN U2 ∧ ~(q0 IN (states m))` 
+`?q0.q0 IN U2 ∧ ~(q0 IN (states m))`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists] THEN
-`∃qe.qe ∈ U2 ∧ (qe ∉ (q0 INSERT states m))` 
+`∃qe.qe ∈ U2 ∧ (qe ∉ (q0 INSERT states m))`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists,
 		  FINITE_INSERT] THEN
 `(q0 ≠ qe) ∧ (qe ∉ states m)` by FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1261,13 +1261,13 @@ val toFinalStateTrans = Define
 `toFinalStateTrans x0 qf st = ((NONE,x0,st),qf,[])`;
 
 val newm' = Define
-`newm' (p:('isym, 'ssym, 'state) pda) 
-      (q0':'state,x0:'ssym,qf:'state) = 
+`newm' (p:('isym, 'ssym, 'state) pda)
+      (q0':'state,x0:'ssym,qf:'state) =
 let d = [((NONE:'isym option,x0,q0'),(p.start,p.ssSym::[x0]))] ++
         p.next ++
         MAP (toFinalStateTrans x0 qf) (statesList p)
 in
-      <| start := q0';  ssSym := x0;  
+      <| start := q0';  ssSym := x0;
          next := d; final := ([qf]:'state list) |>`;
 
 
@@ -1279,10 +1279,10 @@ valid in the new PDA.
 *)
 val idLaesImpLafs' = store_thm
 ("idLaesImpLafs'",
-``∀x y. (m:('i,'s,'st)pda) ⊢ x → y ∧ 
+``∀x y. (m:('i,'s,'st)pda) ⊢ x → y ∧
   ¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
-  ¬(qf ∈ states m) 
+  ¬(qf ∈ states m)
       ⇒
     newm' m (q0',x0,qf) ⊢ x → y``,
 
@@ -1313,7 +1313,7 @@ Q_TAC SUFF_TAC `newm' m (q0',x0,qf) ⊢ x → x'` THEN
 METIS_TAC [RTC_RULES, idLaesImpLafs']);
 
 
-val finalStateRule = store_thm 
+val finalStateRule = store_thm
 ("finalStateRule",
 ``¬(x0 ∈ stkSyms m) ∧
   ¬(q0' ∈ states m) ∧
@@ -1340,13 +1340,13 @@ val memStartStateNewm' = store_thm
 
 SRW_TAC [][newm', LET_THM] THEN
 SRW_TAC [][statesList_def] THEN
-METIS_TAC [rich_listTheory.CONS_APPEND, statesListApp, 
+METIS_TAC [rich_listTheory.CONS_APPEND, statesListApp,
            statesList'_def, MEM]);
 
 
 val toStEqFs = store_thm (
 "toStEqFs",
-``∀fsl sl'.MEM ((NONE,h',q),q',sl) 
+``∀fsl sl'.MEM ((NONE,h',q),q',sl)
                 (MAP (toFinalStateTrans x0 qf) stl)
                ⇒
             (q'=qf) ∧ (sl=[]) ∧ (h'=x0)``,
@@ -1366,7 +1366,7 @@ val toFsTrans = store_thm
    MEM ((NONE,x0,state),qf,[]) m'.next``,
 
 SRW_TAC [][newm', LET_THM] THEN
-`MEM state (statesList m)` 
+`MEM state (statesList m)`
     by METIS_TAC [mem_in, states_list_eqresult] THEN
 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq]THEN
 SRW_TAC [][statesList_def, statesList'_def, toFinalStateTrans] THEN
@@ -1385,12 +1385,12 @@ val laesImpLafs' = store_thm
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][newm', LET_THM] THEN
-Q.MATCH_ABBREV_TAC `x ∈ lafs <| start := q0'; 
+Q.MATCH_ABBREV_TAC `x ∈ lafs <| start := q0';
                                 ssSym := x0;
 				next := d';
-				final := [qf] |>` THEN 
+				final := [qf] |>` THEN
 Q.MATCH_ABBREV_TAC `x ∈ lafs m'` THEN
-`IDC m' (q0',x,[x0]) (m.start,x,m.ssSym::[x0])` by 
+`IDC m' (q0',x,[x0]) (m.start,x,m.ssSym::[x0])` by
 (SRW_TAC [][] THEN
 SRW_TAC [] [Once RTC_CASES1] THEN
 Q.EXISTS_TAC `(m.start,x,[m.ssSym;x0])` THEN
@@ -1399,25 +1399,25 @@ Cases_on `x` THEN SRW_TAC [][ID_def] THEN
 UNABBREV_ALL_TAC THEN
 SRW_TAC [][]) THEN
 FULL_SIMP_TAC (srw_ss()) [laes_def] THEN
-`IDC m' (m.start,x,[m.ssSym]) (state,[],[])` 
+`IDC m' (m.start,x,[m.ssSym]) (state,[],[])`
    by METIS_TAC [idcLaesImpLafs', newm', LET_THM, APPEND] THEN
 SRW_TAC [][lafs_def] THEN
-`IDC m' (m.start,x,m.ssSym::[x0]) 
-        (state,[],[x0])` 
+`IDC m' (m.start,x,m.ssSym::[x0])
+        (state,[],[x0])`
           by METIS_TAC [ APPEND, idcStackInsert] THEN
-`MEM m.start (statesList m)` 
+`MEM m.start (statesList m)`
    by FULL_SIMP_TAC (srw_ss()) [statesList_def] THEN
-`MEM state (statesList m)` 
+`MEM state (statesList m)`
     by METIS_TAC [memState] THEN
 `state ∈ states m` by METIS_TAC [mem_in, states_list_eqresult] THEN
-`MEM ((NONE,x0,state),qf,[]) m'.next` 
+`MEM ((NONE,x0,state),qf,[]) m'.next`
      by METIS_TAC [toFsTrans, Abbr `m'`, newm', LET_THM,
 		   APPEND] THEN
 `ID m' (state,[],[x0]) (qf,[],[])`
   by SRW_TAC [][ID_def] THEN
 MAP_EVERY Q.EXISTS_TAC [`qf`, `[]`]  THEN
 SRW_TAC [][] THEN
-`IDC m' (state,[],[x0]) (qf,[],[])` 
+`IDC m' (state,[],[x0]) (qf,[],[])`
     by SRW_TAC [][RTC_RULES] THEN
 `MEM qf m'.final` by SRW_TAC [][Abbr `m'`] THEN
 `m'.start = q0'` by SRW_TAC [][Abbr `m'`] THEN
@@ -1429,7 +1429,7 @@ METIS_TAC [RTC_RTC]);
 
 val notSomeInpMemFst' = store_thm (
 "notSomeInpMemFst'",
-``∀fsl sl'.¬MEM ((SOME h,h',q),q',sl) 
+``∀fsl sl'.¬MEM ((SOME h,h',q),q',sl)
                 (MAP (toFinalStateTrans x0 qf) stl)``,
 
 Induct_on `stl` THEN
@@ -1448,7 +1448,7 @@ val toFsStk = store_thm
 
 Cases_on `i` THEN Cases_on `s` THEN
 SRW_TAC [][newm', LET_THM, ID_def] THEN
-FULL_SIMP_TAC (srw_ss()) [states_def] THEN 
+FULL_SIMP_TAC (srw_ss()) [states_def] THEN
 METIS_TAC [toStEqFs, notSomeInpMemFst', APPEND]);
 
 
@@ -1477,7 +1477,7 @@ val idNewm'ImpOldm = store_thm
   newm' m (q0',x0,qf) ⊢ (q,i,s) → (q',i',s') ∧
   q' ∈ states m
         ⇒
-    (q=q0') ∨ 
+    (q=q0') ∨
     (q ∈ states m ∧
     m ⊢ (q,i,s) → (q',i',s'))``,
 
@@ -1515,7 +1515,7 @@ SRW_TAC [][newm', LET_THM] THEN
 SPOSE_NOT_THEN ASSUME_TAC THEN
 Cases_on `i` THEN Cases_on `s` THEN
 FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
-SRW_TAC [][] 
+SRW_TAC [][]
 THENL[
       FULL_SIMP_TAC (srw_ss()) [states_def] THEN
       METIS_TAC [],
@@ -1547,7 +1547,7 @@ val idcNewm'ImpOldm = store_thm
         ⇒
     (ID m)^* (q,i,s) (q',i',s')``,
 
-Q_TAC SUFF_TAC 
+Q_TAC SUFF_TAC
   `∀x y. (ID (newm' m (q0',x0,qf)))^* x y ⇒
          x0 ∉ stkSyms m ⇒
          q0' ∉ states m ⇒
@@ -1557,8 +1557,8 @@ Q_TAC SUFF_TAC
             (x = (q,s0,stk)) ∧ (y = (q',s1,stk')) ∧
              q' ∈ states m ∧ q ∈ (states m)
                    ⇒
-        	(ID m)^* (q,s0,stk) (q',s1,stk')` THEN1 
-METIS_TAC [] THEN 
+        	(ID m)^* (q,s0,stk) (q',s1,stk')` THEN1
+METIS_TAC [] THEN
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [RTC_RULES] THEN
@@ -1568,7 +1568,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 RES_TAC THEN
 `q'' ∈ states m ∨ (q'' = qf)` by METIS_TAC [idStatesMem']
 THENL[
-      `∃l.ID (newm' m (q0',x0,qf)) ⊢ l ◁ 
+      `∃l.ID (newm' m (q0',x0,qf)) ⊢ l ◁
                           (q'',q''',r') → (q',s1,stk')`
 	    by METIS_TAC [rtc2list_exists'] THEN
       `q'' ∈ states m` by METIS_TAC [idStatesMem'] THEN
@@ -1576,7 +1576,7 @@ THENL[
 
 
       SRW_TAC [][] THEN
-      `∃l.ID (newm' m (q0',x0,q'')) ⊢ l ◁ 
+      `∃l.ID (newm' m (q0',x0,q'')) ⊢ l ◁
                           (q'',q''',r') → (q',s1,stk')`
 	    by METIS_TAC [rtc2list_exists'] THEN
       FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
@@ -1600,7 +1600,7 @@ val idNewm'FstStep = store_thm
 
 Cases_on `i` THEN
 SRW_TAC [][ID_def] THEN
-FULL_SIMP_TAC (srw_ss()) [newm', LET_THM] 
+FULL_SIMP_TAC (srw_ss()) [newm', LET_THM]
 THENL[
       FULL_SIMP_TAC (srw_ss()) [states_def] THEN METIS_TAC [],
 
@@ -1621,7 +1621,7 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [states_def] THEN METIS_TAC [],
 
       METIS_TAC [notSomeInpMemFst'],
-      
+
       FULL_SIMP_TAC (srw_ss()) [states_def] THEN METIS_TAC [],
 
       METIS_TAC [memFslFst', states_list_eqresult, mem_in],
@@ -1636,7 +1636,7 @@ val newm'start = store_thm
 ("newm'start",
 ``x0 ∉ stkSyms m ∧
   q0' ∉ states m ∧
-  qf ∉ states m  
+  qf ∉ states m
           ⇒
     ((newm' m (q0',x0,qf)).start=q0')``,
 SRW_TAC [][newm', LET_THM]);
@@ -1645,7 +1645,7 @@ val newm'ssSym = store_thm
 ("newm'ssSym",
 ``x0 ∉ stkSyms m ∧
   q0' ∉ states m ∧
-  qf ∉ states m  
+  qf ∉ states m
           ⇒
     ((newm' m (q0',x0,qf)).ssSym=x0)``,
 SRW_TAC [][newm', LET_THM]);
@@ -1662,7 +1662,7 @@ val newm'toFs = store_thm
 SRW_TAC [][newm', LET_THM] THEN
 Cases_on `i` THEN Cases_on `s` THEN
 FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
-FULL_SIMP_TAC (srw_ss()) [states_def] THEN 
+FULL_SIMP_TAC (srw_ss()) [states_def] THEN
 METIS_TAC [notSomeInpMemFst', toStEqFs, APPEND]);
 
 
@@ -1676,7 +1676,7 @@ val toFsFromOldSt = store_thm
      q ∈ states m``,
 SRW_TAC [][newm', LET_THM] THEN
 Cases_on `i` THEN Cases_on `s` THEN
-FULL_SIMP_TAC (srw_ss()) [ID_def] 
+FULL_SIMP_TAC (srw_ss()) [ID_def]
 THENL[
 
   FULL_SIMP_TAC (srw_ss()) [states_def] THEN METIS_TAC [],
@@ -1710,7 +1710,7 @@ val fsTransPfxNil = store_thm
 
 Cases_on `i` THEN Cases_on `p'` THEN
 SRW_TAC [][newm', LET_THM, ID_def] THEN
-FULL_SIMP_TAC (srw_ss()) [states_def] THEN 
+FULL_SIMP_TAC (srw_ss()) [states_def] THEN
 METIS_TAC [toStEqFs, notSomeInpMemFst']);
 
 val lafsImpLaes' = store_thm
@@ -1732,11 +1732,11 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `((q0',x,[x0])=(qf,[],stack)) ∨
  ∃u.ID (newm' m (q0',x0,qf)) (q0',x,[x0]) u ∧
-    (ID (newm' m (q0',x0,qf)))^* u (qf,[],stack)` 
+    (ID (newm' m (q0',x0,qf)))^* u (qf,[],stack)`
     by METIS_TAC [RTC_CASES1] THEN
 SRW_TAC [][] THEN
 Cases_on `u`THEN Cases_on `r` THEN
-`(q = m.start) ∧ (q' = x) ∧ (r' = [m.ssSym; x0])` 
+`(q = m.start) ∧ (q' = x) ∧ (r' = [m.ssSym; x0])`
 	 by METIS_TAC [idNewm'FstStep] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss())  [Once RTC_CASES2] THEN
@@ -1745,14 +1745,14 @@ Cases_on `u'` THEN Cases_on `r` THEN
 `(q''=[])` by METIS_TAC [newm'toFs] THEN
 `q ∈ states m`  by METIS_TAC [toFsFromOldSt] THEN
 `m.start ∈ states m` by FULL_SIMP_TAC (srw_ss()) [states_def] THEN
-`(ID m)^* (m.start,q',[m.ssSym; x0]) (q,q'',r')` 
+`(ID m)^* (m.start,q',[m.ssSym; x0]) (q,q'',r')`
     by METIS_TAC [idcNewm'ImpOldm] THEN
 IMP_RES_TAC idcStkPop THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`[m.ssSym]`] MP_TAC) THEN
 SRW_TAC [][] THEN
 `x0 ≠ m.ssSym` by FULL_SIMP_TAC (srw_ss()) [stkSyms_def] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-`∃l. ID m ⊢ l ◁ (m.start,q',[m.ssSym; x0]) → (q,[],r')` 
+`∃l. ID m ⊢ l ◁ (m.start,q',[m.ssSym; x0]) → (q,[],r')`
     by METIS_TAC [rtc2list_exists'] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`r'`, `[]`, `q`, `m.start`,`l`,
 			     `[]`,`q'`] MP_TAC) THEN
@@ -1761,7 +1761,7 @@ SRW_TAC [][] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 `l' ≠ []` by (Cases_on `l'` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
-`(ID m)^* (m.start,q',[m.ssSym]) (q,[],[])` 
+`(ID m)^* (m.start,q',[m.ssSym]) (q,[],[])`
     by METIS_TAC [rtc2listRtcHdLast] THEN
 `(m.start,q',[m.ssSym]) ≠ (q,[],[])` by SRW_TAC [][] THEN
 METIS_TAC [RTC_CASES2]);
@@ -1770,20 +1770,20 @@ METIS_TAC [RTC_CASES2]);
 
 val thm52 = store_thm
 ("thm52",
-``INFINITE (U1 : 'ssym set) ∧ INFINITE (U2 : 'state set) 
+``INFINITE (U1 : 'ssym set) ∧ INFINITE (U2 : 'state set)
      ⇒
-   ∀m.∃m'.laes (m:('isym, 'ssym, 'state) pda) = 
+   ∀m.∃m'.laes (m:('isym, 'ssym, 'state) pda) =
           lafs (m':('isym, 'ssym, 'state) pda)``,
 SRW_TAC [] [EQ_IMP_THM, EXTENSION] THEN
-`FINITE (stkSyms m)` 
+`FINITE (stkSyms m)`
      by METIS_TAC [finiteStkSyms, FINITE_LIST_TO_SET] THEN
-`∃x0.x0 IN U1  ∧ x0 ∉ stkSyms m` 
+`∃x0.x0 IN U1  ∧ x0 ∉ stkSyms m`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_ssym_exists] THEN
-`FINITE (states m)` 
+`FINITE (states m)`
      by METIS_TAC [finiteStates, FINITE_LIST_TO_SET] THEN
-`∃q0'.q0' IN U2  ∧ q0' ∉ states m` 
+`∃q0'.q0' IN U2  ∧ q0' ∉ states m`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists] THEN
-`∃qf.qf IN U2  ∧ qf ∉ (q0' INSERT states m)` 
+`∃qf.qf IN U2  ∧ qf ∉ (q0' INSERT states m)`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists,
 		  FINITE_INSERT] THEN
 FULL_SIMP_TAC (srw_ss()) [INSERT_DEF] THEN

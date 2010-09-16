@@ -2567,10 +2567,9 @@ METIS_TAC [elDrop]);
 
 val gnfExists = store_thm
 ("gnfExists",
-``∀g:('a, 'b) grammar. 
- INFINITE (UNIV:'a set) ∧ 
- [] ∉ language g ∧
- language g ≠ {}  ⇒ 
+``∀g:('nts, 'ts) grammar. 
+ INFINITE (UNIV:'nts set) ∧ 
+ [] ∉ language g ⇒
  ∃g'.isGnf g' ∧ (language g = language g')``,
 
 SRW_TAC [][] THEN
@@ -2586,21 +2585,21 @@ METIS_TAC [use_exists, lemma4_1a] THEN
  (set (ntms ug) ∩ set bs0 = {})` by METIS_TAC [allDistinctNewlist,
 					       FINITE_LIST_TO_SET] THEN
 
-`set (ntms ug) ∩ set ([]:'a list) = {}` by SRW_TAC [][] THEN
+`set (ntms ug) ∩ set ([]:'nts list) = {}` by SRW_TAC [][] THEN
 
-`seenInv (rules ug) ([]:'a list)` by SRW_TAC [][seenInv] THEN
+`seenInv (rules ug) ([]:'nts list)` by SRW_TAC [][seenInv] THEN
 
-`(set bs0 ∩ set ([]:α list) = {})` by SRW_TAC [][] THEN
+`(set bs0 ∩ set ([]:'nts list) = {})` by SRW_TAC [][] THEN
 
-`∃g1.(r49)^* (bs0, ntms ug, ug, ([]:'a list), ([]:'a list)) 
- (DROP (LENGTH (ntms ug)) bs0, ([]:'a list), g1,ntms ug, 
+`∃g1.(r49)^* (bs0, ntms ug, ug, ([]:'nts list), ([]:'nts list)) 
+ (DROP (LENGTH (ntms ug)) bs0, ([]:'nts list), g1,ntms ug, 
   TAKE (LENGTH (ntms ug)) bs0) ∧
  (language ug = language g1)`
  by METIS_TAC [r49Rtc_exists, r49Rtc_equiv, APPEND_NIL] THEN
 
 
-Q.ABBREV_TAC `s0 = []:α list` THEN
-Q.ABBREV_TAC `ubs0 = []:α list` THEN
+Q.ABBREV_TAC `s0 = []:'nts list` THEN
+Q.ABBREV_TAC `ubs0 = []:'nts list` THEN
 Q.ABBREV_TAC `nts0 = ntms ug` THEN
 Q.ABBREV_TAC `ubs = TAKE (LENGTH (ntms ug)) bs0` THEN
 
@@ -2629,16 +2628,16 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 
 `seenInv (rules g1) (ntms ug)` by METIS_TAC [r49Rtc_seenInv] THEN
 
-`∃g2. fstNtm2Tm^* (ntms ug,g1,[]:α list) ([],g2,ntms ug) ∧
+`∃g2. fstNtm2Tm^* (ntms ug,g1,[]:'nts list) ([],g2,ntms ug) ∧
  (language ug = language g2)` by METIS_TAC [fstNtm2TmRtc_exists,
 					    fstNtm2TmRtc_equiv, APPEND_NIL] THEN
 
 `set (ntms g2) ⊆ set (ntms g1)` by METIS_TAC [fstNtm2TmRtc_ntmsSubset] THEN
 
-`gnfInv (rules g1) ([]:α list)` by SRW_TAC [][gnfInv] THEN
+`gnfInv (rules g1) ([]:'nts list)` by SRW_TAC [][gnfInv] THEN
 
 Q.ABBREV_TAC `ontms0 = ntms ug` THEN
-Q.ABBREV_TAC `ontms = []:α list` THEN
+Q.ABBREV_TAC `ontms = []:'nts list` THEN
 Q.ABBREV_TAC `s = ntms ug` THEN
 
 `set s0 ∩ set ubs = {}` by METIS_TAC [INTER_EMPTY, LIST_TO_SET_THM] THEN
@@ -2649,12 +2648,12 @@ Q.ABBREV_TAC `s = ntms ug` THEN
 `set ontms0 ∩ set ubs = {}` by 
 (FULL_SIMP_TAC (srw_ss()) [SUBSET_DEF, EXTENSION] THEN
  METIS_TAC []) THEN
-`ruleInv (rules g1) ontms0 ([]:α list)` by 
+`ruleInv (rules g1) ontms0 ([]:'nts list)` by 
 (Cases_on `g1` THEN 
  METIS_TAC [rhsTlNonTmsImpRuleInv,
 	    startSym_def, rules_def]) THEN
-`gnfInv (rules g1) ([]:α list)` by SRW_TAC [][gnfInv] THEN
-`ALL_DISTINCT (ontms0 ++ ([]:α list))` by FULL_SIMP_TAC (srw_ss()) [] THEN
+`gnfInv (rules g1) ([]:'nts list)` by SRW_TAC [][gnfInv] THEN
+`ALL_DISTINCT (ontms0 ++ ([]:'nts list))` by FULL_SIMP_TAC (srw_ss()) [] THEN
 
 `gnfInv (rules g2) (ntms ug)` by METIS_TAC [fstNtm2TmRtc_gnfInv, INTER_EMPTY,
 					    LIST_TO_SET_THM] THEN

@@ -85,8 +85,7 @@ val negr_r1 = prove(
 Induct_on `rhs` THENL
 [
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [munge0,derives_def] THEN
-METIS_TAC [RTC_RULES],
+FULL_SIMP_TAC (srw_ss()) [munge0,derives_def],
 
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [munge0] THEN

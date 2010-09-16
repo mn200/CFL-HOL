@@ -1242,13 +1242,13 @@ val thm51 = store_thm
 SRW_TAC [] [EQ_IMP_THM, EXTENSION] THEN
 `FINITE (stkSyms m)`
      by METIS_TAC [finiteStkSyms, FINITE_LIST_TO_SET] THEN
-`?x0.x0 IN U1 ∧ ~(x0 IN (stkSyms m))`
+`∃x0.x0 IN (univ((:'ssym) :'ssym itself)) ∧ ~(x0 IN (stkSyms m))`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_ssym_exists] THEN
 `FINITE (states m)`
      by METIS_TAC [finiteStates, FINITE_LIST_TO_SET] THEN
-`?q0.q0 IN U2 ∧ ~(q0 IN (states m))`
+`∃q0.q0 IN (univ((:'state) :'state itself)) ∧ ~(q0 IN (states m))`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists] THEN
-`∃qe.qe ∈ U2 ∧ (qe ∉ (q0 INSERT states m))`
+`∃qe.qe ∈ (univ((:'state) :'state itself)) ∧ (qe ∉ (q0 INSERT states m))`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists,
 		  FINITE_INSERT] THEN
 `(q0 ≠ qe) ∧ (qe ∉ states m)` by FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1770,20 +1770,21 @@ METIS_TAC [RTC_CASES2]);
 
 val thm52 = store_thm
 ("thm52",
-``INFINITE (U1 : 'ssym set) ∧ INFINITE (U2 : 'state set)
+``INFINITE univ(:'ssym) ∧ INFINITE univ(:'state)
      ⇒
    ∀m.∃m'.laes (m:('isym, 'ssym, 'state) pda) =
           lafs (m':('isym, 'ssym, 'state) pda)``,
+
 SRW_TAC [] [EQ_IMP_THM, EXTENSION] THEN
 `FINITE (stkSyms m)`
      by METIS_TAC [finiteStkSyms, FINITE_LIST_TO_SET] THEN
-`∃x0.x0 IN U1  ∧ x0 ∉ stkSyms m`
+`∃x0.x0 IN univ(:'ssym)  ∧ x0 ∉ stkSyms m`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_ssym_exists] THEN
 `FINITE (states m)`
      by METIS_TAC [finiteStates, FINITE_LIST_TO_SET] THEN
-`∃q0'.q0' IN U2  ∧ q0' ∉ states m`
+`∃q0'.q0' IN univ(:'state)  ∧ q0' ∉ states m`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists] THEN
-`∃qf.qf IN U2  ∧ qf ∉ (q0' INSERT states m)`
+`∃qf.qf IN univ(:'state)  ∧ qf ∉ (q0' INSERT states m)`
     by METIS_TAC [IN_INFINITE_NOT_FINITE, new_state_exists,
 		  FINITE_INSERT] THEN
 FULL_SIMP_TAC (srw_ss()) [INSERT_DEF] THEN

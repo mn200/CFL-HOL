@@ -77,15 +77,11 @@ Cases_on `g` THEN METIS_TAC [startSym_def,negr]);
 (*∧ ∃l.rule l l2 IN munge g (rules g) ∧ rule l l1 IN rules g`;*)
 val no_rhs = Define `no_rhs g l1 l2 = MEM l2 (munge0 g l1)`;
 
-val no_rule = Define `no_rule g (rule l1 r1) (rule l2 r2) = (l1=l2) ∧ 
-    (MEM r2 (munge0 g r1)) `;
-
 val negr_r1 = prove(
 ``∀rhs' rhs.(MEM rhs' (munge0 g rhs) ⇒ RTC (derives g) rhs rhs')``,
-Induct_on `rhs` THENL
-[
-SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [munge0,derives_def],
+Induct_on `rhs` THEN1
+(SRW_TAC [] [] THEN
+FULL_SIMP_TAC (srw_ss()) [munge0,derives_def]) THEN
 
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [munge0] THEN
@@ -93,9 +89,9 @@ Cases_on `nullable g [h]` THENL
 [
 FULL_SIMP_TAC (srw_ss()) [MEM] THENL
 	[	
-	`∃e.MEM e (munge0 g rhs) ∧ (rhs'= (h::e))` by METIS_TAC [MEM_MAP]  THEN
+	`∃e.MEM e (munge0 g rhs) ∧ (rhs'= (h::e))` by METIS_TAC [MEM_MAP] THEN
 	`RTC (derives g) rhs e` by METIS_TAC [] THEN
-	METIS_TAC [rtc_derives_same_append_left,APPEND] ,
+	METIS_TAC [rtc_derives_same_append_left,APPEND],
 
 	RES_TAC THEN
 	FULL_SIMP_TAC (srw_ss()) [nullable] THEN
@@ -103,8 +99,8 @@ FULL_SIMP_TAC (srw_ss()) [MEM] THENL
 	],
 
 FULL_SIMP_TAC (srw_ss()) [MEM] THEN
-`∃e.MEM e (munge0 g rhs) ∧ (rhs'= (h::e))` by METIS_TAC [MEM_MAP]  THEN
-METIS_TAC [rtc_derives_same_append_left,APPEND] ]]);
+`∃e.MEM e (munge0 g rhs) ∧ (rhs'= (h::e))` by METIS_TAC [MEM_MAP] THEN
+METIS_TAC [rtc_derives_same_append_left,APPEND]]);
 
 val negr_r2 = prove(
 ``negr g g' ⇒ derives g' u v ⇒ RTC (derives g) u v``,

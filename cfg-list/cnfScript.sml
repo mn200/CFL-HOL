@@ -1385,12 +1385,6 @@ val thm4_5 = store_thm
 SRW_TAC [] [cnf] THEN
 METIS_TAC [cnf,lemma14_b,lemma9_a,lemma9_b,cnf_lemma]);
 
-val isCnf_def = Define
-`isCnf g = ∀l r.MEM (rule l r) (rules g) ⇒
-    ((LENGTH r = 2) ∧ EVERY isNonTmnlSym r) ∨
-    ((LENGTH r = 1) ∧ EVERY isTmnlSym r)`;
-
-
 
 val cnfisCnfEq = store_thm
 ("cnfisCnfEq",

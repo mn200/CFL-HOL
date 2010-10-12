@@ -258,11 +258,11 @@ val upgr_r31 = prove
 (``∀v v'. negr g1 g2 ⇒ upgr g2 g3 ⇒
 derives g3 v v' ⇒ RTC (derives g2) v v'``,
 
-SRW_TAC [] [derives_def, upgr, rules_def, nonUnitProds,newProds,allDeps,
-	    upgr_rules,EXTENSION] 
-THENL[
- METIS_TAC [res1,derives_same_append_left,derives_same_append_right,RTC_SUBSET],
-
+SRW_TAC [][derives_def, upgr, upgr_rules, rules_def,EXTENSION] THEN1
+ (FULL_SIMP_TAC (srw_ss()) [nonUnitProds] THEN
+  METIS_TAC [res1,derives_same_append_left,derives_same_append_right, 
+	     RTC_SUBSET]) THEN
+FULL_SIMP_TAC (srw_ss()) [nonUnitProds,newProds,allDeps,unitProds,EXTENSION] THEN
 Cases_on `g2` THEN
 FULL_SIMP_TAC (srw_ss()) [startSym_def] THEN
 `∀e.e ∈ unitProds (G l n) ⇒ MEM e (rules (G l n))`
@@ -274,7 +274,7 @@ FULL_SIMP_TAC (srw_ss()) [eq_sneup,startSym_def,rules_def] THEN
 `RTC (derives (G l n)) [NTS lhs] rhs` 
       by METIS_TAC [RTC_RULES_RIGHT1,eq_sneup,eq_snegr,negr_def,
 		    rules_def] THEN
-METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left]]);
+METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left]);
 
 
 val upgr_r31rgr = prove

@@ -80,7 +80,22 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [TAKE_def] THEN
 METIS_TAC [MEM]);
 
+val followSetMem = store_thm 
+("followSetMem", 
+``∀u v.RTC (derives g) u v ⇒ (u=[NTS N]) ⇒
+(v=(pfx++[NTS N']++[TS ts]++sfx)) ⇒
+((TS ts) IN followSet g (NTS N'))``,
 
+HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [] [RTC_RULES] THEN1
+ FULL_SIMP_TAC (srw_ss()) [lreseq] THEN
+ FULL_SIMP_TAC (srw_ss()) [derives_def, lreseq, followSet] THEN
+ Q.EXISTS_TAC `u'` THEN
+ SRW_TAC [] [] 
+ THENL[
+       FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ruleRhs_def] THEN
+       METIS_TAC [],
+			  
+       METIS_TAC []]);
 
 val _ = export_theory ();
 
@@ -202,23 +217,6 @@ SRW_TAC [][] THEN
 Cases_on `y` THEN
 METIS_TAC [followRuleEq1, APPEND, APPEND_NIL]);
 
-
-val followSetMem = store_thm 
-("followSetMem", 
-``∀u v.RTC (derives g) u v ⇒ (u=[NTS N]) ⇒
-(v=(pfx++[NTS N']++[TS ts]++sfx)) ⇒
-((TS ts) IN followSet g (NTS N'))``,
-
-HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [] [RTC_RULES] THEN1
- FULL_SIMP_TAC (srw_ss()) [lreseq] THEN
- FULL_SIMP_TAC (srw_ss()) [derives_def, lreseq, followSet] THEN
- Q.EXISTS_TAC `u'` THEN
- SRW_TAC [] [] 
- THENL[
-       FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, ruleRhs_def] THEN
-       METIS_TAC [],
-			  
-       METIS_TAC []]);
 
 
 

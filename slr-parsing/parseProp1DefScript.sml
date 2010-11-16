@@ -322,7 +322,6 @@ val sgoto_exp = store_thm ("sgoto_exp",
 SRW_TAC [] [slrmac_def, LET_THM]);
 
 
-
 val parse_csl_validStates = store_thm ("parse_csl_validStates",
 ``∀m g.(m=slrmac g) ⇒ validStates g ((s, itl)::csl) 
 ⇒ (parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))

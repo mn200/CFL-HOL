@@ -5,18 +5,21 @@ relationTheory markerTheory boolSimps optionTheory
 
 open symbolDefTheory grammarDefTheory boolLemmasTheory listLemmasTheory
 whileLemmasTheory parseTreeTheory yaccDefTheory
-parseProp1DefTheory parseProp2DefTheory
 
-val _ = new_theory "parserPropDefTheory"
+open parseProp1DefTheory 
+
+open parseProp2DefTheory
+
+val _ = new_theory "parserPropDef"
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
 
 val parser_inv = Define 
 `parser_inv g stl csl = validptree_inv g stl /\ 
                       ~NULL csl /\ validStates g csl`
 
 
-
 val parserValidptree_Invthm = store_thm ("parserValidptree_Invthm",
-``!g sl stl.(auggr g s eof = SOME ag) ==>
+``∀g sl stl.(auggr g s eof = SOME ag) ==>
 (slrmac ag = m) ==> parser_inv ag stl csl ==>
 (parser ((NTS (startSym ag),initItems ag (rules ag)), 
          eof, startSym g) m sl = SOME (SOME tree)) ==> 
@@ -25,9 +28,9 @@ validptree ag tree``,
 SRW_TAC [] [parser_def, parser_inv,init_def] THEN
 FULL_SIMP_TAC (srw_ss()) [LET_THM, Abbrev_def] THEN
 Q.ABBREV_TAC `inis = (NTS (startSym ag),initItems ag (rules ag))` THEN
-Cases_on `mwhile (\s. ~exitCond (eof,NTS (startSym g)) s)
-               (\(sli,stli,csli). parse (slrmac ag) (sli,stli,csli))
-               (sl,[],[inis])` THEN 
+Cases_on `mwhile (λs. ¬exitCond (eof,NTS (startSym g)) s)
+           (λ(sli,stli,csli). parse (slrmac ag) (sli,stli,csli))
+           (sl,[],[(NTS (startSym ag),initItems ag (rules ag))])` THEN 
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `x'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -43,10 +46,11 @@ SRW_TAC [] [] THEN
 `~ CC ss'` by METIS_TAC [mwhileEndCond, SOME_11] THEN
 Q.ABBREV_TAC 
 `PP = \(sli,stli,csli) : 
-(symbol list # (((symbol # state) # ptree) list) # ((symbol#state) list)).
-validptree_inv ag stli /\
-validStates ag csli /\
-~ NULL csli` THEN
+((α,β) symbol list # ((((α,β) symbol # (α,β)state) # (α,β) ptree) list) # 
+(((α,β) symbol# (α,β) state) list)).
+validptree_inv ag stli ∧
+validStates ag csli ∧
+¬ NULL csli` THEN
 
 Q_TAC SUFF_TAC `PP ss'` THENL[
 UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
@@ -88,8 +92,25 @@ SRW_TAC [][validptree_inv_def, validStkSymTree_def, validptree,init_def] THEN
 FULL_SIMP_TAC (srw_ss()) [validStates_def, initItems_def] THEN
 METIS_TAC [validItl_initProds2Items, validItl_iclosure,MEM, 
 	   stacklsymtree_def]
-]])
+]]);
 
+
+val soundness = store_thm ("soundness",
+``∀g sl stl.(auggr g s eof = SOME ag) ∧
+(slrmac ag = m) ∧ parser_inv ag stl csl ∧
+(parser ((NTS (startSym ag),initItems ag (rules ag)), 
+         eof, startSym g) m sl = SOME (SOME tree)) ⇒
+sl ∈ language ag``,
+
+SRW_TAC [][language_def] THEN
+`validptree ag tree` by METIS_TAC [parserValidptree_Invthm] THEN
+Cases_on `tree` THEN
+FULL_SIMP_TAC (srw_ss()) [validptree, parser_def, LET_THM] THEN
+Cases_on `mwhile (λs. ¬exitCond (eof,NTS (startSym g)) s)
+           (λ(sli,stli,csli). parse (slrmac ag) (sli,stli,csli))
+           (init (NTS (startSym ag),initItems ag (rules ag)) sl)` THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+MAGIC);
 
 
 val parse_sl_not_nil = store_thm ("parse_sl_not_nil",
@@ -113,24 +134,26 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [] THEN
       METIS_TAC [NOT_CONS_NIL]
       ]
-)
+);
 
 
 
-val parserLeaves_Eq_Invthm = store_thm ("parserLeaves_Eq_Invthm",
-``!m g s eof sl csl.(auggr g s eof = SOME ag) ==>  
+val parserLeaves_Eq_Invthm = store_thm 
+("parserLeaves_Eq_Invthm",
+ ``∀m (g:(α,β) grammar) (s:α) (eof:β) sl csl.
+ (auggr g s eof = SOME ag) ==>  
   ~NULL csl ==> validStates ag csl ==>
 (m=slrmac ag) ==> leaves_eq_inv sl sl [] ==> 
 (inis = (NTS (startSym ag), initItems ag (rules ag))) ==>
 (parser (inis, eof, startSym g) m sl = SOME (SOME tree)) ==>
-(sl=leaves tree++[TS eof])``,
+(sl=MAP TS (leaves tree) ++ [TS eof])``,
 
 SRW_TAC [] [parser_def, LET_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [LET_THM, Abbrev_def] THEN
 Q.ABBREV_TAC `inis = (NTS (startSym ag), initItems ag (rules ag))` THEN
-Cases_on `mwhile (\s. ~exitCond (eof,NTS (startSym g)) s)
-               (\(sli,stli,csli). parse (slrmac ag) (sli,stli,csli))
-               (init inis sl)` THEN 
+Cases_on `mwhile (λs. ¬exitCond (eof,NTS (startSym g)) s)
+           (λ(sli,stli,csli). parse (slrmac ag) (sli,stli,csli))
+           (init (NTS (startSym ag),initItems ag (rules ag)) sl)` THEN 
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `x'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -140,13 +163,14 @@ Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 POP_ASSUM MP_TAC THEN
 Q.MATCH_ABBREV_TAC `(mwhile CC ff ss = SOME (SOME ss')) ==>
-(sl=leaves tree ++ [TS eof])` THEN
+(sl=MAP TS (leaves tree) ++ [TS eof])` THEN
 STRIP_TAC THEN
 SRW_TAC [] [] THEN
 `~ CC ss'` by METIS_TAC [mwhileEndCond, SOME_11] THEN
 Q.ABBREV_TAC 
 `PP = \(sli,stli,csli) : 
-(symbol list # (((symbol # state) # ptree) list) # ((symbol#state) list)).
+((α,β) symbol list # ((((α,β) symbol # (α,β) state) # (α,β)ptree) list) # 
+(((α,β)symbol#(α,β)state) list)).
 leaves_eq_inv sl sli (REVERSE stli) /\
 validStates ag csli /\ ~NULL csli` THEN
 Q_TAC SUFF_TAC `PP ss'` 
@@ -190,7 +214,7 @@ FULL_SIMP_TAC (srw_ss()) [exitCond_def] THEN
 SRW_TAC [][leaves_eq_inv_def, leaves_def, stacktreeleaves_def] THEN
 FULL_SIMP_TAC (srw_ss()) [validStates_def, initItems_def] THEN
 METIS_TAC [validItl_initProds2Items, validItl_iclosure]
-]])
+]]);
 
 
 val _ = export_theory ();

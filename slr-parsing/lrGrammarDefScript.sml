@@ -72,11 +72,6 @@ SRW_TAC [][] THEN
  Cases_on `t''` THEN FULL_SIMP_TAC (srw_ss()) []);
 
 
-val followSetEq = 
-    mk_thm ([], ``∀g sym.s IN (followSetML g sym) = s IN (followSet g sym)``);
-
-val _ = save_thm ("followSetEq", followSetEq);
-
 val reduce_not_mem = store_thm ("reduce_not_mem",
 ``isTmnlSym sym ⇒ (reduce ag itl (ts2str sym) = []) ⇒ 
 (∀e.MEM e itl ⇒ (~∃N r.(e=(item N (r,[]))) ∧ (sym IN (followSet ag (NTS N)))))``,

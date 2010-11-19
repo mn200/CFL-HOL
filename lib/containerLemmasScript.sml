@@ -77,4 +77,24 @@ Q.EXISTS_TAC `e::r`  THEN
 SRW_TAC [][]);
 
 
+val mapCard = store_thm
+("mapCard",
+``∀s. FINITE s ⇒ ∀l.(s = set l) ⇒ (∀x y.(f x = f y) ⇔ (x = y)) ⇒ 
+ (CARD (set (MAP f l)) = CARD s)``,
+
+HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [][] THEN
+`∃l'. (set l' = s)` by  METIS_TAC [listExists4Set] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`l'`] MP_TAC) THEN SRW_TAC [][] THEN
+`set l = e INSERT set l'` by METIS_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+`¬(MEM (f e) (MAP f l'))`  by FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
+`CARD ((f e) INSERT (set (MAP f l'))) = CARD (e INSERT set l')` by SRW_TAC [][] THEN
+`set (MAP f l) = f e INSERT set (MAP f l')` by
+ (FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+  METIS_TAC [MEM_MAP]) THEN
+`CARD (e INSERT set l') = SUC (CARD (set l'))` 
+ by FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+METIS_TAC []);
+
+
 val _ = export_theory ();

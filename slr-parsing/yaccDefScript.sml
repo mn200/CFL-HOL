@@ -2032,7 +2032,8 @@ Induct_on `pfx` THEN SRW_TAC [] [trans]);
 
 
 
-val doReduce = Define `doReduce m ((sym::rst), os, ((s, itl)::rem)) ru =
+val doReduce = Define 
+`doReduce m ((sym::rst), os, ((s, itl)::rem)) ru =
                    if (isNonTmnlSym sym) then NONE 
                    else 
                        let 

@@ -1498,13 +1498,6 @@ Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [lderives_def,lreseq] THEN
 SRW_TAC [][distinctldNts_def,ldNts_def,rmDupes,delete_def]]);
 
 
-val ntProp = Define
-`ntProp dl p s tsl B sfx n1 n2=
-(dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ [tsl++[NTS n1;NTS n2]++sfx] ++ s) ∧
- EVERY isTmnlSym tsl ∧
- ((n1=B) ∨
-   ∃r1 r2 v w.
-   (s=r1++[(tsl ++ v ++ [NTS B] ++ w ++ sfx)]++r2) ∧ EVERY isTmnlSym v)`;
 
 val lastExpProp = Define
 `lastExpProp (g,dl,z) =
@@ -1669,7 +1662,7 @@ Cases_on `symRepProp ((pz0' ++ sz0')::t)` THEN1
 (`lastExpProp (g,(pz0' ++ sz0')::t,z)` by METIS_TAC [] THEN
  FULL_SIMP_TAC (srw_ss()) [lastExpProp] THEN
  SRW_TAC [][] THEN
- FULL_SIMP_TAC (srw_ss()) [ntProp] THEN SRW_TAC [][] THEN1
+ FULL_SIMP_TAC (srw_ss()) [ntProp_def] THEN SRW_TAC [][] THEN1
 
 (MAP_EVERY Q.EXISTS_TAC [`h::p`,`s`,`tsl`,`B`,`sfx`, `B`,`n2`] THEN
  SRW_TAC [][] THEN
@@ -1724,7 +1717,7 @@ FULL_SIMP_TAC (srw_ss()) [list_lem1] THEN
 Cases_on `e` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
 SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [lastExpProp, ntProp] THEN
+FULL_SIMP_TAC (srw_ss()) [lastExpProp, ntProp_def] THEN
 MAP_EVERY Q.EXISTS_TAC [`[]`, `s1`,`s1'`,`B`,`s2`,`B`,`n`] THEN
 SRW_TAC [][] THEN1
 METIS_TAC [APPEND, APPEND_ASSOC] THEN
@@ -1826,7 +1819,7 @@ by METIS_TAC [isCnf_def] THEN1
 Cases_on `e1` THEN Cases_on `e2` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
 SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [lastExpProp, ntProp] THEN
+FULL_SIMP_TAC (srw_ss()) [lastExpProp, ntProp_def] THEN
 `(s1' = pz0') ∧ ([NTS n;NTS n']++s2 = sz0')` by METIS_TAC [symListDiv, APPEND,
 							   APPEND_ASSOC] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -2342,7 +2335,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN
 MAP_EVERY Q.EXISTS_TAC [`tsl`,`v`,`zb'`,`zy'`,`rst'`] THEN
 SRW_TAC [][] THEN1
-(FULL_SIMP_TAC (srw_ss()) [ntProp] THEN SRW_TAC [][]
+(FULL_SIMP_TAC (srw_ss()) [ntProp_def] THEN SRW_TAC [][]
  THENL[
        `LENGTH ([NTS B;NTS n2]) > 1` by
        FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
@@ -2420,7 +2413,7 @@ THENL[
 	     (* 3 subgoals *)
 
 	     (* 1 *)
-	     FULL_SIMP_TAC (srw_ss()) [ntProp] THEN
+	     FULL_SIMP_TAC (srw_ss()) [ntProp_def] THEN
 	     (Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
 	      (`(tsl ++ [NTS B] ++ sfx) = pz0++sz0`
 	      by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN

@@ -21,7 +21,7 @@ val followSet = Define
           ∃pfx sfx.RTC (derives g) s (pfx++[sym]++[TS ts]++sfx) }`;
 
 
-val followML_defn = Hol_defn "followML"
+val followG_defn = Hol_defn "followG"
   `(followG g sn N = followrs g sn N (LENGTH (rules g) - 1)) ∧
    (followrs g sn N 0 = 
     followr g sn N 0 (LENGTH (ruleRhs (EL 0 (rules g))))) ∧
@@ -96,6 +96,14 @@ HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [] [RTC_RULES] THEN1
        METIS_TAC [],
 			  
        METIS_TAC []]);
+
+val (followG,followG_ind) = 
+tprove (followG_defn,
+MAGIC);
+
+val followSetEq = store_thm ("followSetEq",
+``!g sym.s IN (followG g [] nt) = s IN (followSet g (NTS nt))``,
+MAGIC)
 
 val _ = export_theory ();
 

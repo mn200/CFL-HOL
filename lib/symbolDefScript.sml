@@ -641,6 +641,13 @@ val symRepProp = Define
      (∀e.MEM e s0 ⇒ ∃p0 p1 nt.(e = tsl ++ p0 ++ [NTS nt] ++ p1 ++ sfx) ∧
       EVERY isTmnlSym p0)`;
 
+val ntProp = Define
+`ntProp dl p s tsl B sfx n1 n2=
+(dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ [tsl++[NTS n1;NTS n2]++sfx] ++ s) ∧
+ EVERY isTmnlSym tsl ∧
+ ((n1=B) ∨
+   ∃r1 r2 v w.
+   (s=r1++[(tsl ++ v ++ [NTS B] ++ w ++ sfx)]++r2) ∧ EVERY isTmnlSym v)`;
 
 val spropApp = store_thm
 ("spropApp",

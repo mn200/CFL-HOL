@@ -264,10 +264,6 @@ METIS_TAC []
 );
 
 
-
-
-
-
 val upgr_r7 = store_thm("upgr_r7",
 ``∀u z.
     (derives g)^* u z ⇒ (u=x++y) ⇒
@@ -3610,6 +3606,47 @@ SRW_TAC [] [] THEN
 IMP_RES_TAC notNullLhsLastSym THEN
 Cases_on `sym` THEN
 METIS_TAC [allNtSymsInGr,allTmSymsInGr,notNullLhsLastSym,APPEND_NIL]);
+
+val rtcDReplEnd = store_thm
+("rtcDReplEnd",
+ ``∀i.(derives g)^* [NTS B] (p ++ [NTS B] ++ s) ∧
+ (derives g)^*  [NTS B] z ∧ EVERY isTmnlSym z ∧
+ (derives g)^* s z' ∧ EVERY isTmnlSym z'
+  ⇒
+  (derives g)^* [NTS B] (FLAT (lpow p i) ++ z ++ FLAT (lpow z' i))``,
+
+Induct_on `i` THEN SRW_TAC [][] THEN1
+(SRW_TAC [][lpow_def,REPLICATE] THEN
+ METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left,
+	    APPEND_ASSOC,RTC_RTC]) THEN
+RES_TAC THEN
+SRW_TAC [][flatRepSuc] THEN
+Q_TAC SUFF_TAC
+`(derives g)^* [NTS B] (p ++ FLAT (lpow p i) ++ z ++  FLAT (lpow z' i) ++z')` THEN1
+METIS_TAC [flatRepComm,APPEND_ASSOC] THEN
+`(derives g)^* (p++[NTS B]++s) (p++FLAT (lpow p i) ++ z ++ FLAT (lpow z' i)++s)` by
+METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left,
+	   APPEND_ASSOC] THEN
+METIS_TAC [RTC_RTC,rtc_derives_same_append_left]);
+      
+
+
+val ntmsLen = store_thm
+("ntmsLen",
+``LENGTH (ntms g) ≥ 1``,
+
+Cases_on `g` THEN 
+SRW_TAC [][ntms, ntList, nonTerminalsList, startSym,
+	   rmDupes] THEN
+DECIDE_TAC);
+
+
+val isCnf_def = Define
+`isCnf g = ∀l r.MEM (rule l r) (rules g) ⇒
+    ((LENGTH r = 2) ∧ EVERY isNonTmnlSym r) ∨
+    ((LENGTH r = 1) ∧ EVERY isTmnlSym r)`;
+
+
 
 val mlDir = "./theoryML/"
 

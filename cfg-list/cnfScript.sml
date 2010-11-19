@@ -287,10 +287,10 @@ val elimNT = Define
 	([nt1;nt2]++(elimNT sf (rule nt [nt1;nt2])))
     else (s::elimNT sf (rule nt [nt1;nt2])))`
 
-(* Does sentential form sf from new grammar g' has any new nonterminals, i.e. ones not in g *)
+(* Does sentential form sf from new grammar g' has any new nonterminals, i.e. ones not in g 
 val noNewNts = Define
 `noNewNts g sf = ∀e.MEM e sf ⇒ isNonTmnlSym e ⇒ e IN (nonTerminals g)`
-
+*)
 
 val slemma1_1 = prove(
 ``∀g g' nt t. trans1Tmnl nt t g g' ⇒ MEM (rule nt rhs) (rules g') ⇒ (rhs=[t])``,

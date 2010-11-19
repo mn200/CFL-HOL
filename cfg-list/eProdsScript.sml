@@ -229,24 +229,28 @@ Induct_on `s` THENL [
   METIS_TAC [munge0]]);
 
 
-val negr_r14 = prove(
-``∀s1 s2 s'.no_rhs g (s1++s2) s' ⇒ 
-		     (∃s1' s2'. (s'=s1'++s2') ∧  no_rhs g s1 s1' ∧ no_rhs g s2 s2')``,
+val negr_r14 = prove
+(``∀s1 s2 s'.no_rhs g (s1++s2) s' ⇒ 
+ (∃s1' s2'. (s'=s1'++s2') ∧  no_rhs g s1 s1' ∧ no_rhs g s2 s2')``,
+
 SIMP_TAC (srw_ss()) [no_rhs] THEN
-Induct_on `s1` THENL [
-  SRW_TAC [] [munge0],
-  SRW_TAC [] [munge0, MEM_MAP] THENL [ `∃s1' s2'.
-              (y = s1' ++ s2') ∧ MEM s1' (munge0 g s1) ∧
-              MEM s2' (munge0 g s2)` by METIS_TAC [] THEN MAP_EVERY Q.EXISTS_TAC [`h::s1'`,`s2'`] THEN SRW_TAC [] [],
-				  `∃s1' s2'.
-              (s' = s1' ++ s2') ∧ MEM s1' (munge0 g s1) ∧
-              MEM s2' (munge0 g s2)` by METIS_TAC [] THEN MAP_EVERY Q.EXISTS_TAC [`s1'`,`s2'`] THEN SRW_TAC [] [],
-	`∃s1' s2'.
-              (y = s1' ++ s2') ∧ MEM s1' (munge0 g s1) ∧
-              MEM s2' (munge0 g s2)` by METIS_TAC [] THEN MAP_EVERY Q.EXISTS_TAC [`h::s1'`,`s2'`] THEN SRW_TAC [] []
-]]);
+Induct_on `s1` THEN1 SRW_TAC [] [munge0] THEN
+ SRW_TAC [] [munge0, MEM_MAP] 
+THENL [ 
+       `∃s1' s2'. (y = s1' ++ s2') ∧ MEM s1' (munge0 g s1) ∧
+       MEM s2' (munge0 g s2)` by METIS_TAC [] THEN 
+       MAP_EVERY Q.EXISTS_TAC [`h::s1'`,`s2'`] THEN SRW_TAC [] [],
+       
+       `∃s1' s2'. (s' = s1' ++ s2') ∧ MEM s1' (munge0 g s1) ∧
+       MEM s2' (munge0 g s2)` by METIS_TAC [] THEN 
+       MAP_EVERY Q.EXISTS_TAC [`s1'`,`s2'`] THEN SRW_TAC [] [],
+       
+       `∃s1' s2'. (y = s1' ++ s2') ∧ MEM s1' (munge0 g s1) ∧
+       MEM s2' (munge0 g s2)` by METIS_TAC [] THEN 
+       MAP_EVERY Q.EXISTS_TAC [`h::s1'`,`s2'`] THEN SRW_TAC [] []
+       ]);
 
-
+ 
 val negr_r15 = store_thm
 ("negr_r15",
  ``∀s sf.RTC (derives g) s sf ⇒ negr g g' ⇒

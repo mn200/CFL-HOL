@@ -175,5 +175,108 @@ SRW_TAC [][EVERY_MEM] THEN
 Cases_on `e` THEN 
 FULL_SIMP_TAC (srw_ss()) [MEM_MAP, isTmnlSym_def]]);
 
+val getSymsCleaves = store_thm
+("getSymsCleaves",
+``∀g t. (∀e. e ∈ t ∧ isNode e ⇒ validptree g e) ⇒
+(derives g)^* (getSymbols t) (MAP TS (cleaves t))``,
+
+Induct_on `t` THEN SRW_TAC [][] THEN1
+SRW_TAC [][getSymbols_def, leaves_def] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [getSymbols_def] THEN
+FULL_SIMP_TAC (srw_ss()) [cleavesApp, leaves_def] THEN1
+METIS_TAC [APPEND, rtc_derives_same_append_left, APPEND] THEN
+
+`(derives g)^* [NTS n] (MAP TS (leaves (Node n l)))`
+ by METIS_TAC [vptRtcd, fringeEqLeaves, isNode_def, root_def] THEN
+FULL_SIMP_TAC (srw_ss()) [leaves_def] THEN
+METIS_TAC [APPEND, derives_append, APPEND]);
+
+
+val vptSubtD = store_thm
+("vptSubtD",
+``∀g t. validptree g t ⇒ ∀p t0. (subtree t p = SOME t0) ⇒
+∃pfx sfx. (derives g)^* [root t] (MAP TS pfx ++ [root t0] ++ MAP TS sfx) ∧
+(leaves t = pfx ++ leaves t0 ++ sfx)``,
+
+HO_MATCH_MP_TAC validptree_ind THEN SRW_TAC [][validptree] THEN
+Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [subtree_def] THEN
+SRW_TAC [][] THEN1
+(MAP_EVERY Q.EXISTS_TAC [`[]`,`[]`] THEN
+SRW_TAC [][]) THEN
+
+Cases_on `h < LENGTH ptl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `EL h ptl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+
+(Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [subtree_def] THEN
+SRW_TAC [][] THEN
+IMP_RES_TAC EL_IS_EL THEN
+FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, getSyms_append] THEN
+SRW_TAC [][] THEN
+ONCE_ASM_REWRITE_TAC [] THEN
+SRW_TAC [][root_def, leaves_def, cleavesApp] THEN
+`rule n (getSymbols (r1' ++ [Leaf t'] ++ r2')) ∈ rules g`
+by METIS_TAC [MEM, MEM_APPEND] THEN
+FULL_SIMP_TAC (srw_ss()) [getSyms_append, getSymbols_def] THEN
+MAP_EVERY Q.EXISTS_TAC [`cleaves r1'`,`cleaves r2'`]  THEN
+SRW_TAC [][] THEN
+`(derives g)^* (getSymbols r1') (MAP TS (cleaves r1'))`
+by METIS_TAC [getSymsCleaves, MEM, MEM_APPEND, validptree, rgr_r9eq] THEN
+`(derives g)^* (getSymbols r2') (MAP TS (cleaves r2'))`
+by METIS_TAC [getSymsCleaves, MEM, MEM_APPEND, validptree, rgr_r9eq] THEN
+
+`(derives g)^* ((getSymbols r1')++[TS t']) (MAP TS (cleaves r1') ++ [TS t'])`
+by METIS_TAC [rtc_derives_same_append_right] THEN
+`(derives g)^* ((getSymbols r1')++[TS t']++(getSymbols r1' ++ [TS t'])) 
+(MAP TS (cleaves r1') ++ [TS t']++(getSymbols r1' ++ [TS t']))`
+by METIS_TAC [rtc_derives_same_append_right] THEN
+`derives g [NTS n] (getSymbols r1' ++ [TS t'] ++ getSymbols r2')`
+by METIS_TAC [res1] THEN
+METIS_TAC [rtc_derives_same_append_left, rtc_derives_same_append_right,
+	   RTC_RULES, RTC_RTC]) THEN
+
+
+`isNode (EL h ptl)`by METIS_TAC [isNode_def] THEN
+Q.PAT_ASSUM `∀e. P e`MP_TAC THEN
+`Node n' l ∈ ptl` by METIS_TAC [EL_IS_EL] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`EL h ptl`] MP_TAC) THEN SRW_TAC [][] THEN
+`∃pfx sfx. (derives g)^* [root (Node n' l)] 
+(MAP TS pfx ++ [root t0] ++ MAP TS sfx) ∧
+(leaves (Node n' l) = pfx ++ leaves t0 ++ sfx)`  by METIS_TAC [] THEN
+FULL_SIMP_TAC (srw_ss()) [leaves_def] THEN
+FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+SRW_TAC [][cleavesApp, leaves_def] THEN
+FULL_SIMP_TAC (srw_ss()) [root_def] THEN
+`rule n (getSymbols (r1' ++ [Node n' l] ++ r2'))∈ rules g`
+by METIS_TAC [MEM, MEM_APPEND] THEN
+MAP_EVERY Q.EXISTS_TAC [`cleaves r1'++pfx`,`sfx ++ cleaves r2'`] THEN
+SRW_TAC [][] THEN
+`(derives g)^* (getSymbols r1') (MAP TS (cleaves r1'))`
+by METIS_TAC [getSymsCleaves, MEM, MEM_APPEND, validptree, rgr_r9eq] THEN
+`(derives g)^* (getSymbols r2') (MAP TS (cleaves r2'))`
+by METIS_TAC [getSymsCleaves, MEM, MEM_APPEND, validptree, rgr_r9eq] THEN
+`derives g [NTS n] (getSymbols (r1' ++ [Node n' l] ++ r2'))`
+by METIS_TAC [res1] THEN
+FULL_SIMP_TAC (srw_ss()) [getSyms_append, getSymbols_def] THEN
+`(derives g)^* (getSymbols [Node n' l]) (MAP TS (cleaves [Node n' l]))`
+by METIS_TAC [getSymsCleaves, MEM, MEM_APPEND, validptree, rgr_r9eq] THEN
+FULL_SIMP_TAC (srw_ss()) [getSymbols_def, leaves_def] THEN
+`(derives g)^* ((getSymbols r1')++[NTS n']) (MAP TS (cleaves r1') ++ [NTS n'])`
+by METIS_TAC [rtc_derives_same_append_right] THEN
+`(derives g)^* (MAP TS (cleaves r1')++[NTS n']++getSymbols r2') 
+(MAP TS (cleaves r1') ++ [NTS n'] ++ getSymbols r2')`
+by METIS_TAC [rtc_derives_same_append_right, APPEND_ASSOC,RTC_RULES] THEN
+`(derives g)^* (MAP TS (cleaves r1') ++ [NTS n'] ++getSymbols r2') 
+(MAP TS (cleaves r1') ++ [NTS n'] ++MAP TS (cleaves r2'))`
+by METIS_TAC [rtc_derives_same_append_left, APPEND_ASSOC] THEN
+`(derives g)^* (MAP TS (cleaves r1') ++[NTS n'] ++ MAP TS (cleaves r2'))
+(MAP TS (cleaves r1') ++MAP TS pfx ++ [root t0] ++ MAP TS sfx ++ MAP TS (cleaves r2'))`
+by METIS_TAC [rtc_derives_same_append_left, rtc_derives_same_append_right,
+	      APPEND_ASSOC] THEN
+`(derives g)^* (getSymbols r1' ++ [NTS n'] ++ getSymbols r2')
+         (MAP TS (cleaves r1') ++ [NTS n'] ++ getSymbols r2')`
+by METIS_TAC [APPEND_ASSOC, rtc_derives_same_append_right] THEN
+METIS_TAC [APPEND_ASSOC, RTC_RTC, RTC_RULES]);
+
+
 
 val _ = export_theory();

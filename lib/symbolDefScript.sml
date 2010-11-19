@@ -641,11 +641,12 @@ val symRepProp = Define
      (∀e.MEM e s0 ⇒ ∃p0 p1 nt.(e = tsl ++ p0 ++ [NTS nt] ++ p1 ++ sfx) ∧
       EVERY isTmnlSym p0)`;
 
+
 val ntProp = Define
-`ntProp dl p s tsl B sfx n1 n2=
-(dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ [tsl++[NTS n1;NTS n2]++sfx] ++ s) ∧
+`ntProp dl p s tsl B sfx N1 N2=
+(dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ [tsl++[NTS N1;NTS N2]++sfx] ++ s) ∧
  EVERY isTmnlSym tsl ∧
- ((n1=B) ∨
+ ((N1=B) ∨
    ∃r1 r2 v w.
    (s=r1++[(tsl ++ v ++ [NTS B] ++ w ++ sfx)]++r2) ∧ EVERY isTmnlSym v)`;
 
@@ -660,6 +661,7 @@ Cases_on `p` THEN SRW_TAC [][] THEN1
  (FIRST_X_ASSUM (Q.SPECL_THEN [`[h]`,`tsl`,`B`,`sfx`,`v`,`w`, `t`]
 		 MP_TAC) THEN SRW_TAC [][] THEN
   FULL_SIMP_TAC (srw_ss()) [] THEN
+
   METIS_TAC [MEM,MEM_APPEND]) THEN
 
  FIRST_X_ASSUM (Q.SPECL_THEN [`h::h''::t'`,`tsl`,`B`,`sfx`,`v`,`w`,`s`]

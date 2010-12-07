@@ -876,6 +876,18 @@ HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN
 SRW_TAC [] [RTC_RULES] THEN
 METIS_TAC [RTC_RTC,apg_r3Gen]);
 
+val aProdsExists = store_thm(
+"aProdsExists",
+``A ∉ l ⇒ ∀g. ∃g'. aProds A l g g'``,
+SRW_TAC [][aProds] THEN
+`FINITE (aProdsRules A l (set (rules g)))` by METIS_TAC [finiteaProdsRules,
+                                                         FINITE_LIST_TO_SET] THEN
+`∃r. set r = aProdsRules A l (set (rules g))` by METIS_TAC [listExists4Set] THEN
+Q.EXISTS_TAC `G r (startSym g)` THEN
+SRW_TAC [][startSym_def, rules_def]);
+
+
+
 
 val lemma4_3Gen = store_thm
 ("lemma4_3Gen",

@@ -569,7 +569,7 @@ val pdaTransOnPfx = store_thm
 ("pdaTransOnPfx",
 ``∀q q' ipfx isfx spfx ssfx.
    ID p ⊢ dl ◁ (q,ipfx++isfx,spfx++ssfx) → (q',isfx,ssfx) ⇒
-   (∀e.MEM e (FRONT dl) ⇒ ∃p.(p ≠ []) ∧ (pdastk e = p++ssfx))
+   (∀e.MEM e (FRONT dl) ⇒ ∃s.(s ≠ []) ∧ (pdastk e = s++ssfx))
       ⇒
       (ID p)^* (q,ipfx,spfx) (q',[],[])``,
 
@@ -630,10 +630,10 @@ THENL[
       Q.PAT_ASSUM `X ⊢ (q,Y,Z) → WW` MP_TAC THEN
       SRW_TAC [][id_thm]
       THENL[
-	    Q.EXISTS_TAC `(q1,ipfx,p')` THEN
+	    Q.EXISTS_TAC `(q1,ipfx,s)` THEN
 	    Cases_on `spfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 	    SRW_TAC [][] THEN
-	    `p'=st'++t` by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
+	    `s=st'++t` by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
 	    SRW_TAC [][id_thm],
 
 	    `LENGTH isfx <= LENGTH i2` by METIS_TAC [listderiv_def, ldIdcInpLen,
@@ -651,7 +651,7 @@ THENL[
 	    SRW_TAC [][] THEN
  	    Q.EXISTS_TAC `(q1,t,st'++t')` THEN
  	    SRW_TAC [][id_thm] THEN
-	    `p'=st'++t'` by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
+	    `s=st'++t'` by METIS_TAC [APPEND_ASSOC, APPEND_11] THEN
 	    SRW_TAC [][id_thm]
 	    ]]);
 

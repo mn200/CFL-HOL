@@ -220,16 +220,10 @@ val rtc_derives_same_append_right = store_thm ("rtc_derives_same_append_right",
 
 
 val derives_append = store_thm ("derives_append",
-  ``RTC (derives g) M N ∧ RTC (derives g) P Q ⇒
-    RTC (derives g) (M ++ P) (N ++ Q)``,
-  Q_TAC SUFF_TAC `∀x y. RTC (derives g) x y ⇒
-                        ∀u v. RTC (derives g) u v ⇒
-                              RTC (derives g) (x ++ u) (y ++ v)`
-        THEN1 METIS_TAC [] THEN
-  HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [][] THENL [
-                METIS_TAC [rtc_derives_same_append_left],
-                METIS_TAC [derives_same_append_right,RTC_RULES]]);
-
+  ``RTC (derives g) u v ∧ RTC (derives g) w x ⇒
+    RTC (derives g) (u ++ w) (v ++ x)``,
+METIS_TAC [rtc_derives_same_append_right, rtc_derives_same_append_left,
+           RTC_RTC]);
 
 val res1 = store_thm ("res1",
         ``∀lhs rhs g.MEM (rule lhs rhs) (rules g) ⇒ derives g [NTS lhs] rhs``,
@@ -867,7 +861,7 @@ val R_IND = (Q.GEN `P` o
                                   prim_recTheory.WF_measure])
                 (ISPEC R relationTheory.WF_INDUCTION_THM)
 
-val nullableML' = prove(
+val nullableML' = store_thm("nullableML'",
   ``(nullableML g sn [] = T) ∧
     (nullableML g sn (TS x :: t) = F) ∧
     (nullableML g sn (NTS n :: t) =

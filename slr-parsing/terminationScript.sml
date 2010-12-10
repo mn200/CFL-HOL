@@ -87,9 +87,7 @@ val stepDoRedGen = store_thm ("stepDoRedGen",
   (inis = initItems ag (rules ag)) ==>
   (stl = ((sym,sta:(α,β)state),tr:(α,β)ptree)::t) ==>
 validItemInv
-(ag,((sym,sta),tr)::t,
- (sym,sta)::
- (MAP FST t ++ [(NTS st,initItems ag (rules ag))])) ==>
+(ag,((sym,sta),tr)::t) ==>
 (csl = (sym,sta)::MAP FST t ++ [(NTS st,inis)]) ==>
   parseInv (ag,stl,csl) ==>
   MEM (item lhs (stackSyms stl,[])) sta ==>
@@ -207,7 +205,7 @@ val takesStepsReduce = store_thm
   (slrmac ag = SOME m) ==>
   (stackSyms stl = s1++rhs) ==>
   parseInv (ag,stl,csl) ==>
-  validItemInv (ag,stl,csl) ==>
+  validItemInv (ag,stl) ==>
    MEM (item lhs (rhs,[])) (itemlist csl) ==>
    RTC (rderives ag) [NTS (startSym ag)]
     (s1++[NTS lhs]++s2) ==>
@@ -720,7 +718,7 @@ EVERY isTmnlSym (ininp++sfx) ==>
 ~(stli=[]) ==>
 (!nt.nt IN (nonTerminals ag) ==> gaw ag nt) ==>
 parseInv (ag, stli, csli) ==>
-validItemInv (ag,stli,csli) ==>
+validItemInv (ag,stli) ==>
 ?i stl csl.
       takesSteps (LENGTH ininp) (parse (SOME m))
       (exitCond (eof,NTS (startSym g)))
@@ -965,7 +963,7 @@ EVERY isTmnlSym (ininp++rhs++sfx) ==>
 (!nt.nt IN (nonTerminals ag) ==> gaw ag nt) ==>
 (LENGTH csli = LENGTH stli + 1) ==>
 parseInv (ag, stli, csli) ==>
-validItemInv (ag,stli,csli) ==>
+validItemInv (ag,stli) ==>
 ?i stl csl.
       takesSteps (LENGTH ininp) (parse (SOME m))
       (exitCond (eof,NTS (startSym g)))

@@ -143,12 +143,14 @@ val parserLeaves_Eq_Invthm = store_thm
  ``∀m (g:(α,β) grammar) (s:α) (eof:β) sl csl.
  (auggr g s eof = SOME ag) ==>  
   ~NULL csl ==> validStates ag csl ==>
-(m=slrmac ag) ==> leaves_eq_inv sl sl [] ==> 
+(m=slrmac ag) ==> 
 (inis = (NTS (startSym ag), initItems ag (rules ag))) ==>
 (parser (inis, eof, startSym g) m sl = SOME (SOME tree)) ==>
 (sl=MAP TS (leaves tree) ++ [TS eof])``,
 
 SRW_TAC [] [parser_def, LET_THM] THEN
+`leaves_eq_inv sl sl ([]: ((γ # δ) # (α, β) ptree) list)` 
+ by SRW_TAC [][leaves_eq_inv_def, stacktreeleaves_def] THEN
 FULL_SIMP_TAC (srw_ss()) [LET_THM, Abbrev_def] THEN
 Q.ABBREV_TAC `inis = (NTS (startSym ag), initItems ag (rules ag))` THEN
 Cases_on `mwhile (λs. ¬exitCond (eof,NTS (startSym g)) s)

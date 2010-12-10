@@ -28,12 +28,8 @@ val stkSymsCsl = Define
 
 val validItemInv = Define `
   validItemInv (ag, (stl:((('nts,β)symbol # 
-			   ('nts,β)item list) # ('nts,β)ptree) list), 
-	   csl) = 
+			   ('nts,β)item list) # ('nts,β)ptree) list)) = 
 ∀stk.IS_PREFIX (REVERSE stl) stk ⇒ ~NULL stk ⇒
-    (* (NULL stk ∧ 
-    (trans ag (initItems ag (rules ag), stackSyms stk)	        
-     = SOME (initStateCsl ((s,itl)::csl)))) ∨*)
     (trans ag (initItems ag (rules ag), stackSyms (REVERSE stk))	        
      = SOME (stkItl (REVERSE stk)))`;
 
@@ -42,7 +38,7 @@ val validItemInv = Define `
 val validItemInvInit = store_thm 
 ("validItemInvInit",
 ``∀m g sl st.
-validItemInv (ag, [], [((NTS st), initItems ag (rules ag))])``,
+validItemInv (ag, [])``,
 SRW_TAC [] [validItemInv] THEN
 FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND] THEN
 SRW_TAC [] [stackSyms_def, trans_def, FRONT_DEF, stkSymsCsl,
@@ -525,7 +521,7 @@ validStlItemsStack stl csl ∧
 
 val validItemInvReduceStlNil = store_thm(
 "validItemInvReduceStlNil",
-``validItemInv (ag, stl, csl) ⇒
+``validItemInv (ag, stl) ⇒
    (csl = MAP FST stl++[(NTS st,initItems ag (rules ag))]) ⇒
    EVERY isTmnlSym (h::t) ⇒
   (auggr g st eof = SOME ag) ⇒
@@ -534,7 +530,7 @@ val validItemInvReduceStlNil = store_thm(
  (stl=[]) ⇒
 parseInv (ag, stl, csl) ⇒
  (getState m (itemlist csl) h = REDUCE r) ⇒
- validItemInv (ag,stl',csl')``,
+ validItemInv (ag,stl')``,
 
 SRW_TAC [] [] THEN
  FULL_SIMP_TAC (srw_ss()) [language_def, EXTENSION, itemlist_def, parseInv] THEN
@@ -618,7 +614,7 @@ Cases_on `l` THEN SRW_TAC [] [pop_def]);
 
 val validItemInvReduceStlNotNil = store_thm
 ("validItemInvReduceStlNotNil",
-``validItemInv (ag, stl, csl) ⇒
+``validItemInv (ag, stl) ⇒
    (csl = MAP FST stl++[(NTS st,initItems ag (rules ag))]) ⇒
    EVERY isTmnlSym (h::t) ⇒
   (auggr g st eof = SOME ag) ⇒
@@ -627,7 +623,7 @@ val validItemInvReduceStlNotNil = store_thm
  (slrmac ag = SOME m) ⇒
 parseInv (ag,stl,csl) ⇒
  (getState m (itemlist csl) h = REDUCE r) ⇒
- validItemInv (ag,stl',csl')``,
+ validItemInv (ag,stl')``,
 MAGIC);
 (*
 Cases_on `stl` THEN
@@ -810,11 +806,11 @@ val parseValidItemInv = store_thm
 ``(slrmac ag = SOME m) ∧ (auggr g st eof = SOME ag) ∧
 ~(sl=[]) ∧ EVERY isTmnlSym sl ∧
 (csl = MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ∧
-validItemInv (ag, stl, csl) ∧
+validItemInv (ag, stl) ∧
 parseInv (ag,stl,csl) ∧
 (parse (SOME m) (sl, stl, csl) = SOME (sl',stl',csl'))
  ⇒ 
-validItemInv (ag, stl', csl')``,
+validItemInv (ag, stl')``,
 
 MAGIC);
 (*
@@ -1487,7 +1483,7 @@ EVERY isTmnlSym (onstk++ininp) ⇒
 (onstk = stacktreeleaves (REVERSE stl)) ⇒
 (sl=onstk++ininp) ⇒
 (csl = MAP FST stl ++ [(NTS st, initItems ag (rules ag))]) ⇒
-validItemInv (ag, stl, csl) ⇒
+validItemInv (ag, stl) ⇒
 parseInv (ag, stl, csl) ⇒
 viablePfx ag (N,h) (stackSyms stl++ininp) (stackSyms stl) ⇒
 ((parse (SOME m) (ininp, stl, csl) = SOME (sl',stl',csl'))) ⇒
@@ -2115,7 +2111,7 @@ EVERY isTmnlSym (onstk++ininp) ⇒
 (onstk = stacktreeleaves (REVERSE stl)) ⇒
 (sl=onstk++ininp) ⇒
 (csl = MAP FST stl ++ [(NTS st, initItems ag (rules ag))]) ⇒
-validItemInv (ag, stl, csl) ⇒
+validItemInv (ag, stl) ⇒
 parseInv (ag, stl, csl) ⇒
 viablePfx ag (N,h) (stackSyms stl++ininp) (stackSyms stl) ⇒
 ((parse (SOME m) (ininp, stl, csl) = SOME (sl',stl',csl'))) ⇒

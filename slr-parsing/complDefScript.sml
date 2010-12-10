@@ -1325,8 +1325,8 @@ val takesStepsValidItemInv = store_thm
              (slrmac ag = SOME m) ==>
              (auggr g st eof = SOME ag) ==>
 	     parseInv (ag,stl,csl) ==>
-	     validItemInv (ag, stl, csl) ==>
-	     validItemInv (ag,stl',csl')``,
+	     validItemInv (ag, stl) ==>
+	     validItemInv (ag,stl')``,
 Induct_on `n` THEN SRW_TAC [] [takesSteps] THEN
 SRW_TAC [] [] THEN
 Cases_on `n` THEN SRW_TAC [][]
@@ -1339,7 +1339,7 @@ THENL[
       `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `validItemInv (ag,q',r')` 
+      Q_TAC SUFF_TAC `validItemInv (ag,q')` 
       THENL[
 	    SRW_TAC [] [] THEN
 	    METIS_TAC [takesStepsCslStlEq,takesStepsTmnlSyms,takesStepsParseInv,takesStepsSlNotNil],
@@ -1354,12 +1354,11 @@ val validItemInvGoto = store_thm
 ``(slrmac ag = SOME m) ==>
 (getState m r' (TS s) = GOTO l) ==>
 parseInv (ag,((q',r'),r)::t,csli) ==>
-validItemInv (ag,((q',r'),r)::t,csli) ==>
+validItemInv (ag,((q',r'),r)::t) ==>
 (csli =
  (q',r')::(MAP FST t ++ [(NTS st,initItems ag (rules ag))])) ==>
 validItemInv
-   (ag,((TS s,l),Leaf (ts2str (TS s)))::((q',r'),r)::t,
-    (TS s,l)::csli)``,
+   (ag,((TS s,l),Leaf (ts2str (TS s)))::((q',r'),r)::t)``,
 MAGIC);
 (*
 SRW_TAC [] [] THEN
@@ -1468,10 +1467,9 @@ val validItemInvGotoInit = store_thm
 (getState m (itemlist csl) (TS s) = GOTO l) ==>
 (csl = MAP FST t++[(NTS st,initItems ag (rules ag))]) ==>
 parseInv (ag,t,csl) ==>
-validItemInv (ag,t,MAP FST t++[(NTS st,initItems ag (rules ag))]) ==>
+validItemInv (ag,t) ==>
 validItemInv
-   (ag,((TS s,l),Leaf (ts2str (TS s)))::t,
-    (TS s,l)::MAP FST t++[(NTS st,initItems ag (rules ag))])``,
+   (ag,((TS s,l),Leaf (ts2str (TS s)))::t)``,
 MAGIC);
 (*
 SRW_TAC [] [] THEN
@@ -1589,7 +1587,7 @@ IS_PREFIX (pfx ++ rhs) (stackSyms stli) ==>
 (!nt.nt IN (nonTerminals ag) ==> gaw ag nt) ==>
 (LENGTH csli = LENGTH stli + 1) ==> 
 parseInv (ag, stli, csli) ==>
-validItemInv (ag, stli, csli) ==>
+validItemInv (ag, stli) ==>
 ?i stl csl.
       takesSteps (LENGTH ininp) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
         (ininp ++ sfx,stli,csli)
@@ -1661,17 +1659,15 @@ Induct_on `ininp` THEN SRW_TAC [] [] THEN
          	    (csl = MAP FST t ++ [(NTS st,initItems ag (rules ag))]) ==>
 		    parseInv (ag,t,csl) ==>
 		    validItemInv
-		    (ag,t,MAP FST t ++ [(NTS st,initItems ag (rules ag))]) ==>
+		    (ag,t) ==>
 		    validItemInv
-		    (ag,((TS t',l),Leaf t')::t,
-		     (TS t',l)::MAP FST t ++ [(NTS st,initItems ag (rules ag))])` 
+		    (ag,((TS t',l),Leaf t')::t)` 
 		      by METIS_TAC [validItemInvGotoInit, ts2str_def] THEN
 		  FIRST_X_ASSUM (Q.SPECL_THEN [`[(NTS st,initItems ag (rules ag))]`,`[]`] MP_TAC) THEN
 		  SRW_TAC [][] THEN
 		  FULL_SIMP_TAC (srw_ss()) [itemlist_def] THEN
 		  `validItemInv
-		    (ag,[((TS t',l),Leaf t')],
-		     [(TS t',l); (NTS st,initItems ag (rules ag))])`
+		    (ag,[((TS t',l),Leaf t')])`
 		      by METIS_TAC [parseInvInit] THEN
 		  `EVERY (validItem ag []) (iclosure ag (initItems ag (rules ag)))`
 		      by METIS_TAC [validItem_iclosure] THEN
@@ -1811,7 +1807,7 @@ EVERY isTmnlSym (pfx++rhs++sfx) ==>
 (!nt.nt IN (nonTerminals ag) ==> gaw ag nt) ==>
 (LENGTH csli = LENGTH stli + 1) ==> 
 parseInv (ag, stli, csli) ==>
-validItemInv (ag,stli,csli) ==>
+validItemInv (ag,stli) ==>
 ?i stl csl.
       takesSteps (LENGTH ininp) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
         (ininp ++ rhs++ sfx,stli,csli) (i,stl,csl) 
@@ -2559,7 +2555,7 @@ Cases_on `N=startSym ag` THEN1
          (!nt. nt IN nonTerminals ag ==> gaw ag nt) ==>
          (LENGTH csli = LENGTH stli + 1) ==>
           parseInv (ag,stli,csli) ==>
-         validItemInv (ag,stli,csli) ==>
+         validItemInv (ag,stli) ==>
          ?i stl csl.
            takesSteps (LENGTH ininp) (parse (SOME m))
              (exitCond (eof,NTS (startSym g))) (ininp ++ sfx,stli,csli)
@@ -2577,8 +2573,7 @@ Cases_on `N=startSym ag` THEN1
      by METIS_TAC [parseInvInit] THEN
      `validItemInv
          ((ag :(α, β) grammar),
-          ([] :(((α, β) symbol # (α, β) state) # (α, β) ptree) list),
-          [(NTS (st :α),initItems ag (rules ag))])` 
+          ([] :(((α, β) symbol # (α, β) state) # (α, β) ptree) list))` 
      by METIS_TAC [validItemInvInit] THEN
      IMP_RES_TAC lem2 THEN
      FIRST_X_ASSUM (Q.SPECL_THEN [`sfx`, `h::t`, `N`] MP_TAC) THEN
@@ -2600,7 +2595,7 @@ Cases_on `N=startSym ag` THEN1
          (!nt. nt IN nonTerminals ag ==> gaw ag nt) ==>
          (LENGTH csli = LENGTH stli + 1) ==>
           parseInv (ag,stli,csli) ==>
-         validItemInv (ag,stli,csli) ==>
+         validItemInv (ag,stli) ==>
          ?i stl csl.
            takesSteps (LENGTH ininp) (parse (SOME m))
              (exitCond (eof,NTS (startSym g))) (ininp ++ sfx,stli,csli)
@@ -2626,7 +2621,7 @@ Cases_on `N=startSym ag` THEN1
 
 `parseInv (ag,[],[(NTS st,initItems ag (rules ag))])`
     by METIS_TAC [parseInvInit] THEN
-`validItemInv (ag,[],[(NTS st,initItems ag (rules ag))])` 
+`validItemInv (ag,[])` 
     by METIS_TAC [validItemInvInit] THEN
 `!n sl stl csl stl' csl' sl'.
          (csl = MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ==>
@@ -2657,8 +2652,8 @@ SRW_TAC [] [] THEN
          (slrmac ag = SOME m) ==>
          (auggr g st eof = SOME ag) ==>
          parseInv (ag,stl,csl) ==>
-         validItemInv (ag,stl,csl) ==>
-         validItemInv (ag,stl',csl')` 
+         validItemInv (ag,stl) ==>
+         validItemInv (ag,stl')` 
     by METIS_TAC [takesStepsValidItemInv] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH t`,`h::(t ++ rhs ++ sfx)`,
 			     `[]`,`[(NTS st,initItems ag (rules ag))]`,
@@ -2673,7 +2668,7 @@ METIS_TAC [takesStepsAdd, validItemInvInit]);
 val validItemInvInit = store_thm 
 ("validItemInvInit",
 ``!m g sl st.
-validItemInv (ag, [], [((NTS st), initItems ag (rules ag))])``,
+validItemInv (ag, [])``,
 SRW_TAC [] [validItemInv_def] THEN
 FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND] THEN
 SRW_TAC [] [stackSyms_def, trans_def, FRONT_DEF, stkSymsCsl_def,

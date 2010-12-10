@@ -120,19 +120,19 @@ FULL_SIMP_TAC (srw_ss()) []);
 
 
 val rule1 = Define
-`rule1 m m' h = 
+`rule1 m h = 
 { ((NONE,ssym,q,x),(p,x),ssyms) | ∃a. isSuffix x (h a) ∧ 
  MEM ((NONE,ssym,q),(p,ssyms)) m.next }`;
 
 val rule2 = Define
-`rule2 m m' h =
+`rule2 m h =
 { ((NONE,ssym,(q,isym::x)),((p,x),ssyms)) | ∃a. isSuffix (isym::x) (h a) ∧ 
 MEM ((SOME isym,ssym,q),(p,ssyms)) m.next }`;
 
 val rule3 = Define
-`rule3 (m:(α, β, γ) pda) (m':(α, β, γ # α list) pda) (h: α -> α list) =
+`rule3 (m:(α, β, γ) pda) (h: α -> α list) newssym=
 { ((SOME a,ssym,(q,[])),((q,h a),[ssym])) | a,ssym,q |
-q ∈ states m ∧ ssym ∈ (stkSyms m ∪ {m'.ssSym}) ∧ (h a) ∈ IMAGE h {a} }`;
+q ∈ states m ∧ ssym ∈ (stkSyms m ∪ {newssym}) ∧ (h a) ∈ IMAGE h {a} }`;
 
 
 val hInvpda = Define
@@ -140,7 +140,7 @@ val hInvpda = Define
 ∃z0. z0 ∉ stkSyms m ∧ (m'.ssSym = z0) ∧ 
 ∃q0. q0 ∉ states m ∧ (m'.start = (q0,[]:α list)) ∧ 
 (∀q r.MEM (q,r:α list) m'.final = MEM q m.final ∧ (r=[])) ∧
-∀r.MEM r m'.next = r ∈ (rule1 m m' h ∪ rule2 m m' h ∪ rule3 m m' h) ∪
+∀r.MEM r m'.next = r ∈ (rule1 m h ∪ rule2 m h ∪ rule3 m h m'.ssSym) ∪
 { ((NONE,m'.ssSym,m'.start),((m.start,[]),[m.ssSym;m'.ssSym])) } `;
 
 

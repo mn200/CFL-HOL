@@ -831,6 +831,23 @@ iclosure (reduce)
 *)
 
 
+
+val slrmac = Define `slrmac g =
+let
+sg = sgoto g and
+red = reduce g
+in
+if (∃pfx itl sym. isTmnlSym sym ∧ (trans g (initItems g (rules g),pfx) = SOME itl) ∧
+let
+    (s = sg itl sym) and
+    (r = red itl (ts2str sym))
+in
+case (s,r) of (* ([],[]) dealt in the parser *)
+ ((x::xs),(y::ys)) -> T
+|| (_,(y::y'::ys)) -> T
+|| otherwise -> F)
+then NONE else SOME (sg,red)`;
+
 val noError = Define
     `(noError (sf,red) [] st = T) ∧
     (noError (sf,red) (sym::rst) st = 
@@ -851,24 +868,14 @@ val slrmach = Define
     `slrmach g initState = 
       if (okSlr g initState) then SOME (sgoto g, reduce g) else NONE`;
 
+val sgotoItlNil = store_thm
+("sgotoItlNil",
+``sgoto g [] sym = []``,
 
-val slrmac = Define `slrmac g =
-let
-sg = sgoto g and
-red = reduce g
-in
-if (∃pfx itl sym. isTmnlSym sym ∧ (trans g (initItems g (rules g),pfx) = SOME itl) ∧
-let
-    (s = sg itl sym) and
-    (r = red itl (ts2str sym))
-in
-case (s,r) of (* ([],[]) dealt in the parser *)
- ((x::xs),(y::ys)) -> T
-|| (_,(y::y'::ys)) -> T
-|| otherwise -> F)
-then NONE else SOME (sg,red)`;
+SRW_TAC [][sgoto, nextState, moveDot, iclosure]);
 
 
+(*
 val slrmacEqAlt = store_thm 
 ("slrmacEqAlt",
  ``slrmac g = slrmach g (initItems g (rules g))``,
@@ -876,48 +883,29 @@ val slrmacEqAlt = store_thm
  SRW_TAC[][slrmac, slrmach] THEN
  FULL_SIMP_TAC (srw_ss()) [Abbrev_def, okSlr] THEN
  SRW_TAC [][] THEN
- SPOSE_NOT_THEN ASSUME_TAC THEN
  Cases_on `sgoto g itl sym` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
  (Cases_on `reduce g itl (ts2str sym)` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
   Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
   FIRST_X_ASSUM (Q.SPECL_THEN [`pfx`, `itl`, `[sym]`] MP_TAC) THEN 
   SRW_TAC [][noError] THEN
-  Cases_on `itl` THEN FULL_SIMP_TAC (srw_ss()) [reduce]) THEN1
-
-( Cases_on `reduce g itl (ts2str sym)` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+  Cases_on `itl` THEN FULL_SIMP_TAC (srw_ss()) [reduce]) THEN
+ Cases_on `reduce g itl (ts2str sym)` THEN
+ FULL_SIMP_TAC (srw_ss()) [] THEN
  Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
- FIRST_X_ASSUM (Q.SPECL_THEN [`pfx`, `itl`, `[sym]`] MP_TAC) THEN 
- SRW_TAC [][noError] THEN
- Cases_on `itl` THEN FULL_SIMP_TAC (srw_ss()) [reduce]) 
-THENL[
+ FIRST_X_ASSUM (Q.SPECL_THEN [`pfx`, `itl`, `[sym]`] MP_TAC) THEN
+ SRW_TAC [][] THEN
+ FULL_SIMP_TAC (srw_ss()) [noError] THEN
+ Cases_on `reduce g itl (ts2str sym)` THEN
+ Cases_on `sgoto g itl sym` THEN
+ FULL_SIMP_TAC (srw_ss()) [] THEN
+ Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+ SRW_TAC [][] THEN
+ SPOSE_NOT_THEN ASSUME_TAC THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+ Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [trans] THEN
+METIS_TAC [sgotoItlNil, NOT_CONS_NIL]
 
-      Cases_on `symlist` THEN FULL_SIMP_TAC (srw_ss()) [noError] THEN
-      Cases_on `reduce g state (ts2str h)` THEN
-      FULL_SIMP_TAC (srw_ss()) [] THEN
-      SRW_TAC [][] 
-      THENL[
-            Cases_on `t` THEN
-            FULL_SIMP_TAC (srw_ss()) [noError] THEN
-            FIRST_X_ASSUM (Q.SPECL_THEN [`vp`,`state`,`h'`] MP_TAC) THEN
-            Cases_on `sgoto g state h'` THEN SRW_TAC [][] THEN
-            Cases_on `reduce g state (ts2str h')` THEN
-            SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-            MAGIC,
-            
-            Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-            MAGIC
-            ],
+*)
 
-      MAGIC
-       ]);
-
-
-
-                          
-
-       
- 
- 
 
 
 

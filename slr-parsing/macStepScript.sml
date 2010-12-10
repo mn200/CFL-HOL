@@ -98,7 +98,7 @@ EVERY isTmnlSym (onstk++ininp) ==>
 viablePfx ag (N,h) (stackSyms stl ++ ininp)
            (stackSyms stl) ==>
 parseInv (ag, stl,csl) ==>
-validItemInv (ag, stl, csl) ==>
+validItemInv (ag, stl) ==>
 (getState (sgoto ag,reduce ag) (itemlist csl) (HD ininp) 
  = REDUCE ru) ==>
 ?sl' stl' csl'.
@@ -447,7 +447,7 @@ EVERY isTmnlSym (onstk++ininp) ==>
 viablePfx ag (N,h) (stackSyms stl ++ ininp)
            (stackSyms stl) ==>
 parseInv (ag, stl,csl) ==>
-validItemInv (ag, stl, csl) ==>
+validItemInv (ag, stl) ==>
 ?sl' stl' csl'.((parse (SOME m) (ininp, stl, csl) 
    = SOME (sl',stl',csl')))``,
 
@@ -1333,7 +1333,7 @@ EVERY isTmnlSym (onstk++ininp) ==>
 viablePfx ag (N,h) (stackSyms stl ++ ininp)
            (stackSyms stl) ==>
 parseInv (ag, stl,csl) ==>
-validItemInv (ag, stl, csl) ==>
+validItemInv (ag, stl) ==>
 ?sl' stl' csl'.((parse (SOME m) (ininp, stl, csl) 
    = SOME (sl',stl',csl')))``,
 
@@ -1769,7 +1769,7 @@ EVERY isTmnlSym (onstk++ininp) ==>
 viablePfx ag (N,h) (stackSyms stl ++ ininp)
            (stackSyms stl) ==>
 parseInv (ag, stl,csl) ==>
-validItemInv (ag, stl, csl) ==>
+validItemInv (ag, stl) ==>
 ?sl' stl' csl'.((parse (SOME m) (ininp, stl, csl) 
    = SOME (sl',stl',csl')))``,
 METIS_TAC [macStepInvStlNil, macStepInvStlNotNil])

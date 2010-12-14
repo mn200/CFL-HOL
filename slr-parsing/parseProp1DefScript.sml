@@ -280,7 +280,7 @@ Cases_on `itemEqRuleList (h::t) (h'::t')`  THEN FULL_SIMP_TAC (srw_ss()) []]
 *)
 
 val parse_csl_not_nil = store_thm ("parse_csl_not_nil",
-``∀m g.(m=slrmac g) ⇒ 
+``∀m g.(slrmac g = SOME m) ⇒ 
 (parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))
 ⇒ ~(NULL csl')``,
 
@@ -323,7 +323,7 @@ SRW_TAC [] [slrmac_def, LET_THM]);
 
 
 val parse_csl_validStates = store_thm ("parse_csl_validStates",
-``∀m g.(m=slrmac g) ⇒ validStates g ((s, itl)::csl) 
+``∀m g.(SOME m = slrmac g) ⇒ validStates g ((s, itl)::csl) 
 ⇒ (parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))
 ⇒ validStates g csl'``,
 
@@ -394,7 +394,7 @@ Cases_on `itemEqRuleList (h::t) (h'::t')` THEN FULL_SIMP_TAC (srw_ss()) [])));
 
 (* 1.All the nonterminal symbols on top of the stack are the result of reduce operations *)
 val validptree_invthm = store_thm ("validptree_invthm", 
-``∀m g.(m=slrmac g) ⇒ validStates g ((s, itl)::csl) ⇒ 
+``∀m g.(SOME m=slrmac g) ⇒ validStates g ((s, itl)::csl) ⇒ 
    ∀stl.validptree_inv g stl ⇒
    (parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl')) ⇒ 
    (validptree_inv g stl')``,

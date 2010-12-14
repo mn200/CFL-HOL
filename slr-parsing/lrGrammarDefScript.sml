@@ -1458,7 +1458,7 @@ validStates ag (state s itl::csl) = parse_csl_validStates
 *)
 
 val parse_validStlItemsStack = store_thm("parse_validStlItemsStack",
-``∀m g.validStlItemsStack stl csl ⇒ (m=slrmac g) ⇒
+``∀m g.validStlItemsStack stl csl ⇒ (SOME m=slrmac g) ⇒
 ~NULL csl ⇒ (* preserved by parse_csl_not_nil *)
 (LENGTH csl = LENGTH stl + 1) ⇒ (* another invariant *)
 EVERY (\x.~(x=[])) (MAP SND csl) ⇒ (* prove this as an invariant∀∀∀∀∀ *)
@@ -1473,15 +1473,15 @@ Cases_on `x` THEN
 `∃x' y'.csl' = x'::y'` by (Induct_on `csl'` THEN SRW_TAC [] []) THEN
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM] THEN 
-Cases_on `slrmac g ` THEN  Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `t` THEN Cases_on `getState x r h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `t` THEN Cases_on `getState m r h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `stl` THEN FULL_SIMP_TAC (srw_ss()) [] THENL[
 
 (* doReduce x ([h],h'::t,state s l::y) r = SOME (sl',stl',x'::y') *)
 
 FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM] THEN
 Cases_on `isNonTmnlSym h` THEN Cases_on `addRule (h'::t) r'` THEN 
-Cases_on `FST x (SND (HD (pop ((q,r)::y) (LENGTH (ruleRhs r')))))
+Cases_on `FST m (SND (HD (pop ((q,r)::y) (LENGTH (ruleRhs r')))))
 				  (NTS (ruleLhs r')) = []` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `pop ((q, r)::y) (LENGTH (ruleRhs r')) = []` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1490,7 +1490,7 @@ Cases_on `r'` THEN
 FULL_SIMP_TAC (srw_ss()) [ruleLhs_def, ruleRhs_def] THEN
 Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 FULL_SIMP_TAC (srw_ss()) [ADD1] THEN
-`x=(sgoto g, reduce g)` by METIS_TAC [sgoto_exp] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+`m=(sgoto g, reduce g)` by METIS_TAC [sgoto_exp] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 `∃e el.(pop ((q, (h''::t'))::y) (LENGTH l)) = e::el` by METIS_TAC [list_nchotomy] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `LENGTH (h'::t) >= LENGTH l` by METIS_TAC [addrule_len] THEN
@@ -1509,7 +1509,7 @@ SRW_TAC [] [] THEN METIS_TAC [validStlItems_sgoto_gen]],
 (* doReduce x (h::h'::t',h''::t,state s l::y) r = SOME (sl',stl',x'::y') *)
 FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM] THEN
 Cases_on `isNonTmnlSym h` THEN Cases_on `addRule (h''::t) r'` THEN 
-Cases_on `FST x (SND (HD (pop ((q,r)::y) (LENGTH (ruleRhs r')))))
+Cases_on `FST m (SND (HD (pop ((q,r)::y) (LENGTH (ruleRhs r')))))
 				  (NTS (ruleLhs r')) = []` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `pop ((q, r)::y) (LENGTH (ruleRhs r')) = []` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1518,7 +1518,7 @@ Cases_on `r'` THEN
 FULL_SIMP_TAC (srw_ss()) [ruleLhs_def, ruleRhs_def] THEN
 Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 FULL_SIMP_TAC (srw_ss()) [ADD1] THEN
-`x=(sgoto g, reduce g)` by METIS_TAC [sgoto_exp] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+`m=(sgoto g, reduce g)` by METIS_TAC [sgoto_exp] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 `∃e el.(pop ((q, (h'::t'))::y) (LENGTH l)) = e::el` by METIS_TAC [list_nchotomy] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `LENGTH (h''::t) >= LENGTH l` by METIS_TAC [addrule_len] THEN
@@ -1548,7 +1548,7 @@ FULL_SIMP_TAC (srw_ss()) [push_def] THEN
 SRW_TAC [] [] THEN FULL_SIMP_TAC (srw_ss()) [validStlItemsStack, validStlItems] THEN
 FULL_SIMP_TAC (srw_ss()) [push_def,validStlItemsStack] THEN
 SRW_TAC [] [] THEN
-`x=(sgoto g, reduce g)` by METIS_TAC [sgoto_exp] THEN
+`m=(sgoto g, reduce g)` by METIS_TAC [sgoto_exp] THEN
 SRW_TAC [] [] THEN
 METIS_TAC [sgoto_exp, validStlItems_goto, APPEND, APPEND_ASSOC, validStlItems]]);
 

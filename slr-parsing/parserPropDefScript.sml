@@ -20,7 +20,7 @@ val parser_inv = Define
 
 val parserValidptree_Invthm = store_thm ("parserValidptree_Invthm",
 ``∀g sl stl.(auggr g s eof = SOME ag) ==>
-(slrmac ag = m) ==> parser_inv ag stl csl ==>
+(slrmac ag = SOME m) ==> parser_inv ag stl csl ==>
 (parser ((NTS (startSym ag),initItems ag (rules ag)), 
          eof, startSym g) m sl = SOME (SOME tree)) ==> 
 validptree ag tree``,
@@ -29,7 +29,7 @@ SRW_TAC [] [parser_def, parser_inv,init_def] THEN
 FULL_SIMP_TAC (srw_ss()) [LET_THM, Abbrev_def] THEN
 Q.ABBREV_TAC `inis = (NTS (startSym ag),initItems ag (rules ag))` THEN
 Cases_on `mwhile (λs. ¬exitCond (eof,NTS (startSym g)) s)
-           (λ(sli,stli,csli). parse (slrmac ag) (sli,stli,csli))
+           (λ(sli,stli,csli). parse m (sli,stli,csli))
            (sl,[],[(NTS (startSym ag),initItems ag (rules ag))])` THEN 
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -97,7 +97,7 @@ METIS_TAC [validItl_initProds2Items, validItl_iclosure,MEM,
 
 val soundness = store_thm ("soundness",
 ``∀g sl stl.(auggr g s eof = SOME ag) ∧
-(slrmac ag = m) ∧ parser_inv ag stl csl ∧
+(slrmac ag = SOME m) ∧ parser_inv ag stl csl ∧
 (parser ((NTS (startSym ag),initItems ag (rules ag)), 
          eof, startSym g) m sl = SOME (SOME tree)) ⇒
 sl ∈ language ag``,
@@ -107,23 +107,22 @@ SRW_TAC [][language_def] THEN
 Cases_on `tree` THEN
 FULL_SIMP_TAC (srw_ss()) [validptree, parser_def, LET_THM] THEN
 Cases_on `mwhile (λs. ¬exitCond (eof,NTS (startSym g)) s)
-           (λ(sli,stli,csli). parse (slrmac ag) (sli,stli,csli))
+           (λ(sli,stli,csli). parse m (sli,stli,csli))
            (init (NTS (startSym ag),initItems ag (rules ag)) sl)` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 MAGIC);
 
 
 val parse_sl_not_nil = store_thm ("parse_sl_not_nil",
-``!m g.(m=slrmac g) ==> 
+``!m g.(SOME m=slrmac g) ==> 
  ~(sl=[]) ==>
  ((parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))) ==> 
   ~(sl'=[])``,
 
 SRW_TAC [] [parse_def, LET_THM] THEN
-Cases_on `slrmac g` THEN
 Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `t` THEN
-Cases_on `getState x itl h` THEN
+Cases_on `getState m itl h` THEN
 FULL_SIMP_TAC (srw_ss()) []
 THENL[
       METIS_TAC [red_sym, NOT_CONS_NIL, APPEND],
@@ -143,7 +142,7 @@ val parserLeaves_Eq_Invthm = store_thm
  ``∀m (g:(α,β) grammar) (s:α) (eof:β) sl csl.
  (auggr g s eof = SOME ag) ==>  
   ~NULL csl ==> validStates ag csl ==>
-(m=slrmac ag) ==> 
+(slrmac ag = SOME m) ==> 
 (inis = (NTS (startSym ag), initItems ag (rules ag))) ==>
 (parser (inis, eof, startSym g) m sl = SOME (SOME tree)) ==>
 (sl=MAP TS (leaves tree) ++ [TS eof])``,
@@ -154,9 +153,9 @@ SRW_TAC [] [parser_def, LET_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [LET_THM, Abbrev_def] THEN
 Q.ABBREV_TAC `inis = (NTS (startSym ag), initItems ag (rules ag))` THEN
 Cases_on `mwhile (λs. ¬exitCond (eof,NTS (startSym g)) s)
-           (λ(sli,stli,csli). parse (slrmac ag) (sli,stli,csli))
+           (λ(sli,stli,csli). parse m (sli,stli,csli))
            (init (NTS (startSym ag),initItems ag (rules ag)) sl)` THEN 
-FULL_SIMP_TAC (srw_ss()) [] THEN
+FULL_SIMP_TAC (srw_ss()) [init_def] THEN
 Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `x'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN

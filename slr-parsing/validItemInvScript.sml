@@ -808,7 +808,7 @@ val parseValidItemInv = store_thm
 (csl = MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ∧
 validItemInv (ag, stl) ∧
 parseInv (ag,stl,csl) ∧
-(parse (SOME m) (sl, stl, csl) = SOME (sl',stl',csl'))
+(parse m (sl, stl, csl) = SOME (sl',stl',csl'))
  ⇒ 
 validItemInv (ag, stl')``,
 
@@ -1486,7 +1486,7 @@ EVERY isTmnlSym (onstk++ininp) ⇒
 validItemInv (ag, stl) ⇒
 parseInv (ag, stl, csl) ⇒
 viablePfx ag (N,h) (stackSyms stl++ininp) (stackSyms stl) ⇒
-((parse (SOME m) (ininp, stl, csl) = SOME (sl',stl',csl'))) ⇒
+((parse m (ininp, stl, csl) = SOME (sl',stl',csl'))) ⇒
 ∃N' h'.viablePfx ag (N',h') (stackSyms stl'++sl') 
        (stackSyms stl')``,
 
@@ -2114,7 +2114,7 @@ EVERY isTmnlSym (onstk++ininp) ⇒
 validItemInv (ag, stl) ⇒
 parseInv (ag, stl, csl) ⇒
 viablePfx ag (N,h) (stackSyms stl++ininp) (stackSyms stl) ⇒
-((parse (SOME m) (ininp, stl, csl) = SOME (sl',stl',csl'))) ⇒
+((parse m (ininp, stl, csl) = SOME (sl',stl',csl'))) ⇒
 ∃N' h'.viablePfx ag (N',h') (stackSyms stl'++sl') 
        (stackSyms stl')``,
 

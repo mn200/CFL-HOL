@@ -448,7 +448,7 @@ viablePfx ag (N,h) (stackSyms stl ++ ininp)
            (stackSyms stl) ==>
 parseInv (ag, stl,csl) ==>
 validItemInv (ag, stl) ==>
-?sl' stl' csl'.((parse (SOME m) (ininp, stl, csl) 
+?sl' stl' csl'.((parse m (ininp, stl, csl) 
    = SOME (sl',stl',csl')))``,
 
 MAGIC);
@@ -1334,7 +1334,7 @@ viablePfx ag (N,h) (stackSyms stl ++ ininp)
            (stackSyms stl) ==>
 parseInv (ag, stl,csl) ==>
 validItemInv (ag, stl) ==>
-?sl' stl' csl'.((parse (SOME m) (ininp, stl, csl) 
+?sl' stl' csl'.((parse m (ininp, stl, csl) 
    = SOME (sl',stl',csl')))``,
 
 MAGIC);
@@ -1770,7 +1770,7 @@ viablePfx ag (N,h) (stackSyms stl ++ ininp)
            (stackSyms stl) ==>
 parseInv (ag, stl,csl) ==>
 validItemInv (ag, stl) ==>
-?sl' stl' csl'.((parse (SOME m) (ininp, stl, csl) 
+?sl' stl' csl'.((parse m (ininp, stl, csl) 
    = SOME (sl',stl',csl')))``,
 METIS_TAC [macStepInvStlNil, macStepInvStlNotNil])
 

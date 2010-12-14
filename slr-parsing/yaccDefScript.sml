@@ -2156,9 +2156,7 @@ METIS_TAC [validItl_rules_cons]);
 
 
 val parse = Define `
-(parse mac (inp, os, ((s, itl)::rem)) = 
-  case mac of NONE -> NONE 
-  || (SOME m) ->
+(parse m (inp, os, ((s, itl)::rem)) = 
 	case inp of [] -> NONE
 	    || [e] -> 
 	    (let      
@@ -2194,10 +2192,10 @@ val init = Define
 `init inis sl =  
 (sl,([]:((('nts,'ts)symbol# ('nts,'ts)state) # ('nts,'ts)ptree) list),[inis])`;
 
-val parser = Define `parser (initState, eof, oldS) m sl = 
+val parser = Define `parser (initConf, eof, oldS) m sl = 
 let 
 out = (mwhile (\s. ~(exitCond (eof,NTS oldS) s))
-(\(sli,stli,csli).parse m (sli,stli, csli)) (init initState sl))
+(\(sli,stli,csli).parse m (sli,stli, csli)) (sl,([]:((('nts,'ts)symbol# ('nts,'ts)state) # ('nts,'ts)ptree) list),[initConf]))
 in
     case out of NONE -> NONE
               || (SOME (SOME (slo,[(st1,pt)],cs))) -> SOME (SOME pt)
@@ -2219,9 +2217,9 @@ in
 	    case mac of NONE -> NONE
             || (SOME m) -> (
       let
-	  initState =  ((NTS s'), initItems ag (rules ag))
+	  initConf =  ((NTS s'), initItems ag (rules ag))
       in
-	  case (parser (initState,eof,startSym g) (SOME m) sl) 
+	  case (parser (initConf,eof,startSym g) m sl) 
 	   of NONE -> NONE
 		|| SOME (NONE) -> NONE
 		|| SOME (SOME out) -> SOME out))`;

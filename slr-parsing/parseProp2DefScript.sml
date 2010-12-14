@@ -154,7 +154,7 @@ Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r))` THEN
 (* 3. Leaves of all the ptrees on the stack + the remaining input symbols =
  original symbol list *)
 val leaves_eq_invthm = store_thm ("leaves_eq_invthm",
-``∀m g.(m=slrmac g) ⇒ leaves_eq_inv orig sl (REVERSE stl) ⇒ 
+``∀m g.(SOME m=slrmac g) ⇒ leaves_eq_inv orig sl (REVERSE stl) ⇒ 
 ((parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))) 
 ⇒ leaves_eq_inv orig sl' (REVERSE stl')``,
 

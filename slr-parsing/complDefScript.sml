@@ -261,7 +261,7 @@ THENL[
 val parseVldStkSymTree = store_thm(
 "parseVldStkSymTree",
 ``!stl sl e csl.validStkSymTree stl ==>
-(parse (SOME m) (sl,stl,(e::csl)) = SOME (sl',stl',csl')) ==>
+(parse m (sl,stl,(e::csl)) = SOME (sl',stl',csl')) ==>
 validStkSymTree stl'``,
 Induct_on `stl` THEN SRW_TAC [] [validStkSymTree_def]
 THENL[
@@ -299,7 +299,7 @@ THENL[
 
 val takesStepsValidStkSymTree = store_thm
 ("takesStepsValidStkSymTree",
-``!n sl stl e csl.takesSteps n (parse (SOME m))
+``!n sl stl e csl.takesSteps n (parse m)
              (exitCond (eof,NTS (startSym g)))
              (sl,stl,e::csl)
              (sl',stl',csl') ==>
@@ -316,7 +316,7 @@ THENL[
       METIS_TAC [parseVldStkSymTree],
 
 
-      `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,e::csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
       Q_TAC SUFF_TAC `validStkSymTree q'` 
@@ -335,7 +335,7 @@ THENL[
 
 val takesStepsValidStates = store_thm
 ("takesStepsValidStates",
-``!n sl stl e csl.takesSteps n (parse (SOME m))
+``!n sl stl e csl.takesSteps n (parse m)
              (exitCond (eof,NTS (startSym g)))
              (sl,stl,e::csl)
              (sl',stl',csl') ==>
@@ -351,7 +351,7 @@ THENL[
       Cases_on `e` THEN
       METIS_TAC [parse_csl_validStates],
 
-      `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,e::csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
       Q_TAC SUFF_TAC `validStates ag r'` 
@@ -436,7 +436,7 @@ THENL[
 
 val parseCslStlEq = store_thm (
 "parseCslStlEq",
-``(parse (SOME m) (sl,stl,MAP FST stl ++ [e]) 
+``(parse m (sl,stl,MAP FST stl ++ [e]) 
    = SOME (sl',stl',csl')) ==>
     (csl' = MAP FST stl' ++ [e])``,
 
@@ -488,7 +488,7 @@ THENL[
 
 val takesStepsCslStlEq = store_thm(
 "takesStepsCslStlEq",
-``!n sl stl e csl.takesSteps n (parse (SOME m))
+``!n sl stl e csl.takesSteps n (parse m)
              (exitCond (eof,NTS (startSym g)))
              (sl,stl,MAP FST stl++[e])
              (sl',stl',csl') ==>
@@ -502,7 +502,7 @@ THENL[
       Cases_on `e` THEN
       METIS_TAC [parseCslStlEq],
 
-      `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,MAP FST stl++[e]) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
       Q_TAC SUFF_TAC `r'=MAP FST q'++[e]` THEN
@@ -516,7 +516,7 @@ val parseValidStlStack = store_thm
 ``validStlItemsStack stl csl ==>
   (slrmac g = SOME m) ==>
   (csl = MAP FST stl ++ [(NTS st, initItems ag (rules ag))]) ==>
-  (parse (SOME m) (sl,stl,csl) = SOME (sl',stl',csl')) ==>
+  (parse m (sl,stl,csl) = SOME (sl',stl',csl')) ==>
   validStlItemsStack stl' csl'``,
 
 Cases_on `stl` THEN
@@ -667,7 +667,7 @@ val takesStepsValidStlItems = store_thm
 ("takesStepsValidStlItems",
 ``!n sl stl csl.
              (csl = MAP FST stl ++ [(NTS st, initItems ag (rules ag))]) ==>
-	     takesSteps n (parse (SOME m))
+	     takesSteps n (parse m)
              (exitCond (eof,NTS (startSym g)))
              (sl,stl,csl)
              (sl',stl',csl') ==>
@@ -683,7 +683,7 @@ THENL[
       METIS_TAC [parseValidStlStack],
 
       Q.ABBREV_TAC `csl=MAP FST stl ++ [(NTS st,initItems ag (rules ag))]` THEN
-      `takesSteps (SUC 0) (parse (SOME m)) 
+      `takesSteps (SUC 0) (parse m) 
          (exitCond (eof,NTS (startSym g)))
          (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
@@ -719,7 +719,7 @@ val parseValidItem = store_thm
 (!nt. nt IN nonTerminals ag ==> gaw ag nt) ==>
 stackValid ag stl csl  ==>
 EVERY isTmnlSym sl ==>
-(parse (SOME m) (sl, stl, csl) = SOME (sl',stl',csl')) ==>
+(parse m (sl, stl, csl) = SOME (sl',stl',csl')) ==>
 stackValid ag stl' csl'``,
 
  Cases_on `stl` THEN SRW_TAC [] [] 
@@ -905,7 +905,7 @@ val parseTmnlSyms = store_thm
 ``!m g.
 (csl = MAP FST stl ++ [e]) ==>
 EVERY isTmnlSym sl ==>
-(parse (SOME m) (sl, stl, csl) = SOME (sl',stl',csl')) ==>
+(parse m (sl, stl, csl) = SOME (sl',stl',csl')) ==>
 EVERY isTmnlSym sl'``,
 
 Cases_on `stl`
@@ -1004,7 +1004,7 @@ val takesStepsTmnlSyms = store_thm
 ("takesStepsTmnlSyms",
 ``!n sl stl csl e.
              (csl = MAP FST stl ++ [e]) ==>
-             takesSteps  n (parse (SOME m))
+             takesSteps  n (parse m)
              (exitCond (eof,NTS (startSym g)))
              (sl,stl,csl)
              (sl',stl',csl') ==>
@@ -1019,7 +1019,7 @@ THENL[
       METIS_TAC [parseTmnlSyms],
 
       Q.ABBREV_TAC `csl=(MAP FST stl ++ [e])` THEN
-      `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
       Q_TAC SUFF_TAC `EVERY isTmnlSym q` 
@@ -1037,7 +1037,7 @@ val parseSlNotNil = store_thm
 ``!m g.
 (csl = MAP FST stl ++ [e]) ==>
 ~(sl=[]) ==>
-(parse (SOME m) (sl, stl, csl) = SOME (sl',stl',csl')) ==>
+(parse m (sl, stl, csl) = SOME (sl',stl',csl')) ==>
 ~(sl'=[])``,
 
 Cases_on `stl` THEN
@@ -1140,7 +1140,7 @@ val takesStepsSlNotNil = store_thm
 ("takesStepsSlNotNil",
 ``!n sl stl csl e.
              (csl = MAP FST stl ++ [e]) ==>
-             takesSteps n (parse (SOME m))
+             takesSteps n (parse m)
              (exitCond (eof,NTS (startSym g)))
              (sl,stl,csl)
              (sl',stl',csl') ==>
@@ -1156,7 +1156,7 @@ THENL[
       METIS_TAC [parseSlNotNil],
 
       Q.ABBREV_TAC `csl=(MAP FST stl ++ [e])` THEN
-      `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
       Q_TAC SUFF_TAC `~(q=[])` 
@@ -1174,7 +1174,7 @@ val takesStepsStackValid = store_thm
 ("takesStepsStackValid",
 ``!n sl stl csl.
              (csl = MAP FST stl ++ [(NTS st, initItems ag (rules ag))]) ==>
-             takesSteps n (parse (SOME m))
+             takesSteps n (parse m)
              (exitCond (eof,NTS (startSym g)))
              (sl,stl,csl)
              (sl',stl',csl') ==>
@@ -1193,7 +1193,7 @@ THENL[
       METIS_TAC [parseValidItem],
 
       Q.ABBREV_TAC `csl=(MAP FST stl ++ [(NTS st,initItems ag (rules ag))])` THEN
-      `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
       Q_TAC SUFF_TAC `stackValid ag q' r'` 
@@ -1236,7 +1236,7 @@ EVERY isTmnlSym sl ==>
 (!nt. nt IN nonTerminals ag ==> gaw ag nt) ==>
 (csl=MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ==>
 parseInv (ag,stl,csl) ==>
-(parse (SOME m) (sl,stl,csl) = SOME (sl',stl',csl')) ==>
+(parse m (sl,stl,csl) = SOME (sl',stl',csl')) ==>
 parseInv (ag,stl',csl')``,
 
       FULL_SIMP_TAC (srw_ss()) [parseInv_def] THEN
@@ -1275,7 +1275,7 @@ val takesStepsParseInv = store_thm
 ("takesStepsParseInv",
 ``!n sl stl csl.
     (csl = MAP FST stl ++ [(NTS st, initItems ag (rules ag))]) ==>
-    takesSteps n (parse (SOME m))
+    takesSteps n (parse m)
     (exitCond (eof,NTS (startSym g)))
     (sl,stl,csl)
     (sl',stl',csl') ==>
@@ -1294,7 +1294,7 @@ THENL[
 	    
 	    
       Q.ABBREV_TAC `csl=MAP FST stl ++ [(NTS st,initItems ag (rules ag))]` THEN
-      `takesSteps (SUC 0) (parse (SOME m)) 
+      `takesSteps (SUC 0) (parse m) 
          (exitCond (eof,NTS (startSym g)))
          (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
@@ -1315,7 +1315,7 @@ val takesStepsValidItemInv = store_thm
 ("takesStepsValidItemInv",
 ``!n sl stl csl.
              (csl = MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ==>
-             takesSteps n (parse (SOME m))
+             takesSteps n (parse m)
              (exitCond (eof,NTS (startSym g)))
              (sl,stl,csl)
              (sl',stl',csl') ==>
@@ -1336,7 +1336,7 @@ THENL[
       METIS_TAC [parseValidItemInv],
 
       Q.ABBREV_TAC `csl=(MAP FST stl ++ [(NTS st,initItems ag (rules ag))])` THEN
-      `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
       Q_TAC SUFF_TAC `validItemInv (ag,q')` 
@@ -1589,7 +1589,7 @@ IS_PREFIX (pfx ++ rhs) (stackSyms stli) ==>
 parseInv (ag, stli, csli) ==>
 validItemInv (ag, stli) ==>
 ?i stl csl.
-      takesSteps (LENGTH ininp) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      takesSteps (LENGTH ininp) (parse m) (exitCond (eof,NTS (startSym g)))
         (ininp ++ sfx,stli,csli)
         (i,stl,csl) /\ (stackSyms stl = pfx ++ rhs) /\ (i=sfx) /\
 	(MEM (item N (rhs,[])) (itemlist csl))``,
@@ -1809,7 +1809,7 @@ EVERY isTmnlSym (pfx++rhs++sfx) ==>
 parseInv (ag, stli, csli) ==>
 validItemInv (ag,stli) ==>
 ?i stl csl.
-      takesSteps (LENGTH ininp) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      takesSteps (LENGTH ininp) (parse m) (exitCond (eof,NTS (startSym g)))
         (ininp ++ rhs++ sfx,stli,csli) (i,stl,csl) 
 	   /\ (stackSyms stl = pfx) /\ (i=rhs++sfx)``,
 MAGIC);
@@ -2413,7 +2413,7 @@ RTC (rderives ag) [NTS (startSym ag)]
   MEM (rule N rhs) (rules ag) ==>
 parseInv
 (ag,stl,MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ==>
-takesSteps (SUC (LENGTH t)) (parse (SOME m))
+takesSteps (SUC (LENGTH t)) (parse m)
        (exitCond (eof,NTS (startSym g)))
        (h::(t ++ rhs ++ sfx),[],
         [(NTS st,initItems ag (rules ag))])
@@ -2434,7 +2434,7 @@ Cases_on `sfx` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN1
       (`!n sl stl csl e sl' stl' csl'.
          (csl = MAP FST stl ++ [e]) ==>
-         takesSteps (SUC n) (parse (SOME m))
+         takesSteps (SUC n) (parse m)
            (exitCond (eof,NTS (startSym g))) (sl,stl,csl)
            (sl',stl',csl') ==>
          ~(sl = []) ==>
@@ -2447,7 +2447,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN1
 
       SRW_TAC [] [] THEN
       `SUC 0 = 1` by DECIDE_TAC THEN
-      `takesSteps (SUC 0) (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (NTS (startSym g)::TS eof::t'',[],
              [(NTS st,initItems ag (rules ag))])
             (TS eof::t'',h'::t',
@@ -2525,7 +2525,7 @@ val takesStepsBase = store_thm
   (slrmac ag = SOME m) ==>
  (!nt. nt IN nonTerminals ag ==> gaw ag nt) ==>
     ?n i stl csl.
-      takesSteps n (parse (SOME m)) (exitCond (eof,NTS (startSym g)))
+      takesSteps n (parse m) (exitCond (eof,NTS (startSym g)))
         (pfx ++ rhs ++ sfx,[],[(NTS st,initItems ag (rules ag))])
         (i,stl,csl) /\ (stackSyms stl = pfx ++ rhs) /\
         MEM (item N (rhs,[])) (itemlist csl) /\ (i=sfx)``,
@@ -2557,7 +2557,7 @@ Cases_on `N=startSym ag` THEN1
           parseInv (ag,stli,csli) ==>
          validItemInv (ag,stli) ==>
          ?i stl csl.
-           takesSteps (LENGTH ininp) (parse (SOME m))
+           takesSteps (LENGTH ininp) (parse m)
              (exitCond (eof,NTS (startSym g))) (ininp ++ sfx,stli,csli)
              (i,stl,csl) /\ (stackSyms stl = pfx ++ rhs) /\ (i = sfx) /\
            MEM (item N (rhs,[])) (itemlist csl)` 
@@ -2597,13 +2597,13 @@ Cases_on `N=startSym ag` THEN1
           parseInv (ag,stli,csli) ==>
          validItemInv (ag,stli) ==>
          ?i stl csl.
-           takesSteps (LENGTH ininp) (parse (SOME m))
+           takesSteps (LENGTH ininp) (parse m)
              (exitCond (eof,NTS (startSym g))) (ininp ++ sfx,stli,csli)
              (i,stl,csl) /\ (stackSyms stl = pfx ++ rhs) /\ (i = sfx) /\
            MEM (item N (rhs,[])) (itemlist csl)` 
 	 by METIS_TAC [lem1] THEN
      `?stl csl.
-             takesSteps (SUC (LENGTH t)) (parse (SOME m))
+             takesSteps (SUC (LENGTH t)) (parse m)
                (exitCond (eof,NTS (startSym g)))
                (h::(t ++ rhs ++ sfx),[],[(NTS st,initItems ag (rules ag))])
                (rhs++sfx,stl,csl) /\ (stackSyms stl = h::t)` 
@@ -2625,7 +2625,7 @@ Cases_on `N=startSym ag` THEN1
     by METIS_TAC [validItemInvInit] THEN
 `!n sl stl csl stl' csl' sl'.
          (csl = MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ==>
-         takesSteps (SUC n) (parse (SOME m))
+         takesSteps (SUC n) (parse m)
            (exitCond (eof,NTS (startSym g))) (sl,stl,csl)
            (sl',stl',csl') ==>
          EVERY isTmnlSym sl ==>
@@ -2643,7 +2643,7 @@ FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH t`,`h::(t ++ rhs ++ sfx)`,
 SRW_TAC [] [] THEN
 `!n sl stl csl sl' stl' csl'.
          (csl = MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ==>
-         takesSteps (SUC n) (parse (SOME m))
+         takesSteps (SUC n) (parse m)
            (exitCond (eof,NTS (startSym g))) (sl,stl,csl)
            (sl',stl',csl') ==>
          (!nt. nt IN nonTerminals ag ==> gaw ag nt) ==>

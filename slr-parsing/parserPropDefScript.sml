@@ -102,6 +102,9 @@ val soundness = store_thm ("soundness",
          eof, startSym g) m sl = SOME (SOME tree)) ⇒
 sl ∈ language ag``,
 
+MAGIC);
+
+(*
 SRW_TAC [][language_def] THEN
 `validptree ag tree` by METIS_TAC [parserValidptree_Invthm] THEN
 Cases_on `tree` THEN
@@ -109,9 +112,24 @@ FULL_SIMP_TAC (srw_ss()) [validptree, parser_def, LET_THM] THEN
 Cases_on `mwhile (λs. ¬exitCond (eof,NTS (startSym g)) s)
            (λ(sli,stli,csli). parse m (sli,stli,csli))
            (init (NTS (startSym ag),initItems ag (rules ag)) sl)` THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
+FULL_SIMP_TAC (srw_ss()) [init_def] THEN
+Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `x'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `q'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+POP_ASSUM MP_TAC THEN
+Q.MATCH_ABBREV_TAC `(mwhile CC ff ss = SOME (SOME ss')) ==>
+(derives ag)^* [NTS (startSym ag)] sl` THEN
+STRIP_TAC THEN
+SRW_TAC [] [] THEN
+`~ CC ss'` by METIS_TAC [mwhileEndCond, SOME_11] THEN
+UNABBREV_ALL_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [exitCond_def, stackSyms_def] THEN
+SRW_TAC [][] THEN
 MAGIC);
-
+*)
 
 val parse_sl_not_nil = store_thm ("parse_sl_not_nil",
 ``!m g.(SOME m=slrmac g) ==> 

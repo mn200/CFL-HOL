@@ -10,7 +10,6 @@ open pred_setTheory listLemmasTheory containerLemmasTheory setLemmasTheory
 val _ = new_theory "relationLemmas";
 
 val _ = Globals.linewidth := 60
-val _ = set_trace "Unicode" 1
 
 val rtc2list = Define
     `(rtc2list R [] = F) /\

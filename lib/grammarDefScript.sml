@@ -10,14 +10,6 @@ containerLemmasTheory setLemmasTheory relationLemmasTheory
 
 val _ = new_theory "grammarDef";
 
-val _ = Globals.linewidth := 60
-
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
-
-(* 14/05/07 AB *)
-
-
 (*
 Theory of context free grammar.
 Based on Chapter 4, Hopcroft & Ullman.
@@ -1445,7 +1437,7 @@ SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [] []
 THENL[
-      FULL_SIMP_TAC (srw_ss()) [] THEN      
+      FULL_SIMP_TAC (srw_ss()) [] THEN
       FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH dl'`] MP_TAC) THEN
       SRW_TAC [] [] THEN
       `LENGTH dl' < 1 + LENGTH l2`
@@ -3101,7 +3093,7 @@ METIS_TAC [flatRepComm,APPEND_ASSOC] THEN
 METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left,
 	   APPEND_ASSOC] THEN
 METIS_TAC [RTC_RTC,rtc_derives_same_append_left]);
-      
+
 val rtcDReplEnd = store_thm
 ("rtcDReplEnd",
  ``∀i.(derives g)^* [NTS B] (p ++ [NTS B] ++ s) ∧
@@ -3123,7 +3115,7 @@ METIS_TAC [flatRepComm,APPEND_ASSOC] THEN
 METIS_TAC [rtc_derives_same_append_right,rtc_derives_same_append_left,
 	   APPEND_ASSOC] THEN
 METIS_TAC [RTC_RTC,rtc_derives_same_append_left]);
-      
+
 
 val nonTmnlsApp = store_thm
 ("nonTmnlsApp",

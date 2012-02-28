@@ -9,19 +9,14 @@ val if_rw_SOMEeqSOME = store_thm ("if_rw_SOMEeqSOME",
 ``((if p then SOME x else NONE) = SOME x') = ((x=x') /\ p)``,
 SRW_TAC [][AC CONJ_ASSOC CONJ_COMM])
 
-(* I find it hard to believe this is useful *)
-val if_rw_SOME = store_thm ("if_rw_SOME",
-``?x' p'.(SOME x' = (if p then NONE else p')) = ((p'=SOME x'))``,
-MAP_EVERY Q.EXISTS_TAC [`ARB`, `NONE`] THEN SRW_TAC [][]);
-
 val option_case_rwt = store_thm("option_case_rwt",
-  ``((case x of NONE -> NONE || SOME y -> f y) = SOME z) = (?a. (x = SOME a) /\ (f a = SOME z))``,
+  ``((case x of NONE => NONE | SOME y => f y) = SOME z) = (?a. (x = SOME a) /\ (f a = SOME z))``,
   Cases_on `x` THEN SRW_TAC [][]);
 
 val list_case_rwt = store_thm("list_case_rwt",
-  ``(((case x of [] -> NONE || h::t -> f h t) = SOME z) = (?i j. (x = i::j) /\ (f i j = SOME z))) /\
+  ``(((case x of [] => NONE | h::t => f h t) = SOME z) = (?i j. (x = i::j) /\ (f i j = SOME z))) /\
 
-    (((case x of [] -> y || h::t -> NONE) = SOME z) = ((x = []) /\ (y = SOME z)))``,
+    (((case x of [] => y | h::t => NONE) = SOME z) = ((x = []) /\ (y = SOME z)))``,
   Cases_on `x` THEN SRW_TAC [][] );
 
 

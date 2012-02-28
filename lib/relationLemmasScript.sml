@@ -11,7 +11,7 @@ val _ = new_theory "relationLemmas";
 
 val _ = Globals.linewidth := 60
 
-val rtc2list = Define
+val rtc2list_def = Define
     `(rtc2list R [] = F) /\
     (rtc2list R [x] = T) /\
     (rtc2list R (x::y::rst) = R x y /\ rtc2list R (y::rst))`
@@ -40,7 +40,8 @@ val rtc2list_exists' = store_thm (
   ``!u v. RTC R u v ==> ∃l. R ⊢ l ◁ u → v``,
   HO_MATCH_MP_TAC RTC_INDUCT THEN SRW_TAC [][] THENL [
     Q.EXISTS_TAC `[u]` THEN SRW_TAC [][listderiv_def],
-    `?h t. (l = h::t)` by METIS_TAC [list_CASES, listderiv_def, rtc2list] THEN
+    `?h t. (l = h::t)`
+      by METIS_TAC [list_CASES, listderiv_def, rtc2list_def] THEN
     Q.EXISTS_TAC `u::l` THEN SRW_TAC [][] THEN
     FULL_SIMP_TAC (srw_ss()) [listderiv_def]
   ]);
@@ -80,59 +81,37 @@ val rtc2list_distrib_append_snd = store_thm
 ("rtc2list_distrib_append_snd",
 ``!l1 l2 R.rtc2list R (l1++l2) ==> ~(l2=[]) ==> rtc2list R l2``,
 Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [rtc2list] THEN
-Cases_on `l1` THEN METIS_TAC [rtc2list, APPEND])
+FULL_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `l1` THEN METIS_TAC [rtc2list_def, APPEND])
 
 val rtc2list_append_right = store_thm
 ("rtc2list_append_right",
  ``!l R v.rtc2list R l ==> R (LAST l) v ==> rtc2list R (l++[v])``,
-          Induct_on `l` THEN SRW_TAC [] [rtc2list] THEN
-          Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [rtc2list])
-
-val rtc2listRtcRdHdLast = store_thm ("rtc2listRtcRdHdLast",
-``!t.rtc2list (rderives ag) t ==> ~(t=[]) ==>
-      RTC (rderives ag)(HD t) (LAST t)``,
-    Induct_on `t` THEN SRW_TAC [] [rtc2list] THEN
-    SRW_TAC [] [RTC_RULES] THEN
-    Cases_on `t` THEN
-    FULL_SIMP_TAC (srw_ss()) [rtc2list, RTC_RULES] THEN
-    METIS_TAC [RTC_RULES])
-
-
-
-val rtcRderivesRtc2list = store_thm ("rtcRderivesRtc2list",
-``!h h'.RTC (rderives ag) h h' ==>
-rtc2list (rderives ag) (h'::dl) ==>
-RTC (rderives ag) h (LAST (h'::dl))``,
-HO_MATCH_MP_TAC RTC_STRONG_INDUCT_RIGHT1 THEN
-SRW_TAC [] [rtc2list]
-THENL[
- METIS_TAC [HD, rtc2listRtcRdHdLast, NOT_CONS_NIL],
-
- `RTC (rderives ag) h'' (LAST (h''::dl))`
-     by METIS_TAC [rtc2listRtcRdHdLast, HD, NOT_CONS_NIL] THEN
- METIS_TAC [RTC_RULES, RTC_RTC]]);
-
+          Induct_on `l` THEN SRW_TAC [] [] THEN
+          Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [])
 
 val rtc2listRtcHdLast = store_thm ("rtc2listRtcHdLast",
-``!t.rtc2list R t ==> ~(t=[]) ==>
-   RTC R (HD t) (LAST t)``,
-    Induct_on `t` THEN SRW_TAC [] [rtc2list] THEN
-    SRW_TAC [] [RTC_RULES] THEN
-    Cases_on `t` THEN
-    FULL_SIMP_TAC (srw_ss()) [rtc2list, RTC_RULES] THEN
-    METIS_TAC [RTC_RULES]);
+``!t.  rtc2list R t ==> RTC R (HD t) (LAST t)``,
+  Induct_on `t` THEN SRW_TAC [] [] THEN
+  Cases_on `t` THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN
+  METIS_TAC [RTC_RULES])
 
+val rtcRderivesRtc2list = store_thm ("rtcRderivesRtc2list",
+``!h h'. RTC R h h' ==>
+         rtc2list R (h'::dl) ==>
+         RTC R h (LAST (h'::dl))``,
+REPEAT STRIP_TAC THEN IMP_RES_TAC rtc2listRtcHdLast THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN METIS_TAC [RTC_CASES_RTC_TWICE]);
 
 val rtc2list_mem = store_thm
 ("rtc2list_mem",
-``∀l e1 e2.R ⊢ l ◁ e1 → e2 ∧
-    MEM e' l
+``∀l e1 e2.
+      R ⊢ l ◁ e1 → e2 ∧ MEM e' l
        ⇒
-    R^* e1 e' ∧ R^* e' e2``,
-
+      R^* e1 e' ∧ R^* e' e2``,
   Induct_on `l` THEN
-  SRW_TAC [][rtc2list, listderiv_def] THEN1
+  SRW_TAC [][listderiv_def] THEN1
    METIS_TAC [RTC_RULES] THEN1
    METIS_TAC [HD, rtc2listRtcHdLast, NOT_CONS_NIL] THEN
   Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -151,8 +130,6 @@ val listderiv_thm = store_thm(
   SRW_TAC [][listderiv_def] THEN Cases_on `t` THEN
   SRW_TAC [][] THEN
   METIS_TAC []);
-
-
 
 val rtc2listLastFront = store_thm
 ("rtc2listLastFront",
@@ -323,19 +300,26 @@ FIRST_X_ASSUM (Q.SPECL_THEN [`t'`] MP_TAC) THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) []);
 
 
+val rtc2list_CONS_RWT = store_thm(
+  "rtc2list_CONS_RWT",
+  ``rtc2list R (h::t) = (t = []) ∨ R h (HD t) ∧ rtc2list R t``,
+  Cases_on `t` THEN SRW_TAC [][]);
 
-val ldAppend = store_thm
-("ldAppend",
-``∀p e s x.R ⊢ (p ++ [e] ++ s) ◁ x → y =
-R ⊢ p ++ [e] ◁ x → e ∧ R ⊢ [e]++s ◁ e → y``,
+val rtc2list_APPEND_MID1_EQN = store_thm(
+  "rtc2list_APPEND_MID1_EQN",
+  ``∀p s. rtc2list R (p ++ [e] ++ s) ⇔
+          rtc2list R (p ++ [e]) ∧ rtc2list R (e::s)``,
+  Induct_on `p` THEN SRW_TAC [][rtc2list_CONS_RWT] THEN
+  Cases_on `p` THEN SRW_TAC [][] THEN METIS_TAC []);
 
-SRW_TAC [][listderiv_def] THEN
-Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][EQ_IMP_THM] THEN
-METIS_TAC [rtc2list_distrib_append_fst, APPEND, APPEND_ASSOC, MEM,
-	   rtc2list_distrib_append_snd, last_append, rtc2listTrans,
-	   last_elem]);
-
+val ldAppend = store_thm (
+  "ldAppend",
+  ``∀p e s x.
+      R ⊢ (p ++ [e] ++ s) ◁ x → y ⇔
+      R ⊢ p ++ [e] ◁ x → e ∧ R ⊢ [e]++s ◁ e → y``,
+  SRW_TAC [][listderiv_def, rtc2list_APPEND_MID1_EQN] THEN
+  Cases_on `s` THEN SRW_TAC [][] THEN1 METIS_TAC [] THEN
+  Cases_on `p` THEN SRW_TAC [][] THEN METIS_TAC []);
 
 val ldMemRel' = store_thm
 ("ldMemRel'",
@@ -367,29 +351,5 @@ METIS_TAC [rtc2list_distrib_append_fst, APPEND, APPEND_ASSOC, MEM,
 
 `h::t = FRONT (h::t) ++ [LAST (h::t)]` by METIS_TAC [APPEND_FRONT_LAST,MEM] THEN
 METIS_TAC [ldMemRel', APPEND, APPEND_ASSOC, listderiv_def]);
-(*
-val elId = store_thm
-("elId",
-``∀n l.n + 1< LENGTH l ⇒ rtc2list p l
-      ⇒
-    p ⊢ l ◁ (EL n l) → (EL (n+1) l)``,
-
-Induct_on `l` THEN SRW_TAC [][] THEN
-Cases_on `n` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN1
-(Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-FIRST_X_ASSUM (Q.SPECL_THEN [`0`] MP_TAC) THEN SRW_TAC [][]
- ) THEN
-Q_TAC SUFF_TAC `p ⊢ EL n' l → EL (SUC (SUC n')) (h::l)` THEN1
-METIS_TAC [ADD1] THEN
-SRW_TAC [][] THEN
-`n'+1 < LENGTH l` by DECIDE_TAC THEN
-RES_TAC THEN
-Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-RES_TAC THEN
-METIS_TAC [elTlEq]);
-*)
 
 val _ = export_theory ();

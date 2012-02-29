@@ -22,7 +22,7 @@ val finitergrRules = store_thm
  SRW_TAC [][rgrRules] THEN
  Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
  Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of
-                        rule N rhs -> if (∃a b.
+                        rule N rhs => if (∃a b.
 					  (derives g)^* [NTS (startSym g)]
 					  (a ++ [NTS N] ++ b)) then
 			{rule N rhs} else {} `

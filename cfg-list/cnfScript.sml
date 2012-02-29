@@ -11,10 +11,6 @@ open reachableGrammarTheory
 
 val _ = new_theory "cnf";
 
-val _ = Globals.linewidth := 60
-val _ = set_trace "Unicode" 1
-
-
 val noeProds = Define
 `noeProds ru = ¬∃l. rule l [] ∈ ru`;
 
@@ -287,7 +283,7 @@ val elimNT = Define
 	([nt1;nt2]++(elimNT sf (rule nt [nt1;nt2])))
     else (s::elimNT sf (rule nt [nt1;nt2])))`
 
-(* Does sentential form sf from new grammar g' has any new nonterminals, i.e. ones not in g 
+(* Does sentential form sf from new grammar g' has any new nonterminals, i.e. ones not in g
 val noNewNts = Define
 `noNewNts g sf = ∀e.MEM e sf ⇒ isNonTmnlSym e ⇒ e IN (nonTerminals g)`
 *)
@@ -1344,7 +1340,7 @@ Cases_on `v=0` THEN1
 SRW_TAC [] [] THEN
 `∃g' nt t. trans1Tmnl nt t g g'` by  METIS_TAC [MONO_NOT,lemma11_a] THEN
 `(badTmnlsCount g' < badTmnlsCount g)` by METIS_TAC [lemma6_a] THEN
-`∃g''.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g' g'' ∧ (badTmnlsCount g'' = 0)` 
+`∃g''.RTC (\x y.∃nt t.trans1Tmnl nt t x y) g' g'' ∧ (badTmnlsCount g'' = 0)`
 		     by  METIS_TAC [] THEN
 Q.EXISTS_TAC `g''` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1390,7 +1386,7 @@ val cnfisCnfEq = store_thm
 ("cnfisCnfEq",
 ``∀g:('nts, 'ts) grammar.
  INFINITE (UNIV:'nts set) ∧
- [] ∉ language g  ⇒ 
+ [] ∉ language g  ⇒
  ∃g':('nts,'ts) grammar.isCnf g' ∧ (language g = language g')``,
 
 SRW_TAC [][] THEN

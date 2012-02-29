@@ -82,7 +82,7 @@ val finiteunitProds = store_thm
 SRW_TAC [][unitProds] THEN
 Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
 Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of
-                        rule N rhs -> if (∃nt. rhs = [NTS nt]) then {rule N rhs}
+                        rule N rhs => if (∃nt. rhs = [NTS nt]) then {rule N rhs}
 				      else {}`  THEN
 Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set (rules g)))`
  THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN
@@ -145,7 +145,7 @@ Q.ABBREV_TAC `l = nonUnitProds g` THEN
 SRW_TAC [][newProds] THEN
  Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
  Q.ABBREV_TAC `f = \r. case (r : (α,β) rule) of
-                        rule N rhs ->
+                        rule N rhs =>
 			{ rule a rhs | a |
 			 ∃ru. (NTS a,NTS N) ∈ allDeps (G ru (startSym g)) ∧
 			 (set ru = unitProds g)} `

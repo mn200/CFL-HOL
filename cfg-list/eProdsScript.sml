@@ -30,14 +30,14 @@ val finitenegrRules = store_thm
  SRW_TAC [][munge] THEN
  Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
  Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of
-                        rule N rhs -> {rule N rhs' | rhs' |
+                        rule N rhs => {rule N rhs' | rhs' |
 				       rhs' ∈ munge0 g rhs ∧ (rhs' ≠ [])} `
  THEN
 Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set p))`
  THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN
 	Cases_on `r` THEN SRW_TAC [][] THEN
 	Q.ABBREV_TAC `h = \r. case (r : (α,β)rule) of
-                        rule N rhs -> if ((N ≠ n) ∨ (rhs ≠ l)) then {}
+                        rule N rhs => if ((N ≠ n) ∨ (rhs ≠ l)) then {}
 				      else
 				      set (MAP (λr'.rule N r')
 					   (FILTER (\e. ¬NULL e) (munge0 g rhs)))`

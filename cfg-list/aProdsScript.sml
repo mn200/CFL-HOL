@@ -694,7 +694,7 @@ SRW_TAC[][aProdsRules] THEN
 `∀NT r. { rule NT r | F } = ∅` by SRW_TAC [][EXTENSION] THEN
 Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
 Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of
-                        rule N rhs -> if N ≠ A then {}
+                        rule N rhs => if N ≠ A then {}
                                       else { rule A (x ++ r0) | x,r0 |
                                             ?B. B ∈ l ∧ rule B x ∈ ru ∧
                                                 (rhs = NTS B :: r0)}`  THEN
@@ -704,7 +704,7 @@ Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f ru)`
         Q.MATCH_ABBREV_TAC `FINITE Horrible2` THEN
         Q.ABBREV_TAC
             `g = \r. case r of
-                       rule M rr -> if M ∈ l then
+                       rule M rr => if M ∈ l then
                                       {rule A (rr ++ r0) | r0 | l' = NTS M :: r0}
                                     else {}` THEN
           Q_TAC SUFF_TAC `Horrible2 = BIGUNION (IMAGE g ru)`

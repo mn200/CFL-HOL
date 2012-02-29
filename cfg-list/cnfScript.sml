@@ -1180,24 +1180,22 @@ SRW_TAC [][] THEN
 `f h > 0` by DECIDE_TAC THEN
 METIS_TAC []);
 
-
 val lemma8_a = prove(
 ``INFINITE (UNIV : 'nts set) ⇒ (badTmnlsCount (g:('nts,'ts) grammar) > 0)
         ⇒
      ∃g' (nt:'nts) t.trans1Tmnl nt t g g' ``,
 
 SRW_TAC [] [badTmnlsCount] THEN
-`∃e.MEM e (rules g) ∧ ruleTmnls e > 0` by METIS_TAC [sumMapGt0] THEN
+`∃e. MEM e (rules g) ∧ ruleTmnls e > 0` by METIS_TAC [sumMapGt0] THEN
 `∃l p s t. (e=rule l (p ++ [TS t] ++ s)) ∧ (p ≠ [] ∨ s ≠ [])`
  by METIS_TAC [slemma12_a_2] THEN
-(FULL_SIMP_TAC (srw_ss()) [trans1Tmnl] THEN
+FULL_SIMP_TAC (srw_ss()) [trans1Tmnl] THEN
  `FINITE (nonTerminals g)` by METIS_TAC [finiteNts, FINITE_LIST_TO_SET] THEN
 `FINITE (IMAGE nts2str (nonTerminals g))` by METIS_TAC [finiteNts2str] THEN
 `∃nt.nt IN UNIV ∧ ~(nt IN (IMAGE nts2str (nonTerminals g)))`
     by METIS_TAC [IN_INFINITE_NOT_FINITE] THEN
 `~(NTS nt IN nonTerminals g)` by METIS_TAC [existsNewNt] THEN
-METIS_TAC [isTmnlSym_def,startSym_def,rules_def]));
-
+METIS_TAC [isTmnlSym_def,startSym_def,rules_def]);
 
 val noTmnls = prove(
 ``∀l r.(ruleTmnls (rule l r) = 0) = ((LENGTH r <= 1) ∨ (EVERY isNonTmnlSym r))``,
@@ -1207,102 +1205,104 @@ SRW_TAC [] [EQ_IMP_THM] THENL[
 `~(∃e.MEM e r ∧ isTmnlSym e)` by METIS_TAC [filter_l2] THEN METIS_TAC [sym_r7b,rgr_r9eq],
 METIS_TAC [sym_r3b,rgr_r9eq,filter_l2]]);
 
-
 val lemma8_b = prove (
 ``INFINITE (UNIV : 'nts set) ⇒
-   (badTmnlsCount (g:('nts,'ts) grammar) = 0)
-  ⇒ ((badNtmsCount g > 0) ⇒
-  ∃g' nt:'nts nt1 nt2.trans2NT nt nt1 nt2 g g')``,
+   (badTmnlsCount (g:('nts,'ts) grammar) = 0) ⇒
+   badNtmsCount g > 0 ⇒
+   ∃g' nt:'nts nt1 nt2.trans2NT nt nt1 nt2 g g'``,
 
 SRW_TAC [] [badNtmsCount] THEN
 FULL_SIMP_TAC (srw_ss()) [badTmnlsCount] THEN
-`∀r.MEM r (rules g) ⇒ (ruleTmnls r = 0)`  by METIS_TAC [lemma16_b,badTmnlsCount] THEN
-`∃e.MEM e (rules g) ∧ ruleNonTmnls e > 0` by METIS_TAC [sumMapGt0] THEN
+`∀r.MEM r (rules g) ⇒ (ruleTmnls r = 0)`
+   by METIS_TAC [lemma16_b,badTmnlsCount] THEN
+`∃e. MEM e (rules g) ∧ ruleNonTmnls e > 0` by METIS_TAC [sumMapGt0] THEN
 `ruleTmnls e = 0` by METIS_TAC [] THEN
-` ~∃l p s t. (e = rule l (p ++ [TS t] ++ s)) ∧ (p ≠ [] ∨ s ≠ [])`
- by METIS_TAC [slemma12_a_1] THEN
+`~∃l p s t. (e = rule l (p ++ [TS t] ++ s)) ∧ (p ≠ [] ∨ s ≠ [])`
+  by METIS_TAC [slemma12_a_1] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-`∃l r p s t1. (e=rule l (p ++ [NTS t1] ++ s)) ∧ (LENGTH (p ++ [NTS t1] ++ s) ≥ 3)`
+`∃l r p s t1. (e=rule l (p ++ [NTS t1] ++ s)) ∧ LENGTH (p ++ [NTS t1] ++ s) ≥ 3`
  by METIS_TAC [slemma12_a_2NT] THEN
 `(p ≠ [] ∨ s ≠ [])` by METIS_TAC [sl, NULL_EQ_NIL]
 THENL[
-` ~(e = rule l (p ++ [TS t] ++ s))` by METIS_TAC [] THEN
-FULL_SIMP_TAC (srw_ss()) [trans2NT] THEN
-`FINITE (nonTerminals g)` by METIS_TAC [finiteNts, FINITE_LIST_TO_SET] THEN
-`FINITE (IMAGE nts2str (nonTerminals g))` by METIS_TAC [finiteNts2str] THEN
-`∃nt.nt IN UNIV ∧ ~(nt IN (IMAGE nts2str (nonTerminals g)))` by METIS_TAC [IN_INFINITE_NOT_FINITE] THEN
-`~(NTS nt IN nonTerminals g)` by METIS_TAC [existsNewNt] THEN
-`~(p=[])` by METIS_TAC [NULL_DEF] THEN
-`p = FRONT p ++ [LAST p]` by METIS_TAC [APPEND_FRONT_LAST] THEN
-`~(LENGTH (p ++ [NTS t1] ++ s) <= 1)` by METIS_TAC [notLen1, NULL_EQ_NIL] THEN
-`EVERY isNonTmnlSym (p ++ [NTS t1] ++ s)` by METIS_TAC [noTmnls] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [] [] THEN
-`EVERY isNonTmnlSym (FRONT p) ∧ isNonTmnlSym (LAST p)` by METIS_TAC [EVERY_APPEND,EVERY_DEF] THEN
-`∃ntx.LAST p = (NTS ntx)` by METIS_TAC [isNonTmnlSym_def] THEN
+   `~(e = rule l (p ++ [TS t] ++ s))` by METIS_TAC [] THEN
+   FULL_SIMP_TAC (srw_ss()) [trans2NT] THEN
+  `FINITE (nonTerminals g)` by METIS_TAC [finiteNts, FINITE_LIST_TO_SET] THEN
+  `FINITE (IMAGE nts2str (nonTerminals g))` by METIS_TAC [finiteNts2str] THEN
+  `∃nt.nt IN UNIV ∧ ~(nt IN (IMAGE nts2str (nonTerminals g)))` by METIS_TAC [IN_INFINITE_NOT_FINITE] THEN
+  `~(NTS nt IN nonTerminals g)` by METIS_TAC [existsNewNt] THEN
+  `~(p=[])` by METIS_TAC [NULL_DEF] THEN
+  `p = FRONT p ++ [LAST p]` by METIS_TAC [APPEND_FRONT_LAST] THEN
+  `~(LENGTH (p ++ [NTS t1] ++ s) <= 1)` by METIS_TAC [notLen1, NULL_EQ_NIL] THEN
+  `EVERY isNonTmnlSym (p ++ [NTS t1] ++ s)` by METIS_TAC [noTmnls] THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN
+  SRW_TAC [] [] THEN
+  `EVERY isNonTmnlSym (FRONT p) ∧ isNonTmnlSym (LAST p)` by METIS_TAC [EVERY_APPEND,EVERY_DEF] THEN
+  `∃ntx.LAST p = (NTS ntx)` by METIS_TAC [isNonTmnlSym_def] THEN
 
-MAP_EVERY Q.EXISTS_TAC
-[`G (delete (rule l (FRONT p ++ [NTS ntx; NTS t1] ++ s)) (rules g) ++
-[rule nt [NTS ntx; NTS t1]; rule l (FRONT p ++ [NTS nt] ++ s)]) (startSym g)`,
-`nt`,`NTS ntx`,`NTS t1`,`l`,`FRONT p`,`s`] THEN
-SRW_TAC [] []  THEN1
-METIS_TAC [APPEND,CONS,APPEND_ASSOC]
-THENL[
+  MAP_EVERY Q.EXISTS_TAC
+  [`G (delete (rule l (FRONT p ++ [NTS ntx; NTS t1] ++ s)) (rules g) ++
+  [rule nt [NTS ntx; NTS t1]; rule l (FRONT p ++ [NTS nt] ++ s)]) (startSym g)`,
+  `nt`,`NTS ntx`,`NTS t1`,`l`,`FRONT p`,`s`] THEN
+  SRW_TAC [] []  THEN1
+  METIS_TAC [APPEND,CONS,APPEND_ASSOC]
+  THENL[
 
-`LENGTH (FRONT p ++ [LAST p]) + 1 + LENGTH s >= 3`  by METIS_TAC [] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-`LENGTH (FRONT p) + LENGTH s >= 1` by DECIDE_TAC THEN
-Cases_on `s ≠ []` THEN1 METIS_TAC [] THEN
-SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-`LENGTH (FRONT p) >= 1` by DECIDE_TAC THEN
-`1 <= LENGTH (FRONT p)` by DECIDE_TAC THEN
-`∃a0 a1.(FRONT p=a0::a1)` by METIS_TAC [l_lemma1] THEN
-SRW_TAC [] [] THEN
-Cases_on `FRONT p` THEN FULL_SIMP_TAC (srw_ss()) [],
+     `LENGTH (FRONT p ++ [LAST p]) + 1 + LENGTH s >= 3`  by METIS_TAC [] THEN
+     FULL_SIMP_TAC (srw_ss()) [] THEN
+     `LENGTH (FRONT p) + LENGTH s >= 1` by DECIDE_TAC THEN
+     Cases_on `s ≠ []` THEN1 METIS_TAC [] THEN
+     SRW_TAC [] [] THEN
+     FULL_SIMP_TAC (srw_ss()) [] THEN
+     `LENGTH (FRONT p) >= 1` by DECIDE_TAC THEN
+     `1 <= LENGTH (FRONT p)` by DECIDE_TAC THEN
+     `∃a0 a1.(FRONT p=a0::a1)` by METIS_TAC [l_lemma1] THEN
+     SRW_TAC [] [] THEN
+     Cases_on `FRONT p` THEN FULL_SIMP_TAC (srw_ss()) [],
 
-METIS_TAC [isNonTmnlSym_def],
+     METIS_TAC [isNonTmnlSym_def],
 
-METIS_TAC [rules_def],
+     METIS_TAC [rules_def],
 
-METIS_TAC [startSym_def]],
+     METIS_TAC [startSym_def]
+  ],
 
-` ~(e = rule l (p ++ [TS t] ++ s))` by METIS_TAC [] THEN
-FULL_SIMP_TAC (srw_ss()) [trans2NT] THEN
-`INFINITE (UNIV : string set)` by SRW_TAC [] [] THEN1 SRW_TAC [] [INFINITE_STR_UNIV] THEN
-`FINITE (nonTerminals g)` by METIS_TAC [finiteNts, FINITE_LIST_TO_SET] THEN
-`FINITE (IMAGE nts2str (nonTerminals g))` by METIS_TAC [finiteNts2str] THEN
-`∃nt.nt IN UNIV ∧ ~(nt IN (IMAGE nts2str (nonTerminals g)))` by METIS_TAC [IN_INFINITE_NOT_FINITE] THEN
-`~(NTS nt IN nonTerminals g)` by METIS_TAC [existsNewNt] THEN
-`~(s=[])` by METIS_TAC [NULL_DEF] THEN
-`∃h' t'.s = h'::t'` by METIS_TAC [listNotNull, NULL_EQ_NIL] THEN
-`~(LENGTH (p ++ [NTS t1] ++ s) <= 1)` by METIS_TAC [notLen1, NULL_EQ_NIL] THEN
-`EVERY isNonTmnlSym (p ++ [NTS t1] ++ s)` by METIS_TAC [noTmnls] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [] [] THEN
-`isNonTmnlSym h' ∧ EVERY isNonTmnlSym t'` by METIS_TAC [EVERY_APPEND,EVERY_DEF,APPEND,CONS] THEN
-`∃ntx.h' = (NTS ntx)` by METIS_TAC [isNonTmnlSym_def] THEN
+  `e <> rule l (p ++ [TS t] ++ s)` by METIS_TAC [] THEN
+  FULL_SIMP_TAC (srw_ss()) [trans2NT] THEN
+  `INFINITE (UNIV : string set)` by SRW_TAC [] [] THEN
+  `FINITE (nonTerminals g)` by METIS_TAC [finiteNts, FINITE_LIST_TO_SET] THEN
+  `FINITE (IMAGE nts2str (nonTerminals g))` by METIS_TAC [finiteNts2str] THEN
+  `∃nt.nt IN UNIV ∧ ~(nt IN (IMAGE nts2str (nonTerminals g)))` by METIS_TAC [IN_INFINITE_NOT_FINITE] THEN
+  `~(NTS nt IN nonTerminals g)` by METIS_TAC [existsNewNt] THEN
+  `~(s=[])` by METIS_TAC [NULL_DEF] THEN
+  `∃h' t'.s = h'::t'` by METIS_TAC [listNotNull, NULL_EQ_NIL] THEN
+  `~(LENGTH (p ++ [NTS t1] ++ s) <= 1)` by METIS_TAC [notLen1, NULL_EQ_NIL] THEN
+  `EVERY isNonTmnlSym (p ++ [NTS t1] ++ s)` by METIS_TAC [noTmnls] THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN
+  SRW_TAC [] [] THEN
+  `isNonTmnlSym h' ∧ EVERY isNonTmnlSym t'` by METIS_TAC [EVERY_APPEND,EVERY_DEF,APPEND,CONS] THEN
+  `∃ntx.h' = (NTS ntx)` by METIS_TAC [isNonTmnlSym_def] THEN
 
-MAP_EVERY Q.EXISTS_TAC [
-`G (delete (rule l (p ++ [NTS t1; NTS ntx] ++ t')) (rules g) ++
-[rule nt [NTS t1; NTS ntx]; rule l (p ++ [NTS nt] ++ t')]) (startSym g)`,
-`nt`,`NTS t1`,`NTS ntx`,`l`,`p`,`t'`] THEN
-SRW_TAC [] [] THENL[
-METIS_TAC [APPEND,CONS,APPEND_ASSOC],
+  MAP_EVERY Q.EXISTS_TAC [
+  `G (delete (rule l (p ++ [NTS t1; NTS ntx] ++ t')) (rules g) ++
+  [rule nt [NTS t1; NTS ntx]; rule l (p ++ [NTS nt] ++ t')]) (startSym g)`,
+  `nt`,`NTS t1`,`NTS ntx`,`l`,`p`,`t'`] THEN
+  SRW_TAC [] [] THENL[
+     METIS_TAC [APPEND,CONS,APPEND_ASSOC],
 
-FULL_SIMP_TAC (srw_ss()) [] THEN
-`LENGTH p + LENGTH t' >= 1` by DECIDE_TAC THEN
-Cases_on `p ≠ []` THEN1 METIS_TAC [] THEN
-SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-`LENGTH (t') >= 1` by DECIDE_TAC THEN
-`1 <= LENGTH (t')` by DECIDE_TAC THEN
-`∃a0 a1.(t'=a0::a1)` by METIS_TAC [l_lemma1] THEN
-SRW_TAC [] [] THEN
-Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [],
-METIS_TAC [rules_def],
-METIS_TAC [startSym_def]]]);
-
+     FULL_SIMP_TAC (srw_ss()) [] THEN
+     `LENGTH p + LENGTH t' >= 1` by DECIDE_TAC THEN
+     Cases_on `p ≠ []` THEN1 METIS_TAC [] THEN
+     SRW_TAC [] [] THEN
+     FULL_SIMP_TAC (srw_ss()) [] THEN
+     `LENGTH (t') >= 1` by DECIDE_TAC THEN
+     `1 <= LENGTH (t')` by DECIDE_TAC THEN
+     `∃a0 a1.(t'=a0::a1)` by METIS_TAC [l_lemma1] THEN
+     SRW_TAC [] [] THEN
+     Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [],
+     METIS_TAC [rules_def],
+     METIS_TAC [startSym_def]
+  ]
+]);
 
 val lemma11_a = prove(
 ``∀g.INFINITE (UNIV:'nts set) ⇒
@@ -1428,7 +1428,5 @@ Cases_on `h'` THEN FULL_SIMP_TAC (srw_ss()) [ruleNonTmnls] THEN
 Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [ruleNonTmnls] THEN
 Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def,
 					    ruleNonTmnls, ruleTmnls]);
-
-
 
 val _ = export_theory ();

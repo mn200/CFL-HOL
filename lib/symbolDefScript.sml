@@ -4,9 +4,6 @@ open pred_setTheory listLemmasTheory;
 
 val _ = new_theory "symbolDef";
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
-val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];
 
 
@@ -173,7 +170,7 @@ val conc_def = Define `(conc [] (b::bs) = (b::bs)) ∧ (conc (a::as) (b::bs) = (
 *)
 
 val conc_def = Define
-`conc (as:α list -> bool) (bs:α list -> bool) = 
+`conc (as:α list -> bool) (bs:α list -> bool) =
  {s | ∃u v. u IN as ∧ v IN bs ∧ (s = u ++ v)}`;
 
 (* Union *)

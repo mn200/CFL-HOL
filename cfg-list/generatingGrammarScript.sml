@@ -21,7 +21,7 @@ val finiteusefulntsRules = store_thm
  SRW_TAC [][usefulntsRules] THEN
  Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
  Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of
-                        rule N rhs -> if (gaw g (NTS N) ∧ EVERY (gaw g) rhs) then
+                        rule N rhs => if (gaw g (NTS N) ∧ EVERY (gaw g) rhs) then
 			{rule N rhs} else {} `
  THEN
 Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f (set (rules g)))`

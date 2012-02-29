@@ -58,7 +58,7 @@ SRW_TAC [][] THEN
 
 Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
 Q.ABBREV_TAC `f = \r. case (r : (α,β)rule) of
-                        rule N rhs -> if N ≠ A then {}
+                        rule N rhs => if N ≠ A then {}
 				      else
 					  { rule B a |
 					    (rhs = NTS A :: a)} ∪

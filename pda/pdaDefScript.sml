@@ -811,193 +811,51 @@ METIS_TAC [last_append,NOT_CONS_NIL,pdastk,APPEND]
 ]);
 
 
+val frontdlPropGen0 = store_thm (
+  "frontdlPropGen0",
+``∀q i0 r0 rst q' i r' N.
+   ID p ⊢ dl ◁ (q,i0,r0++rst) → (q',i,r'++rst) ∧
+   LENGTH rst < N ∧
+   (∀e. MEM e dl ⇒ N ≤ LENGTH (pdastk e))
+      ⇒
+   (∀e. MEM e dl ⇒ ∃p. (p ≠ []) ∧ (pdastk e = p++rst))``,
+Induct_on `dl` THEN1 SRW_TAC [][listderiv_def,pdastk] THEN
+Cases_on `dl` THEN1
+  (FULL_SIMP_TAC (srw_ss()) [] THEN
+   SRW_TAC [][listderiv_thm, pdastk] THEN STRIP_TAC THEN
+   FULL_SIMP_TAC (srw_ss() ++ ARITH_ss) [pdastk]) THEN
+ASM_SIMP_TAC (srw_ss()) [Once listderiv_thm] THEN
+MAP_EVERY Q.X_GEN_TAC [`q`, `i0`, `r0`, `rst`, `q'`, `i`, `r`, `N`] THEN
+STRIP_TAC THEN
+FULL_SIMP_TAC (srw_ss()) [DISJ_IMP_THM, FORALL_AND_THM, pdastk] THEN
+`r0 ≠ []` by (STRIP_TAC THEN FULL_SIMP_TAC (srw_ss() ++ ARITH_ss) []) THEN
+`∃rh rt. r0 = rh::rt` by METIS_TAC [list_CASES] THEN
+`∃qq ii sstk. h = (qq, ii, sstk)` by METIS_TAC [pairTheory.pair_CASES] THEN
+REPEAT VAR_EQ_TAC THEN FULL_SIMP_TAC (srw_ss()) [pdastk] THEN
+`∃sh'. sstk = sh' ++ rt ++ rst`
+   by (FULL_SIMP_TAC (srw_ss()) [id_thm] THEN SRW_TAC [][]) THEN
+`sh' ++ rt ≠ []`
+   by (SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+       SPOSE_NOT_THEN STRIP_ASSUME_TAC THEN
+       FULL_SIMP_TAC (srw_ss() ++ ARITH_ss) []) THEN
+CONJ_TAC THEN1 SRW_TAC [][] THEN
+Q.X_GEN_TAC `e` THEN SRW_TAC [][] THEN
+FIRST_X_ASSUM (Q.SPECL_THEN [`qq`,`ii`,`sh' ++ rt`, `rst`, `q'`, `i`, `r`, `N`]
+                            MP_TAC) THEN
+ASM_SIMP_TAC (srw_ss()) []);
 
 val frontdlPropGen = store_thm
 ("frontdlPropGen",
-``∀q i0 isfx r0 rst q' i' isfx r' rst.
+``∀q i0 isfx r0 q' i' isfx r' rst.
    ID p ⊢ dl ◁ (q,i0++isfx,r0++rst) → (q',i'++isfx,r'++rst) ⇒ (r0≠[]) ⇒
    (∀e.MEM e dl ⇒ LENGTH (r0++rst) ≤ LENGTH (pdastk e))
       ⇒
    (∀e.MEM e dl ⇒ ∃p.(p ≠ []) ∧ (pdastk e = p++rst))``,
-
-completeInduct_on `LENGTH dl` THEN
-SRW_TAC [][] THEN
-Cases_on `dl=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-SRW_TAC [][] THEN
-Cases_on `dl` THEN SRW_TAC [][] THEN
-Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN1
-METIS_TAC [APPEND,NOT_CONS_NIL,pdastk] THEN1
-METIS_TAC [APPEND,NOT_CONS_NIL,pdastk] THEN1
-(Cases_on `e`  THEN
- Cases_on `r` THEN FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
- SRW_TAC [][] THEN
- FULL_SIMP_TAC (srw_ss()) [pdastk] THEN
- (`LENGTH r0 + LENGTH rst ≤ LENGTH (st'++st)` by METIS_TAC [pdastk] THEN
- FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `r0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
- `LENGTH st' ≠ 0` by DECIDE_TAC THEN
- METIS_TAC [LENGTH_NIL])) THEN
-`t' ≠ []` by METIS_TAC [MEM] THEN
-`MEM e ((FRONT t')++[LAST t'])` by METIS_TAC [APPEND_FRONT_LAST] THEN
-FULL_SIMP_TAC (srw_ss()) []
-THENL[
-
-(* MEM e FRONT t' *)
-
-`LENGTH (FRONT t') < LENGTH t'` by METIS_TAC [frontLen] THEN
-FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH((q,i0++isfx,r0++rst)::h'::FRONT t')`]
-	       MP_TAC) THEN
-SRW_TAC [][] THEN
-FIRST_X_ASSUM (Q.SPECL_THEN [`((q,i0 ++ isfx,r0 ++ rst)::h'::FRONT t')`]
-	       MP_TAC) THEN
-SRW_TAC [][] THEN
-`FRONT t'≠[]` by METIS_TAC [MEM] THEN
-`LAST t' = (q',i'++isfx,r' ++ rst)` by METIS_TAC [APPEND,last_append,
-						  APPEND_ASSOC,MEM,
-						  MEM_APPEND] THEN
-`rtc2list (ID p) ([LAST (FRONT t')]++[(q',i'++isfx,r' ++ rst)])`
-by METIS_TAC [rtc2listLastFront,rtc2list_distrib_append_snd,APPEND] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `LAST (FRONT t')` THEN
-Cases_on `r` THEN
-FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
-SRW_TAC [][]
-THENL[
-      IMP_RES_TAC twoListAppEq THEN
-      SRW_TAC [][]
-      THENL[
-	    `rtc2list (ID p) (h'::FRONT t')`
-	    by METIS_TAC [rtc2list_distrib_append_fst,APPEND,NOT_CONS_NIL,
-			  APPEND_ASSOC,APPEND_FRONT_LAST] THEN
-
-	    `(LAST (h'::FRONT t') =
-            (q'',i'++isfx,[sh]++rst))` by METIS_TAC [last_append,NOT_CONS_NIL,
-					      APPEND] THEN
-	    FIRST_X_ASSUM (Q.SPECL_THEN [`i0`,`r0`,`q''`,`i'`,`isfx`,
-					 `[sh]`,`rst`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    `(∀e'.
-              (e' = (q,i0 ++ isfx,r0 ++ rst)) ∨ (e' = h') ∨
-              MEM e' (FRONT t') ⇒
-              LENGTH r0 + LENGTH rst ≤ LENGTH (pdastk e'))`
-	    by METIS_TAC [MEM_APPEND,APPEND_FRONT_LAST,MEM] THEN
-	    METIS_TAC [],
-
-
-	    `rtc2list (ID p) (h'::FRONT t')`
-	    by METIS_TAC [rtc2list_distrib_append_fst,APPEND,NOT_CONS_NIL,
-			  APPEND_ASSOC,APPEND_FRONT_LAST] THEN
-	    `(LAST (h'::FRONT t') =
-            (q'',i'++isfx,[sh]++(s1'++rst)))` by METIS_TAC [last_append,
-							    NOT_CONS_NIL,
-							    APPEND] THEN
-	    FIRST_X_ASSUM (Q.SPECL_THEN [`i0`,`r0`,`q''`,`i'`,`isfx`,
-					 `[sh]++s1'`,`rst`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    METIS_TAC [MEM_APPEND,APPEND_FRONT_LAST,MEM],
-
-
-	    `rtc2list (ID p) (h'::FRONT t')`
-	    by METIS_TAC [rtc2list_distrib_append_fst,APPEND,NOT_CONS_NIL,
-			  APPEND_ASSOC,APPEND_FRONT_LAST] THEN
-	    `(LAST (h'::FRONT t') =
-            (q'',i'++isfx,[sh]++s2))` by METIS_TAC [last_append,
-						    NOT_CONS_NIL,
-						    APPEND] THEN
-	    FIRST_X_ASSUM (Q.SPECL_THEN [`i0`,`r0`,`q''`,`i'`,`isfx`,
-					 `[sh]`,`s2`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    `MEM (q'',i'++isfx,sh::s2) t'`
-	    by METIS_TAC [APPEND_FRONT_LAST,
-			  MEM,MEM_APPEND] THEN
-	    `LENGTH r0 + LENGTH (s1 ++ s2) ≤ LENGTH (sh::s2)`
-	    by METIS_TAC [pdastk] THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    Cases_on `r0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    `LENGTH s1=0`by DECIDE_TAC THEN
-	    `s1=[]` by METIS_TAC [LENGTH_NIL] THEN
-	    SRW_TAC [][] THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    METIS_TAC [MEM_APPEND,APPEND_FRONT_LAST,MEM]
- 	    ],
-
-
-      `rtc2list (ID p) (h'::FRONT t')`
-      by METIS_TAC [rtc2list_distrib_append_fst,APPEND,NOT_CONS_NIL,
-		    APPEND_ASSOC,APPEND_FRONT_LAST] THEN
-      IMP_RES_TAC twoListAppEq THEN
-      SRW_TAC [][]
-      THENL[
-	    `(LAST (h'::FRONT t') =
-            (q'',ih::(i'++isfx),[sh]++rst))` by METIS_TAC [last_append,
-						     NOT_CONS_NIL,
-						     APPEND] THEN
-	    FIRST_X_ASSUM (Q.SPECL_THEN [`i0`,`r0`,`q''`,`ih::i'`,`isfx`,
-					 `[sh]`,`rst`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    `(∀e'.
-              (e' = (q,i0 ++ isfx,r0 ++ rst)) ∨ (e' = h') ∨
-              MEM e' (FRONT t') ⇒
-              LENGTH r0 + LENGTH rst ≤ LENGTH (pdastk e'))`
-	    by METIS_TAC [MEM_APPEND,APPEND_FRONT_LAST,MEM] THEN
-	    METIS_TAC [],
-
-	    `(LAST (h'::FRONT t') =
-            (q'',ih::(i'++isfx),[sh]++(s1'++rst)))`
-	    by METIS_TAC [last_append,NOT_CONS_NIL,APPEND] THEN
-	    FIRST_X_ASSUM (Q.SPECL_THEN [`i0`,`r0`,`q''`,`ih::i'`,`isfx`,
-					 `[sh]++s1'`,`rst`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    METIS_TAC [MEM_APPEND,APPEND_FRONT_LAST,MEM],
-
-
-	    `(LAST (h'::FRONT t') =
-            (q'',ih::(i'++isfx),[sh]++s2))` by METIS_TAC [last_append,
-						    NOT_CONS_NIL,
-						    APPEND] THEN
-	    FIRST_X_ASSUM (Q.SPECL_THEN [`i0`,`r0`,`q''`,`ih::i'`,`isfx`,
-					 `[sh]`,`s2`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    `MEM (q'',ih::(i'++isfx),sh::s2) t'`
-	    by METIS_TAC [APPEND_FRONT_LAST,
-			  MEM,MEM_APPEND] THEN
-	    `LENGTH r0 + LENGTH (s1 ++ s2) ≤ LENGTH (sh::s2)`
-	    by METIS_TAC [pdastk] THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    Cases_on `r0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    `LENGTH s1=0`by DECIDE_TAC THEN
-	    `s1=[]` by METIS_TAC [LENGTH_NIL] THEN
-	    SRW_TAC [][] THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    METIS_TAC [MEM_APPEND,APPEND_FRONT_LAST,MEM]
-	    ]],
-
-
-(* e = LAST t' *)
-
-`r'≠[]` by
-(SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
- FULL_SIMP_TAC (srw_ss()) [] THEN
- SRW_TAC [][] THEN
- `LENGTH r0 + LENGTH rst ≤ LENGTH rst` by METIS_TAC [pdastk,last_append,
-					     APPEND] THEN
- FULL_SIMP_TAC (srw_ss()) [] THEN
- FULL_SIMP_TAC (arith_ss) [] THEN
-`LENGTH r0 = 0` by DECIDE_TAC THEN
-METIS_TAC [LENGTH_NIL]) THEN
-METIS_TAC [last_append,NOT_CONS_NIL,pdastk,APPEND]
-]);
-
+REPEAT STRIP_TAC THEN
+Q.ISPECL_THEN [`q`, `i0 ++ isfx`, `r0`, `rst`, `q'`, `i' ++ isfx`, `r'`,
+              `LENGTH (r0 ++ rst)`] MP_TAC frontdlPropGen0 THEN
+ASM_SIMP_TAC (srw_ss()) [] THEN
+Cases_on `r0` THEN SRW_TAC [][]);
 
 val dlprop = store_thm
 ("dlprop",

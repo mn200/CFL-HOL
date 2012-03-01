@@ -5,6 +5,7 @@
 .HOLMK
 *.aux
 *.make
+*.temp
 Makefile.local
 pda-paper/*.log
 pda-paper/cfg.tex

@@ -1,0 +1,80 @@
+\section{Context-Free Grammars}
+\label{sec:grammars}
+
+\paragraph{Symbols}
+Grammars use \emph{symbols} of two types, terminals and non-terminals.
+We use HOL's parametric polymorphism to allow both sorts of symbol to draw from arbitrary types, which then become type-arguments to the binary type-operator \texttt{symbol}.
+The definition is
+\begin{salltt}
+  \HOLthm{symbolDef.datatype_symbol}
+\end{salltt}
+This means that the type of symbols has two constructors, \HOLtm{NTS} and \HOLtm{TS}, and that, for example, \HOLtm{TS} has type
+\begin{alltt}
+\HOLty[>>,alltt,of]{TS}
+\end{alltt}
+
+\paragraph{Rules and Grammars}
+A \emph{rule} is a pair of a non-terminal symbol and a possible expansion for that non-terminal.
+We then write \HOLtm{rule N rhs} to indicate that pairing of $N$ and $\mathit{rhs}$, with $N$ of type \HOLty{:'nts} and \HOLtm{rhs} a list of symbols, thus of type \HOLty{:('nts,'ts) symbol list}.
+A \emph{grammar} can then pair a start symbol with a list of rules.
+%
+Traditional presentations of grammars often include separate sets corresponding to the grammar's terminals and non-terminals.
+%
+It's easy to derive these sets from the grammar's rules and start symbol, so we shall occasionally write a grammar $G$ as a tuple $(V,T,P,S)$ in the proofs to come.
+Here, $V$ is the list of non-terminals, $T$ is the list of terminals, $P$ is the list of productions and $S$ is the start symbol.
+
+\begin{definition}
+  A list of symbols (or \emph{sentential form}) $s$ \emph{derives} $t$
+  in a single step if $s$ is of the form $\alpha A\gamma$, $t$ is of
+  the form $\alpha\beta\gamma$, and if $A\to\beta$ is one of the rules
+  in the grammar. In HOL, relation \HOLtm{derives g lsl rsl} holds iff
+  sentential form \HOLtm{lsl} can derive sentential form \HOLtm{rsl}
+  with respect to grammar \HOLtm{g}.
+
+\begin{holdef}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{grammarDef.derives_def}
+\end{salltt}
+\end{holdef}
+\end{definition}
+
+We write \HOLtm{(derives g)^* sf1 sf2} to indicate that \HOLtm{sf2} is
+derived from \HOLtm{sf1} in zero or more steps, also written
+\mbox{\HOLtm{sf1} $\Rightarrow^{*}$ \HOLtm{sf2}} (where the grammar $g$ is assumed).
+%
+
+We can also represent derivations more concretely using \emph{derivation lists}.
+If an arbitrary binary relation $R$ holds on adjacent elements of list
+\HOLtm{l} which has $x$ as its first element and $y$ as its last
+element, then we write \HOLtm{R ⊢ l ◁ x → y}.
+%
+For example a
+derivation sequence $l_1 \derive l_2 \derive l_3 \dots \derive l_n$
+can be represented using lists as \HOLtm{derive ⊢ l ◁ l1 → ln}
+where $l = l_1 l_2\dots l_n$.
+
+In the context of grammars, $R$ relates sentential forms.
+Later we will use the same notation to relate derivations in a PDA.
+Using the concrete notation has simplified the mechanisation of the proofs of many theorems.
+We will also use the rightmost derivation relation, \texttt{rderives}, and its closure.
+
+\begin{definition}
+  The \emph{language} of a grammar consists of all the words (lists of only terminal symbols) that can be derived from the start symbol.
+\begin{holdef}
+\begin{salltt}
+
+\HOLthm[nostile,>>,width=80]{grammarDef.language_def}
+\end{salltt}
+Function \HOLtm{isWord tsl} returns true if all the elements in the
+sentential form \HOLtm{tsl} are terminal symbols.
+\end{holdef}
+\end{definition}
+
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "cfgPda"
+%%% End:

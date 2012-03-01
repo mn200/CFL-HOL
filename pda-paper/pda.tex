@@ -1,0 +1,100 @@
+\documentclass[1p,review,authoryear]{elsarticle}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{alltt}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{underscore}
+\usepackage{holtexbasic}
+%\usepackage{verbatim}
+\usepackage{pstricks}
+\usepackage{url}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+\newcommand{\mcite}[1]{(\citet{#1})}
+\newcommand{\et}{\textit{et al}}
+\newcommand{\around}{\raisebox{.3ex}{\tiny$\sim$}}
+\newtheorem{mythm}{Theorem}[section]
+\newtheorem{holthm}{HOL Theorem}
+\newtheorem{hollemma}{HOL Lemma}
+\newtheorem{holdef}{HOL Definition}
+\newtheorem{holgap}{Gap Theorem}[section]
+\newcommand{\V}{\forall}
+\newcommand{\E}{\exists}
+\newcommand{\ie}{\textit{i.e.}}
+\newcommand{\eg}{\textit{e.g.}}
+\newcommand{\derive}{\Rightarrow}
+\newcommand{\lderive}{\stackrel{l}{\derive}}
+\newcommand{\rderive}{\stackrel{r}{\derive}}
+\newcommand{\derives}[1]{\Rightarrow^{#1}}
+\newcommand{\rderives}[1]{{\stackrel{r}{\derive}}{}^{#1}}
+\newcommand{\lderives}[1]{{\stackrel{l}{\derive}}{}^{#1}}
+\newenvironment{salltt}{\begin{samepage}\small\begin{alltt}}{\end{alltt}\end{samepage}}
+
+\newenvironment{gaps}
+{% This is the begin code
+\noindent\par\textbf{Filling in the gaps}\begin{it}\par\noindent
+}
+{% This is the end code
+\end{it} }
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+
+
+\begin{document}
+\begin{frontmatter}
+\date{}
+
+\title{A Mechanisation of the Theory of Context-Free Languages in HOL4}
+
+\author[ab]{Aditi Barthwal\corref{cor1}}
+\ead{Aditi.Barthwal@anu.edu.au}
+\author[mn]{ Michael Norrish\corref{cor2}}
+\ead{Michael.Norrish@nicta.com.au}
+\address[ab]{Australian National University}
+\address[mn]{Canberra Research Lab., NICTA}
+\cortext[cor1]{Principal corresponding author}
+\cortext[cor2]{Corresponding author}
+
+
+
+\begin{abstract}
+We describe the mechanisation of some foundational results in the theory of context-free languages~(CFLs), using the HOL4 system.
+We first show that two standard models, the pushdown automata~(PDAs) and context-free grammars~(CFGs), actually coincide.
+With both models to hand, we can then show a number of basic, but important results.
+For example, we prove the basic closure properties of the context-free languages such as union and concatenation.
+Using PDAs, we are able to mechanise an elegant proof of closure under inverse homomorphism.
+We also discuss the varying extent to which textbook proofs (we follow Hopcroft and Ullman) and our mechanisations diverge: sometimes elegant textbook proofs remain elegant in HOL; sometimes the required mechanisation effort blows up unconscionably.
+\end{abstract}
+
+\begin{keyword}
+context-free languages \sep context-free grammars \sep pushdown automata \sep closure properties \sep HOL4
+\end{keyword}
+\end{frontmatter}
+
+\input{introduction}
+\input{cfg}
+\input{pdaDef}
+\input{laeslafs}
+\input{cfg2pda}
+\input{pda2cfg}
+\input{cfls}
+\input{conclusion}
+
+\bibliographystyle {elsarticle-harv}
+\bibliography{theoremProving}
+
+
+\end{document}
+
+
+% LocalWords:  PDAs CFGs CFLs

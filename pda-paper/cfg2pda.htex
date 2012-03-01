@@ -1,0 +1,53 @@
+\section{Constructing a PDA for a CFG}
+\label{sec:cfg2pda}
+Let $G = (V,T,P,S)$ be a context-free grammar in Greibach normal form
+generating $L$. We construct machine $M$ such that
+$M=({q},T,V,\delta,q,S,\phi)$, where $\delta(q,a,A)$ contains
+$(q,\gamma)$ whenever $A \to a\gamma$ is in $P$.  Every production in
+a grammar that is in GNF has to be of the form $A~\to~a\alpha$, where
+$a$ is a terminal symbol and $\alpha$ is a string (possibly empty) of
+non-terminal symbols (\HOLtm{isGnf}).  The automaton for the grammar
+is constructed by creating transitions from the grammar productions,
+$A~\to~a\alpha$ that read the head symbol of the RHS ($a$) and push
+the remaining RHS ($\alpha$) on to the stack.  The terminals are
+interpreted as the input symbols and the non-terminals are the stack
+symbols for the PDA.
+
+\begin{salltt}
+\HOLthm[nostile,>>]{pdaEqCfg.trans_def}
+\HOLthm[nostile,>>]{pdaEqCfg.grammar2pda_def}
+\end{salltt}
+(Here \HOLtm{HD} returns the first element in the list and
+\HOLtm{TL} returns the remaining list. Function \HOLtm{MAP} applies
+a given function to each element of a list.)
+
+The PDA $M$ simulates leftmost derivations of $G$. Since $G$ is in Greibach
+normal form, each sentential form in a leftmost derivation consists of
+a string of terminals $x$ followed by a string of variables $\alpha$. $M$
+stores the suffix $\alpha$ of the left sentential form on its stack
+after processing the prefix $x$. Formally we show that
+\begin{equation}
+  S~\lderives{*}~x\alpha~\mbox{by a leftmost derivation if and only if}~(q,x,A)~\to^*_M~(q,\epsilon,\alpha)
+\label{eq:pdaImpg}
+\end{equation}
+
+  This turns out to be straightforward process in HOL and is done by
+  representing the grammar and the machine derivations using
+  derivation lists. Let $dl$ represent the grammar derivation from $S$
+  to $x\alpha$ and $dl'$ represent the derivation from
+  $(q,x,A)$ to $(q,\epsilon,\alpha)$ in the machine. Then an induction
+  on $dl$ gives us the ``if'' portion of (\ref{eq:pdaImpg}) and induction on
+  $dl'$ gives us the ``only if'' portion of (\ref{eq:pdaImpg}).
+  Thus, we can conclude the following,
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>,nosp]{pdaEqCfg.thm5_3}
+\end{salltt}
+\end{holthm}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "pda"
+%%% End:

@@ -1,0 +1,420 @@
+\section{Constructing a CFG from a PDA}
+\label{sec:pda2cfg}
+The CFG for a PDA is constructed by encoding every possible transition
+step in the PDA as a rule in the grammar. The LHS of each production
+encodes the starting and final state of the transition while the
+RHS encodes the contents of the stack in the final state.
+
+Let $M$ be the PDA $(Q,\delta,q_0,Z_0,\phi)$ and $\Sigma$ and $\Gamma$
+the derived input and stack alphabets, respectively.  We construct $G
+= (V,\Sigma,P,S)$ such that $V$ is a set containing the new symbol $S$
+and objects of the form $[q,A,p]$; for $q$ and $p$ in $Q$, and $A$ in
+$\Gamma$.
+
+The productions $P$ are of the following form: (\textbf{Rule~1}) $S
+\to [q_0,Z_0,q]$ for each $q$ in $Q$; and (\textbf{Rule~2})
+$[q,A,q_{m+1}] \to a[q_1,B_1,q_2][q_2,B_2,q_3]...[q_m,B_m,q_{m+1}]$
+for each $q,q_1,q_2,...,q_{m+1}$ in $Q$, each $a$ in $\Sigma \cup
+\{\epsilon\}$, and $A,B_1,B_2,...,B_m$ in $\Gamma$, such that
+$\delta(q,a,A)$ contains $(q_1,B_1B_2...B_m)$ (if $m=0$, then the
+production is $[q,A,q_1] \to a$). The variables and productions
+of $G$ have been defined so that a leftmost derivation in $G$ of a
+sentence $x$ is a simulation of the PDA $M$ when fed the input $x$. In
+particular, the variables that appear in any step of a leftmost
+derivation in $G$ correspond to the symbols on the stack of $M$ at a
+time when $M$ has seen as much of the input as the grammar has already
+generated.
+
+%In other words, $[q,A,p]$ derives $x$ if and and only if
+%$x$ causes $M$ to erase an $A$ from its stack by some sequence of
+%moves beginning in state $q$ and ending in state $p$. The input string
+%form the set $T^*$ while the nonterminals are used to represent the
+%stack content.
+
+\paragraph{\bf From text to automated text:}
+For \textbf{Rule~1} we only have to ensure that the state $q$ is in
+$Q$.  On the other hand, there are multiple constraints underlying the
+statement of \textbf{Rule~2} which will need to be isolated for
+mechanisation and are summarised below.
+
+\begin{description}
+\item[\textbf{C2.1}] The states $q$, $q_1$ and $p$ belong in $Q$ (a
+  similar statement for terminals and non-terminals can be ignored
+  since they are derived);
+
+\item[\textbf{C2.3}] the corresponding machine transition is based on
+  the values of $a$ and $m$ and steps from state $q$ to some state
+  $q_1$ replacing $A$ with $B_1...B_m$;
+
+\item[\textbf{C2.3}] the possibilities of generating the different
+  grammar rules based on whether $a=\epsilon$, $m=0$ or $a$ is a
+  terminal symbol;
+
+\item[\textbf{C2.4}] if $m > 1$ \ie~more than one nonterminal exists
+  on the RHS of the rule then
+  \begin{description}
+  \item[\textbf{C2.4.1}] $\alpha$ is composed of only nonterminals;
+
+  \item[\textbf{C2.4.2}] a nonterminal is an object of the form
+    $[q,A,p]$ for PDA from-state $q$ and to-state $p$, and stack
+    symbol $A$;
+
+    \item[\textbf{C2.4.3}] the from-state of the first object is $q_1$ and
+      the to-state of the last object is $q_{m+1}$;
+
+    \item[\textbf{C2.4.4}] the to-state and from-state of adjacent
+      nonterminals must be the same;
+
+    \item[\textbf{C2.4.5}] the states encoded in the nonterminals must
+      belong to $Q$.
+\end{description}
+\end{description}
+
+
+Whether we use a functional approach or a relational one, the
+succinctness of the above definition is hard to capture in HOL. Using
+relations we can avoid concretely computing every possible rule in the
+grammar and thus work at a higher level of abstraction. The extent of
+details to follow are characteristic of mechanising such a proof.  The
+relation \texttt{pda2grammar} captures the restrictions on the rules
+for the grammar corresponding to a PDA.
+
+\begin{holdef}
+\begin{salltt}
+
+\HOLthm[nostile,>>,M/m]{pdaEqCfg.pda2grammar_def}
+\end{salltt}
+\end{holdef}
+
+The nonterminals are a tuple of a from-state, a stack symbol and a
+to-state, the states and the stack symbols belonging to the PDA. As
+long as one of the components is not in the PDA, our start symbol will
+be new and will not overlap with the symbols constructed from the
+PDA. The first conjunct of \texttt{pda2grammar} ensures this.  The
+function \HOLtm{p2gStartRules} corresponds to \textbf{Rule~1} and the
+function (\HOLtm{p2gRules}) ensures that each rule conforms with
+\textbf{Rule~2}. As already mentioned, \textbf{Rule~2} turns out to be
+more complicated to mechanise due to the amount of detail hidden
+behind the concise notation.
+
+The \texttt{p2gRules} predicate (see Figure~\ref{fig:p2gRules})
+enforces the conditions \textbf{C2.1}, \textbf{C2.2}, \textbf{C2.3}
+(capturing the four possibilities for a rule, $A~\to~\epsilon$;
+$A~\to~a$, $A~\to~a\alpha$, where $a$ is a terminal symbol and
+$A~\to~\alpha$ for nonterminals $\alpha$).
+
+\begin{figure}[htbp]
+\begin{holdef}
+\begin{salltt}
+
+\HOLthm[nostile,>>,M/m]{pdaEqCfg.p2gRules_def}
+\end{salltt}
+\end{holdef}
+\caption{Definition of \texttt{p2gRules}.}
+\label{fig:p2gRules}
+\end{figure}
+
+Condition \texttt{ntslCond} captures \textbf{C2.4} by describing the
+structure of the components making up the RHS of the rules when
+$\alpha$ is nonempty (\ie~ has one or more nonterminals).  The
+component $[q,A,p]$ is interpreted as a non-terminal symbol and $q$
+(\HOLtm{frmState}) and $p$ (\HOLtm{toState}) belong in the states of
+the PDA (\textbf{C2.4.2}), the conditions on $q'$ and $q_l$ that
+reflects \textbf{C2.4.3} condition on $q_1$ and $q_{m+1}$
+respectively, \textbf{C2.4.4} using relation $adj$ and \textbf{C2.4.5}
+using the last conjunct.
+
+\begin{holdef}
+\begin{salltt}
+
+\HOLthm[nostile,>>,M/m]{pdaEqCfg.ntslCond_def}
+\end{salltt}
+\noindent (The \texttt{;} is used to separate elements in a list and
+\HOLtm{LAST} returns the last element in a list.)
+\end{holdef}
+
+The constraints described above reflect exactly the information
+corresponding to the two criteria for the grammar rules. On the other
+hand, it is clear that the automated definition looks and is far more
+complex to digest. Concrete information that is easily gleaned by a
+human reader from abstract concepts has to be explicitly stated in a
+theorem prover.
+
+Now that we have a CFG for our machine we can plunge ahead to prove
+the following.
+\begin{theorem}
+If $L$ is $N(M)$ for some PDA $M$, then $L$ is a context-free
+language.
+\end{theorem}
+
+To show that $L(G) = N(M)$, we prove by induction on the number of
+steps in a derivation of $G$ or the number of moves of $M$ that
+\begin{equation}
+  ~(q,x,A)~\to_M^{*}~(p,\epsilon,\epsilon)~\mbox{iff}~[q,A,p]~\lderives{*}_{G}~x~.
+\label{eq:gEqPda}
+\end{equation}
+
+\subsection{Proof of the ``if'' portion of (\ref{eq:gEqPda})}
+First we show by induction on $i$ that if $(q,x,A) \to^i
+(p,\epsilon,\epsilon)$, then $[q,A,p] \Rightarrow^* x$.
+\begin{holthm}
+% thms/pdaEqCfg
+% pdaImpP2g
+\begin{salltt}
+
+\HOLthm[nostile,>>,M/m]{pdaEqCfg.pdaImpP2g}
+\end{salltt}
+\end{holthm}
+
+\begin{proof}
+  The proof is based on induction on the length of \HOLtm{dl}. The
+  crux of the proof is breaking down the derivation such that a single
+  stack symbol gets popped off after reading some (possibly empty)
+  input.
+
+  Let $x = a\gamma$ and
+  $(q,a\gamma,A)~\to~(q_1,\gamma,B_1B_2...B_n)~\to^{i-1}~(p,\epsilon,\epsilon)$.
+  The single step is easily derived based on how the rules are
+  constructed. For the $i-1$ steps, the induction hypothesis can be
+  applied as long as the derivations involve a single symbol on the
+  stack.  The string $\gamma$ can be written $\gamma =
+  \gamma_1\gamma_2...\gamma_n$ where $\gamma_i$ has the effect of
+  popping $B_j$ from the stack, possibly after a long sequence of
+  moves. Note that $B_1$ need not be the $n^{th}$ stack symbol from
+  the bottom during the entire time $\gamma_1$ is being read by $M$.
+  %since $B_1$ may be changed if it is at the top of the stack and is
+  %replaced by one or more symbols.
+  %However, none of $B_2B_3...B_n$ are ever at the top while $\gamma_1$
+  %is being read and so cannot be changed or influence the
+  %computation.
+  In general, $B_j$ remains on the stack unchanged while
+  $\gamma_1,\gamma_2...\gamma_{j-1}$ is read. There exist states
+  $q_2,q_3,...,q_{n+1}$, where $q_{n+1}=p$, such that
+  $(q_j,\gamma_j,B_j)~\to^*~(q_j,\epsilon,\epsilon)$ by fewer than $i$
+  moves ($q_j$ is the state entered when the stack first becomes as
+  short as $n-j+1$). These observations are easily assumed by Hopcroft
+  and Ullman or for that matter any human reader. The more concrete
+  construction for mechanisation is as follows.
+\paragraph{\textbf {\textit Filling in the gaps}:}
+For a derivation of the form,
+$(q_1,\gamma,B_1B_2...B_n)~\to^{i}~(p,\epsilon,\epsilon)$, this is
+asserted in HOL by constructing a list of objects
+$(q0,\gamma_j,B_j,q_n)$ (combination of the object's from-state,
+input, stack symbols and to-state), such that
+$(q0,\gamma_j,B_j)~\to^i~(q_n,\epsilon)$, where $i > 0$, $\gamma_j$ is
+input symbols reading which stack symbol $B_j$ gets popped off from
+the stack resulting in the transition from state $q_0$ to $q_n$.  The
+from-state of the first object in the list is $q_1$ and the to-state
+of the last object is $p$. Also, for each adjacent pair \HOLtm{e1} and
+\HOLtm{e2}, the
+to-state of \HOLtm{e1} is the same as the from-state of \HOLtm{e2}.  This process
+of popping off the $B_j$ stack symbol turns out to be a lengthy one
+and is reflected in the proof statement of HOL
+Theorem~\ref{holthm:pdaTransSplit}.
+
+% thms/pdaEqCfg
+% pdaTransSplit
+\begin{figure}
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>,M/p]{pdaEqCfg.pdaTransSplit}
+\end{salltt}
+\label{holthm:pdaTransSplit}
+\smallskip(Relation \texttt{NRC}$~R~m~x~y$ is the RTC closure of $R$ from $x$ to
+$y$ in $m$ steps.)
+\end{holthm}
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{pdaDef.ldIdcSplit}
+\end{salltt}
+\label{holthm:ldIdcSplit}
+
+\smallskip\noindent
+(Predicate \HOLtm{FRONT l} returns the list \HOLtm{l} minus the last
+element.)
+\end{holthm}
+\end{figure}
+
+To be able to prove this, it is neccessary to provide the assertion
+that each derivation in the PDA can be divided into two parts, such
+that the first part (list \HOLtm{dl0}) corresponds to reading $n$ input
+symbols to pop off the top stack symbol. This is our HOL Theorem~\ref{holthm:ldIdcSplit}.
+% thms/pdaDef
+% ldIdcSplit
+
+% thms/pdaDef
+% pdaTransOnPfx
+%\begin{salltt}
+
+%\input{mythms/pdaDef/pdaTransOnPfx}
+%\end{salltt}
+The proof of above is based on another HOL theorem that if $(q,\gamma
+\eta, \alpha \beta)\to^i(q',\eta, \beta)$ then we can conclude
+$(q,\gamma, \alpha)~\to^i~(q',\epsilon,\epsilon)$ (proved in
+HOL). This is a good example of a proof where most of the reasoning is
+``obvious'' to the reader. This when translated into a theorem prover
+results in a cascading structure where one has to provide the proofs
+for steps that are considered ``trivial''. The gaps outlined here are
+just the start of the bridging process between the text proofs and the
+mechanised proofs.
+\paragraph{\textbf {\textit Proof resumed}:} Once these gaps have been taken care of, we
+can apply the inductive hypothesis to get
+\begin{equation}
+[q_j,B_j,q_{j+1}]~\lderives{*}~\gamma_j~\mbox{for}~1 \le j \le n.
+\label{eq:indDeriv}
+\end{equation}
+This leads to,
+$a[q_1,B,q_2][q_2,B_2,q_3]...[q_n,B_n,q_{n+1}]~\lderives{*}x$.
+
+%Because of the the list structure that has to be used to represent the
+%individual (\ref{eq:indDeriv}) derivations, we also have to
+%provide the following proof.
+
+% mythms/pdaEqCfg
+% toRhsLd
+%\begin{theorem}
+%\begin{salltt}
+
+%\input{mythms/pdaEqCfg/toRhsLd}
+%\end{salltt}
+%\end{theorem}
+
+Since $(q,a\gamma,A) \to (q_1,\gamma,B_1B_2...B_n)$, we know that
+
+    $[q,A,p]~\lderive~a[q_1,B,q_2][q_2,B_2,q_3]...[q_n,B_n,q_{n+1}]$,
+so finally we can conclude that
+$[q,A,p]~\lderives{*}~a\gamma_1\gamma_2...\gamma_n~=~x$.
+\end{proof}
+
+The overall structure of the proof follows Hopcroft and Ullman but for
+each assertion made in the book, we have to provide concrete proofs
+before we can proceed any further. These proofs were quite involved,
+only a small subset of which has been shown above due to space
+restrictions.
+
+\subsection{Proof of the ``only if'' portion of (\ref{eq:gEqPda})}
+Now suppose $[q,A,p] \Rightarrow^{i} x$. We show by induction
+on $i$ that $(q,x,A) \to^* (p, \epsilon,\epsilon)$.
+% mythms/pdaEqCfg
+% p2gImpPda
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>,M/m]{pdaEqCfg.p2gImpPda}
+\end{salltt}
+\end{holthm}
+
+\begin{proof}
+  The basis, $i=1$, is immediate, since $[q,A,p] \to x$ must be a
+  production of $G$ and therefore $\delta(q,x,A)$ must contain
+  $(p,\epsilon)$. Note $x$ is $\epsilon$ or in $\Sigma$ here.  In the
+  inductive step, there are three cases to be considered. The first is
+  the trivial case, $[q,A,p]~\Rightarrow~a$, where $a$ is a terminal.
+  Thus, $x=a$ and $\delta(q,a,A)$ must contain $(p,\epsilon)$.  The
+  other two possibilities are,
+  $[q,A,p]~\Rightarrow~a[q_1,B_1,q_2]...[q_n,B_n,q_{n+1}]~\Rightarrow^{i-1}~x$,
+  where $q_{n+1} = p$ or
+  $[q,A,p]~\Rightarrow~[q_1,B_1,q_2]...[q_n,B_n,q_{n+1}]~\Rightarrow^{i-1}~x$,
+  where $q_{n+1} = p$.  The latter case can be considered a
+  specialisation of the first one such that $a=\epsilon$.  Then $x$
+  can be written as $x=ax_1x_2...x_n$, where $[q_j,B_j,q_{j+1}]
+  \Rightarrow^* x_j$ for $1 \le j \le n$ and possibly $a=\epsilon$.
+  This has to be formally asserted in HOL.  Let $\alpha$ be of length
+  $n$.  If $\alpha~\derives{m}~\beta$, then $\alpha$ can be divided
+  into $n$ parts, $\alpha=\alpha_1\alpha_2...\alpha_n$ and
+  $\beta=\beta_1\beta_2...\beta_n$, such that
+  $\alpha_i~\derives{i}~\beta_i$ in $i\le m$ steps.
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{grammarDef.listPairExistsLd}
+\end{salltt}
+
+\smallskip\noindent (The \HOLtm{FLAT} function returns the elements of (nested) lists,
+\HOLtm{SND} returns the second element of a pair.)
+\end{holthm}
+
+Inserting $B_{j+1}...B_n$ at the bottom of each stack in the above
+sequence of ID's gives us,
+\begin{equation}
+(q_j,x_j,B_jB_{j+1}...B_n)~\to^*~(q_{j+1},\epsilon,B_{j+1}...B_n).
+\label{eq:insertStack}
+\end{equation}
+The first step in the derivation of $x$ from $[q,A,p]$ gives us,
+\begin{equation}
+(q,x,A)~\to~(q_1,x_1x_2...x_n,B_1B_2...B_n)
+\label{eq:firstStep}
+\end{equation}
+is a legal move of $M$. From this move and (\ref{eq:insertStack}) for
+$j=1,2,...,n$, $(q,x,A)~\to^*~(p,\epsilon,\epsilon)$ follows. In
+Hopcroft and Ullman, the above two equations suffice to deduce the
+result we are interested in.
+
+Unfortunately, the sequence of reasoning here is too coarse-grained
+for HOL4 to handle. The intermediate steps need to be explicitly stated
+for the proof to work out using a theorem prover.
+
+These steps can be further elaborated as follows.\footnote{Their HOL
+  versions can be found as part of the source code} By our induction
+hypothesis,
+\begin{equation}
+(q_j,x_j,B_j)~\to^*~(q_{j+1},\epsilon,\epsilon).
+\label{ref:indhyp}
+\end{equation}
+Now consider the first step, if we insert $x_2...x_n$ after input
+$x_1$ and $B_2...B_n$ at the bottom of each stack, we see that
+\begin{equation}
+(q_1,x_1...x_n,B_1...B_n)~\to^*~(p,\epsilon,\epsilon).
+\label{eq:insertBot}
+\end{equation}
+Another fact that needs to be asserted explicitly is reasoning for
+(\ref{eq:insertBot}).
+% mythms/pdaEqCfg
+% listPairImpIdc
+%\begin{salltt}
+
+%\input{mythms/pdaEqCfg/listPairImpIdc}
+% \end{salltt}
+This is done by proving the affect of inserting input/stack symbols on
+the PDA transitions.
+% mythms/pdaDef
+% idcInpInsert
+%\begin{salltt}
+%\input{mythms/pdaDef/idcInpInsert}
+%\end{salltt}
+Now from the first step, (\ref{eq:firstStep}) and (\ref{eq:insertBot}),
+\mbox{$(q,x,A)~\to^*~(p,\epsilon,\epsilon)$ follows}.
+\end{proof}
+Equation (\ref{eq:gEqPda}) with $q=q_0$ and $A=Z_0$ says
+$[q_0,Z_0,p]~\Rightarrow^*~x~\mbox{iff}~(q_0,x,Z_0)~\to^*~(p,\epsilon,\epsilon)$.  This observation,
+together with \textbf{Rule 1} of the construction of $G$, says that
+$S~\Rightarrow^*~x$ if and only if
+$(q_0,x,Z_0)~\to^*~(p,\epsilon,\epsilon)$ for some state $p$.  That
+is, $x$ is in $L(G)$ if and only if $x$ is in $N(M)$ and we have
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[width=60,nostile,>>,M/m]{pdaEqCfg.p2gEqPda}
+\end{salltt}
+\end{holthm}
+
+\noindent To avoid the above being vacuous, we additionally prove the following:
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nosp,nostile,>>]{pdaEqCfg.p2gGrExists}
+\end{salltt}
+\end{holthm}
+
+The \HOLtm{INFINITE} condition is on the type of state in the
+PDA. This is necessary to be a able to choose a fresh state (not in
+the PDA) to create the start symbol of the grammar as mentioned
+before.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "cfgPda"
+%%% End:

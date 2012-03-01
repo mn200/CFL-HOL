@@ -1,0 +1,100 @@
+\section{Pushdown Automata}
+\label{sec:pda}
+The PDA is modelled as a record containing the start state
+(\texttt{start} or $q_0$), the starting stack symbol (\texttt{ssSym} or
+$Z_0$), list of final states (\texttt{final} or $F$) and the next
+state transitions (\texttt{final} or $\delta$).
+
+\begin{salltt}
+\HOLthm[nosp,nostile,>>]{pdaDef.datatype_pda}
+\end{salltt}
+The input alphabets ($\Sigma$), stack alphabets ($\Gamma$) and the
+states for the PDA ($Q$) can be easily extracted from the above
+information. In the proofs, we will refer to a PDA $M$ as the tuple
+$(Q,\Sigma,\Gamma,\delta,q_0,Z_0,F)$ for easy access to the
+components. We have used lists instead of sets to avoid unncessary
+finiteness constraints in our proofs.
+
+The \texttt{trans} type implements a single transition. A transition
+is a tuple of an `optional' input symbol, a stack symbol and a state,
+and the next state along with the stack symbols (possibly
+none) to be added onto the current stack.  The \HOLtm{trans} type
+describes a transition in the PDA's state machine. The \HOLtm{next}
+field of the record is a list of such transitions.
+\begin{salltt}
+  trans = ('isym option # 'ssym # 'state) # ('state # 'ssym list)
+\end{salltt}
+
+\medskip In HOL, a PDA transition in machine $M$ is expressed using a
+binary relation on ``instantaneous descriptions'' of the tape, the
+machine's stack, and its internal state.  We write\newline \HOLtm{M ⊢
+  (q,i::α,s) → (q',i',s')}\newline to mean that in state \HOLtm{q}, looking at
+input \HOLtm{i} with stack \HOLtm{s}, \HOLtm{M} can transition to
+state \HOLtm{q'}, with the input becoming \HOLtm{i'} and the stack
+becoming \HOLtm{s'}.  The input \HOLtm{i'} is either the same as
+\HOLtm{i::α} (referred to as an $\epsilon$ move) or is equal to
+\HOLtm{α}.  Here, consuming the input symbol \HOLtm{i} corresponds to
+\HOLtm{SOME i} and ignoring the input symbol is \HOLtm{NONE} in the
+\texttt{trans} type.
+
+Using the concrete derivation list notation, we write
+\HOLtm{ID M ⊢ l ◁ x → y} to mean that the list
+$\ell$ is a sequence of valid instantaneous descriptions for machine
+$M$, starting with description $x$ and ending with $y$. Transitions
+are not possible in the state where the stack is empty and only
+$\epsilon$ moves are possible in the state where the input is
+empty. 
+
+
+There are two ways in which a PDA can accept its input. The first way
+in which a PDA recognises an input is ``acceptance by final state''.
+This gives us the {\it l}anguage {\it a}ccepted by {\it f}inal {\it
+  s}tate (\HOLtm{lafs})\index{lafs@\HOLtm{lafs}}. In this scenario,
+the automata reaches an accepting state after it is done reading the
+input, and the stack contents are irrelevant.
+
+\begin{holdef}[lafs]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{pdaDef.lafs_def}
+\end{salltt}
+\end{holdef}
+
+The second is ``acceptance by empty stack''. This gives us the {\it
+  l}anguage {\it a}ccepted by {\it e}mpty {\it s}tack
+(\HOLtm{laes})\index{laes@\HOLtm{laes}}. In this case the automata
+empties its stack when it is finished reading the input. The two
+criteria for acceptance give us two different PDAs but having the same
+language.
+
+%\begin{definition}[Language accepted by empty stack]
+%\[\texttt{laes}~(M) \;\;=\;\;\{\;w\;|\;M\vdash (q_0,w,Z_0)\to^*(p,\epsilon,\epsilon)\;\;\mbox{for some p in Q}\}\]
+ %\end{definition}
+\begin{holdef}[laes]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{pdaDef.laes_def}
+\end{salltt}
+\end{holdef}
+
+To be consistent with the notation in Hopcroft and Ullman, predicate
+\HOLtm{laes} is referred to as $N(M)$ in the proofs to follow. When
+the acceptance is by empty stack, the set of final states is
+irrelevant, so we usually let the list of final states be empty.
+
+In the remainder of the paper we focus on the equivalence of PDAs and
+CFGs. Constructing a PDA for a CFG is a straightforward process so
+instead we devote much of the space to explaining the construction of
+a CFG from PDA and its equivalence proof. In order to illustrate the
+huge gap between a textbook \textit{vs.} theorem prover formalisation,
+we try to follow Hopcroft and Ullman as closely as possible. As in the
+book, for the construction of a PDA from a CFG, we assume the grammar
+is in Greibach normal form.
+%\begin{salltt}
+%\input{thms/pdaDef/laes_def}
+%\end{salltt}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "pda"
+%%% End:

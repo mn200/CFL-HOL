@@ -1,0 +1,611 @@
+\section{Closure properties} 
+\label{sec:closureProps}
+
+Context-free languages are closed under the following
+operations~\citep{hopcroft01}. That is, if $L$ and $P$ are context-free
+languages and $D$ is a regular language, the following languages are
+context-free as well:
+
+\begin{itemize}
+    \item the Kleene star $L^*$ of $L$
+    \item the image $φ(L)$ of $L$ under a homomorphism $φ$
+    \item the concatenation $L$ $\circ$ $P$ of $L$ and $P$
+    \item the union $L$ $\cup$ $P$ of $L$ and $P$
+    \item language obtained by substitution operation
+%    \item the intersection (with a regular language) $L$ $\cap$ $D$ of
+%      $L$ and $D$
+\end{itemize}
+
+In this section we go through the HOL formalisation for proving
+closure of CFGs under union, concatenation, Kleene star operation,
+substitution and inverse homomorphism. The closure under homomorphism
+follows from closure under the substitution operation.
+
+We provide only a brief overview of the first two since they were
+straightforward to mechanise. First we establish the `disjoint'
+property which allows renaming of variables in a grammar without
+affecting the language of the grammar. This forms the crucial part of
+proving the closure properties.
+
+\begin{holdef}[\HOLtm{disjoint}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.disjoint}
+\end{salltt}
+\end{holdef}
+
+This theorem corresponds to the text statement {\it we may rename
+  variables at will without changing the language generated} in
+Hopcroft and Ullman. This of course is intuitively true. The closure
+properties that follow are based on this very assumption. Hence, to be
+able to proceed with the remainder of the work we had to prove this
+`disjoint' property in HOL. Note that since we are renaming variables
+(by picking new ones), we need the premise that the type universe of
+the variables is infinite.
+
+Closure properties merge rules of two different grammars in a
+particular way. For example, the union of two grammars, $G_1 = (V_1,
+T_1, P_1, S_1)$ and $G_2 = (V_2, T_2, P_2, S_2)$ results in grammar $G
+= (V_1 \cup V_2 \cup \{S\},T_1 \cup T_2,P,S)$, where $P_3$ is $P_1
+\cup P_2$ plus the productions $S \to S_1 | S_2$. Here $S$ is not in
+$V_1$ or $V_2$.  In order to prove $L(G_1) \cup L (G_2) = L (G)$ we
+need to be able to distinguish the derivations of $G_1$ from
+$G_2$. This distinction is clear if the nonterminals of $G_1$ and
+$G_2$ do not overlap. Hence, the need for the disjoint property.
+
+Formally, for the disjoint property we show:
+\begin{theorem}
+  For any grammar $G = (V, T, P, S)$, we can find a new grammar
+  $G'=(V',T,P,S')$ such that $L (G) = L (G')$ and $V \cap V' = \phi$.
+\end{theorem}
+
+\begin{proof}
+  We first define renaming a single variable.  Function \HOLtm{rename}
+  returns the new value ($x'$) if $x$ is the variable we are
+  interested in, \ie~the variable $e$.
+
+\begin{holdef}[\HOLtm{rename}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.rename_def}
+\end{salltt}
+\end{holdef}
+
+Using \HOLtm{rename}, we can rename the nonterminal $nt$ to $nt'$ for a
+particular rule.
+\begin{holdef}[\HOLtm{ruleNt2Nt'}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.ruleNt2Nt'_def}
+\end{salltt}
+\end{holdef}
+
+
+Now given a new replacement value ($nt'$) for a nonterminal $nt$, we
+systematically rename all $nt$s to $nt'$ in our old grammar
+$G\;p\;s$. Note that we need to rename the start symbol as well. This is
+our function \HOLtm{grNt2Nt'}.
+\begin{holdef}[\HOLtm{grNt2Nt'}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.grNt2Nt'_def}
+\end{salltt}
+\end{holdef}
+
+We can now define the notion of renaming a \emph{single} nonterminal
+in the grammar. Relation \HOLtm{grNt2Nt'R} holds if and only if renaming
+nonterminal $nt$ to $nt'$ (a new nonterminal, not in $g$) in grammar
+$g$ gives us grammar $g'$.
+
+\begin{holdef}[\HOLtm{grNt2Nt'R}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.grNt2Nt'R_def}
+\end{salltt}
+\end{holdef}
+
+
+We then prove that such a single-step transformation preserves the
+language of the grammar.
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{closure.nt2nt'LangEq}
+\end{salltt}
+\end{holthm}
+
+In order to get a new grammar $g'$ starting from the old grammar $g$
+such that the nonterminals are disjoint, all we need to do is rename
+all the nonterminals in $g$ such that the new names introduced are not
+part of $g$. This is achieved by taking the recursive, transitive
+closure of the relation \HOLtm{grNt2Nt'R}.  We show that such a
+grammar ($g'$), which does not have any overlapping nonterminals with
+$g$ and the language of $g'$ is the same as of $g$, exists.
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{closure.grNt2Nt'RAll}
+\end{salltt}
+\end{holthm}
+\end{proof}
+
+When the above theorem is invoked as part of proving the disjoint
+property, both $g$ and $g''$ variables get instantiated with the
+original grammar for which the variables are being renamed.
+
+The proof for the disjoint property (unlike the one line statement
+that sufficed in the text) was \around440~lines of code.
+
+After establishing this property we can now start having a look at the
+closure properties.
+
+
+\subsection{Union}
+\label{sec:union}
+
+\begin{theorem}Context-free languages are closed under union.
+\label{thm:closureUnion}
+\end{theorem}
+
+Let $L_1$ and $L_2$ be CFLs generated by the CFG's $G_1 =
+(V_1,T_1,P_1,S_1)$ and $G_2 = (V_2,T_2,P_2,S_2)$, respectively. Since we
+may rename variables at will (proven above) without changing the
+language generated, we assume $V_1$ and $V_2$ are disjoint. Assume also
+that $S_3$ is not in $V_1$ or $V_2$.
+
+For $L_1 \cup L_2$ construct grammar $G_3 = (V_1 \cup V_2 \cup
+{S_3},T_1 \cup T_2,P_3,S_3)$, where $P_3$ is $P_1 \cup P_2$ plus the
+productions $S_3\to S_1 | S_2$. Given grammars $G_1$ and $G_2$,
+function \texttt{grUnion} constructs such a grammar $G_3$.
+
+\begin{holdef}[\HOLtm{grUnion}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.grUnion_def}
+\end{salltt}
+\end{holdef}
+
+\begin{proof}
+If $w$ is in $L_1$, then the derivation $S_3 \derive_{G_3} S_1
+\derives{*}_{G_1} w$ is a derivation in $G_3$, as every production of
+$G_1$ is a production of $G_3$. Similarly, every word in $L_2$ has a
+derivation in $G_3$ beginning with $S_3 \derive S_2$. Thus, $L_1
+\cup L_2 \subseteq L(G_3)$.
+
+For the converse let $w$ be in $L(G_3)$. Then the derivation $S_1
+\derive w$ begins with either $S_3 \derive_{G_3} S_1
+\derives{*}_{G_3} w$ or $S_3 \derive_{G_3} S_2 \derives{*}_{G_3}
+w$. In the former case, as $V_1$ and $V_2$ are disjoint, only symbols
+of $G_1$ may appear in the derivation $S_1 \derives{*}_{G_3}
+w$. Thus $S_1 \derives{*}_{G_1} w$, and $w$ is in
+$L_1$. Analogously, if the derivation starts $S_3 \derives{*}_{G_3}
+S_2$, we may conclude $w$ is in $L_2$. Hence, $L(G_3) \subseteq L_1
+\cup L_2$, so $L(G_3) = L_1 \cup L_2$, as desired.
+
+The corresponding statement for Theorem~\ref{thm:closureUnion} in HOL is:
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{closure.union_cfg}
+\end{salltt}
+\end{holthm}
+\end{proof}
+
+\subsection{Concatenation}
+\label{sec:concatenation}
+
+\begin{theorem}Context free grammars are closed under concatenation.
+\label{thm:closureConcat}
+\end{theorem}
+
+Let $L_1$ and $L_2$ be CFLs generated by the CFGs $G_1 =
+(V_1,T_1,P_1,S_1)$ and $G_2 = (V_2,T_2,P_2,S_2)$, respectively. Since
+we may rename variables at will without changing the language
+generated, we assume $V_1$ and $V_2$ are disjoint. Assume also that
+$S_3$ is not in $V_1$ or $V_2$.
+
+For concatenation, let $G_3 = (V_1 \cup V_2 \cup {S_3}, T_1 \cup T_2,
+P_3, S_3)$ where $P_3$ is $P_1 \cup P_2$ plus the production $S_3 \to
+S_1S_2$.
+
+In HOL this is expressed using function \texttt{grConcat}.
+\begin{holdef}[\HOLtm{grConcat}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.grConcat_def}
+\end{salltt}
+\end{holdef}
+
+A proof that $L(G_3) = L(G_1)L(G_2)$ follows.
+\begin{proof}
+  $P_3$ is $P_1 \cup P_2$ plus the productions $S_3\to S_1S_2$. If $w$
+  is in $L_1L_2$, then $w=w_1w_2$ such that $w_1$ is in $L_1$ and
+  $w_2$ is in $L_2$. The derivation $S_3 \derive_{G_3} S_1S_2
+  \derives{*}_{G_3} (w_1w_2)$ is a derivation in $G_3$, such that $S_1
+  \derives{*} w_1$ and $S_2 \derives{*} w_2$, as every production of
+  both $G_1$ and $G_2$ is a production of $G_3$. Thus $L_1L_2
+  \subseteq L(G_3)$.
+
+For the converse let $w$ be in $L(G_3)$. Then the derivation $S_1
+\derive w$ begins with $S_3 \derive_{G_3} S_1S_2 \derives{*}_{G_3}
+w$. As $V_1$ and $V_2$ are disjoint, we can divide $w$ into two parts,
+say $w_1w_2$ such that $w_1$ is derived from $S_1$ and $w_2$ from
+$S_2$.
+
+Only symbols of $G_1$ may appear in the derivation $S_1
+\derives{*}_{G_3} w_1$. Thus $S_1 \derives{*}_{G_1} w_1$, and $w_1$ is
+in $L_1$. Analogously we have $S_2 \derives{*}_{G_3} w_2$ and we may
+conclude $w_2$ is in $L_2$. Hence, $L(G_3) \subseteq L_1L_2$, so
+$L(G_3) = L_1L_2$, as desired.
+
+The statement for Theorem~\ref{thm:closureConcat} in HOL is:
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{closure.concat_cfg}
+\end{salltt}
+\end{holthm}
+\end{proof}
+
+\subsection{Kleene closure}
+\label{sec:kleene}
+The Kleene closure of set $P$ is represented by $P^{*}$. Let $G$ be a
+grammar and let $S$ be its start symbol. Then the Kleene closure of
+the language of $G$, $L(G)^{*}$, contains all the words generated
+using the grammar $G_1$ which contains all the rules from the
+original grammar plus the additional rules $S_0 \to SS_0$ and $S_0 \to
+\epsilon$. Here $S_0$ is the start symbol of $G_1$ and does not
+occur in $G$.
+
+\begin{theorem}Context free languages are closed under Kleene closure.
+\label{thm:closureKleene}
+\end{theorem}
+
+In HOL, the $star$ operator represents the Kleene closure.
+\begin{holdef}[\HOLtm{star_rules}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{symbolDef.star_rules}
+\end{salltt}
+\end{holdef}
+
+
+Let $L$ be a CFL generated by the CFG $G = (V,T,P,S)$.  We define a
+new grammar $G_1$ that generates all the strings which are in the
+Kleene closure of grammar $G$.
+Let $G_1 = (V \cup {S_1}, T, P_1, S_1)$ where $P_1$
+is $P$ plus the production $S_1 \to SS_1$ and $S_1 \to \epsilon$. 
+
+In HOL this construction is done using function \texttt{grClosure}.
+\begin{holdef}[\HOLtm{grClosure}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.grClosure_def}
+\end{salltt}
+\end{holdef}
+
+A proof that $L(G)^{*} = L(G_1)$ follows a similar methodology as used
+in proofs above. In HOL, Theorem~\ref{thm:closureKleene} is stated as
+below:
+
+\begin{holdef}[\HOLtm{closure_cfg}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.closure_cfg}
+\end{salltt}
+\end{holdef}
+
+
+\subsection{Substitution}
+\label{sec:substitution}
+A more interesting closure proof is that of the substitution
+operation. The proof of this property is based on the notion of parse
+trees. We first present a brief overview of the implementation of
+parse trees in HOL.
+
+\input{trees}
+
+With the help of the above framework we can now proceed with a proof
+of closure under substitution.
+\begin{theorem}
+Context-free grammars are closed under substitution.
+\label{thm:closureSubs}
+\end{theorem}
+
+Let $G = (V,T,P,S)$. The substitution involves creating a new grammar
+$G^{'}$ from the original grammar $G$ in the following manner. The
+start symbol of $G'$ is the same as the start symbol of $G$.  Each
+terminal symbol $a$ in $G$ gets associated with another grammar
+$G_a$. This means that for every rule $A \to \alpha$ in $G$, any
+occurrence of $a$ in $\alpha$ is substituted with the start symbol of
+grammar $G_a$. Thus, replacing terminal $a$ in the words generated by
+$G$ with any of the words of $G_a$ gives us the words generated by
+$G^{'}$. We will show that the $L(G^{'}) = replace~a~w_a~s_g$, where
+$replace$ substitutes the word $w_a$ for terminal $a$ in sentence
+$s_g$, $w_a \in L(G_a)$ and $s_g \in (V \cup T)^{*}$. Substitution is
+easy to visualise using the parse tree framework. Given a derivation
+tree for some input in the original grammar, the substitution
+operation results in replacing each of the leaf nodes by a derivation
+tree of some input belonging in the language of another grammar.
+
+\begin{proof}
+  Function \HOLtm{substGr} is responsible for the construction of
+  $G'$. Here, \HOLtm{gsub} is the grammar whose start symbol gets
+  substituted for terminal \HOLtm{tm} in original grammar $g$.  The
+  substitution is done for each rule (\HOLtm{substRule}) in
+  $g$. Again, without loss of generality we assume that nonterminals
+  in $g$ and $gsub$ are disjoint.
+
+\begin{holdef}[\HOLtm{substGr}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.substGr_def}
+\end{salltt}
+\end{holdef}
+
+We then define the \HOLtm{replace} function in HOL.  Function
+\HOLtm{replace} substitutes word $s$ for symbol $sym$ in the given
+sentence and returns a set of all possible substitutions.
+
+\begin{holdef}[\HOLtm{replace}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{closure.replace_def}
+\end{salltt}
+\end{holdef}
+
+To prove the closure, we have to establish:
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{closure.substThm}
+\end{salltt}
+\end{holthm}
+
+For the ``if'' direction we prove:
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{closure.grImpSubst}
+\end{salltt}
+\end{holthm}
+
+For the ``only if'' direction we use the notion of derivation trees to
+assert membership in the language of the grammar.  For a derivation
+tree valid with respect to grammar $gsub$, one can construct a
+derivation tree valid with respect to grammar $g$ such that replacing
+the terminal in yield of $g$ by some yield $w$ of $gsub$ gives a yield
+for $G'$.
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{closure.vptSbgrImpGr}
+\end{salltt}
+\end{holthm}
+
+The correspondence between derivation trees and derivations lets us
+derive the ``only if'' statement.
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{closure.substImpGr}
+\end{salltt}
+\end{holthm}
+
+Thus, we now have the closure under substitution.
+\end{proof}
+
+\begin{corollary}[Closure under homomorphism]The property that CFLs
+  are closed under homomorphism follows directly from closure under
+  substitution since homomorphism is just a special type of
+  substitution.
+\end{corollary}
+
+
+\subsection{Inverse homomorphism}
+\label{sec:invhomomorphism}
+The proof for closure under inverse homomorphism uses pushdown
+automata. Since we have already proven the equivalence between
+pushdown automata and context-free grammars, we assume the existence
+of a PDA recognising any given context-free language.
+
+Let $h:\Sigma \to \delta$ be a homomorphism and $L$ be a CFL. Let $L =
+L(M)$, where $M$ is the PDA $(Q,\delta,\Gamma,\delta,q_0,Z_0,F)$.
+
+The construction of PDA $M'$ that accepts $h^{-1}(L)$ is as
+follows. On input $a$, $M'$ generates $h(a)$ and simulates $M$ on
+$h(a)$.  If $M'$ were a finite automaton $M'$ could simulate such a
+composite move in one of its moves. However for a nondeterministic PDA
+$M$, $M$ could pop many symbols, or make moves that push an arbitrary
+number of symbols on the stack. Thus $M'$ cannot necessarily simulate
+$M$'s moves on $h(a)$ with one (or any finite number of) moves of its
+own.
+
+To handle this, we give $M'$ a buffer, in which it may store
+$h(a)$. Then $M'$ may simulate any $\epsilon$ moves of $M$ it likes
+and consume the symbols of $h(a)$ one at a time, as if they were $M$'s
+input. As the buffer is part of $M'$s finite control, it cannot be
+allowed to grow arbitrarily long. We ensure this by permitting $M'$ to
+read an input symbol only when the buffer is empty. Thus the buffer
+holds a suffix of $h(a)$ for some $a$ at all times. $M'$ accepts its
+input $w$ if the buffer is empty and $M$ is in a final state. That is,
+$M$ has accepted $h(w)$. Thus L$(M') = \{ w\;|\;h(w)\;\mbox{is in}\;L \}$,
+that is $L(M') = h^{-1}(L(M))$.
+
+Formally, let $M'= (Q',\Sigma,\Gamma,\delta',[q_0,\epsilon],Z_0,F
+\times {\epsilon})$, where $Q'$ consists of pairs $[q,x]$ such that
+$q$ in $Q$ and $x$ is a (not necessarily proper) suffix of some $h(a)$ for
+$a$ in $\Sigma$.
+
+$\delta'$ is defined as follows.
+
+\begin{description}
+
+\item[Rule 1] $\delta'([q,x],\epsilon,Y)$ contains all $(p,\gamma)$.
+
+\item[Rule 2] $\delta'([q,ax],\epsilon,Y)$ contains all $([p,x],\gamma)$
+  such that $\delta(q,a,\gamma)$ contains $(p,\gamma)$.
+
+\item[Rule 3] $\delta'([q,\epsilon],a,Y)$ contains $([q,h(a)],Y)$ for
+  all $a$ in $\Sigma$ and $Y$ in $\Gamma$.
+\end{description}
+
+We model the construction of $M'$ as a relation. Relation
+\HOLtm{hInvpda M M' h} holds if and only if PDA $M'$ simulates the
+inverse of homomorphic function \texttt{h}. PDA $M'$ starts off in a
+new start state (\HOLtm{(q0,[])}) with a new stack symbol
+(\HOLtm{z0}). The states of $M'$ have an associated buffer.
+
+\begin{holdef}[\HOLtm{hInvpda}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{homomorphism.hInvpda_def}
+\end{salltt}
+\end{holdef}
+
+In HOL, \HOLtm{rule1}, \HOLtm{rule2} and \HOLtm{rule3} correspond to
+the three different ways (described above) of constructing the
+transition rules of the machine accepting the inverse of the
+homomorphic function.
+
+\HOLtm{rule1} simulates $\epsilon$-moves of $M$ independent of the
+buffer content.
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{homomorphism.rule1_def}
+\end{salltt}
+
+\HOLtm{rule2} simulate moves of $M$ on input $a$ in $\delta$, removing
+$a$ from the front of the buffer
+
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{homomorphism.rule2_def}
+\end{salltt}
+
+\HOLtm{rule3} loads the buffer with $h(a)$, reading $a$ from $M'$s
+input; the state and stack of $M$ remain unchanged.
+
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{homomorphism.rule3_def}
+\end{salltt}
+
+To show that $L(M') = h^{-1}(L(M))$ we first show that $s \in L(M')
+\Rightarrow s \in h^{-1}(L(M))$, for some word $s$. This amounts to
+proving the following theorem in HOL.
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{homomorphism.mImpm'}
+\end{salltt}
+\label{holthm:homomImpm'}
+(Here \HOLtm{FLAT (MAP h x)} gives the words in $h^{-1}(L(M)$.)
+\end{holthm}
+
+By one application of Rule~3, followed by applications of Rules~1 and
+2, if $(q,h(a),\alpha) \vdash_M^{*} (p,\epsilon,\beta)$, then
+
+$([q,\epsilon],a,\alpha) \vdash_M ([q,h(a)],\epsilon,\alpha)
+\vdash_M^{*} ([p,\epsilon],\epsilon,\beta)$.
+
+If $M$ accepts $h(w)$ we have
+
+$(q_0,h(w),Z_0) \vdash_M^{*} (p,\epsilon,\beta)$ , for some $p$ in $F$ and $\beta$ in $\Gamma*$.
+
+From this we can derive,
+
+$([q_0,\epsilon],w,Z_0) \vdash_M^{*} ([p,\epsilon],\epsilon,\beta)$.
+
+So $M'$ accepts $w$ (HOL Theorem~\ref{holthm:homomImpm'}). Thus $L(M')
+\supseteq h^{-1}(L(M))$.
+
+\begin{samepage}
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{homomorphism.m'Impm}
+\end{salltt}
+\label{holthm:homom'Impm}
+\end{holthm}
+\end{samepage}
+
+Conversely, we show that $s \in h^{-1}(L(M)) \Rightarrow s \in L(M')$,
+for some string $s$.
+
+Following Hopcroft and Ullman, suppose $M'$ accepts
+$w=a_1a_2...a_n$. Since Rule~3 can be applied only with the buffer
+empty, the sequence of the moves of $M'$ leading to acceptance can be
+written as\\\\
+\noindent
+$([q_0,\epsilon],a_1a_2\dots a_n,Z_0) \vdash^*_{M'}
+([p_1,\epsilon],a_1a_2...a_n,\alpha_1)$,\\
+$\vdash_{M'} ([p_1,h(a_1)],a_2a_3\dots a_n,\alpha_1)$,\\
+$\vdash^{*}_{M'} ([p_2,\epsilon],a_2a_3\dots a_n,\alpha_2)$,\\
+$\vdash_{M'} ([p_1,h(a_2)],a_3a_4\dots a_n,\alpha_2)$,\\
+$\vdots$\\
+$\vdash^{*}_{M'} ([p_{n-1},\epsilon],a_n,\alpha_n)$,\\
+$\vdash_{M'} ([p_{n_1},h(a_n)],\epsilon,\alpha_n)$,\\
+$\vdash^{*}_{M'} ([p_n,\epsilon],\epsilon,\alpha_n)$,
+\\\\
+where $p_n$ is in $F$. The transitions from state $[p_i,\epsilon]$ to
+$[p_i,h(a_i)]$ are by Rule~3, the other transitions are by Rule~1 and
+Rule~2. Thus, $(q_0,\epsilon,Z_0) \vdash_M^{*} (p_1,\epsilon,\alpha)$,
+and for all $i$,
+
+$(p_i,h(a_i),\alpha_i) \vdash_M^{*} (p_{i+1},\epsilon,\alpha_{i+1})$.
+
+From these moves, we have
+
+$(q0,h(a_1a_2...a_n),Z_0) \vdash^*_{M} (p_n,\epsilon,\alpha_{n+1})$.
+
+Therefore $h(a_1a_2...a_n)$ is in $L(M)$ and $L(M') \subseteq
+h^{-1}(L(M))$ (HOL Theorem~\ref{holthm:homom'Impm}).
+
+Thus, $L(M') = h^{-1}(L(M))$, \ie~in HOL:
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{homomorphism.invhEq}
+\end{salltt}
+\label{holthm:invhEq}
+\end{holthm}
+
+
+Apart from couple of minor additions, the mechanisation of closure
+under inverse homomorphism follows the Hopcroft and Ullman quite
+closely.
+
+The first additional predicate is the property \HOLtm{stkSymsInPda}
+which forms a part of the premise of most of the proofs.
+
+\begin{holdef}[\HOLtm{stkSymsInPda}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{homomorphism.stkSymsInPda_def}
+\end{salltt}
+\end{holdef}
+
+When establishing the correspondence of derivations in PDAs $m$ and
+$m'$, the symbols on the stack have to be valid for both $m$ and $m'$.
+Invariant \HOLtm{stkSymsInPda} ensures that the symbols in PDA $m$ are
+also in PDA $m'$ and vice-versa.
+
+The second addition explicitly states that the start state is valid
+for the given PDA (example \HOLtm{q IN states m}).
+
+Both these properties are derived from the premise of the final proof
+goal (HOL Theorem~\ref{holthm:invhEq}) and therefore only affect the
+individual statements for the ``if'' (HOL
+Theorem~\ref{holthm:homomImpm'}) and ``only if'' (HOL
+Theorem~\ref{holthm:homom'Impm}) direction.
+
+

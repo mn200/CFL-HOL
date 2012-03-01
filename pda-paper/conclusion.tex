@@ -1,0 +1,90 @@
+\section{Related work and conclusions}
+
+In the field of language theory, Nipkow~\citep{nipkow98} provided a
+verified and executable lexical analyzer generator. This work is the
+closest in nature to the mechanisation we have done.
+
+%%% rewrite this
+Formalisation of proofs is an incredibly detailed process and as such
+gets easily affected by numerous concerns that seem trivial in the
+context of a text proof. Concerns about the extent of explicitness of
+the proof steps, the structures for representing the proof problem,
+finiteness of the data structures being used, termination of an
+algorithm and executability in some cases are just a handful of issues
+that result in the bloating of a mechanised proof.
+
+These result in a number of what we call ``gap'' proofs. These
+``gaps'' cover the deductive steps that get omitted in a textbook
+proof and the intermediate results needed because of the particular
+mechanisation technique. Formalisation of a theory results in tools,
+techniques and an infrastructure that forms the basis of verifying
+tools based on the theory for example parsers, compilers, etc. Working
+in a well understood domain is useful in understanding the immense
+deviations that automation usually results in.  More often than not
+the techniques for dealing with a particular problem in a domain are
+hard to generalise. The only solution in such cases is to have an
+extensive library at one's call.
+
+With this work, we have formalised a large portion of the background
+theory of context-free grammars and pushdown automata. We hope this
+theory can provide a platform for other works in the area of
+context-free languages. This formalisation is also a good basis for
+teaching language theory and for exploring the proof process that form
+a central part of theorem proving, both textually and using an
+automation tool. Automated theorem proving can have a beneficial
+affect for teaching logic and mathematics courses as evident from the
+use of Coqweb~\citep{coqweb}.  Coqweb provides a language that is
+close to standard mathematical language. It also provides an interface
+for solving exercises using the theorem prover Coq. Proofs are
+essentially performed by clicking. Such web-based approaches that rope
+in automated proof techniques are being used to teach subjects like
+discrete mathematics and logic at the undergraduate
+level. Blanc~\et~have used the Coqweb environment to explore how proof
+assistants can help teachers to explain the concept of a proof and how
+to search for one~\citep{pate07} and Benjamin Pierce to teach courses
+at University of Pennsylvania~\citep{Pierce:LambdaTA-ITP}. Going
+beyond teaching theorem proving as a course in its own right, Pierce
+has used it as a framework to teach programming language
+foundations~\citep{Pierce:LambdaTA}. The formalisation of language
+theory, a standard undergraduate logic course, can be an excellent
+domain for such endeavours.
+
+Table~\ref{tab:numbers} summarises the proof effort. It took six
+months to complete the formalisation.
+% TABLE OF STATS
+\begin{table}[!ht]
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+  \hline
+  ~\textbf{Mechanisation domain}~&~\textbf{LOC}~&~\textbf{\#Definitions}~&~\textbf{\#Proofs}~\\
+  \hline
+  CFGs - background       & 3680 & 36 & 189 \\
+  \hline
+  PDA - background        & 1846 & 15 & 47 \\
+  \hline
+  Acceptance by empty stack == acceptance by final state & 1795 & 6 & 75 \\
+  \hline
+  PDA == CFG & 2598 & 16 & 50\\
+  \hline
+  Closure properties & 1686 & 12 & 91\\
+  \hline
+\end{tabular}
+\end{center}
+\caption{Summary of proof effort}
+\label{tab:numbers}
+\end{table}
+
+HOL sources for the work are available at
+\url{http://users.rsise.anu.edu.au/~aditi/}.
+
+\paragraph{Acknowledgements}
+NICTA is funded by the Australian Government as represented by the
+Department of Broadband, Communications and the Digital Economy and
+the Australian Research Council through the ICT Centre of Excellence
+program.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "pda"
+%%% End:

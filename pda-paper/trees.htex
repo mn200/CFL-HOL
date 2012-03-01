@@ -1,0 +1,131 @@
+\subsubsection{Derivation (or parse) trees}
+\label{sec:trees}
+
+In Section~\ref{sec:grammars} we introduced derivation lists for
+modeling derivations in a grammar. Now we introduce derivation or
+parse trees, an alternate formalisation for representing derivations
+in a grammar.  When explaining a derivation using pen and paper it is
+common to show multiple expansions in parallel. In such a case each
+derivation step involves a
+one-step expansion of all the nonterminals. The derivation\\
+\[ A \derive A_1A_2A_3 \derive a_1A_2A_3 \derive a_1a_2A_3 \derive
+a_1a_2a_3 \]\\
+in a grammar $G$, where $a_1$, $a_2$, $a_3$ are terminals and
+$A$,$A_1$,$A_2$,$A_3$ are nonterminals, can be represented using the
+following diagram.
+
+\begin{center}
+\begin{tikzpicture}[level/.style={sibling distance=30mm/#1}]
+\node [circle,draw] (z){$A$}{
+  child {node [circle,draw] (a) {$A_1$}
+    child {node [circle,draw] (b) {$a_1$}
+    }
+  }
+  child {node [circle,draw] (c) {$A_2$}
+    child {node [circle,draw] (d) {$a_2$}
+    }
+  }
+  child {node [circle,draw] (e) {$A_3$}
+     child {node [circle,draw] (f) {$a_3$}
+    }
+  }};
+
+%\path (c) -- (e) node [midway] {$\cdots$};
+%\path (d) -- (f) node [midway] {$\cdots$};
+\end{tikzpicture}
+\end{center}
+
+Here, nonterminal $A$ is the root node and terminals $a_1$, $a_2$,
+$a_3$ are the leaf nodes. The rules in $G$ that allow this derivation
+are $A \to A_1A_2A_3$, $A_1 \to a_1$, $A_2 \to a_2$ and $A_3 \to a_3$.
+
+%\label{fig:trees}
+%\end{figure}
+
+This structure on the derivable strings in a grammar is called a
+\emph{derivation tree} or a \emph{parse tree}. 
+
+A tree is recursively defined as either a leaf node (no expansion
+possible hereafter) or a node which can expand to multiple derivation
+trees. In HOL:
+
+\begin{salltt}
+\HOLthm{parseTree.datatype_ptree}
+\end{salltt}
+
+The terms \emph{leaves}, \emph{fringe} or the \emph{yield} of a tree
+all stand for the leaf nodes that do not have any children. This is
+slightly different from a leaf node represented as a node with an
+empty ($\epsilon$) node as its only child, the definition in Hopcroft
+and Ullman.
+
+\begin{holdef}[\HOLtm{fringe}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{parseTree.fringe_def}
+\end{salltt}
+\end{holdef}
+
+{\bf Relationship between derivation trees and derivations} A tree is
+a correct derivation tree for a grammar if and only if it is
+\emph{valid} with respect to the rules in the
+grammar~(\HOLtm{validptree}).  A tree is considered valid with respect
+to grammar $G$ if each expansion step corresponds to some rule in $G$.
+
+\begin{holdef}[\HOLtm{validptree}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{parseTree.validptree}
+\end{salltt}
+(\HOLtm{getSymbols ptl} returns the symbols corresponding to the top
+level nodes of the parse tree list \HOLtm{ptl}. Function \HOLtm{isNode
+  tree} returns true if and only if \HOLtm{tree} is a
+node,~\ie~corresponds to a nonterminal.)
+\end{holdef}
+
+
+We differ slightly from Hopcroft and Ullman in what we consider to be
+a derivation tree. Hopcroft and Ullman state that for a tree to be a
+valid derivation tree for $G$, amongst other conditions, the root node
+has to be the start symbol of $G$ and the root node derives a word. We
+instead define a looser version where in a derivation tree is valid as
+long as each expansion is a valid rule in $G$. Thus, the root node
+does not have to be the start symbol of $G$ but the derived string has
+to be composed of only terminals.
+
+If a tree is a valid parse tree with respect to a grammar then one can
+construct a corresponding derivation from the yield from the root
+nonterminal.
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{treeDeriv.vptRtcd}
+\end{salltt}
+\end{holthm}
+
+Similarly, if a terminal string can be derived from a nonterminal one
+can construct a parse tree for the derivation.
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{treeDeriv.rtcdImpVpt}
+\end{salltt}
+\end{holthm}
+
+\begin{theorem}
+  Let $G = (V,T,P,S)$ be a context-free grammar. Then $S \derives{*}
+  \alpha$ if and only if there is a derivation tree in grammar $G$
+  with yield $\alpha$.
+\end{theorem}
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{treeDeriv.ptLangThm}
+\end{salltt}
+\end{holthm}
+
+
+

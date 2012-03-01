@@ -54,7 +54,7 @@
 \begin{frontmatter}
 \date{}
 
-\title{A Mechanisation of the Theory of Context-Free Languages in HOL4}
+\title{A Mechanisation of Some Context-Free Language Theory in HOL4}
 
 \author[ab]{Aditi Barthwal\corref{cor1}}
 \ead{Aditi.Barthwal@anu.edu.au}
@@ -69,11 +69,13 @@
 
 \begin{abstract}
 We describe the mechanisation of some foundational results in the theory of context-free languages~(CFLs), using the HOL4 system.
-We first show that two standard models, the pushdown automata~(PDAs) and context-free grammars~(CFGs), actually coincide.
-With both models to hand, we can then show a number of basic, but important results.
+We focus on push-down automata (PDAs).
+We show that two standard acceptance criteria for PDAs (``accept-by-empty-stack'' and ``accept-by-final-state'') are equivalent in power.
+We are then able to show that the pushdown automata~(PDAs) and context-free grammars~(CFGs) accept the same languages by showing that each can emulate the other.
+With both of these models to hand, we can then show a number of basic, but important results.
 For example, we prove the basic closure properties of the context-free languages such as union and concatenation.
 Using PDAs, we are able to mechanise an elegant proof of closure under inverse homomorphism.
-We also discuss the varying extent to which textbook proofs (we follow Hopcroft and Ullman) and our mechanisations diverge: sometimes elegant textbook proofs remain elegant in HOL; sometimes the required mechanisation effort blows up unconscionably.
+Along the way, we also discuss the varying extent to which textbook proofs (we follow Hopcroft and Ullman) and our mechanisations diverge: sometimes elegant textbook proofs remain elegant in HOL; sometimes the required mechanisation effort blows up unconscionably.
 \end{abstract}
 
 \begin{keyword}

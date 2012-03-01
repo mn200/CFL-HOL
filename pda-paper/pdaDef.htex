@@ -64,7 +64,7 @@ We shall see that the two criteria for acceptance have equivalent power.
 \end{salltt}
 \end{holdef}
 
-To be consistent with the notation in Hopcroft and Ullman, function \HOLtm{laes} is also referred to as $N(M)$ in the proofs to follow.
+To be consistent with the notation in Hopcroft and Ullman, in what follows, function \HOLtm{laes} is also referred to as $N$ (thus $N(M)$ is the language accepted by $M$ using the empty stack criterion), and function \HOLtm{lafs} is simply $L$.
 
 %%% Local Variables:
 %%% mode: latex

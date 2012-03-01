@@ -56,7 +56,7 @@ where $l = l_1 l_2\dots l_n$.
 
 In the context of grammars, $R$ relates sentential forms.
 Later we will use the same notation to relate derivations in a PDA.
-Using the concrete notation has simplified the mechanisation of the proofs of many theorems.
+Using this very concrete formulation simplifies the mechanisation of the proofs of a number of theorems.
 We will also use the rightmost derivation relation, \texttt{rderives}, and its closure.
 
 \begin{definition}
@@ -76,5 +76,5 @@ sentential form \HOLtm{tsl} are terminal symbols.
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "cfgPda"
+%%% TeX-master: "pda"
 %%% End:

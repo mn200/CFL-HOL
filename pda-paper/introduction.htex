@@ -23,7 +23,7 @@ The library of proofs, techniques and notations developed here provides the basi
 \end{itemize}
 
 The rest of the paper is structured as follows.
-We introduce the basic details of our types (languages, grammars and automata) in Sections~\ref{sec:cfg} and~\ref{sec:pdaDef}.
+We introduce the basic details of our types (languages, grammars and automata) in Sections~\ref{sec:grammars} and~\ref{sec:pda}.
 In Section~\ref{sec:laeslafs} we describe the two ways in which a PDA can
 accept an input (``acceptance by empty stack'' and ``acceptance by final state''), and show that they are equivalent in power.
 In Sections~\ref{sec:cfg2pda} and \ref{sec:pda2cfg} we describe the mechanisation of the result that the CFGs and PDAs formalisms are equivalent in power.

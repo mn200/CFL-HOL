@@ -48,7 +48,7 @@ where \HOLtm{finalStateTrans} implements Rule~2 of the
 construction, and \HOLtm{newStateTrans} implements Rule~3.
 
 We first prove that if $x \in L(M_2)$ then $x \in N(M_1)$.
-As $x$ is accepted by final state, $(q_0,x,Z_0)$ $\vdash_{M_{2}}^{*} (q,\epsilon,\gamma)$ for some $q \in F$, and $\gamma \in \Gamma^*$.
+As $x$ is accepted by final state, $(q_0,x,Z_0) \vdash_{M_{2}}^{*} (q,\epsilon,\gamma)$ for some $q \in F$, and $\gamma \in \Gamma^*$.
 Now consider $M_1$'s behaviour on input $x$.
 Rule~1 gives $(q_0',x,X_0) \vdash_{M_1} (q_0,x,Z_0X_0)$.
 

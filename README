@@ -1,3 +1,5 @@
 Mechanised theory of context-free languages in HOL4.
 
-The vast majority of this work is by Aditi Barthwal, as part of her PhD, done at the Australian National University.
+The vast majority of this work was done by Aditi Barthwal as part of her PhD. 
+
+Papers based on this work appeared at ESOP, WoLLiC and CSL.

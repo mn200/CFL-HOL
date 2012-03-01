@@ -16,8 +16,8 @@ In prose proofs, we will occasionally refer to a PDA $M$ as the tuple
 $(Q,\Sigma,\Gamma,\delta,q_0,Z_0,F)$.
 We have used lists instead of sets to avoid unnecessary finiteness constraints in our proofs.
 
-The \texttt{trans} type implements a single transition of a PDA's state machine.
-A transition is a tuple of an `optional' input symbol, a stack symbol and a state, and the next state along with the stack symbols (possibly none) to be added onto the current stack.
+The \texttt{trans} type describes a single transition, or link in the state machine's control graph.
+Such a transition is a tuple of an optional input symbol, a stack symbol and a state, and the next state along with the stack symbols (possibly none) to be added onto the current stack.
 The \HOLtm{next} field of the PDA record is a list of such transitions.
 \begin{salltt}
   trans = ('isym option # 'ssym # 'state) # ('state # 'ssym list)
@@ -37,21 +37,13 @@ becoming \HOLtm{s'}.  The input \HOLtm{i'} is either the same as
 \HOLtm{SOME i} and ignoring the input symbol is \HOLtm{NONE} in the
 \texttt{trans} type.
 
-Using the concrete derivation list notation, we write
-\HOLtm{ID M ⊢ l ◁ x → y} to mean that the list
-$\ell$ is a sequence of valid instantaneous descriptions for machine
-$M$, starting with description $x$ and ending with $y$. Transitions
-are not possible in the state where the stack is empty and only
-$\epsilon$ moves are possible in the state where the input is
-empty.
+Using the concrete derivation list notation, we write \HOLtm{ID M ⊢ l ◁ x → y} to mean that the list $\ell$ is a sequence of valid instantaneous descriptions for machine $M$, starting with description $x$ and ending with $y$.
+Transitions are not possible in states where the stack is empty and only $\epsilon$ moves are possible in states where the input is empty.
 
-
-There are two ways in which a PDA can accept its input. The first way
-in which a PDA recognises an input is ``acceptance by final state''.
-This gives us the {\it l}anguage {\it a}ccepted by {\it f}inal {\it
-  s}tate (\HOLtm{lafs})\index{lafs@\HOLtm{lafs}}. In this scenario,
-the automata reaches an accepting state after it is done reading the
-input, and the stack contents are irrelevant.
+There are two ways in which a PDA can accept its input.
+The first way in which a PDA recognises an input is ``acceptance by final state''.
+This gives us the {\it l}anguage {\it a}ccepted by {\it f}inal {\it s}tate (\HOLtm{lafs})\index{lafs@\HOLtm{lafs}}.
+In this scenario, the automata reaches an accepting state after it is has finished reading the input, and the stack contents are irrelevant.
 
 \begin{holdef}[lafs]
 \begin{salltt}
@@ -60,12 +52,10 @@ input, and the stack contents are irrelevant.
 \end{salltt}
 \end{holdef}
 
-The second is ``acceptance by empty stack''. This gives us the {\it
-  l}anguage {\it a}ccepted by {\it e}mpty {\it s}tack
-(\HOLtm{laes})\index{laes@\HOLtm{laes}}. In this case the automata
-empties its stack when it is finished reading the input. The two
-criteria for acceptance give us two different PDAs but having the same
-language.
+The second is ``acceptance by empty stack''.
+This gives us the {\it l}anguage {\it a}ccepted by {\it e}mpty {\it s}tack (\HOLtm{laes})\index{laes@\HOLtm{laes}}.
+In this case the automata empties its stack when it is finished reading the input.
+We shall see that the two criteria for acceptance have equivalent power.
 
 \begin{holdef}[laes]
 \begin{salltt}
@@ -74,10 +64,7 @@ language.
 \end{salltt}
 \end{holdef}
 
-To be consistent with the notation in Hopcroft and Ullman, function
-\HOLtm{laes} is referred to as $N(M)$ in the proofs to follow. When
-the acceptance is by empty stack, the set of final states is
-irrelevant, so we usually let the list of final states be empty.
+To be consistent with the notation in Hopcroft and Ullman, function \HOLtm{laes} is also referred to as $N(M)$ in the proofs to follow.
 
 %%% Local Variables:
 %%% mode: latex

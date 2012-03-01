@@ -12,7 +12,7 @@ It is also of clear practical importance, being the basis for the description an
 For these reasons, we feel it is a natural object for mechanised study.
 Our contribution in this paper is to describe the mechanisation of a number of basic results in this area.
 The most significant of these is the equivalence of the CFG and PDA models for context-free languages.
-Needless to say, there is no doubt that this theory is in any doubt!
+Needless to say, there is no question that this theory is in any doubt!
 Nonetheless, there \emph{are} a number of other reasons for performing these mechanisations:
 \begin{itemize}
 \item We investigate the degree to which the mechanical system (HOL4~\cite{gordon93,SlindNorrish2008} in our case) is capable of dealing with such important mathematics.

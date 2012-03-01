@@ -24,7 +24,7 @@ val listderiv_def = Define`
                         (LAST d = s1)`;
 
 val _ = add_rule {block_style = (AroundEachPhrase, (PP.INCONSISTENT, 2)),
-                  fixity = Infix(NONASSOC, 550),
+                  fixity = Infix(NONASSOC, 450),
                   paren_style = OnlyIfNecessary,
                   pp_elements = [BreakSpace(1,1), TOK "⊢",
                                  BreakSpace(1,1), TM, BreakSpace(1,1),
@@ -32,8 +32,6 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.INCONSISTENT, 2)),
                                  BeginFinalBlock(PP.INCONSISTENT, 2),
                                  TM, BreakSpace(1,1), TOK "→", HardSpace 1],
                   term_name = "listderiv"}
-
-
 
 val rtc2list_exists' = store_thm (
 "rtc2list_exists'",

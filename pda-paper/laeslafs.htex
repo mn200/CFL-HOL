@@ -1,36 +1,19 @@
 \section{Equivalence of acceptance by final state and empty stack}
 \label{sec:laeslafs}
 
-The first property we establish is that the languages accepted by PDA
-by final state are exactly the languages accepted by PDA by empty
-stack . This is done by establishing the following two claims.
-
-\begin{itemize}
-\item If a PDA accepts strings using final state acceptance then we
-  can construct a corresponding equivalent PDA that accepts the same
-  strings using empty stack acceptance criterion.
-
-\item If a PDA accepts strings using empty stack, then we can
-  construct a corresponding PDA that accepts the strings using a final
-  state.
-\end{itemize}
+The first property we establish is that the languages accepted by PDA by final state are exactly the languages accepted by PDA by empty stack.
+This is done by establishing that PDAs of one type can be emulated by PDAs of the other.
 
 \subsection{PDA construction for acceptance by empty stack}
 
 \begin{theorem}
-  If $L$ is $L(M_2)$ for some PDA $M_2$, then $L$ is $N(M_1)$ for some
-  PDA, $M_1$.
+  For every machine $M_2$ accepting language $L$ by final state, there is a machine $M_1$ such that $N(M_1) = L$.
 \label{thm:lafsEqlaes}
 \end{theorem}
 
-% thms/laeslafs
-% thm51
 \begin{proof}
-  Let $M_2 = (Q,\Sigma,\Gamma,\delta, q_0, m, Z_0,F)$ be a PDA such
-  that $L = L(M_2)$. We define $M_1$ as follows. Let $M_1 = (Q \cup
-  {q_e,q_0',\Sigma,\Gamma\cup{X_0},\delta',q_0',X_0,\phi})$, where
-  $\delta'$ is defined as follows.
-
+  Let PDA $M_2 = (Q,\Sigma,\Gamma,\delta, q_0, m, Z_0,F)$.
+  We invent new states $q_e$ and $q_0'$, and a new stack symbol $X_0$, and then let $M_1 = (Q \cup \{q_e,q_0'\},\Sigma,\Gamma\cup\{X_0\},\delta',q_0',X_0,\phi)$, where $\delta'$ is defined by the following rules:
 \begin{description}
 \item[Rule 1] $\delta'(q_0',\epsilon,X_0) = {(q0,Z_0X_0)}$.
 
@@ -41,157 +24,79 @@ stack . This is done by establishing the following two claims.
   $\delta'(q_e,\epsilon,Z)$ contains $(q_e,\epsilon)$.
 
 \item[Rule 4] $\delta'(q,a,Z)$ includes the elements of
-  $\delta(q,a,Z)$ for all $q$ in $Q$, $a$ in $\Sigma$ or $a=\epsilon$,
-  and $Z$ in $\Gamma$.
+  $\delta(q,a,Z)$ for all $q$, $a$ and $Z$.
 \end{description}
 
-$M_1$ simulates $M_2$ by first putting a stack marker for $M_2$
-($Z_0$) on its stack~(Rule~1). The stack for $M_1$ starts off with the
-bottom of stack marker $X_0$. This is to ensure that $M_1$ does not
-accidentally accept if $M_2$ empties its stack without entering a
-final state.  Rule~4 allows $M_1$ to process the input in exactly the
-same manner as $M_2$. Rule~2 allows $M_1$ the choice of entering the
-state $q_e$ and erasing the remaining stack contents or to continue
-simulating $M_2$ when $M_2$ has entered a final state. Rule~3 allows
-$M_1$ to pop off the remaining stack contents once $M_1$ has accepted
-the input, thus accepting the input by empty stack criterion.  One
-should note that $M_2$ may possibly erase its entire stack for some
-input $x$ not in $L(M_2)$. This is the reason $M_1$ has its own
-special bottom-of-stack marker.
+$M_1$ simulates $M_2$ by first putting a $M_2$'s stack marker~($Z_0$) on its stack~(Rule~1).
+Below this, $M_2$ preserves its own bottom of stack marker $X_0$.
+This ensures that $M_1$ does not accidentally accept if $M_2$ empties its stack without entering a
+final state.
+Rule~4 allows $M_1$ to process the input in exactly the same manner as $M_2$.
+Rule~2 gives $M_1$ the opportunity to enter the state $q_e$ (triggering Rule~3) when $M_2$ enters a final state.
+Rule~3 allows $M_1$ to pop off the remaining stack contents once $M_1$ has accepted
+the input, thus accepting the input by empty stack criterion.
 
-The corresponding construction of the new machine (\texttt{newm}) in
-HOL is:
-
+In HOL, we define a function \HOLtm{newm} that constructs the new machine.
+It takes not just the input machine $M_2$ as a parameter, but also new states ($q_0'$ and $q_e$) and the new stack symbol $X_0$.
 \begin{holdef}[\HOLtm{newm}]
 \begin{salltt}
 
-\HOLthm[nostile,>>,def]{laeslafs.newm_def}
+\HOLthm[nostile,>>,def,width=80,X0/x0,q0'/q0,M2/p]{laeslafs.newm_def}
 \end{salltt}
 \end{holdef}
+where \HOLtm{finalStateTrans} implements Rule~2 of the
+construction, and \HOLtm{newStateTrans} implements Rule~3.
 
-where, \texttt{finalStateTrans} implements the Rule~2 of the
-construction, \texttt{newStateTrans} implements Rule~3. Rule~4 simply
-mimics the original machine transitions (\HOLtm{p.next}).
+We first prove that if $x \in L(M_2)$ then $x \in N(M_1)$.
+As $x$ is accepted by final state, $(q_0,x,Z_0)$ $\vdash_{M_{2}}^{*} (q,\epsilon,\gamma)$ for some $q \in F$, and $\gamma \in \Gamma^*$.
+Now consider $M_1$'s behaviour on input $x$.
+Rule~1 gives $(q_0',x,X_0) \vdash_{M_1} (q_0,x,Z_0X_0)$.
 
-We first prove that if $x \in L(M_2) \Rightarrow x \in N(M_1)$.
-
-Let $x$ be in $L(M_2)$. Then $(q_0,x,Z_0)$ $\vdash_{M_{2}}^{*}
-(q_0',\epsilon,\gamma)$ for some $q$ in $F$. Consider $M_1$ with input
-$x$. Rule~1 gives,
-
-$(q_0',x,X_0) \vdash_{M_1}^{*} (q_0,x,Z_0X_0)$,
-
-By Rule~2, every move of $M_2$ is a legal move for $M_1$, thus
-
-$(q_0,x,Z_0) \vdash_{M_1}^{*} (q,\epsilon, \gamma)$.
-
-{\it If a PDA can make a sequence of moves from a given ID, it can
-  make the same sequence of moves from any ID obtained from the first
-  by inserting a fixed string of stack symbols below the original
-  stack contents}. Thus we have,
-
-$(q_0',x,X_0) \vdash_{M_1} (q_0,x,Z_0 X_0) \vdash_{M_1}^{*} (q,\epsilon,\gamma X_0)$.
-
-{\bf As an aside}, the premise (italicised) is deemed sufficient for
-deducing the above equation. This is the case for not just the
-presentation in Hopcroft and Ullman. Such a self-explanatory statement
-suffices in all presentations of this proof. It is statements like
-these that need to be caught and further elaborated in a mechanised
-version of the proof. At times, such assumptions may not even be
-explicitly vocalised in the text itself.
-
-In this case we have to prove this statement in HOL before we can make
-any further progress. The theorem states that inserting elements below
-the current stack does not invalidate an \texttt{m}-step transition.
-% thms/pdaDef
-% idcStackInsert
+By Rule~2, every move of $M_2$ is a legal move for $M_1$, so we also have
+$(q_0,x,Z_0X_0) \vdash_{M_1}^{*} (q,\epsilon, \gamma{}X_0)$.
+In Hopcroft and Ullman, this last step is justified by
+\begin{quote}
+\itshape If a PDA can make a sequence of moves from a given ID, it can make the same sequence of moves from any ID obtained from the first by inserting a fixed string of stack symbols below the original stack contents.
+\end{quote}
+Simple asides such as the above end up requiring a proof first that single transitions can have arbitrary symbols added underneath their stacks, followed by an induction to show
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{pdaDef.idcStackInsert}
+\HOLthm[nostile,>>,M/m]{pdaDef.idcStackInsert}
 \end{salltt}
 \end{holthm}
-
-We prove this statement by establishing that inserting elements below
-the current stack does not invalidate a 1-step transition. This is
-easily proved using the definition of \texttt{ID}.
-
-\begin{holthm}
-\begin{salltt}
-
-\HOLthm[nostile,>>]{pdaDef.idStackInsert}
-\end{salltt}
-\end{holthm}
-
-{\bf Coming back to the proof} by Rules 3 and 4, $(q,\epsilon,\gamma
+Returning to the proof, by Rules 3 and 4, $(q,\epsilon,\gamma
 X_0) \vdash_{M_1}^{*} (q_e,\epsilon,\epsilon)$.
-
-Therefore,
-$(q_0',x,X_0) \vdash_{M_1}^{*} (q_e,\epsilon,\epsilon)$,
-and $M_1$ accepts $x$ by empty stack.
-
-% thms/laeslafs
-% lafsImpLaes
-This is our HOL theorem:
+Therefore, $(q_0',x,X_0) \vdash_{M_1}^{*} (q_e,\epsilon,\epsilon)$, and $M_1$ accepts $x$ by empty stack.
+Our final HOL theorem is
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{laeslafs.lafsImpLaes}
+\HOLthm[nostile,>>,M2/m,X0/x0]{laeslafs.lafsImpLaes}
 \end{salltt}
 \label{holthm:lafsImplaes}
 \end{holthm}
+(Note the requirement that the new states and stack symbol must be suitably fresh.)
 
-Conversely, if $x \in N(M_1) \Rightarrow x \in L(M_2)$.  If $M_1$
-accepts $x$ by empty stack, $M_2$ can simulate $M_1$ by the following
-sequence of moves. The first move is by Rule~1, then a sequence of
-moves by Rule~2 in which $M_1$ simulates acceptance of $x$ by $M_2$,
-followed by the erasure of $M_1$'s stack using Rules~3 and~4. Thus $x$
-must be in $L(M_2)$. This is our HOL theorem:
-
-% thms/laeslafs
-% laesImpLafs
+The converse, if $x \in N(M_1)$ then $x \in L(M_2)$, is straightforward, and we can then conclude with a HOL version of Theorem~\ref{thm:lafsEqlaes}
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{laeslafs.laesImpLafs}
+\HOLthm[nostile,>>,M1/m',M2/m]{laeslafs.thm51}
 \end{salltt}
-\label{holthm:laesImplafs}
-\end{holthm}
-
-%\ensuremath{{\cal U}_1}
-With HOL Theorems~\ref{holthm:lafsImplaes}
-and~\ref{holthm:laesImplafs} in hand, we can now conclude:
-\begin{holthm}
-\begin{salltt}
-
-\HOLthm[nostile,>>]{laeslafs.thm51}
-\end{salltt}
-(\HOLtm{univ(:'ssym)} is the universal set of stack symbols and
-\HOLtm{univ(:'state)} is the universal set of states.)
 \label{holthm:thm51}
 \end{holthm}
+(\HOLtm{univ(:'ssym)} is the universal set of all possible stack symbols and
+\HOLtm{univ(:'state)} is the universal set of all possible states.)
 
-This is the HOL statement for Theorem~\ref{thm:lafsEqlaes}.
-
-Note that there are two extra conditions in the premise of the HOL
-statement. The proof works by constructing a new PDA $M_1$ according
-to the rules discussed and providing it as a witness. The extra
-assertions correspond to the construction of machine $M_1$. $M_1$'s
-construction requires introducing two new states and a new
-symbol. With respect to HOL types, one can pick a fresh instance of a
-type if and only if the type is infinite and the set of values for
-that type in the PDA, \ie~the PDA states and the stack symbols are
-finite. The former gives rise to the two new conditions that form the
-part of the theorem statement in HOL. The finiteness of the states and
-the stack symbols had to be proven as part of the mechanisation
-process.
+The two extra conditions in the premise of the HOL
+statement are sufficient to ensure that we will always be able to pick fresh states $q_0'$ and $q_e$, as well a fresh stack symbol $X_0$.
+The requirement to be explicit with details such as this are entirely typical of the mechanisation process.
 \end{proof}
 
 \subsection{PDA construction for acceptance by final state}
 
-Now we present the construction of a PDA that accepts inputs via the
-final state criterion that is equivalent to the given PDA accepting
-input via the empty stack criterion.
+Briefly, we present the construction of a ``final-state-accepting'' PDA that accepts the same inputs as an ``empty-stack-accepting'' PDA.
 
 \begin{theorem}
 If $L$ is $N(M_1)$ for some PDA $M_1$, then $L$ is $L(M_2)$ for
@@ -201,14 +106,13 @@ some PDA $M_2$.
 \begin{proof}
   We simulate $M_1$ using $M_2$ and detect when $M_1$ empties its
   stack, $M_2$ enters a final state when and only when this
-  occurs. Let $M_1 = (Q,\Sigma,\Gamma,\delta,q_0,Z_0,\phi)$ be a PDA
-  such that $L = N(M_1)$. Let $M_2 = (Q ∪ {q_0',q_f},\Sigma,\Gamma ∪
-  {X_0},\delta',q_0',X_0,{q_f})$, where $\delta'$ is defined as
-  follows:
-
+  occurs. Let PDA $M_1$ be $(Q,\Sigma,\Gamma,\delta,q_0,Z_0,\phi)$.
+  Given fresh states $q_0'$ and $q_f$, and a fresh stack symbol $X_0$, let $M_2 = (Q \cup \{q_0',q_f\},\Sigma,\Gamma\cup
+  \{X_0\},\delta',q_0',X_0,\{q_f\})$, where $\delta'$ is defined by the
+  following rules:
 \begin{description}
 
-\item[Rule 1] $\delta'(q_0',\epsilon,X_0) = {(q_0,Z_0X_0)}$.
+\item[Rule 1] $\delta'(q_0',\epsilon,X_0) = \{(q_0,Z_0X_0)\}$.
 
 \item[Rule 2] for all $q$ in $Q$, $a$ in $\Sigma \cup {\epsilon}$, and
   $Z$ in $\Gamma$, $\delta'(q,a,Z) = \delta(q,a,Z)$.
@@ -221,7 +125,7 @@ some PDA $M_2$.
 \begin{holdef}[\HOLtm{newm'}]
 \begin{salltt}
 
-\HOLthm[nostile,>>,def]{laeslafs.newm'_def}
+\HOLthm[nostile,>>,def,M1/p,X0/x0]{laeslafs.newm'_def}
 \end{salltt}
 \end{holdef}
 
@@ -235,46 +139,16 @@ final state thereby accepting the input $x$.
 
 
 We proceed in a similar manner to the proof of
-Theorem~\ref{thm:lafsEqlaes} to establish $L(M_2) = N(M_1)$ by proving
-the following subgoals.
-
-% thms/laeslafs
-% laesImpLafs'
-%\input{thms/laeslafs/laesImpLafs'}
-
-First, if $x \in N(M_1) \Rightarrow x \in L(M_2)$:
+Theorem~\ref{thm:lafsEqlaes}, establishing $L(M_2) = N(M_1)$:
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{laeslafs.laesImpLafs'}
-\end{salltt}
-\label{holthm:laesImplafs'}
-\end{holthm}
-
-% thms/laeslafs
-% lafsImpLaes'
-%\input{thms/laeslafs/lafsImpLaes'}
-Then, if $x \in L(M_2) \Rightarrow x \in N(M_1)$:
-\begin{holthm}
-\begin{salltt}
-
-\HOLthm[nostile,>>]{laeslafs.lafsImpLaes'}
-\end{salltt}
-\label{holthm:lafsImplaes'}
-\end{holthm}
-
-From HOL Theorems~\ref{holthm:laesImplafs'}
-and~\ref{holthm:lafsImplaes'} we can deduce:
-\begin{holthm}
-\begin{salltt}
-
-\HOLthm[nostile,>>]{laeslafs.thm52}
+\HOLthm[nostile,>>,M1/m,M2/m']{laeslafs.thm52}
 \end{salltt}
 \end{holthm}
 
-Similar to HOL Theorem~\ref{holthm:thm51} we have to provide the
-assertion about the universe of the types of symbols and states in the
-PDA being infinite.
+Again, we must use the precondition that the universes of the types of symbols and states
+are infinite.
 \end{proof}
 
 In the remainder of the paper, we discuss the proof of equivalence of PDAs and
@@ -295,4 +169,4 @@ is in Greibach normal form.
 %%% TeX-master: "pda"
 %%% End:
 
-% LocalWords:  CFGs
+% LocalWords:  CFGs PDAs

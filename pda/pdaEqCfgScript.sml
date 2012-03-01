@@ -871,6 +871,18 @@ Q_TAC SUFF_TAC `P ⊆ { l | EVERY (λe. e ∈ (IMAGE NTS ntslComp)) l ∧
   SRW_TAC [][EVERY_MEM]);
 
 
+val EXISTS_OPTION = store_thm(
+  "EXISTS_OPTION",
+  ``(?x:'a option. P x) <=> P NONE \/ (?x:'a. P (SOME x))``,
+  EQ_TAC THEN1 (STRIP_TAC THEN Cases_on `x` THEN METIS_TAC []) THEN
+  METIS_TAC []);
+
+val EXISTS_symbol = store_thm(
+  "EXISTS_symbol",
+  ``(?x:('a,'b) symbol. P x) <=> (?x. P (TS x)) \/ (?x. P (NTS x))``,
+  METIS_TAC [TypeBase.nchotomy_of ``:('a,'b)symbol``]);
+
+
 val finitep2gRules = store_thm
 ("finitep2gRules",
 ``FINITE (p2gRules m)``,
@@ -1003,24 +1015,15 @@ THENL[
 	 SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
 		  boolSimps.CONJ_ss][EXISTS_rule,
 				     Abbr`P`, Abbr`f`] THEN
-	 Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	 Cases_on `n` THEN
-	 Cases_on `r` THEN
-	 SRW_TAC [][EQ_IMP_THM] THEN1
-	 (Q.EXISTS_TAC `((SOME (TS ts),q',q),q1,MAP transSym L)` THEN
-	  SRW_TAC [][]) THEN
-	 Cases_on `r` THEN
-	 Cases_on `r''` THEN
-	 Cases_on `q''` THEN
-	 Cases_on `r''` THEN
-	 Cases_on `q''''` THEN
-	 FULL_SIMP_TAC (srw_ss()) [] THEN
-	 Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	 SRW_TAC [][] THEN
-	 METIS_TAC [],
+         `∃q a p rhs. x = rule (q,a,p) rhs`
+            by METIS_TAC [TypeBase.nchotomy_of ``:('a,'b)rule``,
+                          pairTheory.pair_CASES] THEN
+         SRW_TAC [][] THEN EQ_TAC THEN
+         SIMP_TAC (srw_ss()) [pairTheory.EXISTS_PROD, EXISTS_OPTION,
+                              EXISTS_symbol] THEN
+         SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss) [] THEN METIS_TAC [],
 
 	 (* final case *)
-
 	 Q.MATCH_ABBREV_TAC `FINITE P` THEN
 	Q.ABBREV_TAC
 	`f = \r:((δ, γ) symbol, β, α) trans.
@@ -1078,19 +1081,9 @@ THENL[
 	 SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
 		  boolSimps.CONJ_ss][EXISTS_rule,
 				     Abbr`P`, Abbr`f`] THEN
-	 Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	 Cases_on `n` THEN
-	 Cases_on `r` THEN
-	 SRW_TAC [][EQ_IMP_THM] THEN1
-	 (Q.EXISTS_TAC `((NONE,q',q),q1,MAP transSym l)` THEN
-	  SRW_TAC [][]) THEN
-	 Cases_on `r` THEN
-	 Cases_on `r''` THEN
-	 Cases_on `q''` THEN
-	 Cases_on `r''` THEN
-	 Cases_on `q''''` THEN
-	 FULL_SIMP_TAC (srw_ss()) [] THEN
-	 METIS_TAC []
+         SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss)
+                  [pairTheory.EXISTS_PROD, EXISTS_OPTION] THEN
+         METIS_TAC []
 	]);
 
 

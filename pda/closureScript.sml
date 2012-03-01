@@ -410,39 +410,40 @@ SRW_TAC [][] THEN SRW_TAC [][DISJOINT_DEF]) THEN
 		   FULL_SIMP_TAC (srw_ss()) [INSERT_DEF, EXTENSION] THEN
 		   METIS_TAC [tsNotInNonTmnls]) THEN
 SRW_TAC [][] THEN
- `FINITE (nonTerminals g'' ∪ nonTerminals g)`
- by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET, FINITE_UNION] THEN
- `∃nt'.nt' ∉ IMAGE stripNts (nonTerminals g'' ∪ nonTerminals g)`
- by METIS_TAC [NOT_IN_FINITE, IMAGE_FINITE] THEN
-`∃g0.grNt2Nt'R (nt,nt') g g0` by (SRW_TAC [][grNt2Nt'R] THEN
-				      FULL_SIMP_TAC (srw_ss()) [] THEN
-				      METIS_TAC [stripNts]) THEN
+`FINITE (nonTerminals g'' ∪ nonTerminals g)`
+    by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET, FINITE_UNION] THEN
+`∃nt'. nt' ∉ IMAGE stripNts (nonTerminals g'' ∪ nonTerminals g)`
+   by METIS_TAC [NOT_IN_FINITE, IMAGE_FINITE] THEN
+`∃g0. grNt2Nt'R (nt,nt') g g0` by (SRW_TAC [][grNt2Nt'R] THEN
+				   FULL_SIMP_TAC (srw_ss()) [] THEN
+				   METIS_TAC [stripNts]) THEN
 `NTS nt' ∉  nonTerminals g` by (FULL_SIMP_TAC (srw_ss()) [INSERT_DEF, INTER_DEF,
 							  EXTENSION] THEN
 				METIS_TAC [symbol_11, stripNts]) THEN
-`(NTS nt) ∈ nonTerminals g` by (FULL_SIMP_TAC (srw_ss()) [INSERT_DEF, INTER_DEF,
-							 EXTENSION] THEN
-				METIS_TAC [symbol_11]) THEN
-`(NTS nt) ∈ nonTerminals g''` by (FULL_SIMP_TAC (srw_ss()) [INSERT_DEF, INTER_DEF,
+`NTS nt ∈ nonTerminals g` by (FULL_SIMP_TAC (srw_ss()) [INSERT_DEF, INTER_DEF,
+							EXTENSION] THEN
+			      METIS_TAC [symbol_11]) THEN
+`NTS nt ∈ nonTerminals g''` by (FULL_SIMP_TAC (srw_ss()) [INSERT_DEF, INTER_DEF,
 							 EXTENSION] THEN
 				METIS_TAC [symbol_11]) THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `nt ≠ nt'` by METIS_TAC [stripNts, symbol_11] THEN
 `NTS nt' ∈  nonTerminals g0` by METIS_TAC [grNt2Nt'RSymInG'] THEN
-`nonTerminals g0 = (NTS nt') INSERT ((nonTerminals g) DELETE (NTS nt))`
-by METIS_TAC [grNt2Nt'RNts] THEN
-`(s = nonTerminals g0 ∩ nonTerminals g'')` by
-(FULL_SIMP_TAC (srw_ss()) [EXTENSION, INTER_DEF, DELETE_DEF, INSERT_DEF] THEN
-METIS_TAC [symbol_11, stripNts]) THEN
+`nonTerminals g0 = NTS nt' INSERT ((nonTerminals g) DELETE (NTS nt))`
+  by METIS_TAC [grNt2Nt'RNts] THEN
+`(s = nonTerminals g0 ∩ nonTerminals g'')`
+   by (FULL_SIMP_TAC (srw_ss()) [EXTENSION, INTER_DEF, DELETE_DEF,
+                                 INSERT_DEF] THEN
+       METIS_TAC [symbol_11, stripNts]) THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`g0`, `g''`] MP_TAC) THEN
-SRW_TAC [][] THEN
+ASM_REWRITE_TAC [] THEN
+DISCH_THEN (Q.X_CHOOSE_THEN `g'` STRIP_ASSUME_TAC) THEN
 Q.EXISTS_TAC `g'` THEN
 SRW_TAC [][] THEN1
-(Q.ABBREV_TAC `r=(λx y. ∃nt nt'. grNt2Nt'R (nt,nt') x y)` THEN
-`r g g0` by (SRW_TAC [] [Abbr `r`] THEN METIS_TAC []) THEN
-METIS_TAC [RTC_RULES]) THEN
+  (Q.ABBREV_TAC `r=(λx y. ∃nt nt'. grNt2Nt'R (nt,nt') x y)` THEN
+   `r g g0` by (SRW_TAC [] [Abbr `r`] THEN METIS_TAC []) THEN
+   METIS_TAC [RTC_RULES]) THEN
 METIS_TAC [grNt2Nt'R, nt2nt'LangEq]);
-
 
 val disjoint = store_thm
 ("disjoint",
@@ -459,8 +460,6 @@ SRW_TAC [][] THEN
      DISJOINT (nonTerminals g') (nonTerminals g)` by METIS_TAC [grNt2Nt'RAll] THEN
 FULL_SIMP_TAC (srw_ss()) [DISJOINT_DEF, EXTENSION] THEN
 METIS_TAC [DISJOINT_INSERT]);
-
-
 
 (* Substitution *)
 

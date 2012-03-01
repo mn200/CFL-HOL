@@ -10,13 +10,14 @@ The definition is
 \end{salltt}
 This means that the type of symbols has two constructors, \HOLtm{NTS} and \HOLtm{TS}, and that, for example, \HOLtm{TS} has type
 \begin{alltt}
-\HOLty[>>,alltt,of]{TS}
+\HOLty[>>,alltt,of]{TS:'ts -> ('nts,'ts) symbol}
 \end{alltt}
+For values $t$ from the type \HOLty{:'ts}, the term \HOLtm{TS t} is a (terminal) symbol.
 
 \paragraph{Rules and Grammars}
 A \emph{rule} is a pair of a non-terminal symbol and a possible expansion for that non-terminal.
 We then write \HOLtm{rule N rhs} to indicate that pairing of $N$ and $\mathit{rhs}$, with $N$ of type \HOLty{:'nts} and \HOLtm{rhs} a list of symbols, thus of type \HOLty{:('nts,'ts) symbol list}.
-A \emph{grammar} can then pair a start symbol with a list of rules.
+A \emph{grammar} is then a pair of a start symbol with a list of rules.
 %
 Traditional presentations of grammars often include separate sets corresponding to the grammar's terminals and non-terminals.
 %

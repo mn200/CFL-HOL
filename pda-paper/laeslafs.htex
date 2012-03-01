@@ -73,7 +73,7 @@ where, \texttt{finalStateTrans} implements the Rule~2 of the
 construction, \texttt{newStateTrans} implements Rule~3. Rule~4 simply
 mimics the original machine transitions (\HOLtm{p.next}).
 
-We first prove that if $x \in L(M_2) \Rightarrow x \in N(M_1)$.  
+We first prove that if $x \in L(M_2) \Rightarrow x \in N(M_1)$.
 
 Let $x$ be in $L(M_2)$. Then $(q_0,x,Z_0)$ $\vdash_{M_{2}}^{*}
 (q_0',\epsilon,\gamma)$ for some $q$ in $F$. Consider $M_1$ with input
@@ -276,7 +276,23 @@ Similar to HOL Theorem~\ref{holthm:thm51} we have to provide the
 assertion about the universe of the types of symbols and states in the
 PDA being infinite.
 \end{proof}
-%%% Local Variables: 
+
+In the remainder of the paper, we discuss the proof of equivalence of PDAs and
+CFGs.
+Constructing a PDA for a CFG is a straightforward process so
+instead we devote much of the space to explaining the construction of
+a CFG from PDA and its equivalence proof.
+In order to illustrate the
+gap between the textbook \textit{vs.} theorem prover formalisation,
+we try to follow Hopcroft and Ullman as closely as possible. As in the
+book, for the construction of a PDA from a CFG, we assume the grammar
+is in Greibach normal form.
+
+
+
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "pda"
-%%% End: 
+%%% End:
+
+% LocalWords:  CFGs

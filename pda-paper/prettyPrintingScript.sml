@@ -37,12 +37,22 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   term_name = "<=>",
                   fixity = Infix(NONASSOC, 100)}
 
+val _ = overload_on ("ID'", ``\s0 m s1. ID m s0 s1``)
+val _ = overload_on ("IDRTC", ``\s0 m s1. (ID m)^* s0 s1``);
 val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   paren_style = OnlyIfNecessary,
-                  pp_elements = [TOK "(BEGIN_ID_STILE)", TM, TOK "(END_ID_STILE)"],
+                  pp_elements = [HardSpace 1, TOK "(BEGIN_ID_STILE)", TM,
+                                 TOK "(END_ID_STILE)", BreakSpace(1,2)],
                   term_name = "ID'",
                   fixity = Infix(NONASSOC, 450)}
-val _ = overload_on ("ID'", ``\s0 m s1. ID m s0 s1``)
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  paren_style = OnlyIfNecessary,
+                  pp_elements = [HardSpace 1, TOK "(BEGIN_IDRTC_STILE)", TM,
+                                 TOK "(END_ID_STILE)", BreakSpace(1,2)],
+                  term_name = "IDRTC",
+                  fixity = Infix(NONASSOC, 450)}
+
+
 
 (* including some backticks `` ensures that this file gets processed with
    unquote*)

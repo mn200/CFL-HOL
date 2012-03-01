@@ -15,8 +15,15 @@ pda-paper/holtexbasic.sty
 pda-paper/introduction.tex
 pda-paper/laeslafs.tex
 pda-paper/munger*
+pda-paper/pda.bbl
+pda-paper/pda.blg
+pda-paper/pda.d
+pda-paper/pda.dvi
+pda-paper/pda.fls
+pda-paper/pda.out
 pda-paper/pda.pdf
 pda-paper/pda.ps
+pda-paper/pda.spl
 pda-paper/pda2cfg.tex
 pda-paper/pdaDef.tex
 pda-paper/trees.tex

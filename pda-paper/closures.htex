@@ -98,12 +98,11 @@ $g$ gives us grammar $g'$.
 \HOLthm[nostile,>>,def]{closure.grNt2Nt'R_def}
 \end{salltt}
 \end{holdef}
-We then prove that such a single-step transformation preserves the
-language of the grammar.
+We then prove that such a single-step transformation preserves the language of the grammar.
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{closure.nt2nt'LangEq}
+\HOLthm[nostile,>>,:'nts/:'a]{closure.nt2nt'LangEq}
 \end{salltt}
 \end{holthm}
 
@@ -118,7 +117,7 @@ $g$ and the language of $g'$ is the same as of $g$, exists.
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{closure.grNt2Nt'RAll}
+\HOLthm[nostile,>>,:'nts/:'a]{closure.grNt2Nt'RAll}
 \end{salltt}
 \end{holthm}
 \end{proof}
@@ -175,7 +174,7 @@ The corresponding statement for Theorem~\ref{thm:closureUnion} in HOL is:
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{closure.union_cfg}
+\HOLthm[nostile,>>,:'nts/:'a]{closure.union_cfg}
 \end{salltt}
 \end{holthm}
 \end{proof}
@@ -232,7 +231,7 @@ The statement for Theorem~\ref{thm:closureConcat} in HOL is:
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{closure.concat_cfg}
+\HOLthm[nostile,>>,:'nts/:'a]{closure.concat_cfg}
 \end{salltt}
 \end{holthm}
 \end{proof}
@@ -251,8 +250,8 @@ occur in $G$.
 \label{thm:closureKleene}
 \end{theorem}
 
-In HOL, the $star$ operator represents the Kleene closure.
-\begin{holdef}[\HOLtm{star_rules}]
+In HOL, the \HOLtm{star} operator represents the Kleene closure, and it is defined using an inductive relation over the following rules:
+\begin{holdef}[\HOLtm{star}]
 \begin{salltt}
 
 \HOLthm[nostile,>>,def]{symbolDef.star_rules}
@@ -281,7 +280,7 @@ below:
 \begin{holdef}[\HOLtm{closure_cfg}]
 \begin{salltt}
 
-\HOLthm[nostile,>>,def]{closure.closure_cfg}
+\HOLthm[nostile,>>,def]{prettyPrinting.closure_cfg'}
 \end{salltt}
 \end{holdef}
 

@@ -1317,57 +1317,35 @@ THENL[
 	 SRW_TAC [][]))
 	]]);
 
-(*
+val startSym_grUnion = store_thm(
+  "startSym_grUnion",
+  ``startSym (grUnion s0 g1 g2) = s0``,
+  SRW_TAC [][grUnion, startSym_def])
+
+val gruRtcDeriv' = SIMP_RULE (srw_ss()) [AND_IMP_INTRO] gruRtcDeriv
+
 val union_cfg = store_thm(
   "union_cfg",
   ``∀g1 g2. INFINITE univ(:'nts) ⇒
             ∃g. language (g:('nts,'ts)grammar) = language g1 ∪ language g2``,
   REPEAT STRIP_TAC THEN
-  `∃g2'. (language g2' = language g2
-disjoint
-*)
-
-
-val union_cfg = store_thm
-("union_cfg",
-``∀g1 g2.DISJOINT (nonTerminals g1) (nonTerminals g2) ∧
- INFINITE (UNIV:'a set)
-      ⇒
-         ∃s0.(NTS (s0:'a)) ∉ (nonTerminals g1 ∪ nonTerminals g2) ∧
-	 (w ∈ (language g1 ∪ language g2) =
-              w ∈ language (grUnion s0 g1 g2))``,
-
-SRW_TAC [][EQ_IMP_THM] THEN
- `FINITE (nonTerminals g1 ∪ nonTerminals g2)`
- by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET, FINITE_UNION] THEN
- `∃s0.s0 ∉ IMAGE stripNts (nonTerminals g1 ∪ nonTerminals g2)` by
- METIS_TAC [NOT_IN_FINITE, IMAGE_FINITE] THEN
- FULL_SIMP_TAC (srw_ss()) [] THEN
- Q.EXISTS_TAC `s0` THEN
-SRW_TAC [][]
-THENL[
-
-      METIS_TAC [stripNts],
-      METIS_TAC [stripNts],
-
-
- FULL_SIMP_TAC (srw_ss()) [IN_UNION, language_def] THEN
- METIS_TAC [gruRtcSsg1, gruDerivFrmg1, startSym_def, grUnion, RTC_RULES,
-	    RTC_RTC, stripNts, isTmnlSym_def,
-	    gruRtcSsg2,gruDerivFrmg2,IN_UNION,RTC_REFL, gruRtcDeriv],
-
- FULL_SIMP_TAC (srw_ss()) [IN_UNION, language_def] THEN
- METIS_TAC [gruRtcSsg1, gruDerivFrmg1, startSym_def, grUnion, RTC_RULES,
-	    RTC_RTC, stripNts, isTmnlSym_def,
-	    gruRtcSsg2,gruDerivFrmg2,IN_UNION,RTC_REFL, gruRtcDeriv],
-
- FULL_SIMP_TAC (srw_ss()) [IN_UNION, language_def] THEN
- `w ≠ [NTS (startSym (grUnion s0 g1 g2))]`
- by (SPOSE_NOT_THEN ASSUME_TAC THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
- METIS_TAC [gruRtcSsg1, gruDerivFrmg1, startSym_def, grUnion, RTC_RULES,
-	    RTC_RTC, stripNts, isTmnlSym_def,
-	    gruRtcSsg2,gruDerivFrmg2,IN_UNION,RTC_REFL, gruRtcDeriv]]);
-
+  `∃g2'. (language g2 = language g2') ∧
+         DISJOINT (nonTerminals g2') (nonTerminals g1)`
+      by METIS_TAC [better_disjoint, finite_nts] THEN
+  `∃s0. s0 ∉ IMAGE stripNts (nonTerminals g1 ∪ nonTerminals g2')`
+      by METIS_TAC [NOT_IN_FINITE, IMAGE_FINITE, FINITE_UNION, finite_nts] THEN
+  `NTS s0 ∉ nonTerminals g1 ∪ nonTerminals g2'`
+     by (FULL_SIMP_TAC (srw_ss()) [] THEN METIS_TAC [stripNts]) THEN
+  Q.EXISTS_TAC `grUnion s0 g1 g2'` THEN
+  ASM_SIMP_TAC (srw_ss()) [language_def, EXTENSION, startSym_grUnion] THEN
+  Q.X_GEN_TAC `w` THEN Cases_on `isWord w` THEN ASM_SIMP_TAC (srw_ss()) [] THEN
+  `∀n. w ≠ [NTS n]`
+     by (REPEAT STRIP_TAC THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
+  SRW_TAC [][EQ_IMP_THM] THENL [
+    METIS_TAC [gruRtcDeriv, DISJOINT_SYM, IN_UNION],
+    METIS_TAC [RTC_RTC, gruDerivFrmg1, gruRtcSsg1],
+    METIS_TAC [RTC_RTC, gruDerivFrmg2, gruRtcSsg2]
+  ]);
 
 val grConcat = Define
 `grConcat s0 g1 g2 =

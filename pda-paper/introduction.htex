@@ -47,10 +47,24 @@ Overloading notation, we use $\in$ (and $\notin$) to refer to membership (non-me
 
 If \HOLtm{R} is a (curried) binary relation (such that we write \HOLtm{R x y} when $x$ and $y$ are linked in the relation), then \HOLtm{RTC R} is the reflexive and transitive closure of $R$.
 
+\paragraph{Availability} Both HOL4 itself and the sources for this work are available from \url{github.com}.
+The paper's sources are at \url{http://github.com/mn200/CFL-HOL}, and build with the latest repository version of HOL4.
+They will also build with the next official release of HOL4, Kananaskis-8, due in August~2012.
+
+\paragraph{Acknowledgements}
+NICTA is funded by the Australian Government as represented by the
+Department of Broadband, Communications and the Digital Economy and
+the Australian Research Council through the ICT Centre of Excellence
+program.
+
+
+%%% Local Variables:
+
+
 
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "pda"
 %%% End:
 
-% LocalWords:  PDAs CFGs CFG
+% LocalWords:  PDAs CFGs CFG Kananaskis

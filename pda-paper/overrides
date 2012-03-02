@@ -12,5 +12,8 @@ r49 6 gnf_p1
 r49Elem 10 gnf_p1Elem
 . 1 \ensuremath{.}
 (BEGIN_ID_STILE) 1 \ensuremath{\vdash_{
-(BEGIN_IDRTC_STILE) 1 \ensuremath{\vdash^*_{
+(BEGIN_IDRTC_STILE) 1 \ensuremath{\vdash\sp{*}_{
 (END_ID_STILE) 0 }}
+(BEGIN_DERIVES) 1 \ensuremath{\Rightarrow_{
+(END_DERIVES) 0 }}
+(BEGIN_RTC_DERIVES) 1 \ensuremath{\Rightarrow\sp{*}_{

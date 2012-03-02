@@ -53,6 +53,23 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   fixity = Infix(NONASSOC, 450)}
 
 
+val _ = overload_on ("ppderives", ``\sf0 g sf1. derives g sf0 sf1``);
+val _ = overload_on ("pprtcderives", ``\sf0 g sf1. (derives g)^* sf0 sf1``);
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  paren_style = OnlyIfNecessary,
+                  pp_elements = [HardSpace 1, TOK "(BEGIN_DERIVES)", TM,
+                                 TOK "(END_DERIVES)", BreakSpace(1,2)],
+                  term_name = "ppderives",
+                  fixity = Infix(NONASSOC, 450)}
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  paren_style = OnlyIfNecessary,
+                  pp_elements = [HardSpace 1, TOK "(BEGIN_RTC_DERIVES)", TM,
+                                 TOK "(END_DERIVES)", BreakSpace(1,2)],
+                  term_name = "pprtcderives",
+                  fixity = Infix(NONASSOC, 450)}
+
+
+
 
 (* including some backticks `` ensures that this file gets processed with
    unquote*)

@@ -28,32 +28,25 @@ Here, $V$ is the list of non-terminals, $T$ is the list of terminals, $P$ is the
   A list of symbols (or \emph{sentential form}) $s$ \emph{derives} $t$
   in a single step if $s$ is of the form $\alpha A\gamma$, $t$ is of
   the form $\alpha\beta\gamma$, and if $A\to\beta$ is one of the rules
-  in the grammar. In HOL, relation \HOLtm{derives g lsl rsl} holds iff
-  sentential form \HOLtm{lsl} can derive sentential form \HOLtm{rsl}
-  with respect to grammar \HOLtm{g}.
+  in the grammar. In HOL, relation \HOLtm{derives g sf1 sf2} holds iff
+  sentential form \HOLtm{sf1} can derive sentential form \HOLtm{sf2}
+  with respect to grammar~\HOLtm{g}.
 
 \begin{holdef}
 \begin{salltt}
 
-\HOLthm[nostile,>>]{grammarDef.derives_def}
+\HOLthm[nostile,>>,sf1/lsl,sf2/rsl]{grammarDef.derives_def}
 \end{salltt}
 \end{holdef}
 \end{definition}
-
-We write \HOLtm{(derives g)^* sf1 sf2} to indicate that \HOLtm{sf2} is
-derived from \HOLtm{sf1} in zero or more steps, also written
-\mbox{\HOLtm{sf1} $\Rightarrow^{*}$ \HOLtm{sf2}} (where the grammar $g$ is assumed).
-%
+We also write \HOLtm{(derives g)^* sf1 sf2} to indicate that \HOLtm{sf2} is derived from \HOLtm{sf1} in zero or more steps.
 
 We can also represent derivations more concretely using \emph{derivation lists}.
 If an arbitrary binary relation $R$ holds on adjacent elements of list
 \HOLtm{l} which has $x$ as its first element and $y$ as its last
 element, then we write \HOLtm{R ⊢ l ◁ x → y}.
 %
-For example a
-derivation sequence $l_1 \derive l_2 \derive l_3 \dots \derive l_n$
-can be represented using lists as \HOLtm{derive ⊢ l ◁ l1 → ln}
-where $l = l_1 l_2\dots l_n$.
+For example a derivation sequence $l_1 \derive l_2 \derive l_3 \dots \derive ln$ can be represented using lists as \HOLtm{derives g ⊢ l ◁ l1 → ln} where $l = l_1 l_2\dots l_n$, and \HOLtm{derives g} is the binary relation underneath $\mathit{sf}_1\Rightarrow_g\mathit{sf}_2$.
 
 In the context of grammars, $R$ relates sentential forms.
 Later we will use the same notation to relate derivations in a PDA.

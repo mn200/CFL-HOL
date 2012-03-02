@@ -265,13 +265,11 @@ In HOL this construction is done using function \texttt{grClosure}.
 \end{holdef}
 
 A proof that $L(G)^{*} = L(G_1)$ follows a similar methodology as used
-in proofs above. In HOL, Theorem~\ref{thm:closureKleene} is stated as
-below:
-
-\begin{holthm}[\HOLtm{closure_cfg}]
+in proofs above. In HOL, Theorem~\ref{thm:closureKleene} becomes
+\begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>,def,:'nts/:'a]{prettyPrinting.closure_cfg'}
+\HOLthm[nostile,>>]{closure.Kleene_cfg}
 \end{salltt}
 \end{holthm}
 

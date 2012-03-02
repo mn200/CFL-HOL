@@ -4,17 +4,6 @@ val _ = new_theory "prettyPrinting"
 
 local open pdaEqCfgTheory homomorphismTheory closureTheory laeslafsTheory parseTreeTheory treeDerivTheory in end
 
-val closure_cfg' = store_thm(
-  "closure_cfg'",
-  ``INFINITE univ(:'a) ⇒
-    ∃s0. NTS s0 ∉ nonTerminals (g:('a,'b)grammar) ∧
-         w ∈ star (language g) <=>
-         w ∈ language (grClosure s0 g)``,
-  REWRITE_TAC [pred_setTheory.SPECIFICATION] THEN
-  STRIP_TAC THEN IMP_RES_TAC closureTheory.closure_cfg THEN
-  FULL_SIMP_TAC (srw_ss()) [pred_setTheory.SPECIFICATION] THEN
-  METIS_TAC []);
-
 val star_rules' = store_thm(
   "star_rules'",
   ``[] ∈ star A ∧

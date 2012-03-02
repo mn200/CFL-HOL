@@ -277,12 +277,12 @@ A proof that $L(G)^{*} = L(G_1)$ follows a similar methodology as used
 in proofs above. In HOL, Theorem~\ref{thm:closureKleene} is stated as
 below:
 
-\begin{holdef}[\HOLtm{closure_cfg}]
+\begin{holthm}[\HOLtm{closure_cfg}]
 \begin{salltt}
 
-\HOLthm[nostile,>>,def]{prettyPrinting.closure_cfg'}
+\HOLthm[nostile,>>,def,:'nts/:'a]{prettyPrinting.closure_cfg'}
 \end{salltt}
-\end{holdef}
+\end{holthm}
 
 
 \subsection{Substitution}

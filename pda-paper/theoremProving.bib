@@ -1,3 +1,5 @@
+@string{lncs = {Lecture Notes in Computer Science}}
+
 @BOOK{hopcroft01,
   TITLE = {Introduction to Automata Theory, Languages and Computation},
   AUTHOR = {John E. Hopcroft and Jeffrey D. Ullman},
@@ -29,7 +31,9 @@
     author = "Tobias Nipkow",
     title = "Verified Lexical Analysis",
     booktitle = "Proceedings of the 11th International Conference on Theorem Proving in Higher Order Logics ({TPHOLs}'98)",
-    publisher = "Springer-Verlag LNCS 1479",
+    publisher = "Springer",
+    series = "Lecture Notes in Computer Science",
+    volume = 1479,
     address = "Canberra, Australia",
     editor = "J. Grundy and M. Newey",
     pages = "1--15",
@@ -161,7 +165,7 @@ logic",
   year =      2008,
   editor =    {O. A. Mohamed and C. Mu{\~n}oz and S. Tahar},
   volume =    5170,
-  series =    {LNCS},
+  series =    lncs,
   note = {See also the HOL website at \url{http://hol.sourceforge.net}.},
   publisher = "Springer"
 }
@@ -188,7 +192,7 @@ logic",
   year =      2009,
   editor =    {Giuseppe Castagna},
   volume =    5502,
-  series =    {Lecture Notes in Computer Science},
+  series =    lncs,
   isbn = 3642005896,
   doi = "10.1007/978-3-642-00590-9_12",
   month =     {March},
@@ -204,7 +208,7 @@ logic",
   year =      2010,
   editor =    {Anuj Dawar and Helmut Veith},
   volume =    6247,
-  series =    {Lecture Notes in Computer Science},
+  series =    lncs,
   month =     {August},
   publisher = {Springer}}
 
@@ -273,4 +277,44 @@ author = {{Julie Rehmeyer}},
 title = {{How to (really) trust a mathematical proof}},
 Journal = {{ScienceNews}},
 year = 2008
+}
+
+@Article{koprowski11:trx,
+  author =       {Adam Koprowski and Henri Binsztok},
+  title =        {{TRX}: a Formally Verified Parser Interpreter},
+  journal =      {Logical Methods in Computer Science},
+  year =         2011,
+  volume =    7,
+  number =    2,
+  pages =     {1--26},
+  url = "http://dx.doi.org/10.2168/LMCS-7(2:18)2011"
+}
+
+
+@InProceedings{Ridge2011:cfg-parsing,
+  author =       {Tom Ridge},
+  title =        {Simple, Functional, Sound and Complete Parsing for All Context-Free Grammars},
+  booktitle = {Proceedings of Certified Programs and Proofs, CPP~2011},
+  year =      2011,
+  editor =    {Jean-Pierre Jouannaud and Zhong Shao},
+  series =    lncs,
+  volume = 7086,
+  month =     {December},
+  publisher = {Springer},
+  pages = {103--118}
+}
+
+@inproceedings{Danielsson2010:TPC,
+ author = {Nils Anders Danielsson},
+ title = {Total Parser Combinators},
+ booktitle = {Proceedings of the International Conference on Functional Programming, ICFP~2010},
+ year = {2010},
+ isbn = {978-1-60558-794-3},
+ location = {Baltimore, Maryland, USA},
+ pages = {285--296},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/1863543.1863585},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {dependent types, mixed induction and coinduction, parser combinators, productivity, termination},
 }

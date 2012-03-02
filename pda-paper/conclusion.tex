@@ -1,8 +1,22 @@
-\section{Related work and conclusions}
+\section{Related work}
 
-In the field of language theory, Nipkow~\citep{nipkow98} provided a
-verified and executable lexical analyzer generator. This work is the
-closest in nature to the mechanisation we have done.
+In the general area of mechanised language theory, the earliest work we are aware of is by \citeauthor{nipkow98}~(\citeyear{nipkow98}).
+That paper describes a verified and executable lexical analyzer generator.
+%
+Focusing on core language theory as it does, we feel this work is the closest in nature our own mechanisation, though of course it covers regular rather than context-free languages.
+
+Apart from our own earlier work on SLR parsing, there have recently been a number of papers directly concerned with mechanisation and verification of specific approaches to parsing.
+For example, \cite{koprowski11:trx} describe the construction of a verified parser for \emph{expression grammars}.
+This formalism allows for parsers for a large class of languages to be generated from natural specifications that look a great deal like context-free grammars.
+Another example is \cite{ridge2011:cfg-parsing}, which work presents a verified parser for all possible context-free grammars, using an admirably simple algorithm.
+The drawback is that, as presented, the algorithm is of complexity~$O(n^5)$.
+
+Parser combinators, popular in functional programming languages, are another approach to the general parsing problem, and there has been some mechanisation work in this area.
+For example, \citet{Danielsson2010:TPC} presents a library of parser combinators that have been verified (in the Agda system) to guarantee termination of parsing.
+
+
+\section{Conclusions}
+
 
 %%% rewrite this
 Formalisation of proofs is an incredibly detailed process and as such
@@ -57,10 +71,10 @@ months to complete the formalisation.
 \begin{tabular}{lrrr}
   \textbf{Theory}&\textbf{LOC}&\textbf{\#Definitions}&\textbf{\#Proofs}\\
   \hline
-  CFGs - background       & 3680 & 36 & 189 \\
-  PDA - background        & 1846 & 15 & 47 \\
+  CFGs---background       & 3680 & 36 & 189 \\
+  PDAs---background        & 1846 & 15 & 47 \\
   Empty Stack Acceptance $\iff$ Final State Acceptance & 1795 & 6 & 75 \\
-  PDA == CFG & 2598 & 16 & 50\\
+  PDA $\iff$ CFG & 2598 & 16 & 50\\
   Closure properties & 1686 & 12 & 91\\
 \end{tabular}
 \end{center}
@@ -81,3 +95,5 @@ program.
 %%% mode: latex
 %%% TeX-master: "pda"
 %%% End:
+
+% LocalWords:  CFG combinators

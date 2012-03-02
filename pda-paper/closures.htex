@@ -220,6 +220,10 @@ The statement for Theorem~\ref{thm:closureConcat} in HOL is:
 \HOLthm[nostile,>>,:'nts/:'a]{closure.concat_cfg}
 \end{salltt}
 \end{holthm}
+where
+\begin{salltt}
+\HOLthm[nostile,>>,S1/as,S2/bs]{symbolDef.conc_def}
+\end{salltt}
 \end{proof}
 
 \subsection{Kleene closure}

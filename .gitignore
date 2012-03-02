@@ -10,7 +10,7 @@ Makefile.local
 pda-paper/*.log
 pda-paper/cfg.tex
 pda-paper/cfg2pda.tex
-pda-paper/cfls.tex
+pda-paper/closures.tex
 pda-paper/elsevier
 pda-paper/holtexbasic.sty
 pda-paper/introduction.tex

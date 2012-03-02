@@ -1705,33 +1705,26 @@ Cases_on `dl1=[]` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [rtc2listRtcHdLast, HD, NOT_CONS_NIL, grclRtcImpD]);
 
-val closure_cfg = store_thm
-("closure_cfg",
-``∀g. INFINITE (UNIV:'a set)
-           ⇒
-	   ∃s0.(NTS s0) ∉ nonTerminals (g:('a,'b) grammar) ∧
-      	       (star (language g) w) = w ∈ language (grClosure s0 g)``,
-
-SRW_TAC [][EQ_IMP_THM] THEN
- `FINITE (nonTerminals g)` by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET] THEN
- `∃s0.s0 ∉ IMAGE stripNts (nonTerminals g)` by METIS_TAC [NOT_IN_FINITE,
-							  IMAGE_FINITE] THEN
- `startSym (grClosure s0 g) = s0` by METIS_TAC [grClosure, startSym_def] THEN
- FULL_SIMP_TAC (srw_ss()) [] THEN
- Q.EXISTS_TAC `s0` THEN
-SRW_TAC [][]
-THENL[
-      METIS_TAC [starImpgrcl],
-
-      METIS_TAC [symbol_11, stripNts],
-
-      `(derives (grClosure s0 g))^* [NTS (startSym (grClosure s0 g))] w ∧
-      EVERY isTmnlSym w`
+val Kleene_cfg = store_thm(
+  "Kleene_cfg",
+  ``INFINITE univ(:'nts) ==>
+    ∀g : ('nts,'ts) grammar. ∃g'. language g' = star (language g)``,
+  REPEAT STRIP_TAC THEN
+  `FINITE (nonTerminals g)` by METIS_TAC [finiteNtsList,FINITE_LIST_TO_SET] THEN
+  `∃s0. s0 ∉ IMAGE stripNts (nonTerminals g)`
+     by METIS_TAC [NOT_IN_FINITE, IMAGE_FINITE] THEN
+  `NTS s0 ∉ nonTerminals g`
+     by (FULL_SIMP_TAC (srw_ss()) [] THEN METIS_TAC [stripNts]) THEN
+  `startSym (grClosure s0 g) = s0` by METIS_TAC [grClosure, startSym_def] THEN
+  Q.EXISTS_TAC `grClosure s0 g` THEN
+  ASM_SIMP_TAC (srw_ss()) [EXTENSION] THEN Q.X_GEN_TAC `w` THEN
+  Tactical.REVERSE EQ_TAC THEN1 METIS_TAC [starImpgrcl, SPECIFICATION] THEN
+  STRIP_TAC THEN
+  `(derives (grClosure s0 g))^* [NTS (startSym (grClosure s0 g))] w ∧
+   isWord w`
       by FULL_SIMP_TAC (srw_ss()) [language_def, EXTENSION] THEN
-      METIS_TAC [rtc2list_exists', grclImpStarLd, stripNts, symbol_11,
-		 grClosure, startSym_def, listderiv_def]
-      ]);
-
+  METIS_TAC [rtc2list_exists', grclImpStarLd, SPECIFICATION,
+             listderiv_def]);
 
 val _ = export_theory();
 

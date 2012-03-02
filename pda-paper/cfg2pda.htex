@@ -1,17 +1,21 @@
 \section{Constructing a PDA for a CFG}
 \label{sec:cfg2pda}
-Let $G = (V,T,P,S)$ be a context-free grammar in Greibach normal form
-generating $L$. We construct machine $M$ such that
-$M=({q},T,V,\delta,q,S,\phi)$, where $\delta(q,a,A)$ contains
-$(q,\gamma)$ whenever $A \to a\gamma$ is in $P$.  Every production in
-a grammar that is in GNF has to be of the form $A~\to~a\alpha$, where
-$a$ is a terminal symbol and $\alpha$ is a string (possibly empty) of
-non-terminal symbols (\HOLtm{isGnf}).  The automaton for the grammar
-is constructed by creating transitions from the grammar productions,
-$A~\to~a\alpha$ that read the head symbol of the RHS ($a$) and push
-the remaining RHS ($\alpha$) on to the stack.  The terminals are
-interpreted as the input symbols and the non-terminals are the stack
-symbols for the PDA.
+
+In this section, we discuss the paper's most involved proof: that of the equivalence of PDAs and CFGs.
+In fact, constructing a PDA for a CFG is a straightforward process so most of the space is given to just one direction of the equivalence:
+the construction of a CFG from a PDA.
+
+For the simpler direction, we follow Hopcroft and Ullman and assume the grammar is in Greibach normal form.
+Our mechanised proof that all grammars can be put into this normal form is discussed in our earlier conference paper~(\cite{BarthwalNorrish:CSL2010}).
+
+So, let $G = (V,T,P,S)$ be a context-free grammar in Greibach normal form generating $L$.
+We construct machine $M$ such that $M=({q},T,V,\delta,q,S,\phi)$, where $\delta(q,a,A)$ contains $(q,\gamma)$ whenever $A \to a\gamma$ is in $P$.
+%
+Every production in a grammar that is in GNF has to be of the form $A~\to~a\alpha$, where $a$ is a terminal symbol and $\alpha$ is a string (possibly empty) of non-terminal symbols (\HOLtm{isGnf}).
+%
+The automaton for the grammar is constructed by creating transitions from the grammar productions, $A~\to~a\alpha$ that read the head symbol of the RHS ($a$) and push the remaining RHS ($\alpha$) on to the stack.
+%
+The terminals are interpreted as the input symbols and the non-terminals are the stack symbols for the PDA.
 
 \begin{salltt}
 \HOLthm[nostile,>>]{pdaEqCfg.trans_def}
@@ -51,3 +55,5 @@ after processing the prefix $x$. Formally we show that
 %%% mode: latex
 %%% TeX-master: "pda"
 %%% End:
+
+% LocalWords:  CFGs CFG

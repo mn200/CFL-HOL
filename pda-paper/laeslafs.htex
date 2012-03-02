@@ -151,19 +151,6 @@ Again, we must use the precondition that the universes of the types of symbols a
 are infinite.
 \end{proof}
 
-In the remainder of the paper, we discuss the proof of equivalence of PDAs and
-CFGs.
-Constructing a PDA for a CFG is a straightforward process so
-instead we devote much of the space to explaining the construction of
-a CFG from PDA and its equivalence proof.
-In order to illustrate the
-gap between the textbook \textit{vs.} theorem prover formalisation,
-we try to follow Hopcroft and Ullman as closely as possible. As in the
-book, for the construction of a PDA from a CFG, we assume the grammar
-is in Greibach normal form.
-
-
-
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "pda"

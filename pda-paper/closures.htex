@@ -448,26 +448,20 @@ the three different ways (described above) of constructing the
 transition rules of the machine accepting the inverse of the
 homomorphic function.
 
-\HOLtm{rule1} simulates $\epsilon$-moves of $M$ independent of the
-buffer content.
+\medskip
+\noindent \HOLtm{rule1} simulates $\epsilon$-moves of $M$ independent of the
+buffer content:
 \begin{salltt}
-
 \HOLthm[nostile,>>,def]{homomorphism.rule1_def}
 \end{salltt}
-
-\HOLtm{rule2} simulate moves of $M$ on input $a$ in $\delta$, removing
-$a$ from the front of the buffer
-
+\HOLtm{rule2} simulates moves of $M$ on input $a$ in $\delta$, removing
+$a$ from the front of the buffer:
 \begin{salltt}
-
 \HOLthm[nostile,>>,def]{homomorphism.rule2_def}
 \end{salltt}
-
 \HOLtm{rule3} loads the buffer with $h(a)$, reading $a$ from $M'$s
-input; the state and stack of $M$ remain unchanged.
-
+input; the state and stack of $M$ remain unchanged:
 \begin{salltt}
-
 \HOLthm[nostile,>>,def]{homomorphism.rule3_def}
 \end{salltt}
 
@@ -486,20 +480,17 @@ proving the following theorem in HOL.
 
 By one application of Rule~3, followed by applications of Rules~1 and
 2, if $(q,h(a),\alpha) \vdash_M^{*} (p,\epsilon,\beta)$, then
-
 $([q,\epsilon],a,\alpha) \vdash_M ([q,h(a)],\epsilon,\alpha)
 \vdash_M^{*} ([p,\epsilon],\epsilon,\beta)$.
 
 If $M$ accepts $h(w)$ we have
-
-$(q_0,h(w),Z_0) \vdash_M^{*} (p,\epsilon,\beta)$ , for some $p$ in $F$ and $\beta$ in $\Gamma*$.
+$(q_0,h(w),Z_0) \vdash_M^{*} (p,\epsilon,\beta)$, for some $p$ in $F$ and $\beta$ in $\Gamma*$.
 
 From this we can derive,
-
 $([q_0,\epsilon],w,Z_0) \vdash_M^{*} ([p,\epsilon],\epsilon,\beta)$.
 
-So $M'$ accepts $w$ (HOL Theorem~\ref{holthm:homomImpm'}). Thus $L(M')
-\supseteq h^{-1}(L(M))$.
+So $M'$ accepts $w$ (HOL Theorem~\ref{holthm:homomImpm'}).
+Thus $L(M') \supseteq h^{-1}(L(M))$.
 
 \begin{samepage}
 \begin{holthm}
@@ -517,33 +508,31 @@ for some string $s$.
 Following Hopcroft and Ullman, suppose $M'$ accepts
 $w=a_1a_2...a_n$. Since Rule~3 can be applied only with the buffer
 empty, the sequence of the moves of $M'$ leading to acceptance can be
-written as\\\\
-\noindent
-$([q_0,\epsilon],a_1a_2\dots a_n,Z_0) \vdash^*_{M'}
-([p_1,\epsilon],a_1a_2...a_n,\alpha_1)$,\\
-$\vdash_{M'} ([p_1,h(a_1)],a_2a_3\dots a_n,\alpha_1)$,\\
-$\vdash^{*}_{M'} ([p_2,\epsilon],a_2a_3\dots a_n,\alpha_2)$,\\
-$\vdash_{M'} ([p_1,h(a_2)],a_3a_4\dots a_n,\alpha_2)$,\\
-$\vdots$\\
-$\vdash^{*}_{M'} ([p_{n-1},\epsilon],a_n,\alpha_n)$,\\
-$\vdash_{M'} ([p_{n_1},h(a_n)],\epsilon,\alpha_n)$,\\
-$\vdash^{*}_{M'} ([p_n,\epsilon],\epsilon,\alpha_n)$,
-\\\\
+written as
+\[
+\begin{array}{l}
+([q_0,\epsilon],a_1a_2\dots a_n,Z_0) \;\vdash^*_{M'}\;
+([p_1,\epsilon],a_1a_2...a_n,\alpha_1)\\
+\quad\vdash_{M'} ([p_1,h(a_1)],a_2a_3\dots a_n,\alpha_1)\\
+\quad\vdash^{*}_{M'} ([p_2,\epsilon],a_2a_3\dots a_n,\alpha_2)\\
+\quad\vdash_{M'} ([p_1,h(a_2)],a_3a_4\dots a_n,\alpha_2)\\
+\quad\vdots\\
+\quad\vdash^{*}_{M'} ([p_{n-1},\epsilon],a_n,\alpha_n)\\
+\quad\vdash_{M'} ([p_{n_1},h(a_n)],\epsilon,\alpha_n)\\
+\quad\vdash^{*}_{M'} ([p_n,\epsilon],\epsilon,\alpha_n)
+\end{array}
+\]
 where $p_n$ is in $F$. The transitions from state $[p_i,\epsilon]$ to
 $[p_i,h(a_i)]$ are by Rule~3, the other transitions are by Rule~1 and
 Rule~2. Thus, $(q_0,\epsilon,Z_0) \vdash_M^{*} (p_1,\epsilon,\alpha)$,
 and for all $i$,
-
-$(p_i,h(a_i),\alpha_i) \vdash_M^{*} (p_{i+1},\epsilon,\alpha_{i+1})$.
-
+\[(p_i,h(a_i),\alpha_i) \vdash_M^{*} (p_{i+1},\epsilon,\alpha_{i+1})\]
 From these moves, we have
-
-$(q0,h(a_1a_2...a_n),Z_0) \vdash^*_{M} (p_n,\epsilon,\alpha_{n+1})$.
-
+\[(q0,h(a_1a_2...a_n),Z_0) \vdash^*_{M} (p_n,\epsilon,\alpha_{n+1})\]
 Therefore $h(a_1a_2...a_n)$ is in $L(M)$ and $L(M') \subseteq
 h^{-1}(L(M))$ (HOL Theorem~\ref{holthm:homom'Impm}).
 
-Thus, $L(M') = h^{-1}(L(M))$, \ie~in HOL:
+\noindent Thus, $L(M') = h^{-1}(L(M))$, \ie~in HOL:
 
 \begin{holthm}
 \begin{salltt}

@@ -15,6 +15,15 @@ val closure_cfg' = store_thm(
   FULL_SIMP_TAC (srw_ss()) [pred_setTheory.SPECIFICATION] THEN
   METIS_TAC []);
 
+val star_rules' = store_thm(
+  "star_rules'",
+  ``[] ∈ star A ∧
+    (s ∈ A ⇒ s ∈ star A) ∧
+    (s1 ∈ A ∧ s2 ∈ star A ⇒ s1 ++ s2 ∈ star A)``,
+  Q.ISPEC_THEN `star A` MP_TAC pred_setTheory.SPECIFICATION THEN
+  SRW_TAC [][symbolDefTheory.star_rules]);
+
+val _ = overload_on ("RTC", ``star``)
 
 val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   paren_style = OnlyIfNecessary,

@@ -240,12 +240,13 @@ occur in $G$.
 \label{thm:closureKleene}
 \end{theorem}
 
-In HOL, the \HOLtm{star} operator represents the Kleene closure, and it is defined using an inductive relation over the following rules:
-\begin{holdef}[\HOLtm{star}]
-\begin{salltt}
-
-\HOLthm[nostile,>>,def]{symbolDef.star_rules}
-\end{salltt}
+In HOL, the Kleene closure is defined using an inductive relation over the following rules:
+\begin{holdef}[\texttt{Kleene}]
+\[
+\HOLthm[conj1,rule]{prettyPrinting.star_rules'} \qquad
+\HOLthm[conj2,rule]{prettyPrinting.star_rules'} \qquad
+\HOLthm[conj3,rule]{prettyPrinting.star_rules'}
+\]
 \end{holdef}
 
 

@@ -87,17 +87,6 @@ our function \HOLtm{grNt2Nt'}.
 \end{salltt}
 \end{holdef}
 
-We can now define the notion of renaming a \emph{single} nonterminal
-in the grammar. Relation \HOLtm{grNt2Nt'R} holds if and only if renaming
-nonterminal $nt$ to $nt'$ (a new nonterminal, not in $g$) in grammar
-$g$ gives us grammar $g'$.
-
-\begin{holdef}[\HOLtm{grNt2Nt'R}]
-\begin{salltt}
-
-\HOLthm[nostile,>>,def]{closure.grNt2Nt'R_def}
-\end{salltt}
-\end{holdef}
 We then prove that such a single-step transformation preserves the language of the grammar.
 \begin{holthm}
 \begin{salltt}
@@ -106,23 +95,20 @@ We then prove that such a single-step transformation preserves the language of t
 \end{salltt}
 \end{holthm}
 
-In order to get a new grammar $g'$ starting from the old grammar $g$
+Then, in order to get a new grammar $g'$ starting from the old grammar $g$
 such that the nonterminals are disjoint, all we need to do is rename
 all the nonterminals in $g$ such that the new names introduced are not
-part of $g$. This is achieved by taking the recursive, transitive
-closure of the relation \HOLtm{grNt2Nt'R}.  We show that such a
-grammar ($g'$), which does not have any overlapping nonterminals with
-$g$ and the language of $g'$ is the same as of $g$, exists.
+part of $g$.
 
+This is achieved by repeatedly renaming the non-terminals away, using the following (and the fact that the non-terminals of a grammar naturally form a finite set):
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>,:'nts/:'a]{closure.grNt2Nt'RAll}
+\HOLthm[nostile,>>]{closure.better_disjoint}
 \end{salltt}
 \end{holthm}
 \end{proof}
 
-When the above theorem is invoked as part of proving the disjoint property, both $g$ and $g''$ variables get instantiated with the original grammar for which the variables are being renamed.
 The proof for the disjoint property (unlike the one line statement
 that sufficed in the text) was \around440~lines of code.
 

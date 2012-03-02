@@ -54,28 +54,21 @@ months to complete the formalisation.
 % TABLE OF STATS
 \begin{table}[!ht]
 \begin{center}
-\begin{tabular}{|l|r|r|r|}
-  \hline
-  ~\textbf{Mechanisation domain}~&~\textbf{LOC}~&~\textbf{\#Definitions}~&~\textbf{\#Proofs}~\\
+\begin{tabular}{lrrr}
+  \textbf{Theory}&\textbf{LOC}&\textbf{\#Definitions}&\textbf{\#Proofs}\\
   \hline
   CFGs - background       & 3680 & 36 & 189 \\
-  \hline
   PDA - background        & 1846 & 15 & 47 \\
-  \hline
-  Acceptance by empty stack == acceptance by final state & 1795 & 6 & 75 \\
-  \hline
+  Empty Stack Acceptance $\iff$ Final State Acceptance & 1795 & 6 & 75 \\
   PDA == CFG & 2598 & 16 & 50\\
-  \hline
   Closure properties & 1686 & 12 & 91\\
-  \hline
 \end{tabular}
 \end{center}
 \caption{Summary of proof effort}
 \label{tab:numbers}
 \end{table}
 
-HOL sources for the work are available at
-\url{http://users.rsise.anu.edu.au/~aditi/}.
+HOL sources for the work are available at \url{http://github.com/mn200/CFL-HOL}.
 
 \paragraph{Acknowledgements}
 NICTA is funded by the Australian Government as represented by the

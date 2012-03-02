@@ -9,9 +9,10 @@ context-free as well:
 \begin{itemize}
     \item the Kleene star $L^*$ of $L$
     \item the image $φ(L)$ of $L$ under a homomorphism $φ$
-    \item the concatenation $L$ $\circ$ $P$ of $L$ and $P$
+    \item the concatenation $L \frown P$ of $L$ and $P$
     \item the union $L$ $\cup$ $P$ of $L$ and $P$
-    \item language obtained by substitution operation
+    \item language obtained by substituting a language for a terminal in
+      a second language
 %    \item the intersection (with a regular language) $L$ $\cap$ $D$ of
 %      $L$ and $D$
 \end{itemize}
@@ -75,11 +76,9 @@ particular rule.
 \end{salltt}
 \end{holdef}
 
-
-Now given a new replacement value ($nt'$) for a nonterminal $nt$, we
-systematically rename all $nt$s to $nt'$ in our old grammar
-$G\;p\;s$. Note that we need to rename the start symbol as well. This is
-our function \HOLtm{grNt2Nt'}.
+Now given a new replacement value ($nt'$) for a nonterminal $nt$, we systematically rename all $nt$s to $nt'$ in our old grammar \HOLtm{G p s} (we write \HOLtm{G} for the pairing function that takes a list of productions $p$ and a start symbol $s$ and returns the corresponding grammar).
+Note that we need to rename the start symbol as well.
+This is our function \HOLtm{grNt2Nt'}.
 \begin{holdef}[\HOLtm{grNt2Nt'}]
 \begin{salltt}
 
@@ -100,7 +99,7 @@ such that the nonterminals are disjoint, all we need to do is rename
 all the nonterminals in $g$ such that the new names introduced are not
 part of $g$.
 
-This is achieved by repeatedly renaming the non-terminals away, using the following (and the fact that the non-terminals of a grammar naturally form a finite set):
+This is achieved by repeatedly renaming the non-terminals away, using the following (and the fact that the non-terminals of a grammar are a finite set):
 \begin{holthm}
 \begin{salltt}
 
@@ -112,8 +111,7 @@ This is achieved by repeatedly renaming the non-terminals away, using the follow
 The proof for the disjoint property (unlike the one line statement
 that sufficed in the text) was \around440~lines of code.
 
-After establishing this property we can now start having a look at the
-closure properties.
+After establishing this property we can now work on the various closure properties.
 
 
 \subsection{Union}

@@ -156,11 +156,11 @@ $L_1$. Analogously, if the derivation starts $S_3 \derives{*}_{G_3}
 S_2$, we may conclude $w$ is in $L_2$. Hence, $L(G_3) \subseteq L_1
 \cup L_2$, so $L(G_3) = L_1 \cup L_2$, as desired.
 
-The corresponding statement for Theorem~\ref{thm:closureUnion} in HOL is:
+The HOL expression of Theorem~\ref{thm:closureUnion} is:
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>,:'nts/:'a]{closure.union_cfg}
+\HOLthm[nostile,>>]{closure.union_cfg}
 \end{salltt}
 \end{holthm}
 \end{proof}

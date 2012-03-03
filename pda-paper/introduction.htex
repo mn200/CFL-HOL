@@ -36,7 +36,7 @@ The main effort goes into establishing this `disjoint' property.
 The two remaining closure properties illustrate how equivalence results for different models can be a great help: closure under substitution~(Section~\ref{sec:substitution}) uses a `parse tree' representation~(Section~\ref{sec:trees}) for derivations (rather than derivation lists), and closure under inverse homomorphism~(Section~\ref{sec:invhomomorphism}) relies on having an equivalent PDA for the given context-free grammar.
 
 \paragraph{HOL4 Notation and Theorems}
-All statements appearing with a turnstile ($\vdash$) are HOL4 theorems, automatically pretty-printed to \LaTeX{} from the relevant theory in the HOL4 development.
+All statements identified as \textbf{HOL Theorems} are theorems mechanically proved in the system and automatically pretty-printed to \LaTeX{} from the relevant theory in the HOL4 development.
 Notation specific to this paper is explained as it is introduced.
 Otherwise, HOL4 supports a notation that is a generally pleasant combination of quantifiers ($\forall$, $\exists$) and functional programming ($\lambda$ for function abstraction, juxtaposition for function application).
 

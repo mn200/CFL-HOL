@@ -23,26 +23,20 @@ substitution and inverse homomorphism. The closure under homomorphism
 follows from closure under the substitution operation.
 
 We provide only a brief overview of the first two since they were
-straightforward to mechanise. First we establish the `disjoint'
-property which allows renaming of variables in a grammar without
-affecting the language of the grammar. This forms the crucial part of
-proving the closure properties.
-
-\begin{holdef}[\HOLtm{disjoint}]
+straightforward to mechanise.
+First we establish the `disjoint' property which allows renaming of variables in a grammar without affecting the language of the grammar.
+This forms the crucial part of proving the closure properties.
+\begin{holthm}
 \begin{salltt}
 
 \HOLthm[nostile,>>,def]{closure.disjoint}
 \end{salltt}
-\end{holdef}
-
+\end{holthm}
 This theorem corresponds to the text statement {\it ``we may rename
   variables at will without changing the language generated''} in
 Hopcroft and Ullman.
-This theorem is a necessary assumption for the closure
-properties that follow.
-Note also that, since we are renaming variables
-(by picking new ones), we need the premise that the type universe of
-the non-terminal symbols be infinite.
+This theorem is a necessary assumption for the closure properties that follow.
+Note also that, since we are renaming variables (by picking new ones), we need the premise that the type universe of the non-terminal symbols be infinite.
 
 Closure properties typically merge rules of two different grammars in a
 particular way.

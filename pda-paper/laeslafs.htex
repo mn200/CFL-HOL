@@ -62,7 +62,7 @@ Simple asides such as the above end up requiring a proof first that single trans
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nostile,>>,M/m]{pdaDef.idcStackInsert}
+\HOLthm[nostile,>>,M/m,width=80]{pdaDef.idcStackInsert}
 \end{salltt}
 \end{holthm}
 Returning to the proof, by Rules 3 and 4, $(q,\epsilon,\gamma

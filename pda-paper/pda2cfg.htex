@@ -154,7 +154,7 @@ steps in a derivation of $G$ or the number of moves of $M$ that
 \end{equation}
 
 \subsection{Proof of the ``if'' portion of (\ref{eq:gEqPda})}
-First we show by induction on $i$ that if $(q,x,A) \to^i
+\noindent First we show by induction on $i$ that if $(q,x,A) \to^i
 (p,\epsilon,\epsilon)$, then $[q,A,p] \Rightarrow^* x$.
 \begin{holthm}
 % thms/pdaEqCfg
@@ -281,21 +281,20 @@ $a[q_1,B,q_2][q_2,B_2,q_3]...[q_n,B_n,q_{n+1}]~\lderives{*}x$.
 %\end{salltt}
 %\end{theorem}
 
-Since $(q,a\gamma,A) \to (q_1,\gamma,B_1B_2...B_n)$, we know that
-
-    $[q,A,p]~\lderive~a[q_1,B,q_2][q_2,B_2,q_3]...[q_n,B_n,q_{n+1}]$,
-so finally we can conclude that
-$[q,A,p]~\lderives{*}~a\gamma_1\gamma_2...\gamma_n~=~x$.
+Since $(q,a\gamma,A) \to (q_1,\gamma,B_1B_2...B_n)$, we know
+\[
+    [q,A,p]~\lderive~a[q_1,B,q_2][q_2,B_2,q_3]...[q_n,B_n,q_{n+1}]
+\]
+and so finally we can conclude \[
+[q,A,p]~\lderives{*}~a\gamma_1\gamma_2...\gamma_n~=~x
+\]
 \end{proof}
 
-The overall structure of the proof follows Hopcroft and Ullman but for
-each assertion made in the book, we have to provide concrete proofs
-before we can proceed any further. These proofs were quite involved,
-only a small subset of which has been shown above due to space
-restrictions.
+The overall structure of the proof follows Hopcroft and Ullman, though at rather greater length.
+The proofs in this section were quite involved, and we have only shown a small subset of them due to space restrictions.
 
 \subsection{Proof of the ``only if'' portion of (\ref{eq:gEqPda})}
-Now suppose $[q,A,p] \Rightarrow^{i} x$. We show by induction
+\noindent Now suppose $[q,A,p] \Rightarrow^{i} x$. We show by induction
 on $i$ that $(q,x,A) \to^* (p, \epsilon,\epsilon)$.
 % mythms/pdaEqCfg
 % p2gImpPda
@@ -307,25 +306,26 @@ on $i$ that $(q,x,A) \to^* (p, \epsilon,\epsilon)$.
 \end{holthm}
 
 \begin{proof}
-  The basis, $i=1$, is immediate, since $[q,A,p] \to x$ must be a
-  production of $G$ and therefore $\delta(q,x,A)$ must contain
-  $(p,\epsilon)$. Note $x$ is $\epsilon$ or in $\Sigma$ here.  In the
-  inductive step, there are three cases to be considered. The first is
-  the trivial case, $[q,A,p]~\Rightarrow~a$, where $a$ is a terminal.
-  Thus, $x=a$ and $\delta(q,a,A)$ must contain $(p,\epsilon)$.  The
-  other two possibilities are,
-  $[q,A,p]~\Rightarrow~a[q_1,B_1,q_2]...[q_n,B_n,q_{n+1}]~\Rightarrow^{i-1}~x$,
+  The basis, $i=1$, is immediate, since $[q,A,p] \to x$ must be a production of $G$ and therefore $\delta(q,x,A)$ must contain $(p,\epsilon)$.
+  Note $x$ is $\epsilon$ or in $\Sigma$ here.
+  In the inductive step, there are three cases to be considered.
+  The first is the trivial case, $[q,A,p]~\Rightarrow~a$, where $a$ is a terminal.
+  Thus, $x=a$ and $\delta(q,a,A)$ must contain $(p,\epsilon)$.
+%
+  The other two possibilities are \[
+    [q,A,p]~\Rightarrow~a[q_1,B_1,q_2]...[q_n,B_n,q_{n+1}]~\Rightarrow^{i-1}~x
+  \]
   where $q_{n+1} = p$ or
-  $[q,A,p]~\Rightarrow~[q_1,B_1,q_2]...[q_n,B_n,q_{n+1}]~\Rightarrow^{i-1}~x$,
-  where $q_{n+1} = p$.  The latter case can be considered a
-  specialisation of the first one such that $a=\epsilon$.  Then $x$
-  can be written as $x=ax_1x_2...x_n$, where $[q_j,B_j,q_{j+1}]
+  \[
+  [q,A,p]~\Rightarrow~[q_1,B_1,q_2]...[q_n,B_n,q_{n+1}]~\Rightarrow^{i-1}~x
+  \]
+  where $q_{n+1} = p$.
+  The latter case can be considered a specialisation of the first one such that $a=\epsilon$.
+  Then $x$ can be written as $x=ax_1x_2...x_n$, where $[q_j,B_j,q_{j+1}]
   \Rightarrow^* x_j$ for $1 \le j \le n$ and possibly $a=\epsilon$.
-  This has to be formally asserted in HOL.  Let $\alpha$ be of length
-  $n$.  If $\alpha~\derives{m}~\beta$, then $\alpha$ can be divided
-  into $n$ parts, $\alpha=\alpha_1\alpha_2...\alpha_n$ and
-  $\beta=\beta_1\beta_2...\beta_n$, such that
-  $\alpha_i~\derives{i}~\beta_i$ in $i\le m$ steps.
+  This has to be formally asserted in HOL.
+  Let $\alpha$ be of length $n$.
+  If $\alpha~\derives{m}~\beta$, then $\alpha$ can be divided into $n$ parts, $\alpha=\alpha_1\alpha_2...\alpha_n$ and $\beta=\beta_1\beta_2...\beta_n$, such that $\alpha_i~\derives{i}~\beta_i$ in $i\le m$ steps.
 \begin{holthm}
 \begin{salltt}
 
@@ -404,14 +404,12 @@ is, $x$ is in $L(G)$ if and only if $x$ is in $N(M)$ and we have
 \begin{holthm}
 \begin{salltt}
 
-\HOLthm[nosp,nostile,>>]{pdaEqCfg.p2gGrExists}
+\HOLthm[nosp,nostile,>>,:'pdastate/:'d]{pdaEqCfg.p2gGrExists}
 \end{salltt}
 \end{holthm}
 
-The \HOLtm{INFINITE} condition is on the type of state in the
-PDA. This is necessary to be a able to choose a fresh state (not in
-the PDA) to create the start symbol of the grammar as mentioned
-before.
+The pre-condition is on the type of state in the PDA.
+This is necessary to be a able to choose a fresh state (not in the PDA) to create the start symbol of the grammar as mentioned before.
 
 %%% Local Variables:
 %%% mode: latex

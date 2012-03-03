@@ -129,8 +129,7 @@ using the last conjunct.
 
 \HOLthm[nostile,>>,M/m]{pdaEqCfg.ntslCond_def}
 \end{salltt}
-\noindent (The \texttt{;} is used to separate elements in a list and
-\HOLtm{LAST} returns the last element in a list.)
+\noindent (The \HOLtm{LAST} function returns the last element in a list.)
 \end{holdef}
 
 The constraints described above reflect exactly the information

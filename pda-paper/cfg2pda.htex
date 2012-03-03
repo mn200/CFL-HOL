@@ -1,7 +1,7 @@
 \section{Constructing a PDA for a CFG}
 \label{sec:cfg2pda}
 
-In this section, we discuss the paper's most involved proof: that of the equivalence of PDAs and CFGs.
+In the next two sections, we discuss the paper's most involved proof: that of the equivalence of PDAs and CFGs.
 In fact, constructing a PDA for a CFG is a straightforward process so most of the space is given to just one direction of the equivalence:
 the construction of a CFG from a PDA.
 

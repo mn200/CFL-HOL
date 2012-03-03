@@ -44,6 +44,10 @@ Lists are written between square brackets, \emph{e.g.,} \HOLtm{[1;2]}.
 The length of a list \HOLtm{l} is written~\HOLtm{LENGTH l}.
 The concatenation of \HOLtm{l1} and \HOLtm{l2} is written \HOLtm{APPEND l1 l2}.
 Overloading notation, we use $\in$ (and $\notin$) to refer to membership (non-membership) of both lists and sets.
+Lists support a range of functions from the functional programming world such as \HOLtm{MAP} and \HOLtm{FLAT} (which takes a list of lists and returns the concatenation of all the member lists).
+
+Concrete sets are written between braces, \emph{e.g.,} \HOLtm{{1;2\}}.
+We can write set comprehensions in typical syntax: the expression \HOLtm{{ x | x < 4\}} denotes the set of numbers less than $4$.
 
 If \HOLtm{R} is a (curried) binary relation (such that we write \HOLtm{R x y} when $x$ and $y$ are linked in the relation), then \HOLtm{RTC R} is the reflexive and transitive closure of $R$.
 
@@ -56,10 +60,6 @@ NICTA is funded by the Australian Government as represented by the
 Department of Broadband, Communications and the Digital Economy and
 the Australian Research Council through the ICT Centre of Excellence
 program.
-
-
-%%% Local Variables:
-
 
 
 %%% Local Variables:

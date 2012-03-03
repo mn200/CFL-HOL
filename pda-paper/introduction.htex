@@ -19,7 +19,8 @@ Nonetheless, there \emph{are} a number of other reasons for performing these mec
 \item We also provide an important basis for future, more complicated mechanised developments.  Without basic results such as those proved here, mechanised developments such as our verification of generation of SLR automata~\citep{Barthwal:ESOP2009:Verified-Parsing} would not be possible.
 %
 The library of proofs, techniques and notations developed here provides the basis from which further work on verified language theory can proceed at a quickened pace.
-\item The mechanisation work is an engaging intellectual exercise in itself; performing proofs of this sort are a very good way to
+\item The mechanisation work is an engaging intellectual exercise in itself; performing proofs of this sort is a very good way to iron out any wrinkles in one's understanding of the material.
+As such, we highly recommend mechanisation to all!
 \end{itemize}
 
 The rest of the paper is structured as follows.

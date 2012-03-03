@@ -17,3 +17,7 @@ r49Elem 10 gnf_p1Elem
 (BEGIN_DERIVES) 1 \ensuremath{\Rightarrow_{
 (END_DERIVES) 0 }}
 (BEGIN_RTC_DERIVES) 1 \ensuremath{\Rightarrow\sp{*}_{
+l1 1 \ensuremath{\ell\sb{1}}
+l2 1 \ensuremath{\ell\sb{2}}
+l3 1 \ensuremath{\ell\sb{3}}
+ln 1 \ensuremath{\ell\sb{n}}

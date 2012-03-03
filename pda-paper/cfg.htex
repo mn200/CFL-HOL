@@ -46,7 +46,7 @@ If an arbitrary binary relation $R$ holds on adjacent elements of list
 \HOLtm{l} which has $x$ as its first element and $y$ as its last
 element, then we write \HOLtm{R ⊢ l ◁ x → y}.
 %
-For example a derivation sequence $l_1 \derive l_2 \derive l_3 \dots \derive ln$ can be represented using lists as \HOLtm{derives g ⊢ l ◁ l1 → ln} where $l = l_1 l_2\dots l_n$, and \HOLtm{derives g} is the binary relation underneath $\mathit{sf}_1\Rightarrow_g\mathit{sf}_2$.
+For example a derivation sequence $\ell_1 \derive \ell_2 \derive \ell_3 \dots \derive \ell_n$ can be represented using lists as \HOLtm{derives g ⊢ l ◁ l1 → ln} where $\ell = \ell_1 \ell_2\dots \ell_n$, and \HOLtm{derives g} is the binary relation underneath $\mathit{sf}_1\Rightarrow_g\mathit{sf}_2$.
 
 In the context of grammars, $R$ relates sentential forms.
 Later we will use the same notation to relate derivations in a PDA.
@@ -58,10 +58,9 @@ We will also use the rightmost derivation relation, \texttt{rderives}, and its c
 \begin{holdef}
 \begin{salltt}
 
-\HOLthm[nostile,>>,width=80]{grammarDef.language_def}
+\HOLthm[nostile,>>,width=80,w/tsl]{grammarDef.language_def}
 \end{salltt}
-Function \HOLtm{isWord tsl} returns true if all the elements in the
-sentential form \HOLtm{tsl} are terminal symbols.
+Function \HOLtm{isWord w} returns true if all the elements in the sentential form \HOLtm{w} are terminal symbols.
 \end{holdef}
 \end{definition}
 

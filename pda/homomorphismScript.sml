@@ -6,6 +6,10 @@ listTheory rich_listTheory optionTheory arithmeticTheory
 open listLemmasTheory relationLemmasTheory containerLemmasTheory
      grammarDefTheory pdaDefTheory symbolDefTheory parseTreeTheory
 
+open pdaEqCfgTheory
+
+open gnfTheory
+
 val _ = new_theory "homomorphism"
 
 
@@ -1703,5 +1707,34 @@ THENL[
        METIS_TAC [APPEND]) THEN
       FULL_SIMP_TAC (srw_ss()) [hInvpda]
       ]);
+
+val inverseHomomorphism = Define 
+`inverseHomomorphism h (g:('nts,'ts)grammar) = { w | (FLAT (MAP h w)) ∈ language g}`;
  
+
+``∀g (h:('nts, 'ts) symbol -> ('nts, 'ts) symbol list). INFINITE
+(UNIV:'nts set) ∧ [] ∉ language (g:('nts,'ts) grammar) ⇒ ∃g'. language
+g' = inverseHomomorphism h g``
+
+SRW_TAC [][]
+`∃g'.isGnf g' ∧ (language g = language g')` by METIS_TAC [gnfExists]
+
+`∃(m:(('nts, 'ts) symbol, ('nts, 'ts) symbol, 'state) pda).
+            x ∈ language g = x ∈ laes m` by METIS_TAC [thm5_3]
+
+
+`∃m'.hInvpda m m' h` by MAGIC
+
+`(x ∈ lafs m' = x ∈ { w | (FLAT (MAP h w)) ∈ lafs m })` by METIS_TAC [invhEq]
+FULL_SIMP_TAC (srw_ss()) [language_def, inverseHomomorphism, EXTENSION]
+`x ∈ lafs m` by MAGIC
+Q.EXISTS_TAC `g` 
+SRW_TAC [][]
+METIS_TAC []
+
+
+
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
+
 val _ = export_theory();

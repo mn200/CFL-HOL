@@ -7,11 +7,11 @@ parse trees, an alternate formalisation for representing derivations
 in a grammar.  When explaining a derivation using pen and paper it is
 common to show multiple expansions in parallel. In such a case each
 derivation step involves a
-one-step expansion of all the nonterminals. The derivation\\
+one-step expansion of all the non-terminals. The derivation\\
 \[ A \derive A_1A_2A_3 \derive a_1A_2A_3 \derive a_1a_2A_3 \derive
 a_1a_2a_3 \]\\
 in a grammar $G$, where $a_1$, $a_2$, $a_3$ are terminals and
-$A$,$A_1$,$A_2$,$A_3$ are nonterminals, can be represented using the
+$A$,$A_1$,$A_2$,$A_3$ are non-terminals, can be represented using the
 following diagram.
 
 \begin{center}
@@ -35,7 +35,7 @@ following diagram.
 \end{tikzpicture}
 \end{center}
 
-Here, nonterminal $A$ is the root node and terminals $a_1$, $a_2$,
+Here, non-terminal $A$ is the root node and terminals $a_1$, $a_2$,
 $a_3$ are the leaf nodes. The rules in $G$ that allow this derivation
 are $A \to A_1A_2A_3$, $A_1 \to a_1$, $A_2 \to a_2$ and $A_3 \to a_3$.
 
@@ -80,7 +80,7 @@ to grammar $G$ if each expansion step corresponds to some rule in $G$.
 (\HOLtm{getSymbols ptl} returns the symbols corresponding to the top
 level nodes of the parse tree list \HOLtm{ptl}. Function \HOLtm{isNode
   tree} returns true if and only if \HOLtm{tree} is a
-node,~\ie~corresponds to a nonterminal.)
+node,~\ie~corresponds to a non-terminal.)
 \end{holdef}
 
 
@@ -95,7 +95,7 @@ to be composed of only terminals.
 
 If a tree is a valid parse tree with respect to a grammar then one can
 construct a corresponding derivation from the yield from the root
-nonterminal.
+non-terminal.
 
 \begin{holthm}
 \begin{salltt}
@@ -104,7 +104,7 @@ nonterminal.
 \end{salltt}
 \end{holthm}
 
-Similarly, if a terminal string can be derived from a nonterminal one
+Similarly, if a terminal string can be derived from a non-terminal one
 can construct a parse tree for the derivation.
 
 \begin{holthm}

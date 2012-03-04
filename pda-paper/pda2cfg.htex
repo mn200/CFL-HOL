@@ -28,7 +28,7 @@ generated.
 %In other words, $[q,A,p]$ derives $x$ if and and only if
 %$x$ causes $M$ to erase an $A$ from its stack by some sequence of
 %moves beginning in state $q$ and ending in state $p$. The input string
-%form the set $T^*$ while the nonterminals are used to represent the
+%form the set $T^*$ while the non-terminals are used to represent the
 %stack content.
 
 \paragraph{\bf From text to automated text:}
@@ -50,12 +50,12 @@ mechanisation and are summarised below.
   grammar rules based on whether $a=\epsilon$, $m=0$ or $a$ is a
   terminal symbol;
 
-\item[\textbf{C2.4}] if $m > 1$ \ie~more than one nonterminal exists
+\item[\textbf{C2.4}] if $m > 1$ \ie~more than one non-terminal exists
   on the RHS of the rule then
   \begin{description}
-  \item[\textbf{C2.4.1}] $\alpha$ is composed of only nonterminals;
+  \item[\textbf{C2.4.1}] $\alpha$ is composed of only non-terminals;
 
-  \item[\textbf{C2.4.2}] a nonterminal is an object of the form
+  \item[\textbf{C2.4.2}] a non-terminal is an object of the form
     $[q,A,p]$ for PDA from-state $q$ and to-state $p$, and stack
     symbol $A$;
 
@@ -63,9 +63,9 @@ mechanisation and are summarised below.
       the to-state of the last object is $q_{m+1}$;
 
     \item[\textbf{C2.4.4}] the to-state and from-state of adjacent
-      nonterminals must be the same;
+      non-terminals must be the same;
 
-    \item[\textbf{C2.4.5}] the states encoded in the nonterminals must
+    \item[\textbf{C2.4.5}] the states encoded in the non-terminals must
       belong to $Q$.
 \end{description}
 \end{description}
@@ -86,7 +86,7 @@ for the grammar corresponding to a PDA.
 \end{salltt}
 \end{holdef}
 
-The nonterminals are a tuple of a from-state, a stack symbol and a
+The non-terminals are a tuple of a from-state, a stack symbol and a
 to-state, the states and the stack symbols belonging to the PDA. As
 long as one of the components is not in the PDA, our start symbol will
 be new and will not overlap with the symbols constructed from the
@@ -101,7 +101,7 @@ The \texttt{p2gRules} predicate (see Figure~\ref{fig:p2gRules})
 enforces the conditions \textbf{C2.1}, \textbf{C2.2}, \textbf{C2.3}
 (capturing the four possibilities for a rule, $A~\to~\epsilon$;
 $A~\to~a$, $A~\to~a\alpha$, where $a$ is a terminal symbol and
-$A~\to~\alpha$ for nonterminals $\alpha$).
+$A~\to~\alpha$ for non-terminals $\alpha$).
 
 \begin{figure}[htbp]
 \begin{holdef}
@@ -116,7 +116,7 @@ $A~\to~\alpha$ for nonterminals $\alpha$).
 
 Condition \texttt{ntslCond} captures \textbf{C2.4} by describing the
 structure of the components making up the RHS of the rules when
-$\alpha$ is nonempty (\ie~ has one or more nonterminals).  The
+$\alpha$ is nonempty (\ie~ has one or more non-terminals).  The
 component $[q,A,p]$ is interpreted as a non-terminal symbol and $q$
 (\HOLtm{frmState}) and $p$ (\HOLtm{toState}) belong in the states of
 the PDA (\textbf{C2.4.2}), the conditions on $q'$ and $q_l$ that
@@ -237,7 +237,7 @@ element.)
 \end{holthm}
 \end{figure}
 
-To be able to prove this, it is neccessary to provide the assertion
+To be able to prove this, it is necessary to provide the assertion
 that each derivation in the PDA can be divided into two parts, such
 that the first part (list \HOLtm{dl0}) corresponds to reading $n$ input
 symbols to pop off the top stack symbol. This is our HOL Theorem~\ref{holthm:ldIdcSplit}.
@@ -337,7 +337,7 @@ on $i$ that $(q,x,A) \to^* (p, \epsilon,\epsilon)$.
 \end{holthm}
 
 Inserting $B_{j+1}...B_n$ at the bottom of each stack in the above
-sequence of ID's gives us,
+sequence of IDs gives us,
 \begin{equation}
 (q_j,x_j,B_jB_{j+1}...B_n)~\to^*~(q_{j+1},\epsilon,B_{j+1}...B_n).
 \label{eq:insertStack}

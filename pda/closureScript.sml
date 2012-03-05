@@ -1108,16 +1108,16 @@ MATCH_MP_TAC RTC_SUBSET THEN
 SRW_TAC [][derives_def, rules_def, grUnion] THEN
 METIS_TAC [APPEND_NIL]);
 
-val gruDerivFrmg1 = store_thm
-("gruDerivFrmg1",
+val gruDeriv1Frmg1 = store_thm
+("gruDeriv1Frmg1",
 ``derives g1 w w' ⇒
  (derives (grUnion s0 g1 g2)) w w'``,
 
 SRW_TAC [][grUnion, derives_def, rules_def] THEN
 METIS_TAC [MEM_APPEND, APPEND_NIL]);
 
-val gruDerivFrmg2 = store_thm
-("gruDerivFrmg2",
+val gruDeriv1Frmg2 = store_thm
+("gruDeriv1Frmg2",
 ``derives g2 w w' ⇒
  (derives (grUnion s0 g1 g2)) w w'``,
 
@@ -1130,7 +1130,7 @@ val gruDerivFrmg1 = store_thm
  (derives (grUnion s0 g1 g2))^* w w'``,
 
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
-METIS_TAC [gruDerivFrmg1, RTC_RULES]);
+METIS_TAC [gruDeriv1Frmg1, RTC_RULES]);
 
 val gruDerivFrmg2 = store_thm
 ("gruDerivFrmg2",
@@ -1138,7 +1138,7 @@ val gruDerivFrmg2 = store_thm
  (derives (grUnion s0 g1 g2))^* w w'``,
 
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
-METIS_TAC [gruDerivFrmg2, RTC_RULES]);
+METIS_TAC [gruDeriv1Frmg2, RTC_RULES]);
 
 val gruStartRuleRhs = store_thm
 ("gruStartRuleRhs",

@@ -121,51 +121,76 @@ METIS_TAC [rtc2list_distrib_append_fst] THEN1
 FULL_SIMP_TAC (srw_ss()) []);
 
 
-val rule1 = Define
-`rule1 (m:(α, β, γ) pda) (h: α -> α list) =
-{ ((NONE:α option,ssym,q,x),(p,x),ssyms) | ∃a. isSuffix x (h a) ∧
- MEM ((NONE,ssym,q),(p,ssyms)) m.next }`;
+val inpSyms_empty = store_thm(
+  "inpSyms_empty",
+  ``(inpSyms m = {}) ==> (laes m ⊆ {[]})``,
+  SIMP_TAC (srw_ss()) [laes_def, SUBSET_DEF] THEN
+  STRIP_TAC THEN
+  Q_TAC SUFF_TAC
+     `∀id0 id. m ⊢ id0 →* id ⇒
+            ∀s0 i0 stk0 s stk.
+              (id0 = (s0,i0,stk0)) ∧ (id = (s,[],stk)) ⇒
+              (i0 = [])` THEN1 METIS_TAC [] THEN
+  HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
+  Cases_on `id0'` THEN Cases_on `r` THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN
+  Cases_on `i0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+  Cases_on `stk0` THEN FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
+  SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [inpSyms_def, EXTENSION] THEN
+  METIS_TAC []);
 
-val rule2 = Define
-`rule2 (m:(α, β, γ) pda) (h: α -> α list) =
-{ ((NONE:α option,ssym,(q,isym::x)),((p,x),ssyms)) | ∃a. isSuffix (isym::x) (h a) ∧
-MEM ((SOME isym,ssym,q),(p,ssyms)) m.next }`;
+val rule1 = Define `
+  rule1 (m:(α, β, γ) pda) (h: α -> α list) =
+    { ((NONE:α option,ssym,q,x),(p,x),ssyms) |
+      ∃a. a ∈ inpSyms m ∧ isSuffix x (h a) ∧
+          MEM ((NONE,ssym,q),(p,ssyms)) m.next
+    }`;
 
-val rule3 = Define
-`rule3 (m:(α, β, γ) pda) (h: α -> α list) newssym=
-{ ((SOME a,ssym,(q,[]:α list)),((q,h a),[ssym])) | a,ssym,q |
-q ∈ states m ∧ ssym ∈ (stkSyms m ∪ {newssym}) ∧ (h a) ∈ IMAGE h {a} }`;
+val rule2 = Define `
+  rule2 (m:(α, β, γ) pda) (h: α -> α list) =
+   { ((NONE:α option,ssym,(q,isym::x)),((p,x),ssyms)) |
+     ∃a. a ∈ inpSyms m ∧ isSuffix (isym::x) (h a) ∧
+         MEM ((SOME isym,ssym,q),(p,ssyms)) m.next
+   }`;
 
+val rule3 = Define `
+  rule3 (m:(α, β, γ) pda) (h: α -> α list) newssym=
+    { ((SOME a,ssym,(q,[]:α list)),((q,h a),[ssym])) | a,ssym,q |
+      a ∈ inpSyms m ∧ q ∈ states m ∧ ssym ∈ (stkSyms m ∪ {newssym}) ∧
+      h a ∈ IMAGE h {a}
+    }`;
 
-val hInvpda = Define
-`hInvpda (m:(α, β, γ) pda) (m':(α, β, γ # α list) pda) (h: α -> α list) =
-∃z0. z0 ∉ stkSyms m ∧ (m'.ssSym = z0) ∧
-∃q0. q0 ∉ states m ∧ (m'.start = (q0,[]:α list)) ∧
-(∀q r.MEM (q,r:α list) m'.final = MEM q m.final ∧ (r=[])) ∧
-∀r.MEM r m'.next = r ∈ (rule1 m h ∪ rule2 m h ∪ rule3 m h m'.ssSym) ∪
-{ ((NONE,m'.ssSym,m'.start),((m.start,[]),[m.ssSym;m'.ssSym])) } `;
+val hInvpda = Define `
+  hInvpda (m:(α, β, γ) pda) (m':(α, β, γ # α list) pda) (h: α -> α list) =
+    ∃z0. z0 ∉ stkSyms m ∧ (m'.ssSym = z0) ∧
+         ∃q0. q0 ∉ states m ∧ (m'.start = (q0,[]:α list)) ∧
+              (∀q r.MEM (q,r:α list) m'.final = MEM q m.final ∧ (r=[])) ∧
+              ∀r.
+                MEM r m'.next ⇔
+                r ∈ (rule1 m h ∪ rule2 m h ∪ rule3 m h m'.ssSym) ∪
+                     { ((NONE,m'.ssSym,m'.start),
+                        ((m.start,[]), [m.ssSym;m'.ssSym])) }
+`;
 
+val memMRule1 = store_thm (
+  "memMRule1",
+  ``MEM ((NONE,sh,q),p,st') m.next ∧ hInvpda m m' h ∧ isSuffix x (h a) ∧
+    a ∈ inpSyms m ⇒
+    MEM ((NONE,sh,q,x),(p,x),st') m'.next``,
+  SRW_TAC [][hInvpda] THEN ASM_SIMP_TAC (srw_ss()) [GSYM DISJ_ASSOC] THEN
+  DISJ1_TAC THEN
+  ASM_SIMP_TAC (srw_ss()) [rule1] THEN
+  METIS_TAC []);
 
-val memMRule1 = store_thm
-("memMRule1",
-``MEM ((NONE,sh,q),p,st') m.next ∧ hInvpda m m' h ∧ isSuffix x (h a)
-⇒
-MEM ((NONE,sh,q,x),(p,x),st') m'.next``,
-
-SRW_TAC [][hInvpda] THEN
-FULL_SIMP_TAC (srw_ss()) [rule1, rule2] THEN
-METIS_TAC []);
-
-
-val mImpm'Trans1 = store_thm
-("mImpm'Trans1",
-``MEM ((NONE,sh,q),p,st') m.next ∧ hInvpda m m' h
+val mImpm'Trans1 = store_thm (
+  "mImpm'Trans1",
+  ``MEM ((NONE,sh,q),p,st') m.next ∧ hInvpda m m' h ∧ a ∈ inpSyms m
       ⇒
-      IDC m' ((q,[]),[a],sh::st) ((p,h a),[],st' ++ st)``,
+    IDC m' ((q,[]),[a],sh::st) ((p,h a),[],st' ++ st)``,
 
  SRW_TAC [][] THEN
-`MEM ((NONE,sh,q,h a),(p,h a),st') m'.next`
- by METIS_TAC [memMRule1, isSuffix_refl] THEN
+ `MEM ((NONE,sh,q,h a),(p,h a),st') m'.next`
+   by METIS_TAC [memMRule1, isSuffix_refl] THEN
  SRW_TAC [][Once RTC_CASES1] THEN
  `q ∈ states m` by
  (SRW_TAC [][states_def, EXTENSION] THEN
@@ -182,15 +207,16 @@ val mImpm'Trans1 = store_thm
 
 val mImpm'Trans2 = store_thm
 ("mImpm'Trans2",
-``MEM ((SOME ih,sh,q),p,st') m.next ∧ (h a = ih::isyms) ∧ hInvpda m m' h
+``MEM ((SOME ih,sh,q),p,st') m.next ∧ (h a = ih::isyms) ∧ hInvpda m m' h ∧
+  a ∈ inpSyms m
  ⇒
-IDC m' ((q,[]),[a],sh::st) ((p,isyms),[],st' ++ st)``,
+  IDC m' ((q,[]),[a],sh::st) ((p,isyms),[],st' ++ st)``,
 
  SRW_TAC [][] THEN
  `isSuffix isyms (h a)` by METIS_TAC [isSuffix_lemma, APPEND] THEN
  `MEM ((NONE,sh,q,ih::isyms),(p,isyms),st')  m'.next`
- by (FULL_SIMP_TAC (srw_ss()) [hInvpda, rule2] THEN
-     METIS_TAC [isSuffix_lemma,APPEND]) THEN
+    by (FULL_SIMP_TAC (srw_ss()) [hInvpda, rule2] THEN
+        METIS_TAC [isSuffix_lemma,APPEND]) THEN
  `q ∈ states m` by (SRW_TAC [][states_def, EXTENSION] THEN METIS_TAC []) THEN
  `sh ∈ stkSyms m'` by (SRW_TAC [][stkSyms_def, EXTENSION] THEN METIS_TAC []) THEN
  `MEM ((SOME a,sh,q,[]),(q,h a),[sh]) m'.next`
@@ -207,11 +233,12 @@ IDC m' ((q,[]),[a],sh::st) ((p,isyms),[],st' ++ st)``,
 
 val mImpm'OneSym = store_thm
 ("mImpm'OneSym",
-``∀dl p isyms ssyms'.ID m ⊢ dl ◁ (q,h a,ssyms) → (p,isyms,ssyms') ∧
-LENGTH dl > 1 ∧
-hInvpda (m:(α, β, γ) pda) (m':(α, β, γ # α list) pda) (h: α -> α list)
-⇒
- IDC m' ((q,[]),[a],ssyms) ((p,isyms),[],ssyms')``,
+``∀dl p isyms ssyms'.
+     ID m ⊢ dl ◁ (q,h a,ssyms) → (p,isyms,ssyms') ∧
+     LENGTH dl > 1 ∧ a ∈ inpSyms m ∧
+     hInvpda (m:(α, β, γ) pda) (m':(α, β, γ # α list) pda) (h: α -> α list)
+  ⇒
+     IDC m' ((q,[]),[a],ssyms) ((p,isyms),[],ssyms')``,
 
 HO_MATCH_MP_TAC SNOC_INDUCT THEN SRW_TAC [][SNOC_APPEND] THEN
 Cases_on `dl=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -253,18 +280,19 @@ THENL[
 	  METIS_TAC [isSuffix_lemma, APPEND]) THEN
       `ID m' ((q',ih::isyms),[],sh::st) ((p,isyms),[],st' ++ st)`
       by SRW_TAC [][id_thm] THEN
-      METIS_TAC [ RTC_RULES_RIGHT1]]);
+      METIS_TAC [ RTC_RULES_RIGHT1]
+]);
 
 
 val mImpm'InpNil = store_thm
 ("mImpm'InpNil",
 ``∀dl q ssyms p.
-ID m ⊢ dl ◁ (q,[],ssyms) → (p,[],ssyms') ∧ hInvpda m m' h
- ⇒
-IDC m' ((q,[]),[],ssyms) ((p,[]),[],ssyms')``,
+     ID m ⊢ dl ◁ (q,[],ssyms) → (p,[],ssyms') ∧ hInvpda m m' h ∧
+     ~(laes m ⊆ {[]})
+   ⇒
+     IDC m' ((q,[]),[],ssyms) ((p,[]),[],ssyms')``,
 
-Induct_on `dl` THEN SRW_TAC [][] THEN1
-FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+Induct_on `dl` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 SRW_TAC [][] THEN
 Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -273,12 +301,13 @@ Cases_on `h'` THEN
 Cases_on `r` THEN
 FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
 SRW_TAC [][] THEN
-`∀a.isSuffix [] (h a)` by SRW_TAC [][isSuffix_def] THEN
+`inpSyms m ≠ {}` by METIS_TAC [inpSyms_empty] THEN
+`∃a. a ∈ inpSyms m` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
+`isSuffix [] (h a)` by SRW_TAC [][isSuffix_def] THEN
 IMP_RES_TAC memMRule1 THEN
 `ID m' ((q,[]),[],sh::st) ((q',[]),[],st' ++ st)`
 by SRW_TAC [][id_thm] THEN
 METIS_TAC [RTC_RULES]);
-
 
 val idTransOnInpPfx = store_thm
 ("idTransOnInpPfx",

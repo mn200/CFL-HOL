@@ -36,10 +36,19 @@ The main effort goes into establishing this `disjoint' property.
 %
 The two remaining closure properties illustrate how equivalence results for different models can be a great help: closure under substitution~(Section~\ref{sec:substitution}) uses a `parse tree' representation~(Section~\ref{sec:trees}) for derivations (rather than derivation lists), and closure under inverse homomorphism~(Section~\ref{sec:invhomomorphism}) relies on having an equivalent PDA for the given context-free grammar.
 
-\paragraph{HOL4 Notation and Theorems}
-All statements identified as \textbf{HOL Theorems} are theorems mechanically proved in the system and automatically pretty-printed to \LaTeX{} from the relevant theory in the HOL4 development.
+\paragraph{HOL4: Background,  Theorems and Notation}
+The work described in this paper was all carried out in HOL4~\citep{gordon93,SlindNorrish2008}, a modern interactive theorem-proving system, or proof assistant.
+Based on the ``LCF philosophy'', HOL4 has a small trusted code base, its proof kernel.
+All theorems proved in the system ultimately depend only on that kernel, providing a high degree of confidence in their validity.
+
+In this paper, all statements identified as \textbf{HOL Theorems} are theorems mechanically proved in the system and automatically pretty-printed to \LaTeX{} from the relevant theory in the HOL4 development.
+Any discussion of proofs accompanying these theorems will be in an informal style.
+The actual proof scripts consumed by the system are typically quite incomprehensible, for all that they do embody the mathematical essence of the proof.
+For this reason, the paper does not include any HOL4 source code directly.
+Of course, full sources are available for download (see the following ``availability'' section).
+
 Notation specific to this paper is explained as it is introduced.
-Otherwise, HOL4 supports a notation that is a generally pleasant combination of quantifiers ($\forall$, $\exists$) and functional programming ($\lambda$ for function abstraction, juxtaposition for function application).
+Otherwise, HOL4 supports a notation that is a generally pleasant combination of predicate logic (quantifiers $\forall$, $\exists$, connectives $\land$, $\Rightarrow$, for example) and functional programming ($\lambda$ for function abstraction, juxtaposition for function application).
 
 Lists are written between square brackets, \emph{e.g.,} \HOLtm{[1;2]}.
 The length of a list \HOLtm{l} is written~\HOLtm{LENGTH l}.
@@ -49,7 +58,6 @@ Lists support a range of functions from the functional programming world such as
 
 Concrete sets are written between braces, \emph{e.g.,} \HOLtm{{1;2\}}.
 We can write set comprehensions in typical syntax: the expression \HOLtm{{ x | x < 4\}} denotes the set of numbers less than $4$.
-
 If \HOLtm{R} is a (curried) binary relation (such that we write \HOLtm{R x y} when $x$ and $y$ are linked in the relation), then \HOLtm{RTC R} is the reflexive and transitive closure of $R$.
 
 \paragraph{Availability} Both HOL4 itself and the sources for this work are available from \url{github.com}.

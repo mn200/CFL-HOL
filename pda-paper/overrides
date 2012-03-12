@@ -21,3 +21,4 @@ l1 1 \ensuremath{\ell\sb{1}}
 l2 1 \ensuremath{\ell\sb{2}}
 l3 1 \ensuremath{\ell\sb{3}}
 ln 1 \ensuremath{\ell\sb{n}}
+(RULEIFX) 1 \ensuremath{\,\leadsto\,}

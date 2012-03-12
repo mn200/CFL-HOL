@@ -78,7 +78,11 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   term_name = "pprtcderives",
                   fixity = Infix(NONASSOC, 450)}
 
-
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  paren_style = OnlyIfNecessary,
+                  pp_elements = [TOK "(RULEIFX)"],
+                  term_name = "rule",
+                  fixity = Infix(NONASSOC, 450)}
 
 
 (* including some backticks `` ensures that this file gets processed with

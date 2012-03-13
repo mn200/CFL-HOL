@@ -1791,20 +1791,18 @@ val PAIR_ABS = prove(
 
 val FINITE_isSuffixTrans = store_thm(
   "FINITE_isSuffixTrans",
-  ``FINITE univ(:'a) ⇒
-    FINITE {((opt,q,r,x),(q',x),r') | (x,a:'a) | a ∈ inpSyms m ∧ isSuffix x (h a)}``,
-MAGIC);
-(*
-  STRIP_TAC THEN ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
+  ``FINITE {((opt,q,r,x),(q',x),r') | (x,a:α) | a ∈ inpSyms (m:(α, β, γ) pda) ∧ 
+            isSuffix x ((h:α -> α list) a)}``,
+
+ ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
   MATCH_MP_TAC IMAGE_FINITE THEN
   SRW_TAC [][PAIR_ABS] THEN
   MATCH_MP_TAC SUBSET_FINITE_I THEN
-  Q.EXISTS_TAC `(BIGUNION (IMAGE (\a. { l | a ∈ inpSyms m ∧ isSuffix l (h a)}) univ(:'a)))
+  Q.EXISTS_TAC `(BIGUNION (IMAGE (\a:α. { l | a ∈ inpSyms m ∧ isSuffix l ((h:α -> α list) a)}) (inpSyms m)))
                    CROSS
-                univ(:'a)` THEN
+                (inpSyms m)` THEN
   Tactical.REVERSE (SRW_TAC [DNF_ss][SUBSET_DEF]) THEN1 METIS_TAC [] THEN
-  SRW_TAC [][suffixes_are_finite]);
-*)
+  SRW_TAC [][suffixes_are_finite, finiteInpSyms]);
 
 val GSPEC' = REWRITE_RULE [SPECIFICATION] GSPECIFICATION
 
@@ -1831,8 +1829,7 @@ val FINITE_INTER2 = store_thm(
   METIS_TAC [INTER_FINITE, INTER_COMM])
 
 val FINITE_rule1 = store_thm("FINITE_rule1",
-  ``FINITE univ(:'a) ⇒
-    FINITE (rule1 (m:(α, β, γ) pda) (h: α -> α list))``,
+  ``FINITE (rule1 (m:(α, β, γ) pda) (h: α -> α list))``,
 
 SRW_TAC [][rule1] THEN
 Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
@@ -1866,7 +1863,7 @@ METIS_TAC []);
 
 val FINITE_rule2 = store_thm(
   "FINITE_rule2",
-  ``FINITE univ(:'a) ⇒ FINITE (rule2 (m:(α, β, γ) pda) (h: α -> α list))``,
+  ``FINITE (rule2 (m:(α, β, γ) pda) (h: α -> α list))``,
 
 SRW_TAC [][rule2] THEN
 Q.MATCH_ABBREV_TAC `FINITE Horrible` THEN
@@ -1894,11 +1891,14 @@ ASM_SIMP_TAC (srw_ss()) [] THEN1
     SRW_TAC [][PAIR_ABS] THEN
     MATCH_MP_TAC SUBSET_FINITE_I THEN
     Q.EXISTS_TAC `
-      (BIGUNION (IMAGE (\a. { l | isSuffix (x::l) (h a)}) univ(:'a)))
+      (BIGUNION (IMAGE (\a. { l | isSuffix (x::l) (h a)}) (inpSyms m)))
                    CROSS
-      univ(:'a)` THEN
+      (inpSyms m)` THEN
     Tactical.REVERSE (SRW_TAC [DNF_ss][SUBSET_DEF]) THEN1 METIS_TAC [] THEN
-    DISJ2_TAC THEN Q.X_GEN_TAC `v` THEN
+    SRW_TAC [][finiteInpSyms] THEN
+    DISJ2_TAC THEN DISJ2_TAC THEN
+    Q.X_GEN_TAC `v` THEN
+    SRW_TAC [][] THEN
     MATCH_MP_TAC SUBSET_FINITE_I THEN
     Q.EXISTS_TAC `{l | isSuffix l (h v)}` THEN CONJ_TAC THEN1
     SRW_TAC [][suffixes_are_finite] THEN
@@ -1916,17 +1916,16 @@ METIS_TAC []);
 
 val FINITE_rule3 = store_thm(
   "FINITE_rule3",
-  ``FINITE univ(:'a) ⇒
-    FINITE (rule3 (m:(α, β, γ) pda) (h: α -> α list) newssym)``,
+  ``FINITE (rule3 (m:(α, β, γ) pda) (h: α -> α list) newssym)``,
 
   SRW_TAC [][rule3] THEN
   ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
   SRW_TAC [][PAIR_ABS] THEN
   MATCH_MP_TAC IMAGE_FINITE THEN
   MATCH_MP_TAC SUBSET_FINITE_I THEN
-  Q.EXISTS_TAC `univ(:'a) × ((newssym INSERT stkSyms m) × states m)`  THEN
+  Q.EXISTS_TAC `(inpSyms m) × ((newssym INSERT stkSyms m) × states m)`  THEN
   SRW_TAC [][finiteStkSyms, finiteStates] THEN
-  SRW_TAC [][SUBSET_DEF] THEN SRW_TAC [][]);
+  SRW_TAC [][SUBSET_DEF] THEN SRW_TAC [][finiteInpSyms]);
 
 val FINITE_finalStateSet = store_thm("FINITE_finalStateSet",
 ``FINITE {(q,[]:(α, β) symbol list) | q ∈ m.final}``,

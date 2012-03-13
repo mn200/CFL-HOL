@@ -25,17 +25,14 @@ It's easy to derive these sets from the grammar's rules and start symbol, so we 
 Here, $V$ is the list of non-terminals, $T$ is the list of terminals, $P$ is the list of productions and $S$ is the start symbol.
 
 \begin{definition}
-  A list of symbols (or \emph{sentential form}) $s$ \emph{derives} $t$
-  in a single step if $s$ is of the form $\alpha A\gamma$, $t$ is of
-  the form $\alpha\beta\gamma$, and if $A\to\beta$ is one of the rules
-  in the grammar. In HOL, relation \HOLtm{derives g sf1 sf2} holds iff
-  sentential form \HOLtm{sf1} can derive sentential form \HOLtm{sf2}
-  with respect to grammar~\HOLtm{g}.
+  A list of symbols (or \emph{sentential form}) $s$ \emph{derives} $t$ in a single step if $s$ is of the form $\alpha A\gamma$, $t$ is of the form $\alpha\beta\gamma$, and if \HOLtm{rule A β} is one of the rules in the grammar.
+%
+In HOL, relation \HOLtm{derives g sf1 sf2} holds iff sentential form \HOLtm{sf1} can derive sentential form \HOLtm{sf2} with respect to grammar~\HOLtm{g}.
 
 \begin{holdef}
 \begin{salltt}
 
-\HOLthm[nostile,>>,sf1/lsl,sf2/rsl]{grammarDef.derives_def}
+\HOLthm[nostile,>>,sf1/lsl,sf2/rsl,A/lhs,β/rhs,α/s1,γ/s2]{grammarDef.derives_def}
 \end{salltt}
 \end{holdef}
 \end{definition}
@@ -51,7 +48,6 @@ For example a derivation sequence $\ell_1 \derive \ell_2 \derive \ell_3 \dots \d
 In the context of grammars, $R$ relates sentential forms.
 Later we will use the same notation to relate derivations in a PDA.
 Using this very concrete formulation simplifies the mechanisation of the proofs of a number of theorems.
-We will also use the rightmost derivation relation, \texttt{rderives}, and its closure.
 
 \begin{definition}
   The \emph{language} of a grammar consists of all the words (lists of only terminal symbols) that can be derived from the start symbol.

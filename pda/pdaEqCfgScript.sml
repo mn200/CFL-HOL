@@ -655,7 +655,7 @@ val thm5_3 = store_thm
  ``∀g:('nts, 'ts) grammar.isGnf g
          ⇒
        ∃(m:(('nts, 'ts) symbol, ('nts, 'ts) symbol, 'state) pda).
-            x ∈ language g = x ∈ laes m``,
+            (∀x. x ∈ language g = x ∈ laes m)``,
 
 SRW_TAC [][EXTENSION, EQ_IMP_THM] THEN
 Q.EXISTS_TAC `grammar2pda g q`  THEN

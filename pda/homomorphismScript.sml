@@ -8,7 +8,7 @@ open listLemmasTheory relationLemmasTheory containerLemmasTheory
 
 open pdaEqCfgTheory
 
-open gnfTheory
+open gnfTheory laeslafsTheory
 
 val _ = new_theory "homomorphism"
 
@@ -139,6 +139,27 @@ val inpSyms_empty = store_thm(
   Cases_on `stk0` THEN FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
   SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [inpSyms_def, EXTENSION] THEN
   METIS_TAC []);
+
+
+val inpSyms_empty_lafs = store_thm(
+  "inpSyms_empty_lafs",
+  ``(inpSyms m = {}) ==> (lafs m ⊆ {[]})``,
+  SIMP_TAC (srw_ss()) [lafs_def, SUBSET_DEF] THEN
+  STRIP_TAC THEN
+  Q_TAC SUFF_TAC
+     `∀id0 id. m ⊢ id0 →* id ⇒
+            ∀s0 i0 stk0 s stk.
+              (id0 = (s0,i0,stk0)) ∧ (id = (s,[],stk)) ∧ s ∈ m.final ⇒
+              (i0 = [])` THEN1 METIS_TAC [] THEN
+  HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
+  Cases_on `id0'` THEN Cases_on `r` THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN
+  Cases_on `i0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+  Cases_on `stk0` THEN FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
+  SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [inpSyms_def, EXTENSION] THEN
+  METIS_TAC []);
+
+
 
 val rule1 = Define `
   rule1 (m:(α, β, γ) pda) (h: α -> α list) =
@@ -289,7 +310,7 @@ val mImpm'InpNil = store_thm
 ("mImpm'InpNil",
 ``∀dl q ssyms p.
      ID m ⊢ dl ◁ (q,[],ssyms) → (p,[],ssyms') ∧ hInvpda m m' h ∧
-     ~(laes m ⊆ {[]})
+     ~(lafs m ⊆ {[]})
    ⇒
      IDC m' ((q,[]),[],ssyms) ((p,[]),[],ssyms')``,
 
@@ -302,7 +323,7 @@ Cases_on `h'` THEN
 Cases_on `r` THEN
 FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
 SRW_TAC [][] THEN
-`inpSyms m ≠ {}` by METIS_TAC [inpSyms_empty] THEN
+`inpSyms m ≠ {}` by METIS_TAC [inpSyms_empty_lafs] THEN
 `∃a. a ∈ inpSyms m` by METIS_TAC [MEMBER_NOT_EMPTY] THEN
 `isSuffix [] (h a)` by SRW_TAC [][isSuffix_def] THEN
 IMP_RES_TAC memMRule1 THEN
@@ -696,8 +717,6 @@ Cases_on `io` THEN RES_TAC THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN
 METIS_TAC [memStkSyms]);
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
 val mImpm'HNil = store_thm
 ("mImpm'HNil",
 ``∀l1.
@@ -732,7 +751,7 @@ SRW_TAC [][ Once RTC_CASES1] THEN
 val mImpm' = store_thm
 ("mImpm'",
 ``∀x dl q ssyms.ID m ⊢ dl ◁ (q,FLAT (MAP h x),ssyms) → (p,[],ssyms') ∧ 
-¬(laes m ⊆ {[]}) ∧ (∀e. e ∈ x ⇒ e ∈ inpSyms m) ∧
+¬(lafs m ⊆ {[]}) ∧ (∀e. e ∈ x ⇒ e ∈ inpSyms m) ∧
  hInvpda m m' h  ∧ LENGTH dl > 1 ∧ stkSymsInPda m' ssyms ∧ q ∈ states m
 ⇒
  IDC m' ((q,[]),x,ssyms++[m'.ssSym]) ((p,[]),[],ssyms'++[m'.ssSym])``,
@@ -1669,94 +1688,6 @@ SRW_TAC [][hInvpda, rule1,rule2,rule3,memStkSymsEq] THEN
 SRW_TAC [][stkSymsInPda] THEN
 METIS_TAC [memStkSymsEq,MEM]);
 
-(*
-val inpSymsMem = store_thm("inpSymsMem",
-``∀x st sf state stack.
- m ⊢ (st,x,sf) →* (state,[],stack) ⇒ (∀e. e ∈ x ⇒ e ∈ inpSyms m)``,
-
-Induct_on `x` THEN SRW_TAC [][] THEN
-MAGIC);
-*)
-
-
-
-val invhEq = store_thm
-("invhEq",
-``∀m m'. hInvpda m m' h ∧ ¬(laes m ⊆ {[]}) 
- ⇒
- ∀x.(x ∈ lafs m' = 
-  (x ∈ { w | (FLAT (MAP h w)) ∈ lafs m}))``,
-MAGIC);
-
-SRW_TAC [][EXTENSION, language_def, EQ_IMP_THM, lafs_def] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-IMP_RES_TAC rtc2list_exists' THEN1
-
-(Cases_on `state` THEN
- IMP_RES_TAC m'FinState THEN
- SRW_TAC [][] THEN
- IMP_RES_TAC m'FstStep THEN
- `q ∈ states m` by (FULL_SIMP_TAC (srw_ss()) [states_def, hInvpda] THEN
-		    METIS_TAC []) THEN
- `MEM q m.final` by (FULL_SIMP_TAC (srw_ss()) [states_def, hInvpda] THEN
-		     METIS_TAC []) THEN
- `stkSymsInPda m [m.ssSym]` by SRW_TAC [][stkSymsInPda, stkSyms_def] THEN
- `∃pf.stack = pf ++ [m'.ssSym]` by METIS_TAC [memld,z0Inv] THEN
- SRW_TAC [][] THEN
- `m.start ∈ states m` by SRW_TAC [][states_def] THEN
- METIS_TAC [m'Impm, ldImprtc2list]) THEN
-
-Cases_on `LENGTH l > 1` THEN1
-MAGIC THEN1
-MAGIC
-THENL[
- 
-      `m.start ∈ states m` by SRW_TAC [][states_def] THEN
-      `stkSymsInPda m' [m.ssSym]` by METIS_TAC [mSsymInm'] THEN
-      `∀e. e ∈ x ⇒ e ∈ inpSyms m` by MAGIC THEN
-      `m' ⊢
-         ((m.start,[]),x,[m.ssSym] ++ [m'.ssSym]) →*
-             ((state,[]),[],stack ++ [m'.ssSym])` by METIS_TAC [mImpm'] THEN
-      SRW_TAC [][Once RTC_CASES1] THEN
-      Q.EXISTS_TAC `(state,[])` THEN
-      Q.EXISTS_TAC `stack++[m'.ssSym]` THEN
-      SRW_TAC [][] THEN1
-      (DISJ2_TAC THEN
-       Q.EXISTS_TAC `((m.start,[]),x,[m.ssSym] ++ [m'.ssSym])` THEN
-       SRW_TAC [][id_thm] THEN1
-       FULL_SIMP_TAC (srw_ss()) [hInvpda, rule3, EXTENSION] THEN
-       METIS_TAC [APPEND]) THEN
-      FULL_SIMP_TAC (srw_ss()) [hInvpda],
-
-      `∀e. e ∈ x ⇒ e ∈ inpSyms m` by MAGIC THEN
-      Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-      `LENGTH t = 0` by DECIDE_TAC THEN
-      `t=[]` by METIS_TAC [LENGTH_NIL] THEN
-      SRW_TAC [][] THEN
-      FULL_SIMP_TAC (srw_ss()) [] THEN
-      SRW_TAC [][] THEN
-      `(∀e. MEM e x ⇒ (h e = []))` by (SRW_TAC [][] THEN
-				       FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
-				       SRW_TAC [][] THEN
-				       FULL_SIMP_TAC (srw_ss()) [FLAT_APPEND]) THEN
-      `m.start ∈ states m` by SRW_TAC [][states_def] THEN
-      `stkSymsInPda m' [m.ssSym]` by METIS_TAC [mSsymInm'] THEN
-      
-      `IDC m' ((m.start,[]),x,[m.ssSym] ++ [m'.ssSym])
-              ((m.start,[]),[],[m.ssSym] ++ [m'.ssSym])`
-      by METIS_TAC [mImpm'HNil] THEN
-      SRW_TAC [][Once RTC_CASES1] THEN
-      Q.EXISTS_TAC `(m.start,[])` THEN
-      Q.EXISTS_TAC `[m.ssSym] ++ [m'.ssSym]` THEN
-      SRW_TAC [][] THEN1
-      (Q.EXISTS_TAC `((m.start,[]),x,[m.ssSym] ++ [m'.ssSym])` THEN
-       SRW_TAC [][id_thm] THEN1
-       FULL_SIMP_TAC (srw_ss()) [hInvpda, rule3, EXTENSION] THEN
-       METIS_TAC [APPEND]) THEN
-      FULL_SIMP_TAC (srw_ss()) [hInvpda]
-      ]);
-
-
 val GSPEC_IMAGE = store_thm(
   "GSPEC_IMAGE",
   ``GSPEC f = IMAGE (FST o f) { x | SND (f x) }``,
@@ -1941,7 +1872,7 @@ SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
 
 
 val exists_hInvpda = store_thm ("exists_hInvpda",
-  ``INFINITE univ(:γ) ∧ INFINITE univ(:δ) ∧ FINITE univ(:(α,β)symbol) ⇒
+  ``INFINITE univ(:γ) ∧ INFINITE univ(:δ) ⇒
     ∀(m: ((α, β) symbol, γ, δ) pda) h. ∃m'. hInvpda m m' h``,
 
   SRW_TAC [][hInvpda] THEN
@@ -1979,13 +1910,121 @@ val languageWords = Define `
      {MAP ts2str tsl | (derives g)^* [NTS (startSym g)] tsl ∧ isWord tsl}`;
 
 
-open laeslafsTheory
+fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
+
+
+val invhEq = store_thm
+("invhEq",
+``∀m m'. hInvpda m m' h ∧ ¬(lafs m ⊆ {[]}) 
+ ⇒
+ ∀x. (x ∈ lafs m' = 
+  x ∈ { w | (FLAT (MAP h w)) ∈ lafs m})``,
+MAGIC);
+(*
+SRW_TAC [][EXTENSION, language_def, EQ_IMP_THM, lafs_def] THEN
+FULL_SIMP_TAC (srw_ss()) [] THEN
+IMP_RES_TAC rtc2list_exists' THEN1
+
+(Cases_on `state` THEN
+ IMP_RES_TAC m'FinState THEN
+ SRW_TAC [][] THEN
+ IMP_RES_TAC m'FstStep THEN
+ `q ∈ states m` by (FULL_SIMP_TAC (srw_ss()) [states_def, hInvpda] THEN
+		    METIS_TAC []) THEN
+ `MEM q m.final` by (FULL_SIMP_TAC (srw_ss()) [states_def, hInvpda] THEN
+		     METIS_TAC []) THEN
+ `stkSymsInPda m [m.ssSym]` by SRW_TAC [][stkSymsInPda, stkSyms_def] THEN
+ `∃pf.stack = pf ++ [m'.ssSym]` by METIS_TAC [memld,z0Inv] THEN
+ SRW_TAC [][] THEN
+ `m.start ∈ states m` by SRW_TAC [][states_def] THEN
+ METIS_TAC [m'Impm, ldImprtc2list]) THEN
+
+Cases_on `LENGTH l > 1` THEN1
+MAGIC THEN1
+MAGIC
+THENL[
+ 
+      `m.start ∈ states m` by SRW_TAC [][states_def] THEN
+      `stkSymsInPda m' [m.ssSym]` by METIS_TAC [mSsymInm'] THEN
+      `∀e. e ∈ x ⇒ e ∈ inpSyms m` by MAGIC THEN
+      `m' ⊢
+         ((m.start,[]),x,[m.ssSym] ++ [m'.ssSym]) →*
+             ((state,[]),[],stack ++ [m'.ssSym])` by METIS_TAC [mImpm'] THEN
+      SRW_TAC [][Once RTC_CASES1] THEN
+      Q.EXISTS_TAC `(state,[])` THEN
+      Q.EXISTS_TAC `stack++[m'.ssSym]` THEN
+      SRW_TAC [][] THEN1
+      (DISJ2_TAC THEN
+       Q.EXISTS_TAC `((m.start,[]),x,[m.ssSym] ++ [m'.ssSym])` THEN
+       SRW_TAC [][id_thm] THEN1
+       FULL_SIMP_TAC (srw_ss()) [hInvpda, rule3, EXTENSION] THEN
+       METIS_TAC [APPEND]) THEN
+      FULL_SIMP_TAC (srw_ss()) [hInvpda],
+
+      `∀e. e ∈ x ⇒ e ∈ inpSyms m` by MAGIC THEN
+      Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+      `LENGTH t = 0` by DECIDE_TAC THEN
+      `t=[]` by METIS_TAC [LENGTH_NIL] THEN
+      SRW_TAC [][] THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN
+      SRW_TAC [][] THEN
+      `(∀e. MEM e x ⇒ (h e = []))` by (SRW_TAC [][] THEN
+				       FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+				       SRW_TAC [][] THEN
+				       FULL_SIMP_TAC (srw_ss()) [FLAT_APPEND]) THEN
+      `m.start ∈ states m` by SRW_TAC [][states_def] THEN
+      `stkSymsInPda m' [m.ssSym]` by METIS_TAC [mSsymInm'] THEN
+      
+      `IDC m' ((m.start,[]),x,[m.ssSym] ++ [m'.ssSym])
+              ((m.start,[]),[],[m.ssSym] ++ [m'.ssSym])`
+      by METIS_TAC [mImpm'HNil] THEN
+      SRW_TAC [][Once RTC_CASES1] THEN
+      Q.EXISTS_TAC `(m.start,[])` THEN
+      Q.EXISTS_TAC `[m.ssSym] ++ [m'.ssSym]` THEN
+      SRW_TAC [][] THEN1
+      (Q.EXISTS_TAC `((m.start,[]),x,[m.ssSym] ++ [m'.ssSym])` THEN
+       SRW_TAC [][id_thm] THEN1
+       FULL_SIMP_TAC (srw_ss()) [hInvpda, rule3, EXTENSION] THEN
+       METIS_TAC [APPEND]) THEN
+      FULL_SIMP_TAC (srw_ss()) [hInvpda]
+      ]);
+*)
+
+val ntsTsTypeExists = store_thm("ntsTsTypeExists",
+``∀tsl.isWord (tsl :
+           (('state # ('nts, 'ts) symbol list) #
+            ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts)
+           symbol list) ⇒ 
+∃(w :('nts, 'ts) symbol list). (MAP ts2str tsl = MAP ts2str w) ∧ isWord w``,
+
+Induct_on `tsl` THEN SRW_TAC [][] THEN
+Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [ts2str_def, isTmnlSym_def] THEN
+Q.EXISTS_TAC `TS t::w` THEN
+SRW_TAC [][ts2str_def, isTmnlSym_def]);
+
+
+val type_thm1 = store_thm("type_thm1",
+``∀x y.(derives g)^* x (y:(('state # ('nts, 'ts) symbol list) #
+            ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts) symbol list)
+ ⇒ isWord y ⇒ (MAP ts2str y = MAP ts2str (w:('nts,'ts) symbol list)) ⇒
+∃y'. 
+isWord y' ∧ (MAP ts2str w = MAP ts2str y') ∧ (derives g)^* x y'``,
+
+HO_MATCH_MP_TAC RTC_INDUCT THEN
+SRW_TAC [][] THEN1
+METIS_TAC [RTC_DEF] THEN
+RES_TAC THEN
+Q.EXISTS_TAC `y'` THEN
+SRW_TAC [][] THEN
+METIS_TAC [RTC_CASES1]);
+
 
 val invHomomorphismThm = store_thm("invHomomorphismThm",
 ``∀g (h:('nts, 'ts) symbol -> ('nts, 'ts) symbol list).
     INFINITE (UNIV:'nts set) ∧
-    INFINITE (UNIV:'state set) ∧
-    [] ∉ language (g:('nts,'ts) grammar) ⇒
+    INFINITE (UNIV:'state set) ∧     
+    [] ∉ language (g:('nts,'ts) grammar) ∧
+    (language g ≠ {}) ⇒
     ∃g':(('state # ('nts, 'ts) symbol list) #
    ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts) grammar. 
       (languageWords g') = (inverseHomomorphism h g)``,
@@ -1994,51 +2033,59 @@ SRW_TAC [][] THEN
 `∃g'.isGnf g' ∧ (language g = language g')` by METIS_TAC [gnfExists] THEN
 `∃(m:(('nts, 'ts) symbol, ('nts,'ts) symbol, 'state) pda). 
             (∀x. x ∈ language g = x ∈ laes m)` by METIS_TAC [thm5_3] THEN
-`INFINITE (UNIV:('nts, 'ts) symbol set)` by MAGIC THEN
+
+`INFINITE (UNIV:('nts, 'ts) symbol set)` by MAGIC THEN                                    
+(*
+INJECTIVE_IMAGE_FINITE SUBSET_FINITE_I
+*)
+
 `∃m':(('nts, 'ts) symbol, ('nts,'ts) symbol, 'state) pda. 
                                    laes m = lafs m'` by METIS_TAC [thm52] THEN
 `∃m'':(('nts, 'ts) symbol, ('nts, 'ts) symbol, 'state # ('nts, 'ts) symbol list) pda.
-     hInvpda m' m'' h` by MAGIC
-(* METIS_TAC [exists_hInvpda] *)
+     hInvpda m' m'' h` by METIS_TAC [exists_hInvpda] THEN
 
-`¬(laes m' ⊆ {[]})` by MAGIC THEN
+`INFINITE (UNIV:('state # ('nts, 'ts) symbol list ) set)` by SRW_TAC [][] THEN
+
+`∃m''':(('nts, 'ts) symbol, ('nts, 'ts) symbol,'state # ('nts, 'ts) symbol list) pda. 
+lafs m'' = laes m'''` by METIS_TAC [thm51] THEN
+
+`¬(lafs m' ⊆ {[]})` by (SRW_TAC [][] THEN
+FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+METIS_TAC []) THEN
+
 `∃g'':(('state # ('nts, 'ts) symbol list) #
-   ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts) grammar. 
-pda2grammar m'' g''` by MAGIC
-(* METIS_TAC [p2gGrExists] THEN *)
-
+   ('nts, 'ts) symbol # ('state # ('nts, 'ts) symbol list), 'ts) grammar. 
+pda2grammar m''' g''` by METIS_TAC [p2gGrExists] THEN
+`∀x. x ∈ {w | FLAT (MAP h w) ∈ lafs m'} ⇔ x ∈ lafs m''` by METIS_TAC [invhEq] THEN
 Q.EXISTS_TAC `g''` THEN
-
-
-`∀x.(x ∈ lafs m'' = x ∈ { w:((('state # ('nts, 'ts) symbol list) #
-            ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts)
-           symbol list) | (FLAT (MAP h w)) ∈ lafs m' })` by 
-METIS_TAC [invhEq] THEN
-
 SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
             boolSimps.CONJ_ss]
-[EXISTS_rule, languageWords, inverseHomomorphism, EXTENSION, EQ_IMP_THM] THEN
+[EXISTS_rule, languageWords, inverseHomomorphism, EXTENSION, EQ_IMP_THM] THENL[
 
-
-`∃w:('nts,'ts) symbol list. (MAP ts2str tsl = MAP ts2str w)` by MAGIC THEN
+`∃w: ('nts, 'ts) symbol list . isWord w ∧ 
+(MAP ts2str tsl = MAP ts2str w)` by METIS_TAC [ntsTsTypeExists] THEN
 Q.EXISTS_TAC `w`  THEN
 SRW_TAC [][] THEN
-
-
-
-`∃p.(ID m'')^* (m''.start,w,[m''.ssSym]) (p,[],[])` by METIS_TAC [p2gEqPda]
-
-`w ∈ laes m''`
-
-`w ∈ {w | FLAT (MAP h w) ∈ lafs m'}` by MAGIC THEN
+`∃p.(ID m''')^* (m'''.start,w,[m'''.ssSym]) (p,[],[])` by MAGIC THEN
+(* by METIS_TAC [p2gEqPda] *)
+`w ∈ laes m'''` by (SRW_TAC [][laes_def] THEN METIS_TAC []) THEN
 `w ∈ lafs m''` by METIS_TAC [] THEN
-`w ∈ laes m'`
+FULL_SIMP_TAC (srw_ss()) [],
 
 
+`∃tsl:(('state # ('nts, 'ts) symbol list) #
+    ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts) symbol
+   list. isWord tsl ∧ (MAP ts2str tsl = MAP ts2str w)` by MAGIC THEN
+Q.EXISTS_TAC `tsl`  THEN
+SRW_TAC [][] THEN
+`w ∈ lafs m''` by (FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN METIS_TAC []) THEN
+`w ∈ laes m'''` by METIS_TAC [] THEN
+`∃p. m''' ⊢ (m'''.start,w,[m'''.ssSym]) →* (p,[],[])`
+by (FULL_SIMP_TAC (srw_ss()) [laes_def, EXTENSION] THEN METIS_TAC []) THEN
+MAGIC]);
+(*`(derives g'')^* [NTS (startSym g'')] w` by METIS_TAC [p2gEqPda] THEN*)
 
 
-
-SRW_TAC [][languageWords, inverseHomomorphism, EXTENSION] THEN
 
 
 val _ = export_theory();

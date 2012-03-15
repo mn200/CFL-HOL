@@ -1,0 +1,191 @@
+\subsection{Inverse homomorphism}
+\label{sec:invhomomorphism}
+The proof for closure under inverse homomorphism uses pushdown
+automata. Since we have already proven the equivalence between
+pushdown automata and context-free grammars, we assume the existence
+of a PDA recognising any given context-free language.
+
+Let $h:\Sigma \to \delta$ be a homomorphism and $L$ be a CFL. Let $L =
+L(M)$, where $M$ is the PDA $(Q,\delta,\Gamma,\delta,q_0,Z_0,F)$.
+
+The construction of PDA $M'$ that accepts $h^{-1}(L)$ is as
+follows. On input $a$, $M'$ generates $h(a)$ and simulates $M$ on
+$h(a)$.  If $M'$ were a finite automaton $M'$ could simulate such a
+composite move in one of its moves. However for a nondeterministic PDA
+$M$, $M$ could pop many symbols, or make moves that push an arbitrary
+number of symbols on the stack. Thus $M'$ cannot necessarily simulate
+$M$'s moves on $h(a)$ with one (or any finite number of) moves of its
+own.
+
+To handle this, we give $M'$ a buffer, in which it may store
+$h(a)$. Then $M'$ may simulate any $\epsilon$ moves of $M$ it likes
+and consume the symbols of $h(a)$ one at a time, as if they were $M$'s
+input. As the buffer is part of $M'$s finite control, it cannot be
+allowed to grow arbitrarily long. We ensure this by permitting $M'$ to
+read an input symbol only when the buffer is empty. Thus the buffer
+holds a suffix of $h(a)$ for some $a$ at all times. $M'$ accepts its
+input $w$ if the buffer is empty and $M$ is in a final state. That is,
+$M$ has accepted $h(w)$. Thus L$(M') = \{ w\;|\;h(w)\;\mbox{is in}\;L \}$,
+that is $L(M') = h^{-1}(L(M))$.
+
+Formally, let $M'= (Q',\Sigma,\Gamma,\delta',[q_0,\epsilon],Z_0,F
+\times {\epsilon})$, where $Q'$ consists of pairs $[q,x]$ such that
+$q$ in $Q$ and $x$ is a (not necessarily proper) suffix of some $h(a)$ for
+$a$ in $\Sigma$.
+
+$\delta'$ is defined as follows.
+
+\begin{description}
+
+\item[Rule 1] $\delta'([q,x],\epsilon,Y)$ contains all $(p,\gamma)$.
+
+\item[Rule 2] $\delta'([q,ax],\epsilon,Y)$ contains all $([p,x],\gamma)$
+  such that $\delta(q,a,\gamma)$ contains $(p,\gamma)$.
+
+\item[Rule 3] $\delta'([q,\epsilon],a,Y)$ contains $([q,h(a)],Y)$ for
+  all $a$ in $\Sigma$ and $Y$ in $\Gamma$.
+\end{description}
+
+We model the construction of $M'$ as a relation. Relation
+\HOLtm{hInvpda M M' h} holds if and only if PDA $M'$ simulates the
+inverse of homomorphic function \texttt{h}. PDA $M'$ starts off in a
+new start state (\HOLtm{(q0,[])}) with a new stack symbol
+(\HOLtm{z0}). The states of $M'$ have an associated buffer.
+
+\begin{holdef}[\HOLtm{hInvpda}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{homomorphism.hInvpda_def}
+\end{salltt}
+\end{holdef}
+
+In HOL, \HOLtm{rule1}, \HOLtm{rule2} and \HOLtm{rule3} correspond to
+the three different ways (described above) of constructing the
+transition rules of the machine accepting the inverse of the
+homomorphic function.
+
+\medskip
+\noindent \HOLtm{rule1} simulates $\epsilon$-moves of $M$ independent of the
+buffer content:
+\begin{salltt}
+\HOLthm[nostile,>>,def]{homomorphism.rule1_def}
+\end{salltt}
+\HOLtm{rule2} simulates moves of $M$ on input $a$ in $\delta$, removing
+$a$ from the front of the buffer:
+\begin{salltt}
+\HOLthm[nostile,>>,def]{homomorphism.rule2_def}
+\end{salltt}
+\HOLtm{rule3} loads the buffer with $h(a)$, reading $a$ from $M'$s
+input; the state and stack of $M$ remain unchanged:
+\begin{salltt}
+\HOLthm[nostile,>>,def]{homomorphism.rule3_def}
+\end{salltt}
+
+To show that $L(M') = h^{-1}(L(M))$ we first show that $s \in L(M')
+\Rightarrow s \in h^{-1}(L(M))$, for some word $s$. This amounts to
+proving the following theorem in HOL.
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{homomorphism.mImpm'}
+\end{salltt}
+\label{holthm:homomImpm'}
+(Here \HOLtm{FLAT (MAP h x)} gives the words in $h^{-1}(L(M)$.)
+\end{holthm}
+
+By one application of Rule~3, followed by applications of Rules~1 and
+2, if $(q,h(a),\alpha) \vdash_M^{*} (p,\epsilon,\beta)$, then
+$([q,\epsilon],a,\alpha) \vdash_M ([q,h(a)],\epsilon,\alpha)
+\vdash_M^{*} ([p,\epsilon],\epsilon,\beta)$.
+
+If $M$ accepts $h(w)$ we have
+$(q_0,h(w),Z_0) \vdash_M^{*} (p,\epsilon,\beta)$, for some $p$ in $F$ and $\beta$ in $\Gamma*$.
+
+From this we can derive,
+$([q_0,\epsilon],w,Z_0) \vdash_M^{*} ([p,\epsilon],\epsilon,\beta)$.
+
+So $M'$ accepts $w$ (HOL Theorem~\ref{holthm:homomImpm'}).
+Thus $L(M') \supseteq h^{-1}(L(M))$.
+
+\begin{samepage}
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{homomorphism.m'Impm}
+\end{salltt}
+\label{holthm:homom'Impm}
+\end{holthm}
+\end{samepage}
+
+Conversely, we show that $s \in h^{-1}(L(M)) \Rightarrow s \in L(M')$,
+for some string $s$.
+
+Following Hopcroft and Ullman, suppose $M'$ accepts
+$w=a_1a_2...a_n$. Since Rule~3 can be applied only with the buffer
+empty, the sequence of the moves of $M'$ leading to acceptance can be
+written as
+\[
+\begin{array}{l}
+([q_0,\epsilon],a_1a_2\dots a_n,Z_0) \;\vdash^*_{M'}\;
+([p_1,\epsilon],a_1a_2...a_n,\alpha_1)\\
+\quad\vdash_{M'} ([p_1,h(a_1)],a_2a_3\dots a_n,\alpha_1)\\
+\quad\vdash^{*}_{M'} ([p_2,\epsilon],a_2a_3\dots a_n,\alpha_2)\\
+\quad\vdash_{M'} ([p_1,h(a_2)],a_3a_4\dots a_n,\alpha_2)\\
+\quad\vdots\\
+\quad\vdash^{*}_{M'} ([p_{n-1},\epsilon],a_n,\alpha_n)\\
+\quad\vdash_{M'} ([p_{n_1},h(a_n)],\epsilon,\alpha_n)\\
+\quad\vdash^{*}_{M'} ([p_n,\epsilon],\epsilon,\alpha_n)
+\end{array}
+\]
+where $p_n$ is in $F$. The transitions from state $[p_i,\epsilon]$ to
+$[p_i,h(a_i)]$ are by Rule~3, the other transitions are by Rule~1 and
+Rule~2. Thus, $(q_0,\epsilon,Z_0) \vdash_M^{*} (p_1,\epsilon,\alpha)$,
+and for all $i$,
+\[(p_i,h(a_i),\alpha_i) \vdash_M^{*} (p_{i+1},\epsilon,\alpha_{i+1})\]
+From these moves, we have
+\[(q0,h(a_1a_2...a_n),Z_0) \vdash^*_{M} (p_n,\epsilon,\alpha_{n+1})\]
+Therefore $h(a_1a_2...a_n)$ is in $L(M)$ and $L(M') \subseteq
+h^{-1}(L(M))$ (HOL Theorem~\ref{holthm:homom'Impm}).
+
+\noindent Thus, $L(M') = h^{-1}(L(M))$, \ie~in HOL:
+
+\begin{holthm}
+\begin{salltt}
+
+\HOLthm[nostile,>>]{homomorphism.invhEq}
+\end{salltt}
+\label{holthm:invhEq}
+\end{holthm}
+
+
+Apart from couple of minor additions, the mechanisation of closure
+under inverse homomorphism follows the Hopcroft and Ullman quite
+closely.
+
+The first additional predicate is the property \HOLtm{stkSymsInPda}
+which forms a part of the premise of most of the proofs.
+
+\begin{holdef}[\HOLtm{stkSymsInPda}]
+\begin{salltt}
+
+\HOLthm[nostile,>>,def]{homomorphism.stkSymsInPda_def}
+\end{salltt}
+\end{holdef}
+
+When establishing the correspondence of derivations in PDAs $m$ and
+$m'$, the symbols on the stack have to be valid for both $m$ and $m'$.
+Invariant \HOLtm{stkSymsInPda} ensures that the symbols in PDA $m$ are
+also in PDA $m'$ and vice-versa.
+
+The second addition explicitly states that the start state is valid
+for the given PDA (example \HOLtm{q IN states m}).
+
+Both these properties are derived from the premise of the final proof
+goal (HOL Theorem~\ref{holthm:invhEq}) and therefore only affect the
+individual statements for the ``if'' (HOL
+Theorem~\ref{holthm:homomImpm'}) and ``only if'' (HOL
+Theorem~\ref{holthm:homom'Impm}) direction.
+
+
+

@@ -34,7 +34,8 @@ It turns out that closure under union, concatenation and Kleene closure~(Section
 These results depend on the fact that given any two grammars, $G_1$ and $G_2$, one can rename the variables such that variables of $G_1$ and $G_2$ are disjoint.
 The main effort goes into establishing this `disjoint' property.
 %
-The two remaining closure properties illustrate how equivalence results for different models can be a great help: closure under substitution~(Section~\ref{sec:substitution}) uses a `parse tree' representation~(Section~\ref{sec:trees}) for derivations (rather than derivation lists), and closure under inverse homomorphism~(Section~\ref{sec:invhomomorphism}) relies on having an equivalent PDA for the given context-free grammar.
+The remaining closure property illustrates how equivalence results for different models can be a great help: closure under substitution~(Section~\ref{sec:substitution}) uses a `parse tree' representation~(Section~\ref{sec:trees}) for derivations (rather than derivation lists).
+%, and closure under inverse homomorphism~(Section~\ref{sec:invhomomorphism}) relies on having an equivalent PDA for the given context-free grammar.
 
 \paragraph{HOL4: Background,  Theorems and Notation}
 The work described in this paper was all carried out in HOL4~\citep{gordon93,SlindNorrish2008}, a modern interactive theorem-proving system, or proof assistant.

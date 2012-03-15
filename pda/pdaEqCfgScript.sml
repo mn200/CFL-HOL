@@ -29,7 +29,7 @@ val grammar2pda = Define
 `grammar2pda (g:('n,'t)grammar) (q: 'state) =
 let ts = MAP (trans q)  (rules g)
     in
-	<| start := q;  ssSym := (NTS (startSym g));
+        <| start := q;  ssSym := (NTS (startSym g));
            next := ts;
            final := ([]:'state list) |>`;
 
@@ -86,7 +86,7 @@ val transMemList = store_thm
 ``∀l.MEM ((SOME h,h',q),q,sl) (MAP (trans q) l) ∧ EVERY validGnfProd l
        ⇒
     ∃nts.(h'=NTS nts) ∧ ∃ts.(h=TS ts) ∧ EVERY isNonTmnlSym sl ∧
-			(MEM (rule nts (h::sl)) l)``,
+                        (MEM (rule nts (h::sl)) l)``,
 Induct_on `l` THEN SRW_TAC [][]
 THENL[
       Cases_on `h''` THEN Cases_on `l'` THEN
@@ -103,7 +103,7 @@ val transMemRule = store_thm
 ``MEM ((SOME h,h',q),q,sl) (grammar2pda g q).next ∧ isGnf g
      ⇒
     ∃nts.(h'=NTS nts) ∧ ∃ts.(h=TS ts) ∧ EVERY isNonTmnlSym sl ∧
-			(MEM (rule nts (h::sl)) (rules g))``,
+                        (MEM (rule nts (h::sl)) (rules g))``,
 Cases_on `g` THEN SRW_TAC [][rules_def, isGnf_def, grammar2pda, LET_THM] THEN
 METIS_TAC [transMemList]);
 
@@ -113,7 +113,7 @@ val idcImpEvTmnl = store_thm
      ID (grammar2pda g q) ⊢ dl ◁
         (q,pfx++sfx,stk) → (q,sfx,stk') ∧ isGnf g
               ⇒
-	     EVERY isTmnlSym pfx``,
+             EVERY isTmnlSym pfx``,
 
 Induct_on `LENGTH pfx` THEN
 SRW_TAC [][]
@@ -132,45 +132,45 @@ THENL[
       Cases_on `dl=[]`  THEN FULL_SIMP_TAC (srw_ss()) [] THEN
       SRW_TAC [][]
       THENL[
-	    FULL_SIMP_TAC (srw_ss()) [rtc2list_def, listderiv_def],
+            FULL_SIMP_TAC (srw_ss()) [rtc2list_def, listderiv_def],
 
-	    Cases_on `dl` THEN SRW_TAC [][] THEN
-	    Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][]
-	    THENL[
-		  FULL_SIMP_TAC (srw_ss()) [rtc2list_def, listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  `LENGTH sfx = LENGTH pfx + LENGTH sfx`
-		  by METIS_TAC [LENGTH_APPEND] THEN
-		  FULL_SIMP_TAC (arith_ss) [],
+            Cases_on `dl` THEN SRW_TAC [][] THEN
+            Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            SRW_TAC [][]
+            THENL[
+                  FULL_SIMP_TAC (srw_ss()) [rtc2list_def, listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  `LENGTH sfx = LENGTH pfx + LENGTH sfx`
+                  by METIS_TAC [LENGTH_APPEND] THEN
+                  FULL_SIMP_TAC (arith_ss) [],
 
-		  Cases_on `h` THEN Cases_on `r` THEN
-		  FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `t` THEN SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
-		  `<|start := q; ssSym := NTS (startSym g);
-		  next := MAP (trans q) (rules g); final := []|> ⊢
-		  (q,pfx ++ sfx,r') → h`
-		  by FULL_SIMP_TAC (srw_ss()) [grammar2pda, LET_THM, ID_def] THEN
-		  Cases_on `h` THEN Cases_on `r` THEN
-		  Cases_on `pfx` THEN Cases_on `r'` THEN
-		  FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
-		  SRW_TAC [][]
-		  THEN (TRY(
-			FIRST_X_ASSUM (Q.SPECL_THEN
-				       [`((q',t ++ sfx,sl' ++ t'')::t')`,
-					`sfx`,`sl'++t''`, `stk'`] MP_TAC) THEN
-			SRW_TAC [][] THEN
-			`q'=q` by METIS_TAC [transStateEq] THEN
-			SRW_TAC [][] THEN
-			Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def,
-								    isGnf_def] THEN
-			`∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧
-			EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`
-			by METIS_TAC [transMemList] THEN
-			SRW_TAC [][isTmnlSym_def] )) THEN
-			METIS_TAC [notNoneTrans, MEM_MAP]]]]);
+                  Cases_on `h` THEN Cases_on `r` THEN
+                  FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  Cases_on `t` THEN SRW_TAC [][] THEN
+                  FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
+                  `<|start := q; ssSym := NTS (startSym g);
+                  next := MAP (trans q) (rules g); final := []|> ⊢
+                  (q,pfx ++ sfx,r') → h`
+                  by FULL_SIMP_TAC (srw_ss()) [grammar2pda, LET_THM, ID_def] THEN
+                  Cases_on `h` THEN Cases_on `r` THEN
+                  Cases_on `pfx` THEN Cases_on `r'` THEN
+                  FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
+                  SRW_TAC [][]
+                  THEN (TRY(
+                        FIRST_X_ASSUM (Q.SPECL_THEN
+                                       [`((q',t ++ sfx,sl' ++ t'')::t')`,
+                                        `sfx`,`sl'++t''`, `stk'`] MP_TAC) THEN
+                        SRW_TAC [][] THEN
+                        `q'=q` by METIS_TAC [transStateEq] THEN
+                        SRW_TAC [][] THEN
+                        Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def,
+                                                                    isGnf_def] THEN
+                        `∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧
+                        EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`
+                        by METIS_TAC [transMemList] THEN
+                        SRW_TAC [][isTmnlSym_def] )) THEN
+                        METIS_TAC [notNoneTrans, MEM_MAP]]]]);
 
 
 val idlStateEq = store_thm
@@ -201,8 +201,8 @@ THENL[
 val idInpLen = store_thm
 ("idInpLen",
 ``grammar2pda g q ⊢ (q,inp,stk) → (q',inp',stk')
-	  ⇒
-	 LENGTH inp' < LENGTH inp``,
+          ⇒
+         LENGTH inp' < LENGTH inp``,
 
 Cases_on `inp` THEN Cases_on `stk` THEN
 SRW_TAC [][] THEN
@@ -213,8 +213,8 @@ METIS_TAC [notNoneTrans, MEM_MAP]);
 val idStateEq = store_thm
 ("idStateEq",
 ``grammar2pda g q ⊢ (q,inp,stk) → (q',inp',stk')
-	  ⇒
-	 (q=q')``,
+          ⇒
+         (q=q')``,
 
 Cases_on `inp` THEN Cases_on `stk` THEN
 SRW_TAC [][] THEN
@@ -272,7 +272,7 @@ val idcImpLd = store_thm
      ID (grammar2pda g q) ⊢ dl ◁
         (q,pfx++sfx,stk) → (q,sfx,stk') ∧ isGnf g
               ⇒
-	   (lderives g)^* stk (pfx++stk')``,
+           (lderives g)^* stk (pfx++stk')``,
 
 Induct_on `LENGTH pfx` THEN
 SRW_TAC [][]
@@ -292,82 +292,82 @@ THENL[
       Cases_on `dl=[]`  THEN FULL_SIMP_TAC (srw_ss()) [] THEN
       SRW_TAC [][]
       THENL[
-	    FULL_SIMP_TAC (srw_ss()) [rtc2list_def, listderiv_def],
+            FULL_SIMP_TAC (srw_ss()) [rtc2list_def, listderiv_def],
 
-	    Cases_on `dl` THEN SRW_TAC [][] THEN
-	    Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][]
-	    THENL[
-		  FULL_SIMP_TAC (srw_ss()) [rtc2list_def, listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  `LENGTH sfx = LENGTH pfx + LENGTH sfx`
-		  by METIS_TAC [LENGTH_APPEND] THEN
-		  FULL_SIMP_TAC (arith_ss) [],
+            Cases_on `dl` THEN SRW_TAC [][] THEN
+            Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            SRW_TAC [][]
+            THENL[
+                  FULL_SIMP_TAC (srw_ss()) [rtc2list_def, listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  `LENGTH sfx = LENGTH pfx + LENGTH sfx`
+                  by METIS_TAC [LENGTH_APPEND] THEN
+                  FULL_SIMP_TAC (arith_ss) [],
 
-		  Cases_on `h` THEN Cases_on `r` THEN
-		  FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `t` THEN SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
-		  `<|start := q; ssSym := NTS (startSym g);
-		  next := MAP (trans q) (rules g); final := []|> ⊢
-		  (q,pfx ++ sfx,r') → h`
-		  by FULL_SIMP_TAC (srw_ss()) [grammar2pda, LET_THM, ID_def] THEN
-		  Cases_on `h` THEN Cases_on `r` THEN
-		  Cases_on `pfx` THEN Cases_on `r'` THEN
-		  FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
-		  SRW_TAC [][]
-		  THENL[
-			FIRST_X_ASSUM (Q.SPECL_THEN
-				       [`((q',t ++ sfx,sl' ++ t'')::t')`,
-					`sfx`,`sl'++t''`, `stk'`] MP_TAC) THEN
-			SRW_TAC [][] THEN
-			`q'=q` by METIS_TAC [transStateEq] THEN
-			SRW_TAC [][] THEN
-			Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def,
-								    isGnf_def] THEN
-			`∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧
-			EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`
-			by METIS_TAC [transMemList] THEN
-			SRW_TAC [][] THEN
-			`lderives (G l n) [NTS nts] (TS ts::sl)`
-			by METIS_TAC [ldres1, rules_def] THEN
-			`lderives (G l n) ([NTS nts]++t'') (TS ts::sl++t'')`
-			by METIS_TAC [lderives_same_append_right, RTC_RTC] THEN
-			`(lderives (G l n))^* (TS ts::sl ++ t'') (TS ts::t ++ stk')`
-			by METIS_TAC [rtc_lderives_same_append_left, isTmnlSym_def,
-				      APPEND, EVERY_DEF] THEN
-			`(lderives (G l n))^* ([NTS nts]++t'') (TS ts::t++stk')`
-			by METIS_TAC [RTC_RULES] THEN
-			METIS_TAC [APPEND, APPEND_ASSOC],
+                  Cases_on `h` THEN Cases_on `r` THEN
+                  FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  Cases_on `t` THEN SRW_TAC [][] THEN
+                  FULL_SIMP_TAC (srw_ss()) [rtc2list_def] THEN
+                  `<|start := q; ssSym := NTS (startSym g);
+                  next := MAP (trans q) (rules g); final := []|> ⊢
+                  (q,pfx ++ sfx,r') → h`
+                  by FULL_SIMP_TAC (srw_ss()) [grammar2pda, LET_THM, ID_def] THEN
+                  Cases_on `h` THEN Cases_on `r` THEN
+                  Cases_on `pfx` THEN Cases_on `r'` THEN
+                  FULL_SIMP_TAC (srw_ss()) [ID_def] THEN
+                  SRW_TAC [][]
+                  THENL[
+                        FIRST_X_ASSUM (Q.SPECL_THEN
+                                       [`((q',t ++ sfx,sl' ++ t'')::t')`,
+                                        `sfx`,`sl'++t''`, `stk'`] MP_TAC) THEN
+                        SRW_TAC [][] THEN
+                        `q'=q` by METIS_TAC [transStateEq] THEN
+                        SRW_TAC [][] THEN
+                        Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def,
+                                                                    isGnf_def] THEN
+                        `∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧
+                        EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`
+                        by METIS_TAC [transMemList] THEN
+                        SRW_TAC [][] THEN
+                        `lderives (G l n) [NTS nts] (TS ts::sl)`
+                        by METIS_TAC [ldres1, rules_def] THEN
+                        `lderives (G l n) ([NTS nts]++t'') (TS ts::sl++t'')`
+                        by METIS_TAC [lderives_same_append_right, RTC_RTC] THEN
+                        `(lderives (G l n))^* (TS ts::sl ++ t'') (TS ts::t ++ stk')`
+                        by METIS_TAC [rtc_lderives_same_append_left, isTmnlSym_def,
+                                      APPEND, EVERY_DEF] THEN
+                        `(lderives (G l n))^* ([NTS nts]++t'') (TS ts::t++stk')`
+                        by METIS_TAC [RTC_RULES] THEN
+                        METIS_TAC [APPEND, APPEND_ASSOC],
 
-			METIS_TAC [notNoneTrans, MEM_MAP],
+                        METIS_TAC [notNoneTrans, MEM_MAP],
 
-			FIRST_X_ASSUM (Q.SPECL_THEN
-				       [`((q',t ++ sfx,sl' ++ t'')::t')`,
-					`sfx`,`sl'++t''`, `stk'`] MP_TAC) THEN
-			SRW_TAC [][] THEN
-			`q'=q` by METIS_TAC [transStateEq] THEN
-			SRW_TAC [][] THEN
-			Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def,
-								    isGnf_def] THEN
-			`∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧
-			EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`
-			by METIS_TAC [transMemList] THEN
-			SRW_TAC [][] THEN
-			`lderives (G l n) [NTS nts] (TS ts::sl)`
-			by METIS_TAC [ldres1, rules_def] THEN
-			`lderives (G l n) ([NTS nts]++t'') (TS ts::sl++t'')`
-			by METIS_TAC [lderives_same_append_right, RTC_RTC] THEN
-			`(lderives (G l n))^* (TS ts::sl ++ t'') (TS ts::t ++ stk')`
-			by METIS_TAC [rtc_lderives_same_append_left, isTmnlSym_def,
-				      APPEND, EVERY_DEF] THEN
-			`(lderives (G l n))^* ([NTS nts]++t'') (TS ts::t++stk')`
-			by METIS_TAC [RTC_RULES] THEN
-			METIS_TAC [APPEND, APPEND_ASSOC],
+                        FIRST_X_ASSUM (Q.SPECL_THEN
+                                       [`((q',t ++ sfx,sl' ++ t'')::t')`,
+                                        `sfx`,`sl'++t''`, `stk'`] MP_TAC) THEN
+                        SRW_TAC [][] THEN
+                        `q'=q` by METIS_TAC [transStateEq] THEN
+                        SRW_TAC [][] THEN
+                        Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [rules_def,
+                                                                    isGnf_def] THEN
+                        `∃nts.(h' = NTS nts) ∧ ∃ts.(h = TS ts) ∧
+                        EVERY isNonTmnlSym sl ∧ MEM (rule nts (h::sl)) l`
+                        by METIS_TAC [transMemList] THEN
+                        SRW_TAC [][] THEN
+                        `lderives (G l n) [NTS nts] (TS ts::sl)`
+                        by METIS_TAC [ldres1, rules_def] THEN
+                        `lderives (G l n) ([NTS nts]++t'') (TS ts::sl++t'')`
+                        by METIS_TAC [lderives_same_append_right, RTC_RTC] THEN
+                        `(lderives (G l n))^* (TS ts::sl ++ t'') (TS ts::t ++ stk')`
+                        by METIS_TAC [rtc_lderives_same_append_left, isTmnlSym_def,
+                                      APPEND, EVERY_DEF] THEN
+                        `(lderives (G l n))^* ([NTS nts]++t'') (TS ts::t++stk')`
+                        by METIS_TAC [RTC_RULES] THEN
+                        METIS_TAC [APPEND, APPEND_ASSOC],
 
-			METIS_TAC [notNoneTrans, MEM_MAP]
-			]]]]);
+                        METIS_TAC [notNoneTrans, MEM_MAP]
+                        ]]]]);
 
 
 val laesImpLang = store_thm
@@ -416,60 +416,60 @@ THENL[
       SRW_TAC [][] THEN
       Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [isGnf_def, rules_def] THEN
       `validGnfProd (rule lhs rhs)`by METIS_TAC [EVERY_APPEND, EVERY_DEF,
-						 rgr_r9eq] THEN
+                                                 rgr_r9eq] THEN
       FULL_SIMP_TAC (srw_ss()) [validGnfProd_def] THEN
       SRW_TAC [][] THEN
       `MEM (NTS nts) (s1 ++ ts::ntsl ++ s2)` by METIS_TAC [MEM_APPEND, MEM] THEN
       FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
       SRW_TAC [][]
       THENL[
-	    FIRST_X_ASSUM (Q.SPECL_THEN [`r1'`, `r2'++[NTS lhs]++s2`,`nts`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def],
+            FIRST_X_ASSUM (Q.SPECL_THEN [`r1'`, `r2'++[NTS lhs]++s2`,`nts`]
+                           MP_TAC) THEN
+            SRW_TAC [][] THEN
+            FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def],
 
-	    FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def],
+            FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def],
 
-	    FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `s2`,`lhs`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    Cases_on `s=[]` THEN SRW_TAC [][] THEN
-	    `s1 ++ ts::(r1' ++ [NTS nts] ++ r2') ++ s2 =
-	    s1 ++ [ts]++(r1' ++ [NTS nts] ++ r2' ++ s2)`
-	    by METIS_TAC [APPEND, APPEND_ASSOC] THEN
-	    `∃l1 l2.
-	    (p++[NTS nts] = s1 ++ [ts] ++ l1) ∧ (s = l2) ∧
-	    (r1' ++ [NTS nts] ++ r2' ++ s2 = l1 ++ l2) ∨
-	    (s = l2 ++ [ts] ++ (r1' ++ [NTS nts] ++ r2' ++ s2)) ∧
-	    (p++[NTS nts] = l1) ∧
-	    (s1 = l1 ++ l2)` by METIS_TAC [list_r6] THEN
-	    SRW_TAC [][] THEN1
-	    (`EVERY isNonTmnlSym (r1' ++ [NTS nts] ++ r2' ++ s2)`
-	    by FULL_SIMP_TAC (srw_ss()) [] THEN
-	    METIS_TAC [EVERY_APPEND]) THEN
-	    FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def],
+            FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `s2`,`lhs`]
+                           MP_TAC) THEN
+            SRW_TAC [][] THEN
+            FULL_SIMP_TAC (srw_ss()) [] THEN
+            Cases_on `s=[]` THEN SRW_TAC [][] THEN
+            `s1 ++ ts::(r1' ++ [NTS nts] ++ r2') ++ s2 =
+            s1 ++ [ts]++(r1' ++ [NTS nts] ++ r2' ++ s2)`
+            by METIS_TAC [APPEND, APPEND_ASSOC] THEN
+            `∃l1 l2.
+            (p++[NTS nts] = s1 ++ [ts] ++ l1) ∧ (s = l2) ∧
+            (r1' ++ [NTS nts] ++ r2' ++ s2 = l1 ++ l2) ∨
+            (s = l2 ++ [ts] ++ (r1' ++ [NTS nts] ++ r2' ++ s2)) ∧
+            (p++[NTS nts] = l1) ∧
+            (s1 = l1 ++ l2)` by METIS_TAC [list_r6] THEN
+            SRW_TAC [][] THEN1
+            (`EVERY isNonTmnlSym (r1' ++ [NTS nts] ++ r2' ++ s2)`
+            by FULL_SIMP_TAC (srw_ss()) [] THEN
+            METIS_TAC [EVERY_APPEND]) THEN
+            FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def],
 
- 	    FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `r1'++[NTS nts]++r2'`,`lhs`]
-			   MP_TAC) THEN
-	    SRW_TAC [][] THEN
-	    Cases_on `s=[]` THEN SRW_TAC [][] THEN
-	    `s1 ++ ts::ntsl++(r1' ++ [NTS nts] ++ r2') =
-	    s1 ++ [ts]++(ntsl++r1' ++ [NTS nts] ++ r2')`
-	    by METIS_TAC [APPEND, APPEND_ASSOC] THEN
-	    `p++[NTS nts]++s = (p++[NTS nts])++s` by METIS_TAC [APPEND_ASSOC] THEN
-	    `∃l1 l2.
-	    (p++[NTS nts] = s1 ++ [ts] ++ l1) ∧ (s = l2) ∧
-	    (ntsl ++ r1' ++ [NTS nts] ++ r2' = l1 ++ l2) ∨
-	    (s = l2 ++ [ts] ++ (ntsl ++ r1' ++ [NTS nts] ++ r2')) ∧
-	    (p++[NTS nts] = l1) ∧
-	    (s1 = l1 ++ l2)` by METIS_TAC [list_r6] THEN
-	    SRW_TAC [][] THEN1
-	    (`EVERY isNonTmnlSym (ntsl ++ r1' ++ [NTS nts] ++ r2')`
-	    by FULL_SIMP_TAC (srw_ss()) [] THEN
-	    METIS_TAC [EVERY_APPEND]) THEN
-	    FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]
-	    ]]);
+            FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `r1'++[NTS nts]++r2'`,`lhs`]
+                           MP_TAC) THEN
+            SRW_TAC [][] THEN
+            Cases_on `s=[]` THEN SRW_TAC [][] THEN
+            `s1 ++ ts::ntsl++(r1' ++ [NTS nts] ++ r2') =
+            s1 ++ [ts]++(ntsl++r1' ++ [NTS nts] ++ r2')`
+            by METIS_TAC [APPEND, APPEND_ASSOC] THEN
+            `p++[NTS nts]++s = (p++[NTS nts])++s` by METIS_TAC [APPEND_ASSOC] THEN
+            `∃l1 l2.
+            (p++[NTS nts] = s1 ++ [ts] ++ l1) ∧ (s = l2) ∧
+            (ntsl ++ r1' ++ [NTS nts] ++ r2' = l1 ++ l2) ∨
+            (s = l2 ++ [ts] ++ (ntsl ++ r1' ++ [NTS nts] ++ r2')) ∧
+            (p++[NTS nts] = l1) ∧
+            (s1 = l1 ++ l2)` by METIS_TAC [list_r6] THEN
+            SRW_TAC [][] THEN1
+            (`EVERY isNonTmnlSym (ntsl ++ r1' ++ [NTS nts] ++ r2')`
+            by FULL_SIMP_TAC (srw_ss()) [] THEN
+            METIS_TAC [EVERY_APPEND]) THEN
+            FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]
+            ]]);
 
 
 val ldImpIdc = store_thm
@@ -477,8 +477,8 @@ val ldImpIdc = store_thm
 ``∀dl x y.lderives g ⊢ dl ◁  [NTS (startSym g)] → (x++y) ∧
       isGnf g ∧ EVERY isTmnlSym x ∧ EVERY isNonTmnlSym y
               ⇒
-	  RTC (ID (grammar2pda g q))
-	  (q,x,[NTS (startSym g)]) (q,[],y)``,
+          RTC (ID (grammar2pda g q))
+          (q,x,[NTS (startSym g)]) (q,[],y)``,
 
 HO_MATCH_MP_TAC SNOC_INDUCT THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
@@ -517,122 +517,122 @@ THENL[
        FULL_SIMP_TAC (srw_ss()) [] THEN
        SRW_TAC [][]
        THENL[
-	    Cases_on `ts` THEN
-	    FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def],
+            Cases_on `ts` THEN
+            FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def],
 
-	    Cases_on `t` THEN Cases_on `h` THEN
-	    SRW_TAC [][] THEN
-	    FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def] THEN
-	    SRW_TAC [] [],
+            Cases_on `t` THEN Cases_on `h` THEN
+            SRW_TAC [][] THEN
+            FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def] THEN
+            SRW_TAC [] [],
 
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][] THEN
-	    FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, trans] THEN
-	    Cases_on `t` THEN Cases_on `h` THEN
-	    FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def] THEN
-	    SRW_TAC [][] THEN
-	    METIS_TAC [APPEND]
-	    ],
+            FULL_SIMP_TAC (srw_ss()) [] THEN
+            SRW_TAC [][] THEN
+            FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, trans] THEN
+            Cases_on `t` THEN Cases_on `h` THEN
+            FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def] THEN
+            SRW_TAC [][] THEN
+            METIS_TAC [APPEND]
+            ],
 
        `t = FRONT t ++ [LAST t]` by METIS_TAC [APPEND_FRONT_LAST] THEN
        Cases_on `LAST t`
        THENL[
-	     FIRST_X_ASSUM (Q.SPECL_THEN [`[]`, `[]`] MP_TAC) THEN
-	     SRW_TAC [][] THEN
-	     `rtc2list (lderives g) ([[]] ++ [x' ++ y])`
-	     by METIS_TAC [rtc2list_distrib_append_snd, APPEND, APPEND_ASSOC,
-			   NOT_CONS_NIL] THEN
-	     FULL_SIMP_TAC (srw_ss()) [rtc2list_def, lderives_def],
+             FIRST_X_ASSUM (Q.SPECL_THEN [`[]`, `[]`] MP_TAC) THEN
+             SRW_TAC [][] THEN
+             `rtc2list (lderives g) ([[]] ++ [x' ++ y])`
+             by METIS_TAC [rtc2list_distrib_append_snd, APPEND, APPEND_ASSOC,
+                           NOT_CONS_NIL] THEN
+             FULL_SIMP_TAC (srw_ss()) [rtc2list_def, lderives_def],
 
-	     `rtc2list (lderives g) ([h::t'] ++ [x' ++ y])`
-	     by METIS_TAC [rtc2list_distrib_append_snd, APPEND, APPEND_ASSOC,
-			   NOT_CONS_NIL] THEN
-	     FULL_SIMP_TAC (srw_ss()) [rtc2list_def, lderives_def] THEN
-	     Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [isGnf_def, rules_def,
-							 startSym_def] THEN
-	     `validGnfProd (rule lhs rhs)` by METIS_TAC [rgr_r9eq, EVERY_APPEND,
-							 EVERY_DEF] THEN
-	     FULL_SIMP_TAC (srw_ss()) [validGnfProd_def] THEN
-	     SRW_TAC [][] THEN
-	     `s1 ++ ts::ntsl ++ s2 = s1++[ts]++(ntsl++s2)` by METIS_TAC [APPEND,
-							    APPEND_ASSOC] THEN
-	     `∃l1 l2.
+             `rtc2list (lderives g) ([h::t'] ++ [x' ++ y])`
+             by METIS_TAC [rtc2list_distrib_append_snd, APPEND, APPEND_ASSOC,
+                           NOT_CONS_NIL] THEN
+             FULL_SIMP_TAC (srw_ss()) [rtc2list_def, lderives_def] THEN
+             Cases_on `g` THEN FULL_SIMP_TAC (srw_ss()) [isGnf_def, rules_def,
+                                                         startSym_def] THEN
+             `validGnfProd (rule lhs rhs)` by METIS_TAC [rgr_r9eq, EVERY_APPEND,
+                                                         EVERY_DEF] THEN
+             FULL_SIMP_TAC (srw_ss()) [validGnfProd_def] THEN
+             SRW_TAC [][] THEN
+             `s1 ++ ts::ntsl ++ s2 = s1++[ts]++(ntsl++s2)` by METIS_TAC [APPEND,
+                                                            APPEND_ASSOC] THEN
+             `∃l1 l2.
                 (x' = s1 ++ [ts] ++ l1) ∧ (y = l2) ∧
-		(ntsl++s2 = l1 ++ l2) ∨
-		(y = l2 ++ [ts] ++ (ntsl++s2)) ∧ (x' = l1) ∧
-		(s1 = l1 ++ l2)` by METIS_TAC [list_r6] THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) []
-	     THENL[
-		   Cases_on `ntsl` THEN Cases_on `l1` THEN
-		   FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][]
-		   THENL[
-			 FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `[NTS lhs]++l2`]
-					MP_TAC) THEN
-			 SRW_TAC [][] THEN
-			 `rtc2list (lderives (G l n)) ([NTS n]::t)`
-			 by METIS_TAC [rtc2list_distrib_append_fst, APPEND_ASSOC,
-				       APPEND, NOT_CONS_NIL] THEN
-			 `LAST ([NTS n]::t) = LAST t`
-			 by METIS_TAC [last_append, APPEND] THEN
-			 FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
-			 `IDC (grammar2pda (G l n) q) (q,s1,[NTS n])
-			 (q,[],NTS lhs::l2)` by METIS_TAC [] THEN
-			 `IDC (grammar2pda (G l n) q) (q,s1++[ts],[NTS n])
-			 (q,[]++[ts],NTS lhs::l2)` by METIS_TAC [idcInpInsert] THEN
-			 FULL_SIMP_TAC (srw_ss()) [] THEN
-			 Q_TAC SUFF_TAC `ID (grammar2pda (G l n) q)
-			 (q,[ts],NTS lhs::l2) (q,[], l2)` THEN1
-			 (SRW_TAC [][] THEN
-			  METIS_TAC [ RTC_RULES_RIGHT1, APPEND_NIL]) THEN
-			 SRW_TAC [][grammar2pda, LET_THM, ID_def, rules_def] THEN
-			 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, trans] THEN
-			 METIS_TAC [APPEND_NIL],
+                (ntsl++s2 = l1 ++ l2) ∨
+                (y = l2 ++ [ts] ++ (ntsl++s2)) ∧ (x' = l1) ∧
+                (s1 = l1 ++ l2)` by METIS_TAC [list_r6] THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) []
+             THENL[
+                   Cases_on `ntsl` THEN Cases_on `l1` THEN
+                   FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][]
+                   THENL[
+                         FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `[NTS lhs]++l2`]
+                                        MP_TAC) THEN
+                         SRW_TAC [][] THEN
+                         `rtc2list (lderives (G l n)) ([NTS n]::t)`
+                         by METIS_TAC [rtc2list_distrib_append_fst, APPEND_ASSOC,
+                                       APPEND, NOT_CONS_NIL] THEN
+                         `LAST ([NTS n]::t) = LAST t`
+                         by METIS_TAC [last_append, APPEND] THEN
+                         FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+                         `IDC (grammar2pda (G l n) q) (q,s1,[NTS n])
+                         (q,[],NTS lhs::l2)` by METIS_TAC [] THEN
+                         `IDC (grammar2pda (G l n) q) (q,s1++[ts],[NTS n])
+                         (q,[]++[ts],NTS lhs::l2)` by METIS_TAC [idcInpInsert] THEN
+                         FULL_SIMP_TAC (srw_ss()) [] THEN
+                         Q_TAC SUFF_TAC `ID (grammar2pda (G l n) q)
+                         (q,[ts],NTS lhs::l2) (q,[], l2)` THEN1
+                         (SRW_TAC [][] THEN
+                          METIS_TAC [ RTC_RULES_RIGHT1, APPEND_NIL]) THEN
+                         SRW_TAC [][grammar2pda, LET_THM, ID_def, rules_def] THEN
+                         FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, trans] THEN
+                         METIS_TAC [APPEND_NIL],
 
-			 `rtc2list (lderives (G l n)) ([NTS n]::(FRONT t ++
-			 [s1 ++ [NTS lhs] ++ h'::(t'' ++ l2)]))`
-			 by METIS_TAC [rtc2list_distrib_append_fst, NOT_CONS_NIL,
-				       APPEND_FRONT_LAST, APPEND_ASSOC,
-				       APPEND] THEN
-			 `(lderives (G l n))^* [NTS n]
-			 (s1 ++ [NTS lhs] ++ h'::(t'' ++ l2))`
-			 by METIS_TAC [rtc2listRtcHdLast, NOT_CONS_NIL, HD,
-				       LAST_APPEND, LAST, NOT_CONS_NIL, APPEND] THEN
-			 METIS_TAC [gnfNotLastTmns, EVERY_APPEND, EVERY_DEF,
-				    sym_r1b, isGnf_def, APPEND, APPEND_ASSOC,rules_def],
+                         `rtc2list (lderives (G l n)) ([NTS n]::(FRONT t ++
+                         [s1 ++ [NTS lhs] ++ h'::(t'' ++ l2)]))`
+                         by METIS_TAC [rtc2list_distrib_append_fst, NOT_CONS_NIL,
+                                       APPEND_FRONT_LAST, APPEND_ASSOC,
+                                       APPEND] THEN
+                         `(lderives (G l n))^* [NTS n]
+                         (s1 ++ [NTS lhs] ++ h'::(t'' ++ l2))`
+                         by METIS_TAC [rtc2listRtcHdLast, NOT_CONS_NIL, HD,
+                                       LAST_APPEND, LAST, NOT_CONS_NIL, APPEND] THEN
+                         METIS_TAC [gnfNotLastTmns, EVERY_APPEND, EVERY_DEF,
+                                    sym_r1b, isGnf_def, APPEND, APPEND_ASSOC,rules_def],
 
-			 FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `[NTS lhs]++s2`]
-					MP_TAC) THEN
-			 SRW_TAC [][] THEN
-			 `rtc2list (lderives (G l n)) ([NTS n]::t)`
-			 by METIS_TAC [rtc2list_distrib_append_fst, APPEND_ASSOC,
-				       APPEND, NOT_CONS_NIL] THEN
-			 `LAST ([NTS n]::t) = LAST t`
-			 by METIS_TAC [last_append, APPEND] THEN
-			 FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
-			 `IDC (grammar2pda (G l n) q) (q,s1,[NTS n])
-			 (q,[],NTS lhs::s2)` by METIS_TAC [] THEN
-			 `IDC (grammar2pda (G l n) q) (q,s1++[ts],[NTS n])
-			 (q,[]++[ts],NTS lhs::s2)` by METIS_TAC [idcInpInsert] THEN
-			 FULL_SIMP_TAC (srw_ss()) [] THEN
-			 Q_TAC SUFF_TAC `ID (grammar2pda (G l n) q)
-			 (q,[ts],NTS lhs::s2) (q,[], NTS s::t''++s2)` THEN1
-			 (SRW_TAC [][] THEN
-			  METIS_TAC [ RTC_RULES_RIGHT1]) THEN
-			 SRW_TAC [][grammar2pda, LET_THM, ID_def, rules_def] THEN
-			 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, trans] THEN
-			 METIS_TAC [APPEND_NIL],
+                         FIRST_X_ASSUM (Q.SPECL_THEN [`s1`, `[NTS lhs]++s2`]
+                                        MP_TAC) THEN
+                         SRW_TAC [][] THEN
+                         `rtc2list (lderives (G l n)) ([NTS n]::t)`
+                         by METIS_TAC [rtc2list_distrib_append_fst, APPEND_ASSOC,
+                                       APPEND, NOT_CONS_NIL] THEN
+                         `LAST ([NTS n]::t) = LAST t`
+                         by METIS_TAC [last_append, APPEND] THEN
+                         FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+                         `IDC (grammar2pda (G l n) q) (q,s1,[NTS n])
+                         (q,[],NTS lhs::s2)` by METIS_TAC [] THEN
+                         `IDC (grammar2pda (G l n) q) (q,s1++[ts],[NTS n])
+                         (q,[]++[ts],NTS lhs::s2)` by METIS_TAC [idcInpInsert] THEN
+                         FULL_SIMP_TAC (srw_ss()) [] THEN
+                         Q_TAC SUFF_TAC `ID (grammar2pda (G l n) q)
+                         (q,[ts],NTS lhs::s2) (q,[], NTS s::t''++s2)` THEN1
+                         (SRW_TAC [][] THEN
+                          METIS_TAC [ RTC_RULES_RIGHT1]) THEN
+                         SRW_TAC [][grammar2pda, LET_THM, ID_def, rules_def] THEN
+                         FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, trans] THEN
+                         METIS_TAC [APPEND_NIL],
 
-			 Cases_on `h'` THEN
-			 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def]
-			 ],
+                         Cases_on `h'` THEN
+                         FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def]
+                         ],
 
-		   Cases_on `ntsl` THEN Cases_on `l1` THEN
-		   FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN
-		   (Cases_on `ts` THEN FULL_SIMP_TAC (srw_ss())
-		    [isNonTmnlSym_def,isTmnlSym_def])]]]]);
+                   Cases_on `ntsl` THEN Cases_on `l1` THEN
+                   FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN
+                   (Cases_on `ts` THEN FULL_SIMP_TAC (srw_ss())
+                    [isNonTmnlSym_def,isTmnlSym_def])]]]]);
 
 
 
@@ -689,26 +689,27 @@ val ntslCond = Define
       (∀e.MEM e ntsl ⇒ MEM (frmState e) (statesList m))`;
 
 
-val p2gRules = Define
-`p2gRules m =
-{ rule (q,A,q1) [] | ((NONE,A,q),q1,[]) ∈ m.next } ∪
-{ rule (q,A,q1) [TS ts] | ((SOME (TS ts),A,q),q1,[]) ∈ m.next } ∪
-{ rule (q,A,p) ([TS ts]++L) | L ≠ [] ∧
- ∃mrhs q1. ((SOME (TS ts),A,q),q1,mrhs) ∈ m.next ∧ ntslCond m (q1,p) L ∧
-       (MAP transSym L = mrhs) ∧ p ∈ statesList m } ∪
-{ rule (q,A,p) L | L ≠ [] ∧
- ∃mrhs q1. ((NONE,A,q),q1,mrhs) ∈ m.next ∧ ntslCond m (q1,p) L ∧
-       (MAP transSym L = mrhs) ∧ p ∈ statesList m }`;
+val p2gRules = Define `
+  p2gRules m =
+     { rule (q,A,q1) [] | ((NONE,A,q),q1,[]) ∈ m.next } ∪
+     { rule (q,A,q1) [TS ts] | ((SOME ts,A,q),q1,[]) ∈ m.next } ∪
+     { rule (q,A,p) ([TS ts]++L) | L ≠ [] ∧
+         ∃mrhs q1. ((SOME ts,A,q),q1,mrhs) ∈ m.next ∧ ntslCond m (q1,p) L ∧
+                   (MAP transSym L = mrhs) ∧ p ∈ statesList m } ∪
+     { rule (q,A,p) L | L ≠ [] ∧
+            ∃mrhs q1. ((NONE,A,q),q1,mrhs) ∈ m.next ∧ ntslCond m (q1,p) L ∧
+                      (MAP transSym L = mrhs) ∧ p ∈ statesList m }
+`;
 
 val p2gStartRules = Define
 `p2gStartRules m s =
 { rule s [NTS (m.start,m.ssSym,q)] | q |  q ∈ statesList m  }`;
 
 
-val pda2grammar = Define
-`pda2grammar m g =
-¬(pdastate (startSym g) ∈ statesList m) ∧
-(set (rules g) = p2gStartRules m (startSym g) ∪ p2gRules m)`;
+val pda2grammar = Define `
+  pda2grammar m g =
+     pdastate (startSym g) ∉ statesList m ∧
+     (set (rules g) = p2gStartRules m (startSym g) ∪ p2gRules m)`;
 
 val finitep2gStartRules = store_thm
 ("finitep2gStartRules",
@@ -717,21 +718,21 @@ val finitep2gStartRules = store_thm
 SRW_TAC [][p2gStartRules] THEN
 Q.MATCH_ABBREV_TAC `FINITE P` THEN
 Q.ABBREV_TAC `f = \q. if q ∈ statesList m then {rule s [NTS (m.start,m.ssSym,q)]}
-		      else {}` THEN
+                      else {}` THEN
 Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set (statesList m)))`
  THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN
-	SRW_TAC [][]) THEN
+        SRW_TAC [][]) THEN
 
-	ONCE_REWRITE_TAC [EXTENSION] THEN
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		 boolSimps.CONJ_ss][EXISTS_rule,
-				    Abbr`f`, Abbr`P`]);
+        ONCE_REWRITE_TAC [EXTENSION] THEN
+        SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
+                 boolSimps.CONJ_ss][EXISTS_rule,
+                                    Abbr`f`, Abbr`P`]);
 
 
 val finitentslComp = store_thm
 ("finitentslComp",
 ``FINITE { (q,A,p) | q ∈ statesList m ∧ p ∈ statesList m ∧
-	  A ∈ stkSymsList m m.next }``,
+          A ∈ stkSymsList m m.next }``,
 
 SRW_TAC [][] THEN
 Q.MATCH_ABBREV_TAC `FINITE P` THEN
@@ -740,33 +741,33 @@ Q.ABBREV_TAC `f = \q. if q ∈ statesList m then
  else {}` THEN
 Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set (statesList m)))` THEN1
  (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN
-	SRW_TAC [][] THEN
-	Q.MATCH_ABBREV_TAC `FINITE P1` THEN
-	Q.ABBREV_TAC `h = \A. if A ∈ stkSymsList m m.next then
-	IMAGE (λp. (q,A,p)) { p | p ∈ statesList m } else {}` THEN
-	Q_TAC SUFF_TAC `P1 = BIGUNION (IMAGE h (set (stkSymsList m m.next)))`
-	THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`h`] THEN
-	       SRW_TAC [][] THEN
-	       Q.MATCH_ABBREV_TAC `FINITE P2` THEN
-	       Q.ABBREV_TAC `i = \p. if p ∈ statesList m then {p} else {}` THEN
-	       Q_TAC SUFF_TAC `P2 = BIGUNION (IMAGE i (set (statesList m)))`
-	       THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`i`] THEN
-		      SRW_TAC [][]) THEN
-	       ONCE_REWRITE_TAC [EXTENSION] THEN
-	       SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-			boolSimps.CONJ_ss][EXISTS_rule,
-					   Abbr`i`, Abbr`P2`]) THEN
-	ONCE_REWRITE_TAC [EXTENSION] THEN
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		 boolSimps.CONJ_ss][EXISTS_rule,
-				    Abbr`h`, Abbr`P1`]  THEN
-	METIS_TAC []) THEN
+        SRW_TAC [][] THEN
+        Q.MATCH_ABBREV_TAC `FINITE P1` THEN
+        Q.ABBREV_TAC `h = \A. if A ∈ stkSymsList m m.next then
+        IMAGE (λp. (q,A,p)) { p | p ∈ statesList m } else {}` THEN
+        Q_TAC SUFF_TAC `P1 = BIGUNION (IMAGE h (set (stkSymsList m m.next)))`
+        THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`h`] THEN
+               SRW_TAC [][] THEN
+               Q.MATCH_ABBREV_TAC `FINITE P2` THEN
+               Q.ABBREV_TAC `i = \p. if p ∈ statesList m then {p} else {}` THEN
+               Q_TAC SUFF_TAC `P2 = BIGUNION (IMAGE i (set (statesList m)))`
+               THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`i`] THEN
+                      SRW_TAC [][]) THEN
+               ONCE_REWRITE_TAC [EXTENSION] THEN
+               SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
+                        boolSimps.CONJ_ss][EXISTS_rule,
+                                           Abbr`i`, Abbr`P2`]) THEN
+        ONCE_REWRITE_TAC [EXTENSION] THEN
+        SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
+                 boolSimps.CONJ_ss][EXISTS_rule,
+                                    Abbr`h`, Abbr`P1`]  THEN
+        METIS_TAC []) THEN
 
-	ONCE_REWRITE_TAC [EXTENSION] THEN
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		 boolSimps.CONJ_ss][EXISTS_rule,
-				    Abbr`f`, Abbr`P`] THEN
-	METIS_TAC []);
+        ONCE_REWRITE_TAC [EXTENSION] THEN
+        SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
+                 boolSimps.CONJ_ss][EXISTS_rule,
+                                    Abbr`f`, Abbr`P`] THEN
+        METIS_TAC []);
 
 
 val finiteDuo = store_thm
@@ -779,28 +780,27 @@ Q.MATCH_ABBREV_TAC `FINITE P1` THEN
  IMAGE (λp. (A,p)) { p | p ∈ statesList m } else {}` THEN
  Q_TAC SUFF_TAC `P1 = BIGUNION (IMAGE h (set (stkSymsList m m.next)))`
  THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`h`] THEN
-	       SRW_TAC [][] THEN
-	       Q.MATCH_ABBREV_TAC `FINITE P2` THEN
-	       Q.ABBREV_TAC `i = \p. if p ∈ statesList m then {p} else {}` THEN
-	       Q_TAC SUFF_TAC `P2 = BIGUNION (IMAGE i (set (statesList m)))`
-	       THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`i`] THEN
-		      SRW_TAC [][]) THEN
-	       ONCE_REWRITE_TAC [EXTENSION] THEN
-	       SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-			boolSimps.CONJ_ss][EXISTS_rule,
-					   Abbr`i`, Abbr`P2`]) THEN
-	ONCE_REWRITE_TAC [EXTENSION] THEN
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		 boolSimps.CONJ_ss][EXISTS_rule,
-				    Abbr`h`, Abbr`P1`]  THEN
-	METIS_TAC []);
-
+               SRW_TAC [][] THEN
+               Q.MATCH_ABBREV_TAC `FINITE P2` THEN
+               Q.ABBREV_TAC `i = \p. if p ∈ statesList m then {p} else {}` THEN
+               Q_TAC SUFF_TAC `P2 = BIGUNION (IMAGE i (set (statesList m)))`
+               THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`i`] THEN
+                      SRW_TAC [][]) THEN
+               ONCE_REWRITE_TAC [EXTENSION] THEN
+               SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
+                        boolSimps.CONJ_ss][EXISTS_rule,
+                                           Abbr`i`, Abbr`P2`]) THEN
+        ONCE_REWRITE_TAC [EXTENSION] THEN
+        SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
+                 boolSimps.CONJ_ss][EXISTS_rule,
+                                    Abbr`h`, Abbr`P1`]  THEN
+        METIS_TAC []);
 
 
 val finitentslImage = store_thm
 ("finitentslImage",
 ``(ntslComp = { (q,A,p) | q ∈ statesList m ∧ p ∈ statesList m ∧
-	  A ∈ stkSymsList m m.next }) ⇒
+          A ∈ stkSymsList m m.next }) ⇒
  FINITE { ntsl | ntsl ⊆ (IMAGE NTS ntslComp) }``,
 
 METIS_TAC [IMAGE_FINITE, finitentslComp, FINITE_POW, POW_DEF]);
@@ -820,12 +820,12 @@ SRW_TAC [][]);
 val finitentslCond = store_thm
 ("finitentslCond",
 ``FINITE { ntsl | ntsl |  ntslCond m (q1,q2) ntsl ∧ (LENGTH ntsl = n) ∧
-	          EVERY (λe. e ∈ stkSymsList m m.next) (MAP transSym ntsl) }``,
+                  EVERY (λe. e ∈ stkSymsList m m.next) (MAP transSym ntsl) }``,
 
 SRW_TAC [][ntslCond] THEN
 Q.MATCH_ABBREV_TAC `FINITE P` THEN
 Q.ABBREV_TAC `ntslComp = { (q,A,p) | q ∈ statesList m ∧ p ∈ statesList m ∧
-			  A ∈ stkSymsList m m.next }` THEN
+                          A ∈ stkSymsList m m.next }` THEN
 Q_TAC SUFF_TAC `P ⊆ { l | EVERY (λe. e ∈ (IMAGE NTS ntslComp)) l ∧
                           (LENGTH l = n)}` THEN1
 
@@ -871,247 +871,198 @@ Q_TAC SUFF_TAC `P ⊆ { l | EVERY (λe. e ∈ (IMAGE NTS ntslComp)) l ∧
   SRW_TAC [][EVERY_MEM]);
 
 
+val EXISTS_symbol = store_thm(
+  "EXISTS_symbol",
+  ``(?x:('a,'b) symbol. P x) <=> (?x. P (TS x)) \/ (?x. P (NTS x))``,
+  METIS_TAC [TypeBase.nchotomy_of ``:('a,'b)symbol``]);
+
+val GSPEC_IMAGE = prove(
+  ``GSPEC f = IMAGE (FST o f) { x | SND (f x)}``,
+  SRW_TAC [][GSPECIFICATION, EXTENSION, EQ_IMP_THM] THEN
+  Cases_on `f x'` THEN SRW_TAC [][] THEN Q.EXISTS_TAC `x'` THEN
+  SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) []);
+
+val UNCURRY' = prove(
+  ``UNCURRY f = λv. f (FST v) (SND v)``,
+  SRW_TAC [][FUN_EQ_THM, pairTheory.UNCURRY]);
+
+val FINITE_MEM = prove(
+  ``(∀x y. (f x = f y) = (x = y)) ⇒ FINITE { x | MEM (f x) l}``,
+  Induct_on `l` THEN SRW_TAC [][GSPEC_OR] THEN
+  Cases_on `∃v. f v = h` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+  Q_TAC SUFF_TAC `{ x | f x = h} = {v}` THEN1 SRW_TAC [][] THEN
+  SRW_TAC [][EXTENSION])
+
+val PAIR_ABS = prove(
+  ``(λ(v:'a#'b). f v) = UNCURRY (λa b. f (a,b))``,
+  SIMP_TAC (srw_ss()) [FUN_EQ_THM, pairTheory.FORALL_PROD]);
+
 val EXISTS_OPTION = store_thm(
   "EXISTS_OPTION",
   ``(?x:'a option. P x) <=> P NONE \/ (?x:'a. P (SOME x))``,
   EQ_TAC THEN1 (STRIP_TAC THEN Cases_on `x` THEN METIS_TAC []) THEN
   METIS_TAC []);
 
-val EXISTS_symbol = store_thm(
-  "EXISTS_symbol",
-  ``(?x:('a,'b) symbol. P x) <=> (?x. P (TS x)) \/ (?x. P (NTS x))``,
-  METIS_TAC [TypeBase.nchotomy_of ``:('a,'b)symbol``]);
+val finitep2gRules = store_thm (
+  "finitep2gRules",
+  ``FINITE (p2gRules m)``,
 
+SRW_TAC [][p2gRules] THENL [
+  ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
+  SRW_TAC [][UNCURRY'] THEN
+  HO_MATCH_MP_TAC FINITE_MEM THEN
+  SIMP_TAC (srw_ss()) [pairTheory.FORALL_PROD] THEN METIS_TAC [],
 
-val finitep2gRules = store_thm
-("finitep2gRules",
-``FINITE (p2gRules m)``,
+  ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
+  SRW_TAC [][UNCURRY'] THEN
+  MATCH_MP_TAC IMAGE_FINITE THEN HO_MATCH_MP_TAC FINITE_MEM THEN
+  SIMP_TAC (srw_ss()) [pairTheory.FORALL_PROD] THEN METIS_TAC [],
 
-SRW_TAC [][p2gRules]
-THENL[
-      Q.MATCH_ABBREV_TAC `FINITE P` THEN
-      Q.ABBREV_TAC `f = \r:((δ, γ) symbol, β, α) trans.
-      case r of
-      ((isymo,A,q),q1,mrhs) =>
-      if (isymo=NONE) ∧ (mrhs=[])
-	  then {rule (q,A,q1) ([]:(α # β # α, γ) symbol list)}
-      else {}` THEN
-      Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set m.next))`
-      THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN
-	     Cases_on `r` THEN
-	     Cases_on `r'` THEN
-	     Cases_on `q` THEN
-	     Cases_on `r'` THEN
-	     SRW_TAC [][]) THEN
-
-	ONCE_REWRITE_TAC [EXTENSION] THEN
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		 boolSimps.CONJ_ss][EXISTS_rule,
-				    Abbr`f`, Abbr`P`] THEN
-	SRW_TAC [][EQ_IMP_THM] THEN1
-	(Q.EXISTS_TAC `((NONE,A,q),q1,[])` THEN
-	SRW_TAC [][]) THEN
-	Cases_on `r` THEN
-	Cases_on `r'` THEN
-	Cases_on `q` THEN
-	Cases_on `r'` THEN
-	FULL_SIMP_TAC (srw_ss()) [] THEN
-	Cases_on `q''` THEN Cases_on `r` THEN
-	FULL_SIMP_TAC (srw_ss()) [],
-
-	(* TS case, similar to above *)
-
-      Q.MATCH_ABBREV_TAC `FINITE P` THEN
-      Q.ABBREV_TAC `f = \r:((δ, γ) symbol, β, α) trans.
-      case r of
-	  ((NONE,A,q),q1,mrhs) => {}
-         | ((SOME (NTS t),A,q),q1,mrhs) => {}
-         | ((SOME (TS ts),A,q),q1,mrhs) =>
-         if (mrhs=[])
-	  then {rule (q,A,q1) ([TS ts]:(α # β # α, γ) symbol list)}
-	 else {}` THEN
-      Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set m.next))`
-      THEN1 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN
-	     Cases_on `r` THEN
-	     Cases_on `r'` THEN
-	     Cases_on `q` THEN
-	     Cases_on `r'` THEN
-	     SRW_TAC [][] THEN
-	     Cases_on `q''` THEN SRW_TAC [][] THEN
-	     Cases_on `x` THEN SRW_TAC [][]) THEN
-
-	ONCE_REWRITE_TAC [EXTENSION] THEN
-	SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		 boolSimps.CONJ_ss][EXISTS_rule,
-				    Abbr`f`, Abbr`P`] THEN
-	SRW_TAC [][EQ_IMP_THM] THEN1
-	(Q.EXISTS_TAC `((SOME (TS ts),A,q),q1,[])` THEN
-	SRW_TAC [][]) THEN
-	Cases_on `r` THEN
-	Cases_on `r'` THEN
-	Cases_on `q` THEN
-	Cases_on `r'` THEN
-	FULL_SIMP_TAC (srw_ss()) [] THEN
-	Cases_on `q''` THEN Cases_on `r` THEN
-	FULL_SIMP_TAC (srw_ss()) [] THEN
-	Cases_on `x'` THEN FULL_SIMP_TAC (srw_ss()) [],
-
-	(* 3rd case *)
-	Q.MATCH_ABBREV_TAC `FINITE P` THEN
-	Q.ABBREV_TAC
-	`f = \r:((δ, γ) symbol, β, α) trans.
-	  case r of
+  (* 3rd case *)
+  Q.MATCH_ABBREV_TAC `FINITE P` THEN
+  Q.ABBREV_TAC
+        `f = \r:(γ, β, α) trans.
+          case r of
             ((NONE,b1,b2),b3,b4) => ({}:(α # β # α, γ) rule -> bool)
-          | ((SOME (NTS x1),x2,x3),x4,x5) => {}
-	  | ((SOME (TS ts),A,q),q1,mrhs) =>
-		  { rule (q,A,p) (TS ts::L) | L ≠ [] ∧
-		   (MAP transSym L = mrhs) ∧
-		   ntslCond m (q1,p) L ∧ p ∈ statesList m}` THEN
-	Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set m.next))` THEN1
+          | ((SOME ts,A,q),q1,mrhs) =>
+                  { rule (q,A,p) (TS ts::L) | L ≠ [] ∧
+                   (MAP transSym L = mrhs) ∧
+                   ntslCond m (q1,p) L ∧ p ∈ statesList m}` THEN
+  Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set m.next))` THEN1
 
-	(DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN
-	Cases_on `r` THEN
-	Cases_on `r'` THEN
-	Cases_on `q` THEN
-	Cases_on `r'` THEN
-	FULL_SIMP_TAC (srw_ss()) [] THEN
-	Cases_on `q''` THEN
-	FULL_SIMP_TAC (srw_ss()) [] THEN
-	Cases_on `x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+        (DISCH_THEN SUBST1_TAC THEN
+         SIMP_TAC (srw_ss()++ boolSimps.DNF_ss) [Abbr`f`] THEN
+         SIMP_TAC (srw_ss()) [pairTheory.FORALL_PROD, FORALL_OPTION] THEN
+         ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
+         SIMP_TAC (srw_ss()) [pairTheory.o_UNCURRY_R, INJECTIVE_IMAGE_FINITE,
+                              combinTheory.o_ABS_R, pairTheory.FORALL_PROD] THEN
+         SIMP_TAC (srw_ss()) [PAIR_ABS] THEN
+         MAP_EVERY Q.X_GEN_TAC [`t`, `stk`, `q`, `q'`, `stks`] THEN
+         STRIP_TAC THEN
+         Q.MATCH_ABBREV_TAC `FINITE P1` THEN
+         Q.ABBREV_TAC `i: α -> (α # (α # β # α, γ) symbol list) set =
+            \a. {a} CROSS
+                { b | b ≠ [] ∧ (MAP transSym b = stks) ∧
+                      ntslCond m (q',a) b}
+         ` THEN
+        Q_TAC SUFF_TAC `P1 = BIGUNION (IMAGE i (set (statesList m)))` THEN1
 
-	Q.MATCH_ABBREV_TAC `FINITE P1` THEN
-	Q.ABBREV_TAC `i: α -> (α # β # α, γ) rule -> bool =
-        \p. {rule (r'',q,p) (TS t::L) | L |
-        L ≠ [] ∧ ntslCond m (q',p) L ∧ (MAP transSym L = r) }` THEN
-	Q_TAC SUFF_TAC `P1 = BIGUNION (IMAGE i (set (statesList m)))` THEN1
+         (DISCH_THEN SUBST1_TAC THEN
+          ASM_SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss) [Abbr`i`] THEN
+          REPEAT STRIP_TAC THEN DISJ2_TAC THEN
+          Q.MATCH_ABBREV_TAC `FINITE P2` THEN
+          Q.ABBREV_TAC `
+            N:(α # β # α, γ) symbol list -> bool =
+             {ntsl |
+               ntslCond m (q',a) ntsl ∧ (LENGTH ntsl = LENGTH stks) ∧
+               EVERY (λe. e ∈ stkSymsList m m.next) (MAP transSym ntsl)}` THEN
+          Q_TAC SUFF_TAC `P2 ⊆ N` THEN1
+            METIS_TAC [finitentslCond, IMAGE_FINITE, SUBSET_FINITE] THEN
 
-	 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`i`] THEN
+          SRW_TAC [][Abbr `P2`, Abbr `N`, SUBSET_DEF] THEN
+          SRW_TAC [][EVERY_MEM] THEN
+          `e ∈ stkSyms m` by
+             (SRW_TAC [][stkSyms_def] THEN METIS_TAC [mem_in]) THEN
+          METIS_TAC [stkSyms_list_eqresult, mem_in]) THEN
 
-	  Q.MATCH_ABBREV_TAC `FINITE P2` THEN
-	Q.ABBREV_TAC `N:(α # β # α, γ) symbol list -> bool =
-	{ntsl |
-	 ntslCond m (q',p) ntsl ∧ (LENGTH ntsl = LENGTH r) ∧
-	 EVERY (λe. e ∈ stkSymsList m m.next)
-	 (MAP transSym ntsl)}` THEN
-	Q.ABBREV_TAC `j = \e. rule (r'',q,p) (TS t::e)` THEN
-	Q_TAC SUFF_TAC `P2 ⊆ IMAGE j N` THEN1
-	  METIS_TAC [finitentslCond, IMAGE_FINITE, SUBSET_FINITE] THEN
+        ONCE_REWRITE_TAC [EXTENSION] THEN
+        ASM_SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss)
+                     [pairTheory.FORALL_PROD, Abbr`P1`, Abbr`i`]) THEN
 
-	  SRW_TAC [][Abbr `P2`, Abbr `j`, Abbr `N`] THEN
-	  SRW_TAC [][EXTENSION, EQ_IMP_THM, SUBSET_DEF] THEN
-	SRW_TAC [][EVERY_MEM] THEN
-	`e ∈ stkSyms m` by
-	(SRW_TAC [][stkSyms_def] THEN
-	METIS_TAC [mem_in]) THEN
-	METIS_TAC [stkSyms_list_eqresult, mem_in]) THEN
+      ONCE_REWRITE_TAC [EXTENSION] THEN
+      ASM_SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss)
+                   [pairTheory.EXISTS_PROD, Abbr`f`, Abbr`P`,
+                    EXISTS_OPTION] THEN
+      METIS_TAC [],
 
-	 ONCE_REWRITE_TAC [EXTENSION] THEN
-	 SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		  boolSimps.CONJ_ss][EXISTS_rule,
-				     Abbr`i`, Abbr`P1`] THEN
-	 METIS_TAC []) THEN
+      (* final case *)
+      ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
+      SIMP_TAC (srw_ss()) [combinTheory.o_ABS_R, pairTheory.o_UNCURRY_R] THEN
+      MATCH_MP_TAC IMAGE_FINITE THEN
+      SRW_TAC [][PAIR_ABS] THEN
+      Q.MATCH_ABBREV_TAC `FINITE P` THEN
+      Q.ABBREV_TAC
+        `(f:(γ, β, α) trans -> (α # β # α # (α # β # α, γ) symbol list) set) =
+         \r.
+          case r of
+              ((NONE,A,q),q1,mrhs) =>
+                { (q,A,p,stks) | stks ≠ [] ∧ (MAP transSym stks = mrhs) ∧
+                                 ntslCond m (q1,p) stks ∧ p ∈ statesList m}
+            | ((SOME x,x2,x3),x4,x5) => {}` THEN
 
-	 ONCE_REWRITE_TAC [EXTENSION] THEN
-	 SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		  boolSimps.CONJ_ss][EXISTS_rule,
-				     Abbr`P`, Abbr`f`] THEN
-         `∃q a p rhs. x = rule (q,a,p) rhs`
-            by METIS_TAC [TypeBase.nchotomy_of ``:('a,'b)rule``,
-                          pairTheory.pair_CASES] THEN
-         SRW_TAC [][] THEN EQ_TAC THEN
-         SIMP_TAC (srw_ss()) [pairTheory.EXISTS_PROD, EXISTS_OPTION,
-                              EXISTS_symbol] THEN
-         SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss) [] THEN METIS_TAC [],
+      Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set m.next))` THEN1
 
-	 (* final case *)
-	 Q.MATCH_ABBREV_TAC `FINITE P` THEN
-	Q.ABBREV_TAC
-	`f = \r:((δ, γ) symbol, β, α) trans.
-	  case r of
-	      ((NONE,A,q),q1,mrhs) =>
-	      { rule (q,A,p) L | L ≠ [] ∧
-	       (MAP transSym L = mrhs) ∧
-	       ntslCond m (q1,p) L ∧ p ∈ statesList m}
-	    | ((SOME x,x2,x3),x4,x5) => ({}:(α # β # α, γ) rule -> bool)` THEN
+        (DISCH_THEN SUBST1_TAC THEN
+         SIMP_TAC (srw_ss()) [Abbr`f`] THEN
+         SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss) [pairTheory.FORALL_PROD,
+                                                  FORALL_OPTION] THEN
+         MAP_EVERY Q.X_GEN_TAC [`A`, `q`, `q1`, `stks`] THEN STRIP_TAC THEN
+         ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
+         MATCH_MP_TAC IMAGE_FINITE THEN
+         SRW_TAC [][PAIR_ABS] THEN
+         Q.MATCH_ABBREV_TAC `FINITE P1` THEN
+         Q.ABBREV_TAC `
+            (i: α -> (α # (α # β # α, γ) symbol list) set) =
+            \a. {(a,b) | b |
+                 b ≠ [] ∧ ntslCond m (q1,a) b ∧ (MAP transSym b = stks) }
+         ` THEN
+         Q_TAC SUFF_TAC `P1 = BIGUNION (IMAGE i (set (statesList m)))` THEN1
 
-	Q_TAC SUFF_TAC `P = BIGUNION (IMAGE f (set m.next))` THEN1
+           (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`i`] THEN
 
-	(DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`f`] THEN
-	Cases_on `r` THEN
-	Cases_on `r'` THEN
-	Cases_on `q` THEN
-	Cases_on `r'` THEN
-	FULL_SIMP_TAC (srw_ss()) [] THEN
-	Cases_on `q''` THEN
-	FULL_SIMP_TAC (srw_ss()) [] THEN
+            Q.MATCH_ABBREV_TAC `FINITE P2` THEN
+            Q.ABBREV_TAC `
+               N:(α # β # α, γ) symbol list -> bool =
+                 {ntsl |
+                    ntslCond m (q1,a) ntsl ∧ (LENGTH ntsl = LENGTH stks) ∧
+                    EVERY (λe. e ∈ stkSymsList m m.next) (MAP transSym ntsl)}
+            ` THEN
+            Q.ABBREV_TAC `j = \n: (α#β#α,γ) symbol list. (a,n)` THEN
+            Q_TAC SUFF_TAC `P2 ⊆ IMAGE j N` THEN1
+              METIS_TAC [finitentslCond, IMAGE_FINITE, SUBSET_FINITE] THEN
 
-	Q.MATCH_ABBREV_TAC `FINITE P1` THEN
-	Q.ABBREV_TAC `i: α -> (α # β # α, γ) rule -> bool =
-        \p. {rule (r'',q,p) L | L |
-        L ≠ [] ∧ ntslCond m (q',p) L ∧ (MAP transSym L = r) }` THEN
-	Q_TAC SUFF_TAC `P1 = BIGUNION (IMAGE i (set (statesList m)))` THEN1
+            SRW_TAC [][Abbr `P2`, Abbr `j`, Abbr `N`, SUBSET_DEF] THEN
+            SRW_TAC [][EVERY_MEM] THEN
+            `e ∈ stkSyms m`
+              by (SRW_TAC [][stkSyms_def] THEN METIS_TAC [mem_in]) THEN
+            METIS_TAC [stkSyms_list_eqresult, mem_in]) THEN
 
-	 (DISCH_THEN SUBST1_TAC THEN SRW_TAC [][Abbr`i`] THEN
+         ONCE_REWRITE_TAC [EXTENSION] THEN
+         ASM_SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss) [Abbr`i`, Abbr`P1`] THEN
+         METIS_TAC []) THEN
 
-	  Q.MATCH_ABBREV_TAC `FINITE P2` THEN
-	Q.ABBREV_TAC `N:(α # β # α, γ) symbol list -> bool =
-	{ntsl |
-	 ntslCond m (q',p) ntsl ∧ (LENGTH ntsl = LENGTH r) ∧
-	 EVERY (λe. e ∈ stkSymsList m m.next)
-	 (MAP transSym ntsl)}` THEN
-	Q.ABBREV_TAC `j = \e. rule (r'',q,p) e` THEN
-	Q_TAC SUFF_TAC `P2 ⊆ IMAGE j N` THEN1
-	  METIS_TAC [finitentslCond, IMAGE_FINITE, SUBSET_FINITE] THEN
+       ONCE_REWRITE_TAC [EXTENSION] THEN
+       ASM_SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss)
+                    [Abbr`P`, Abbr`f`, pairTheory.FORALL_PROD,
+                     pairTheory.EXISTS_PROD, EXISTS_OPTION] THEN
+       METIS_TAC []
+    ]);
 
-	  SRW_TAC [][Abbr `P2`, Abbr `j`, Abbr `N`] THEN
-	  SRW_TAC [][EXTENSION, EQ_IMP_THM, SUBSET_DEF] THEN
-	SRW_TAC [][EVERY_MEM] THEN
-	`e ∈ stkSyms m` by
-	(SRW_TAC [][stkSyms_def] THEN
-	METIS_TAC [mem_in]) THEN
-	METIS_TAC [stkSyms_list_eqresult, mem_in]) THEN
+val p2gGrExists = store_thm (
+  "p2gGrExists",
+  ``INFINITE (UNIV:δ set) ⇒
+      ∀(m: (β, γ, δ) pda) .
+         ∃(g: (δ # γ # δ, β) grammar). pda2grammar m g``,
 
-	 ONCE_REWRITE_TAC [EXTENSION] THEN
-	 SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		  boolSimps.CONJ_ss][EXISTS_rule,
-				     Abbr`i`, Abbr`P1`] THEN
-	 METIS_TAC []) THEN
+  SRW_TAC [][pda2grammar] THEN
+  `FINITE (set (statesList m))` by SRW_TAC [][] THEN
+  `∃q. q ∉ (set (statesList m))` by METIS_TAC [new_state_exists] THEN
 
-	 ONCE_REWRITE_TAC [EXTENSION] THEN
-	 SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
-		  boolSimps.CONJ_ss][EXISTS_rule,
-				     Abbr`P`, Abbr`f`] THEN
-         SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss)
-                  [pairTheory.EXISTS_PROD, EXISTS_OPTION] THEN
-         METIS_TAC []
-	]);
+  Q.ABBREV_TAC `R1:(δ # γ # δ, β) rule -> bool =
+                  (p2gStartRules m (q,sym,q1))` THEN
+  Q.ABBREV_TAC `R2 = (p2gRules m)` THEN
 
+  `FINITE R1` by METIS_TAC [finitep2gStartRules] THEN
+  `FINITE R2` by METIS_TAC [finitep2gRules] THEN
 
-val p2gGrExists = store_thm
-("p2gGrExists",
-``INFINITE (UNIV:δ set) ⇒
- ∀(m: ((α, β) symbol, γ, δ) pda) .
- ∃(g: (δ # γ # δ, β) grammar). pda2grammar m g``,
-
-SRW_TAC [][pda2grammar] THEN
-`FINITE (set (statesList m))` by SRW_TAC [][] THEN
-`∃q. q ∉ (set (statesList m))` by METIS_TAC [new_state_exists] THEN
-
-Q.ABBREV_TAC `R1:(δ # γ # δ, β) rule -> bool =
- (p2gStartRules m (q,sym,q1))` THEN
-Q.ABBREV_TAC `R2 = (p2gRules m)` THEN
-
-`FINITE R1` by METIS_TAC [finitep2gStartRules] THEN
-`FINITE R2` by METIS_TAC [finitep2gRules] THEN
-
-`∃r1. (set r1 = R1)` by METIS_TAC [listExists4Set] THEN
-`∃r2. (set r2 =  R2)` by METIS_TAC [listExists4Set] THEN
+  `∃r1. (set r1 = R1)` by METIS_TAC [listExists4Set] THEN
+  `∃r2. (set r2 =  R2)` by METIS_TAC [listExists4Set] THEN
 
 
-Q.EXISTS_TAC `G (r1++r2) (q,sym,q1)` THEN
-FULL_SIMP_TAC (srw_ss()) [EXTENSION, rules_def, startSym_def, pdastate_def] THEN
-METIS_TAC [mem_in]);
-
+  Q.EXISTS_TAC `G (r1++r2) (q,sym,q1)` THEN
+  FULL_SIMP_TAC (srw_ss()) [EXTENSION, rules_def, startSym_def,
+                            pdastate_def] THEN
+  METIS_TAC [mem_in]);
 
 val tupfrmst = Define `tupfrmst (st,syms,stk,st') = st`;
 val tuptost = Define `tuptost (st,syms,stk,st') = st'`;
@@ -1126,16 +1077,16 @@ val pdaTransSplit = store_thm
        ⇒
       ∃l.(inp = FLAT (MAP tupinp l)) ∧
          (stk = MAP tupstk l) ∧
-	 (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList p)) ∧
-	 (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList p)) ∧
-	 (∀h t.(l=h::t) ⇒ (tupfrmst h = q) ∧ (tupstk h = HD stk) ∧
-	  (tuptost (LAST l) = qf)) ∧
-	 (∀e1 e2 pfx sfx.(l = pfx++[e1;e2]++sfx) ⇒
-	  (tupfrmst e2 = tuptost e1) ∧
-	  (∀e.MEM e l ⇒
-	   ∃m.m < (LENGTH dl) ∧
-	   NRC (ID p) m (tupfrmst e, tupinp e, [tupstk e])
-	   (tuptost e,[],[])))``,
+         (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList p)) ∧
+         (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList p)) ∧
+         (∀h t.(l=h::t) ⇒ (tupfrmst h = q) ∧ (tupstk h = HD stk) ∧
+          (tuptost (LAST l) = qf)) ∧
+         (∀e1 e2 pfx sfx.(l = pfx++[e1;e2]++sfx) ⇒
+          (tupfrmst e2 = tuptost e1) ∧
+          (∀e.MEM e l ⇒
+           ∃m.m < (LENGTH dl) ∧
+           NRC (ID p) m (tupfrmst e, tupinp e, [tupstk e])
+           (tuptost e,[],[])))``,
 
 completeInduct_on `LENGTH dl` THEN
 SRW_TAC [][] THEN
@@ -1160,7 +1111,7 @@ THENL[
       FIRST_X_ASSUM (Q.SPECL_THEN [`q0`,`qf`,`i0`,`s0`] MP_TAC) THEN
       SRW_TAC [][] THEN
       `(∃ipfx.inp=ipfx++FLAT(MAP tupinp l))` by METIS_TAC [idcInpSplit,
-							   APPEND_ASSOC] THEN
+                                                           APPEND_ASSOC] THEN
       SRW_TAC [][] THEN
       `(stk≠[])` by
       (SPOSE_NOT_THEN ASSUME_TAC THEN
@@ -1184,539 +1135,539 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [] THEN
       SRW_TAC [][]
       THENL[
-	    (* 3 subgoals *)
+            (* 3 subgoals *)
 
-	     Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	     SRW_TAC [][] THEN
-	     Cases_on `l=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
-	     (FULL_SIMP_TAC(srw_ss()) [listderiv_def] THEN
-	     Cases_on `dl` THEN
-	     FULL_SIMP_TAC (srw_ss()) [] THEN
-	     SRW_TAC [][] THEN
-	     Q.EXISTS_TAC `[(q,[],h,q0)]` THEN
-	     SRW_TAC [][] THEN
-	     SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost] THEN
-	      Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	      SRW_TAC [][] THEN
-	      `t'=[]` by METIS_TAC [rtc2listIdStkNil] THEN
-	      SRW_TAC [][] THEN
-	      FULL_SIMP_TAC (srw_ss()) [] THEN
-	      SRW_TAC [][] THEN1
-	      (`LENGTH t ≠ 0` by DECIDE_TAC THEN
-	       METIS_TAC [rtc2listLastMemState,LENGTH_NIL,pdastate_def,
-			  APPEND,last_append]) THEN1
-	      (`LENGTH t ≠ 0` by DECIDE_TAC THEN
-	       METIS_TAC [rtc2listFstMemState,LENGTH_NIL]) THEN
-	      Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
-	    Q.EXISTS_TAC `(q,[],h,q0)::l`  THEN
-	    SRW_TAC [][] THEN
-	    SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost]
-	    THENL[
-		  (* 8 subgoals *)
+             Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+             SRW_TAC [][] THEN
+             Cases_on `l=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+             (FULL_SIMP_TAC(srw_ss()) [listderiv_def] THEN
+             Cases_on `dl` THEN
+             FULL_SIMP_TAC (srw_ss()) [] THEN
+             SRW_TAC [][] THEN
+             Q.EXISTS_TAC `[(q,[],h,q0)]` THEN
+             SRW_TAC [][] THEN
+             SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost] THEN
+              Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+              SRW_TAC [][] THEN
+              `t'=[]` by METIS_TAC [rtc2listIdStkNil] THEN
+              SRW_TAC [][] THEN
+              FULL_SIMP_TAC (srw_ss()) [] THEN
+              SRW_TAC [][] THEN1
+              (`LENGTH t ≠ 0` by DECIDE_TAC THEN
+               METIS_TAC [rtc2listLastMemState,LENGTH_NIL,pdastate_def,
+                          APPEND,last_append]) THEN1
+              (`LENGTH t ≠ 0` by DECIDE_TAC THEN
+               METIS_TAC [rtc2listFstMemState,LENGTH_NIL]) THEN
+              Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
+            Q.EXISTS_TAC `(q,[],h,q0)::l`  THEN
+            SRW_TAC [][] THEN
+            SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost]
+            THENL[
+                  (* 8 subgoals *)
 
-		  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND],
+                  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND],
 
-		  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  METIS_TAC [rtc2listFstMemState],
+                  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  METIS_TAC [rtc2listFstMemState],
 
-		  Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [],
+                  Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN
-		  SRW_TAC [][tuptost] THEN
-		  METIS_TAC [],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN
+                  SRW_TAC [][tuptost] THEN
+                  METIS_TAC [],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   `LENGTH ([h]++(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   `LENGTH ([h]++(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
                    MAP tupstk sfx)) = SUC (LENGTH t + 2 + LENGTH sfx)`
-		   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
-		       FULL_SIMP_TAC (arith_ss) [])  THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   SUC (LENGTH t + 2 + LENGTH sfx) ≤ LENGTH (pdastk e)` by
-		   (SRW_TAC [][] THEN Cases_on `e` THEN Cases_on `r` THEN
-		    METIS_TAC [pdastk_def]) THEN
-		   `ID p ⊢ dl0 ◁
-		   (q,[]++[],
-		    [h]++
-		    (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-		     MAP tupstk sfx))
-		   → (q0,[]++[],
-		      []++(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-		      MAP tupstk sfx))` by METIS_TAC [APPEND,APPEND_NIL] THEN
-		   IMP_RES_TAC dlpropGen THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   ∃p. p ≠ [] ∧
-		   (pdastk e = p ++ (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-				     MAP tupstk sfx))`
-		   by METIS_TAC [DECIDE ``SUC n = 1+n``,MEM] THEN
-		   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
-		   ID p ⊢ dlx ◁ (q,[],[h]) → (q0,[],[])`
-		   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL,APPEND] THEN
-		   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
-		   METIS_TAC [listderivNrc]) THEN
-		  `∃m.
-		  m < LENGTH dl1 ∧
-		  NRC (ID p) m
-		  (tupfrmst e,tupinp e,[tupstk e])
-		  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
-		  `m < LENGTH dl` by DECIDE_TAC THEN
-		  METIS_TAC [],
+                   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
+                       FULL_SIMP_TAC (arith_ss) [])  THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   SUC (LENGTH t + 2 + LENGTH sfx) ≤ LENGTH (pdastk e)` by
+                   (SRW_TAC [][] THEN Cases_on `e` THEN Cases_on `r` THEN
+                    METIS_TAC [pdastk_def]) THEN
+                   `ID p ⊢ dl0 ◁
+                   (q,[]++[],
+                    [h]++
+                    (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                     MAP tupstk sfx))
+                   → (q0,[]++[],
+                      []++(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                      MAP tupstk sfx))` by METIS_TAC [APPEND,APPEND_NIL] THEN
+                   IMP_RES_TAC dlpropGen THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   ∃p. p ≠ [] ∧
+                   (pdastk e = p ++ (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                                     MAP tupstk sfx))`
+                   by METIS_TAC [DECIDE ``SUC n = 1+n``,MEM] THEN
+                   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
+                   ID p ⊢ dlx ◁ (q,[],[h]) → (q0,[],[])`
+                   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL,APPEND] THEN
+                   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
+                   METIS_TAC [listderivNrc]) THEN
+                  `∃m.
+                  m < LENGTH dl1 ∧
+                  NRC (ID p) m
+                  (tupfrmst e,tupinp e,[tupstk e])
+                  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
+                  `m < LENGTH dl` by DECIDE_TAC THEN
+                  METIS_TAC [],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   `LENGTH ([h]++(tupstk e2::MAP tupstk sfx)) =
-		   SUC (SUC (LENGTH sfx))`
-		   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
-		   FULL_SIMP_TAC (arith_ss) []) THEN
-		   `∀e.MEM e (FRONT dl0) ⇒ SUC (SUC (LENGTH sfx)) ≤
-		   LENGTH (pdastk e)` by
-		   (SRW_TAC [][] THEN
-		    Cases_on `e` THEN Cases_on `r` THEN
-		    METIS_TAC [pdastk_def]) THEN
-		   `ID p ⊢ dl0 ◁
-		   (q,[]++[],[h]++(tupstk e2::MAP tupstk sfx))
-		   → (tupfrmst e2,[]++[],[]++(tupstk e2::MAP tupstk sfx))`
-		   by METIS_TAC [APPEND_NIL,APPEND] THEN
-		   IMP_RES_TAC dlpropGen THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   ∃p. p ≠ [] ∧
-		   (pdastk e = p ++ (tupstk e2::MAP tupstk sfx))`
-		   by METIS_TAC [MEM] THEN
-		   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
-		   ID p ⊢ dlx ◁ (q,[],[h]) → (tupfrmst e2,[],[])`
-		   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL,APPEND] THEN
-		   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
-		   METIS_TAC [listderivNrc]) THEN
-		  `∃m.
-		  m < LENGTH dl1 ∧
-		  NRC (ID p) m
-		  (tupfrmst e,tupinp e,[tupstk e])
-		  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
-		  `m < LENGTH dl` by DECIDE_TAC THEN
-		  METIS_TAC [],
-
-
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `sfx=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN1 METIS_TAC [listderivNrc] THEN
-		   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   FIRST_X_ASSUM (Q.SPECL_THEN [`e`,`h'`,`[]`,`t`] MP_TAC) THEN
-		   SRW_TAC [][] THEN
-		   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
-		  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   `LENGTH ([h]++(tupstk e2::MAP tupstk sfx)) =
+                   SUC (SUC (LENGTH sfx))`
+                   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
+                   FULL_SIMP_TAC (arith_ss) []) THEN
+                   `∀e.MEM e (FRONT dl0) ⇒ SUC (SUC (LENGTH sfx)) ≤
+                   LENGTH (pdastk e)` by
+                   (SRW_TAC [][] THEN
+                    Cases_on `e` THEN Cases_on `r` THEN
+                    METIS_TAC [pdastk_def]) THEN
+                   `ID p ⊢ dl0 ◁
+                   (q,[]++[],[h]++(tupstk e2::MAP tupstk sfx))
+                   → (tupfrmst e2,[]++[],[]++(tupstk e2::MAP tupstk sfx))`
+                   by METIS_TAC [APPEND_NIL,APPEND] THEN
+                   IMP_RES_TAC dlpropGen THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   ∃p. p ≠ [] ∧
+                   (pdastk e = p ++ (tupstk e2::MAP tupstk sfx))`
+                   by METIS_TAC [MEM] THEN
+                   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
+                   ID p ⊢ dlx ◁ (q,[],[h]) → (tupfrmst e2,[],[])`
+                   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL,APPEND] THEN
+                   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
+                   METIS_TAC [listderivNrc]) THEN
+                  `∃m.
+                  m < LENGTH dl1 ∧
+                  NRC (ID p) m
+                  (tupfrmst e,tupinp e,[tupstk e])
+                  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
+                  `m < LENGTH dl` by DECIDE_TAC THEN
+                  METIS_TAC [],
 
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN1
-		   (FIRST_X_ASSUM (Q.SPECL_THEN [`e2`,`e`,`[]`,`t`] MP_TAC) THEN
-		    SRW_TAC [][] THEN
-		    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
-		    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``,APPEND_NIL,APPEND]) THEN
-		  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]
-		  ],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `sfx=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN1 METIS_TAC [listderivNrc] THEN
+                   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   FIRST_X_ASSUM (Q.SPECL_THEN [`e`,`h'`,`[]`,`t`] MP_TAC) THEN
+                   SRW_TAC [][] THEN
+                   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
+                  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``],
 
 
-	    Cases_on `l=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][] THEN1
-	    (
-	     Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	     FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	     Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [] THEN
-	     Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	     SRW_TAC [][] THEN
-	     `t=[]` by METIS_TAC [rtc2listIdStkNil] THEN
-	     `LENGTH t = 0`by METIS_TAC [LENGTH_NIL] THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [] THEN
-	     Q.EXISTS_TAC `[(q,ipfx,h,qf)]` THEN
-	     SRW_TAC [][] THEN
-	     SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost] THEN1
-	     (Cases_on `t'=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	      METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND]) THEN1
-	     (Cases_on `t'=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	      METIS_TAC [rtc2listFstMemState]) THEN
-	     Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
-
-	    Q.EXISTS_TAC `(q,ipfx,HD stk,q0)::l` THEN
-	    SRW_TAC [][] THEN
-	    SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost]
-	    THENL[
-		  (* 9 subgoals *)
-
-		  Cases_on `stk` THEN SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [] THEN
-		  `t=[]` by METIS_TAC [LENGTH_NIL] THEN
-		  SRW_TAC [][],
-
-		  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN METIS_TAC [rtc2listFstMemState]) THEN
-		  METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND],
-
-		  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN METIS_TAC [rtc2listFstMemState]) THEN
-		  METIS_TAC [rtc2listFstMemState],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN1
+                   (FIRST_X_ASSUM (Q.SPECL_THEN [`e2`,`e`,`[]`,`t`] MP_TAC) THEN
+                    SRW_TAC [][] THEN
+                    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
+                    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``,APPEND_NIL,APPEND]) THEN
+                  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]
+                  ],
 
 
-		  Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [],
+            Cases_on `l=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            SRW_TAC [][] THEN1
+            (
+             Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+             FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+             Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) [] THEN
+             Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+             SRW_TAC [][] THEN
+             `t=[]` by METIS_TAC [rtc2listIdStkNil] THEN
+             `LENGTH t = 0`by METIS_TAC [LENGTH_NIL] THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) [] THEN
+             Q.EXISTS_TAC `[(q,ipfx,h,qf)]` THEN
+             SRW_TAC [][] THEN
+             SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost] THEN1
+             (Cases_on `t'=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+              METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND]) THEN1
+             (Cases_on `t'=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+              METIS_TAC [rtc2listFstMemState]) THEN
+             Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN
-		  SRW_TAC [][tuptost] THEN
-		  METIS_TAC [],
+            Q.EXISTS_TAC `(q,ipfx,HD stk,q0)::l` THEN
+            SRW_TAC [][] THEN
+            SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost]
+            THENL[
+                  (* 9 subgoals *)
+
+                  Cases_on `stk` THEN SRW_TAC [][] THEN
+                  FULL_SIMP_TAC (srw_ss()) [] THEN
+                  `t=[]` by METIS_TAC [LENGTH_NIL] THEN
+                  SRW_TAC [][],
+
+                  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN METIS_TAC [rtc2listFstMemState]) THEN
+                  METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND],
+
+                  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN METIS_TAC [rtc2listFstMemState]) THEN
+                  METIS_TAC [rtc2listFstMemState],
 
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN
-		   `∀e.
-		   MEM e (FRONT dl0) ⇒
-		   SUC(LENGTH (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-			       MAP tupstk sfx)) ≤ LENGTH (pdastk e)`
-		   by (FULL_SIMP_TAC (srw_ss()) [] THEN
-		       SRW_TAC [][] THEN
-		       Cases_on `e` THEN Cases_on `r` THEN
-		       METIS_TAC [pdastk_def]) THEN
-		   `LENGTH ([h]++ (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-				   MAP tupstk sfx)) =
-		   SUC(LENGTH(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-			      MAP tupstk sfx))`
-		   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
-		       FULL_SIMP_TAC (arith_ss) []) THEN
-		   `ID p ⊢ dl0 ◁(q,ipfx ++ FLAT
-				 (MAP tupinp t ++ [tupinp e1; tupinp e2] ++
-				  MAP tupinp sfx),
-				 [h]++
-				 (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-				  MAP tupstk sfx))
-		   → (q0,[]++FLAT(MAP tupinp t ++
+                  Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [],
+
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN
+                  SRW_TAC [][tuptost] THEN
+                  METIS_TAC [],
+
+
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN
+                   `∀e.
+                   MEM e (FRONT dl0) ⇒
+                   SUC(LENGTH (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                               MAP tupstk sfx)) ≤ LENGTH (pdastk e)`
+                   by (FULL_SIMP_TAC (srw_ss()) [] THEN
+                       SRW_TAC [][] THEN
+                       Cases_on `e` THEN Cases_on `r` THEN
+                       METIS_TAC [pdastk_def]) THEN
+                   `LENGTH ([h]++ (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                                   MAP tupstk sfx)) =
+                   SUC(LENGTH(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                              MAP tupstk sfx))`
+                   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
+                       FULL_SIMP_TAC (arith_ss) []) THEN
+                   `ID p ⊢ dl0 ◁(q,ipfx ++ FLAT
+                                 (MAP tupinp t ++ [tupinp e1; tupinp e2] ++
+                                  MAP tupinp sfx),
+                                 [h]++
+                                 (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                                  MAP tupstk sfx))
+                   → (q0,[]++FLAT(MAP tupinp t ++
                         [tupinp e1; tupinp e2] ++
                         MAP tupinp sfx),
                      []++(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
                      MAP tupstk sfx))` by METIS_TAC [APPEND_NIL,APPEND] THEN
-		   IMP_RES_TAC dlpropGen THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   ∃p. p ≠ [] ∧
-		   (pdastk e = p ++ (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                   IMP_RES_TAC dlpropGen THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   ∃p. p ≠ [] ∧
+                   (pdastk e = p ++ (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
                      MAP tupstk sfx))`
-		   by METIS_TAC [MEM] THEN
-		   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
-		   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (q0,[],[])`
-		   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
-		   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
-		   METIS_TAC [listderivNrc]) THEN
-		  `∃m.
-		  m < LENGTH dl1 ∧
-		  NRC (ID p) m
-		  (tupfrmst e,tupinp e,[tupstk e])
-		  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
-		  `m < LENGTH dl` by DECIDE_TAC THEN
-		  METIS_TAC [],
+                   by METIS_TAC [MEM] THEN
+                   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
+                   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (q0,[],[])`
+                   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
+                   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
+                   METIS_TAC [listderivNrc]) THEN
+                  `∃m.
+                  m < LENGTH dl1 ∧
+                  NRC (ID p) m
+                  (tupfrmst e,tupinp e,[tupstk e])
+                  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
+                  `m < LENGTH dl` by DECIDE_TAC THEN
+                  METIS_TAC [],
 
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN
-		   `∀e.
-		   MEM e (FRONT dl0) ⇒
-		   SUC (LENGTH (tupstk e2::MAP tupstk sfx)) ≤
-		   LENGTH (pdastk e)`
-		   by (FULL_SIMP_TAC (srw_ss()) [] THEN
-		       SRW_TAC [][] THEN
-		       Cases_on `e` THEN Cases_on `r` THEN
-		       METIS_TAC [pdastk_def]) THEN
-		   `LENGTH ([h]++tupstk e2::MAP tupstk sfx) =
-		  SUC (LENGTH (tupstk e2::MAP tupstk sfx))`
-		  by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
-		      FULL_SIMP_TAC (arith_ss) []) THEN
-		   `ID p ⊢ dl0 ◁
-		   (q,ipfx ++ (tupinp e2 ++ FLAT (MAP tupinp sfx)),
-		    [h]++(tupstk e2::MAP tupstk sfx))
-		   → (tupfrmst e2,
-		      []++(tupinp e2 ++ FLAT (MAP tupinp sfx)),
-		      []++(tupstk e2::MAP tupstk sfx))`
-		   by METIS_TAC [APPEND,APPEND_NIL,APPEND_ASSOC] THEN
-		   IMP_RES_TAC dlpropGen THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   ∃p. p ≠ [] ∧
-		   (pdastk e = p ++ (tupstk e2::MAP tupstk sfx))`
-		   by METIS_TAC [MEM] THEN
-		   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
-		   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (tupfrmst e2,[],[])`
-		   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
-		   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
-		   METIS_TAC [listderivNrc]) THEN
-		  `∃m.
-		  m < LENGTH dl1 ∧
-		  NRC (ID p) m
-		  (tupfrmst e,tupinp e,[tupstk e])
-		  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
-		  `m < LENGTH dl` by DECIDE_TAC THEN
-		  METIS_TAC [],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN
+                   `∀e.
+                   MEM e (FRONT dl0) ⇒
+                   SUC (LENGTH (tupstk e2::MAP tupstk sfx)) ≤
+                   LENGTH (pdastk e)`
+                   by (FULL_SIMP_TAC (srw_ss()) [] THEN
+                       SRW_TAC [][] THEN
+                       Cases_on `e` THEN Cases_on `r` THEN
+                       METIS_TAC [pdastk_def]) THEN
+                   `LENGTH ([h]++tupstk e2::MAP tupstk sfx) =
+                  SUC (LENGTH (tupstk e2::MAP tupstk sfx))`
+                  by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
+                      FULL_SIMP_TAC (arith_ss) []) THEN
+                   `ID p ⊢ dl0 ◁
+                   (q,ipfx ++ (tupinp e2 ++ FLAT (MAP tupinp sfx)),
+                    [h]++(tupstk e2::MAP tupstk sfx))
+                   → (tupfrmst e2,
+                      []++(tupinp e2 ++ FLAT (MAP tupinp sfx)),
+                      []++(tupstk e2::MAP tupstk sfx))`
+                   by METIS_TAC [APPEND,APPEND_NIL,APPEND_ASSOC] THEN
+                   IMP_RES_TAC dlpropGen THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   ∃p. p ≠ [] ∧
+                   (pdastk e = p ++ (tupstk e2::MAP tupstk sfx))`
+                   by METIS_TAC [MEM] THEN
+                   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
+                   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (tupfrmst e2,[],[])`
+                   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
+                   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
+                   METIS_TAC [listderivNrc]) THEN
+                  `∃m.
+                  m < LENGTH dl1 ∧
+                  NRC (ID p) m
+                  (tupfrmst e,tupinp e,[tupstk e])
+                  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
+                  `m < LENGTH dl` by DECIDE_TAC THEN
+                  METIS_TAC [],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `sfx=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN1 METIS_TAC [listderivNrc] THEN
-		   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   FIRST_X_ASSUM (Q.SPECL_THEN [`e`,`h`,`[]`,`t`] MP_TAC) THEN
-		   SRW_TAC [][] THEN
-		   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
-		  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `sfx=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN1 METIS_TAC [listderivNrc] THEN
+                   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   FIRST_X_ASSUM (Q.SPECL_THEN [`e`,`h`,`[]`,`t`] MP_TAC) THEN
+                   SRW_TAC [][] THEN
+                   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
+                  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN1
-		   (FIRST_X_ASSUM (Q.SPECL_THEN [`e2`,`e`,`[]`,`t`] MP_TAC) THEN
-		    SRW_TAC [][] THEN
-		    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
-		   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``,APPEND_NIL,APPEND])
-		  THEN
-		  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]
-		  ],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN1
+                   (FIRST_X_ASSUM (Q.SPECL_THEN [`e2`,`e`,`[]`,`t`] MP_TAC) THEN
+                    SRW_TAC [][] THEN
+                    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
+                   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``,APPEND_NIL,APPEND])
+                  THEN
+                  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]
+                  ],
 
 
-	    Q.EXISTS_TAC `(q,ipfx,HD stk,q0)::l` THEN
-	    SRW_TAC [][] THEN
-	    SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost]
-	    THENL[
-		  (* 9 subgoals *)
-		  Cases_on `stk` THEN SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [] THEN
-		  `t=[]` by METIS_TAC [LENGTH_NIL] THEN
-		  SRW_TAC [][],
+            Q.EXISTS_TAC `(q,ipfx,HD stk,q0)::l` THEN
+            SRW_TAC [][] THEN
+            SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost]
+            THENL[
+                  (* 9 subgoals *)
+                  Cases_on `stk` THEN SRW_TAC [][] THEN
+                  FULL_SIMP_TAC (srw_ss()) [] THEN
+                  `t=[]` by METIS_TAC [LENGTH_NIL] THEN
+                  SRW_TAC [][],
 
-		  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN METIS_TAC [rtc2listFstMemState]) THEN
-		  METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND],
+                  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN METIS_TAC [rtc2listFstMemState]) THEN
+                  METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND],
 
-		  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-		  SRW_TAC [][] THEN
-		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN METIS_TAC [rtc2listFstMemState]) THEN
-		  METIS_TAC [rtc2listFstMemState],
+                  Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+                  SRW_TAC [][] THEN
+                  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN METIS_TAC [rtc2listFstMemState]) THEN
+                  METIS_TAC [rtc2listFstMemState],
 
-		  Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [],
+                  Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN
-		  SRW_TAC [][tuptost] THEN
-		  METIS_TAC [],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN
+                  SRW_TAC [][tuptost] THEN
+                  METIS_TAC [],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN
-		   `∀e.MEM e (FRONT dl0) ⇒ SUC
-		   (LENGTH (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-			    MAP tupstk sfx)) ≤ LENGTH (pdastk e)`
-		   by (FULL_SIMP_TAC (srw_ss()) [] THEN
-		       SRW_TAC [][] THEN
-		       Cases_on `e` THEN Cases_on `r` THEN
-		       METIS_TAC [pdastk_def]) THEN
-		   `LENGTH ([h]++
-			    (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-			     MAP tupstk sfx)) = SUC
-		   (LENGTH (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-			    MAP tupstk sfx))`
-		   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
-		       FULL_SIMP_TAC (arith_ss) []) THEN
-		   `ID p ⊢ dl0 ◁
-		   (q,ipfx ++FLAT(MAP tupinp t ++ [tupinp e1; tupinp e2] ++
-				  MAP tupinp sfx),
-		    [h]++(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
-			  MAP tupstk sfx))
-		    → (q0,[]++FLAT(MAP tupinp t ++[tupinp e1; tupinp e2] ++
-				   MAP tupinp sfx), []++(MAP tupstk t ++
-							 [tupstk e1; tupstk e2] ++
-							 MAP tupstk sfx))`
-		    by METIS_TAC [APPEND,APPEND_NIL] THEN
-		   IMP_RES_TAC dlpropGen THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   ∃p. p ≠ [] ∧
-		   (pdastk e = p ++ (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN
+                   `∀e.MEM e (FRONT dl0) ⇒ SUC
+                   (LENGTH (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                            MAP tupstk sfx)) ≤ LENGTH (pdastk e)`
+                   by (FULL_SIMP_TAC (srw_ss()) [] THEN
+                       SRW_TAC [][] THEN
+                       Cases_on `e` THEN Cases_on `r` THEN
+                       METIS_TAC [pdastk_def]) THEN
+                   `LENGTH ([h]++
+                            (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                             MAP tupstk sfx)) = SUC
+                   (LENGTH (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                            MAP tupstk sfx))`
+                   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
+                       FULL_SIMP_TAC (arith_ss) []) THEN
+                   `ID p ⊢ dl0 ◁
+                   (q,ipfx ++FLAT(MAP tupinp t ++ [tupinp e1; tupinp e2] ++
+                                  MAP tupinp sfx),
+                    [h]++(MAP tupstk t ++ [tupstk e1; tupstk e2] ++
+                          MAP tupstk sfx))
+                    → (q0,[]++FLAT(MAP tupinp t ++[tupinp e1; tupinp e2] ++
+                                   MAP tupinp sfx), []++(MAP tupstk t ++
+                                                         [tupstk e1; tupstk e2] ++
+                                                         MAP tupstk sfx))`
+                    by METIS_TAC [APPEND,APPEND_NIL] THEN
+                   IMP_RES_TAC dlpropGen THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   ∃p. p ≠ [] ∧
+                   (pdastk e = p ++ (MAP tupstk t ++ [tupstk e1; tupstk e2] ++
                      MAP tupstk sfx))`
-		   by METIS_TAC [MEM] THEN
-		   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
-		   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (q0,[],[])`
-		   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
-		   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
-		   METIS_TAC [listderivNrc]) THEN
-		  `∃m.m < LENGTH dl1 ∧ NRC (ID p) m (tupfrmst e,tupinp e,[tupstk e])
-	    (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
-		  `m < LENGTH dl` by DECIDE_TAC THEN
-		  METIS_TAC [],
+                   by METIS_TAC [MEM] THEN
+                   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
+                   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (q0,[],[])`
+                   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
+                   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
+                   METIS_TAC [listderivNrc]) THEN
+                  `∃m.m < LENGTH dl1 ∧ NRC (ID p) m (tupfrmst e,tupinp e,[tupstk e])
+            (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
+                  `m < LENGTH dl` by DECIDE_TAC THEN
+                  METIS_TAC [],
 
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN
-		  SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN1
-		  (IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN
-		   `∀e.MEM e (FRONT dl0) ⇒ SUC
-		   (LENGTH (tupstk e2::MAP tupstk sfx)) ≤ LENGTH (pdastk e)`
-		   by (FULL_SIMP_TAC (srw_ss()) [] THEN
-		       SRW_TAC [][] THEN
-		       Cases_on `e` THEN Cases_on `r` THEN
-		       METIS_TAC [pdastk_def]) THEN
-		   `LENGTH ([h]++
-			    (tupstk e2::MAP tupstk sfx)) = SUC
-		   (LENGTH (tupstk e2::MAP tupstk sfx))`
-		   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
-		       FULL_SIMP_TAC (arith_ss) []) THEN
-		   `ID p ⊢ dl0 ◁
-		   (q,ipfx ++(tupinp e2 ++ FLAT (MAP tupinp sfx)),
-		    [h]++(tupstk e2::MAP tupstk sfx))
-		    → (tupfrmst e2,[]++(tupinp e2++FLAT(MAP tupinp sfx)),
-		       []++(tupstk e2::MAP tupstk sfx))`
-		    by METIS_TAC [APPEND,APPEND_NIL,APPEND_ASSOC] THEN
-		   IMP_RES_TAC dlpropGen THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   ∃p. p ≠ [] ∧
-		   (pdastk e = p ++ (tupstk e2::MAP tupstk sfx))`
-		   by METIS_TAC [MEM] THEN
-		   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
-		   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (tupfrmst e2,[],[])`
-		   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
-		   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
-		   METIS_TAC [listderivNrc]) THEN1
-		  (Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   SUC (LENGTH (tupstk e2::MAP tupstk sfx)) ≤ LENGTH (pdastk e)`
-		   by (FULL_SIMP_TAC (srw_ss()) [] THEN
-		       SRW_TAC [][] THEN
-		       Cases_on `e` THEN Cases_on `r` THEN
-		       METIS_TAC [pdastk_def]) THEN
-		   `LENGTH ([h]++
-			    (tupstk e2::MAP tupstk sfx)) = SUC
-		   (LENGTH (tupstk e2::MAP tupstk sfx))`
-		   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
-		       FULL_SIMP_TAC (arith_ss) []) THEN
-		   `ID p ⊢ dl0 ◁
-		   (q,ipfx ++(tupinp e2 ++ FLAT (MAP tupinp sfx)),
-		    [h]++(tupstk e2::MAP tupstk sfx))
-		    → (tupfrmst e2,[]++(tupinp e2++FLAT(MAP tupinp sfx)),
-		       []++(tupstk e2::MAP tupstk sfx))`
-		    by METIS_TAC [APPEND,APPEND_NIL,APPEND_ASSOC] THEN
-		   IMP_RES_TAC dlpropGen THEN
-		   `∀e.MEM e (FRONT dl0) ⇒
-		   ∃p. p ≠ [] ∧
-		   (pdastk e = p ++ (tupstk e2::MAP tupstk sfx))`
-		   by METIS_TAC [MEM] THEN
-		   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
-		   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (tupfrmst e2,[],[])`
-		   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
-		   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
-		   METIS_TAC [listderivNrc]) THEN
-		  `∃m.
-		  m < LENGTH dl1 ∧
-		  NRC (ID p) m
-		  (tupfrmst e,tupinp e,[tupstk e])
-		  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
-		  `m < LENGTH dl` by DECIDE_TAC THEN
-		  METIS_TAC [],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN
+                  SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN1
+                  (IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN
+                   `∀e.MEM e (FRONT dl0) ⇒ SUC
+                   (LENGTH (tupstk e2::MAP tupstk sfx)) ≤ LENGTH (pdastk e)`
+                   by (FULL_SIMP_TAC (srw_ss()) [] THEN
+                       SRW_TAC [][] THEN
+                       Cases_on `e` THEN Cases_on `r` THEN
+                       METIS_TAC [pdastk_def]) THEN
+                   `LENGTH ([h]++
+                            (tupstk e2::MAP tupstk sfx)) = SUC
+                   (LENGTH (tupstk e2::MAP tupstk sfx))`
+                   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
+                       FULL_SIMP_TAC (arith_ss) []) THEN
+                   `ID p ⊢ dl0 ◁
+                   (q,ipfx ++(tupinp e2 ++ FLAT (MAP tupinp sfx)),
+                    [h]++(tupstk e2::MAP tupstk sfx))
+                    → (tupfrmst e2,[]++(tupinp e2++FLAT(MAP tupinp sfx)),
+                       []++(tupstk e2::MAP tupstk sfx))`
+                    by METIS_TAC [APPEND,APPEND_NIL,APPEND_ASSOC] THEN
+                   IMP_RES_TAC dlpropGen THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   ∃p. p ≠ [] ∧
+                   (pdastk e = p ++ (tupstk e2::MAP tupstk sfx))`
+                   by METIS_TAC [MEM] THEN
+                   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
+                   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (tupfrmst e2,[],[])`
+                   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
+                   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
+                   METIS_TAC [listderivNrc]) THEN1
+                  (Cases_on `stk` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   SUC (LENGTH (tupstk e2::MAP tupstk sfx)) ≤ LENGTH (pdastk e)`
+                   by (FULL_SIMP_TAC (srw_ss()) [] THEN
+                       SRW_TAC [][] THEN
+                       Cases_on `e` THEN Cases_on `r` THEN
+                       METIS_TAC [pdastk_def]) THEN
+                   `LENGTH ([h]++
+                            (tupstk e2::MAP tupstk sfx)) = SUC
+                   (LENGTH (tupstk e2::MAP tupstk sfx))`
+                   by (FULL_SIMP_TAC (srw_ss()) [LENGTH_MAP] THEN
+                       FULL_SIMP_TAC (arith_ss) []) THEN
+                   `ID p ⊢ dl0 ◁
+                   (q,ipfx ++(tupinp e2 ++ FLAT (MAP tupinp sfx)),
+                    [h]++(tupstk e2::MAP tupstk sfx))
+                    → (tupfrmst e2,[]++(tupinp e2++FLAT(MAP tupinp sfx)),
+                       []++(tupstk e2::MAP tupstk sfx))`
+                    by METIS_TAC [APPEND,APPEND_NIL,APPEND_ASSOC] THEN
+                   IMP_RES_TAC dlpropGen THEN
+                   `∀e.MEM e (FRONT dl0) ⇒
+                   ∃p. p ≠ [] ∧
+                   (pdastk e = p ++ (tupstk e2::MAP tupstk sfx))`
+                   by METIS_TAC [MEM] THEN
+                   `∃dlx.LENGTH dlx ≤ LENGTH dl0 ∧
+                   ID p ⊢ dlx ◁ (q,ipfx,[h]) → (tupfrmst e2,[],[])`
+                   by METIS_TAC [pdaTransOnPfxLd,APPEND_NIL] THEN
+                   `LENGTH dlx < LENGTH dl` by DECIDE_TAC THEN
+                   METIS_TAC [listderivNrc]) THEN
+                  `∃m.
+                  m < LENGTH dl1 ∧
+                  NRC (ID p) m
+                  (tupfrmst e,tupinp e,[tupstk e])
+                  (tuptost e,[],[])` by METIS_TAC [APPEND_NIL,rgr_r9eq,APPEND_ASSOC] THEN
+                  `m < LENGTH dl` by DECIDE_TAC THEN
+                  METIS_TAC [],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `sfx=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN1 METIS_TAC [listderivNrc] THEN
-		   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   FIRST_X_ASSUM (Q.SPECL_THEN [`e`,`h`,`[]`,`t`] MP_TAC) THEN
-		   SRW_TAC [][] THEN
-		   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   Cases_on `sfx=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   FIRST_X_ASSUM (Q.SPECL_THEN [`e`,`h`,`[]`,`t`] MP_TAC) THEN
-		   SRW_TAC [][] THEN
-		   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
-		  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `sfx=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN1 METIS_TAC [listderivNrc] THEN
+                   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   FIRST_X_ASSUM (Q.SPECL_THEN [`e`,`h`,`[]`,`t`] MP_TAC) THEN
+                   SRW_TAC [][] THEN
+                   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   Cases_on `sfx=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   FIRST_X_ASSUM (Q.SPECL_THEN [`e`,`h`,`[]`,`t`] MP_TAC) THEN
+                   SRW_TAC [][] THEN
+                   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
+                  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``],
 
-		  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   IMP_RES_TAC idcStkNil THEN
-		   SRW_TAC [][] THEN
-		   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN1
-		   (FIRST_X_ASSUM (Q.SPECL_THEN [`e2`,`e`,`[]`,`t`] MP_TAC) THEN
-		    SRW_TAC [][] THEN
-		    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
-		   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``,APPEND_NIL,APPEND]) THEN1
-		  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
-		   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] THEN1
-		   (FIRST_X_ASSUM (Q.SPECL_THEN [`e2`,`e`,`[]`,`t`] MP_TAC) THEN
-		    SRW_TAC [][] THEN
-		    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
-		   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``,APPEND_NIL,APPEND])
-		  THEN
-		  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]
-		  ]],
+                  Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   IMP_RES_TAC idcStkNil THEN
+                   SRW_TAC [][] THEN
+                   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN1
+                   (FIRST_X_ASSUM (Q.SPECL_THEN [`e2`,`e`,`[]`,`t`] MP_TAC) THEN
+                    SRW_TAC [][] THEN
+                    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
+                   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``,APPEND_NIL,APPEND]) THEN1
+                  (SRW_TAC [][tuptost,tupfrmst,tupinp,tupstk] THEN
+                   Cases_on `sfx` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                   SRW_TAC [][] THEN1
+                   (FIRST_X_ASSUM (Q.SPECL_THEN [`e2`,`e`,`[]`,`t`] MP_TAC) THEN
+                    SRW_TAC [][] THEN
+                    METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]) THEN
+                   METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``,APPEND_NIL,APPEND])
+                  THEN
+                  METIS_TAC [DECIDE ``m < x ∧ x < y ⇒ m < y``]
+                  ]],
 
 
       (* (q0,i0,s0) = (qf,[],[]) *)
@@ -1732,32 +1683,32 @@ THENL[
       SRW_TAC [][] THEN
       SRW_TAC [][tupinp,tupstk,tupfrmst,tuptost]
       THENL[
-	    `LENGTH t = 0`by DECIDE_TAC THEN
-	    METIS_TAC [LENGTH_NIL],
+            `LENGTH t = 0`by DECIDE_TAC THEN
+            METIS_TAC [LENGTH_NIL],
 
-	    Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	    SRW_TAC [][] THEN
-	    Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][] THEN
-	    Cases_on `t''=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND],
+            Cases_on `dl0` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+            SRW_TAC [][] THEN
+            Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            SRW_TAC [][] THEN
+            Cases_on `t''=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            METIS_TAC [rtc2listLastMemState,pdastate_def,last_append,APPEND],
 
 
-	    Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	    SRW_TAC [][] THEN
-	    Cases_on `t'=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    METIS_TAC [rtc2listFstMemState],
+            Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+            SRW_TAC [][] THEN
+            Cases_on `t'=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            METIS_TAC [rtc2listFstMemState],
 
-	    Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [],
+            Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [],
 
-	    Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [],
+            Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [],
 
-	    Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [],
+            Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [],
 
-	    Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [],
+            Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) [],
 
-	    Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) []
-	    ]]);
+            Cases_on `pfx` THEN FULL_SIMP_TAC (srw_ss()) []
+            ]]);
 
 
 val toRhs = Define
@@ -1812,22 +1763,22 @@ val ruleMem2nextMemSome = store_thm
 ("ruleMem2nextMemSome",
 ``MEM (rule (q,A,p) [TS ih]) (rules g) ⇒ pda2grammar m g
    ⇒
-  MEM ((SOME (TS ih),A,q),p,[]) m.next``,
+  MEM ((SOME ih,A,q),p,[]) m.next``,
 
 SRW_TAC [][pda2grammar] THEN
 FULL_SIMP_TAC (srw_ss()) [p2gRules, p2gStartRules, EXTENSION, transSym,
-			  ntslCond, isNonTmnlSym_def]);
+                          ntslCond, isNonTmnlSym_def]);
 
 
 val nextMem2RuleSome = store_thm
 ("nextMem2RuleSome",
-``MEM ((SOME (TS s),A,q),p,[]) m.next ⇒ pda2grammar m g
+``MEM ((SOME s,A,q),p,[]) m.next ⇒ pda2grammar m g
     ⇒
     MEM (rule (q,A,p) [TS s]) (rules g)``,
 
 SRW_TAC [][pda2grammar] THEN
 FULL_SIMP_TAC (srw_ss()) [p2gRules, EXTENSION, transSym,ntslCond,
-			  isNonTmnlSym_def, p2gStartRules]);
+                          isNonTmnlSym_def, p2gStartRules]);
 
 
 open pairTheory;
@@ -1855,7 +1806,6 @@ Cases_on `h` THEN Cases_on `r` THEN
 Cases_on `r'` THEN
  FULL_SIMP_TAC (srw_ss()) [toRhs,tupinp,tuptost,tupfrmst,tupstk] THEN
 METIS_TAC [derives_append,APPEND]);
-
 
 val isAdj = store_thm
 ("isAdj",
@@ -1919,9 +1869,6 @@ Cases_on `h` THEN Cases_on `r` THEN
 Cases_on `r'` THEN
 FULL_SIMP_TAC (srw_ss()) [toRhs,frmState,tupfrmst]);
 
-
-
-
 val transToStEq = store_thm
 ("transToStEq",
  ``toState (toRhs h) = tuptost h``,
@@ -1931,15 +1878,11 @@ Cases_on `r'` THEN
 FULL_SIMP_TAC (srw_ss()) [toRhs,toState,tuptost]);
 
 
-
-
-
 val memMapToRhsSl = store_thm
 ("memMapToRhsSl",
-``∀t.MEM e (MAP toRhs t) ∧
-(∀e.MEM e (MAP tuptost t) ⇒ MEM e (statesList m)) ⇒
-MEM (toState e) (statesList m)``,
-
+``∀t.  MEM e (MAP toRhs t) ∧
+       (∀e.MEM e (MAP tuptost t) ⇒ MEM e (statesList m)) ⇒
+       MEM (toState e) (statesList m)``,
 Induct_on `t` THEN SRW_TAC [][] THEN
 METIS_TAC [transToStEq]);
 
@@ -2015,17 +1958,15 @@ SRW_TAC [][ntslCond,isNttoRhs,everyIsNttoRhs,transFrmStEq]
        Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) []
       ]);
 
-
-
-val p2gtransSome = store_thm
-("p2gtransSome",
-``(LENGTH l ≥ 1) ∧ MEM ((SOME (TS ih),A,q),q',MAP tupstk l) m.next ∧
- (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList m)) ∧
-  (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m)) ∧
-(∀h t.(l = h::t) ⇒(tupfrmst h = q') ∧ (tuptost (LAST (h::t)) = p)) ∧
-(∀e1 e2 pfx sfx.(l = pfx ++ [e1; e2] ++ sfx) ⇒ (tupfrmst e2 = tuptost e1))
+val p2gtransSome = store_thm (
+  "p2gtransSome",
+  ``(LENGTH l ≥ 1) ∧ MEM ((SOME ih,A,q),q',MAP tupstk l) m.next ∧
+    (∀e. MEM e (MAP tuptost l) ⇒ MEM e (statesList m)) ∧
+    (∀e .MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m)) ∧
+    (∀h t. (l = h::t) ⇒(tupfrmst h = q') ∧ (tuptost (LAST (h::t)) = p)) ∧
+    (∀e1 e2 pfx sfx.(l = pfx ++ [e1; e2] ++ sfx) ⇒ (tupfrmst e2 = tuptost e1))
 ⇒
-rule (q,A,p) (TS ih::(MAP toRhs l)) ∈ p2gRules m``,
+    rule (q,A,p) (TS ih::(MAP toRhs l)) ∈ p2gRules m``,
 
 SRW_TAC [][p2gRules] THEN
 DISJ1_TAC THEN
@@ -2063,129 +2004,118 @@ THENL[
        ]);
 
 
-val pdaImpP2g = store_thm
-("pdaImpP2g",
-``∀x q A p.
-     ID m ⊢ dl ◁
-        (q,x,[A]) → (p,[],[]) ∧ EVERY isTmnlSym x ∧
-	pda2grammar m g
+val pdaImpP2g = store_thm (
+  "pdaImpP2g",
+  ``∀x q A p.
+     ID m ⊢ dl ◁ (q,x,[A]) → (p,[],[]) ∧ pda2grammar m g
               ⇒
-	   (derives g)^* [NTS (q,A,p)] x``,
+     (derives g)^* [NTS (q,A,p)] (MAP TS x)``,
 
 completeInduct_on `LENGTH dl` THEN SRW_TAC [][] THEN
 Cases_on `dl` THEN SRW_TAC [][] THEN1
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
- Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
- (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
- SRW_TAC [][]) THEN
- `ID m ⊢ h'::t' ◁ h' → (p,[],[])` by METIS_TAC [ldTl] THEN
- Cases_on `h'` THEN Cases_on `r` THEN
+Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+   (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+    SRW_TAC [][]) THEN
+`ID m ⊢ h'::t' ◁ h' → (p,[],[])` by METIS_TAC [ldTl] THEN
+Cases_on `h'` THEN Cases_on `r` THEN
 `(∃l.(q'' = FLAT (MAP tupinp l)) ∧
  (r' = MAP tupstk l) ∧
  (∀e.MEM e (MAP tuptost l) ⇒ MEM e (statesList m)) ∧
-  (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m)) ∧
+ (∀e.MEM e (MAP tupfrmst l) ⇒ MEM e (statesList m)) ∧
  (∀h t. (l = h::t) ⇒ (tupfrmst h = q') ∧ (tupstk h = HD r') ∧
-  (tuptost (LAST l) = p)) ∧
- (∀e1 e2 pfx sfx. (l = pfx ++ [e1; e2] ++ sfx) ⇒ (tupfrmst e2 = tuptost e1) ∧
-  (∀e.MEM e l ⇒ ∃n.n < LENGTH ((q',q'',r')::t') ∧
-  NRC (ID m) n (tupfrmst e,tupinp e,[tupstk e]) (tuptost e,[],[]))))`
- by METIS_TAC [pdaTransSplit] THEN
+ (tuptost (LAST l) = p)) ∧
+ (∀e1 e2 pfx sfx. (l = pfx ++ [e1; e2] ++ sfx) ⇒
+     (tupfrmst e2 = tuptost e1) ∧
+ (∀e.MEM e l ⇒ ∃n.n < LENGTH ((q',q'',r')::t') ∧
+ NRC (ID m) n (tupfrmst e,tupinp e,[tupstk e]) (tuptost e,[],[]))))`
+    by METIS_TAC [pdaTransSplit] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `l=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
-(Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
- SRW_TAC [][] THEN
- `t'=[]` by METIS_TAC [rtc2listIdStkNil] THEN
- SRW_TAC [][] THEN
- FULL_SIMP_TAC (srw_ss()) [] THEN
- FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
- SRW_TAC [][] THEN1
- (`MEM (rule (q,A,p) []) (rules g)`
-  by METIS_TAC [nextMem2RuleNone] THEN
-  METIS_TAC [res1, RTC_RULES]) THEN
- FULL_SIMP_TAC (srw_ss()) [ts2str_def, isTmnlSym_def] THEN
- `MEM (rule (q,A,p) [ih]) (rules g)`
- by METIS_TAC [nextMem2RuleSome] THEN
- METIS_TAC [res1, RTC_RULES]) THEN
+  (Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+   SRW_TAC [][] THEN
+   `t'=[]` by METIS_TAC [rtc2listIdStkNil] THEN
+   SRW_TAC [][] THEN
+   FULL_SIMP_TAC (srw_ss()) [] THEN
+   FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
+   SRW_TAC [][] THEN1
+     (`MEM (rule (q,A,p) []) (rules g)`
+         by METIS_TAC [nextMem2RuleNone] THEN
+      METIS_TAC [res1, RTC_RULES]) THEN
+   FULL_SIMP_TAC (srw_ss()) [ts2str_def, isTmnlSym_def] THEN
+   `MEM (rule (q,A,p) [TS ih]) (rules g)`
+     by METIS_TAC [nextMem2RuleSome] THEN
+   METIS_TAC [res1, RTC_RULES]) THEN
 Cases_on `LENGTH l = 1`  THEN1
-(Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-FULL_SIMP_TAC (srw_ss()) [LENGTH_NIL] THEN
-SRW_TAC [][] THEN
-FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH ((tupfrmst h',tupinp h',
-				       [tupstk h'])::t')`]
-	       MP_TAC) THEN
-SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
-SRW_TAC [][] THEN
-FIRST_X_ASSUM (Q.SPECL_THEN [`((tupfrmst h',tupinp h',
-				[tupstk h'])::t')`]
-	       MP_TAC) THEN
-SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN1
-(`rule (q,A,tuptost h') [NTS (tupfrmst h',tupstk h',tuptost h')] ∈ rules g`
-by
- (FULL_SIMP_TAC (srw_ss()) [pda2grammar] THEN
-  Q_TAC SUFF_TAC
-  `rule (q,A,tuptost h') [NTS (tupfrmst h',tupstk h',tuptost h')] ∈
-  p2gStartRules m (startSym g) ∪ p2gRules m` THEN SRW_TAC [][] THEN1
-  FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
-  FULL_SIMP_TAC (srw_ss()) [p2gRules, EXTENSION, transSym,ntslCond,p2gStartRules,
-			   toState,frmState] THEN1
-  METIS_TAC [memStateRule] THEN
-  SRW_TAC [][isNonTmnlSym_def] THEN
-  DISJ2_TAC THEN
- SPOSE_NOT_THEN ASSUME_TAC THEN
- FULL_SIMP_TAC (srw_ss()) [] THEN
-  Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
- METIS_TAC [res1, RTC_RULES]) THEN
-
-
-(`rule (q,A,tuptost h') (ih::[NTS (tupfrmst h',tupstk h',tuptost h')]) ∈ rules g`
-by
- (FULL_SIMP_TAC (srw_ss()) [pda2grammar] THEN
-  Q_TAC SUFF_TAC
-  `rule (q,A,tuptost h') (ih::[NTS (tupfrmst h',tupstk h',tuptost h')]) ∈
-  p2gStartRules m (startSym g) ∪ p2gRules m` THEN SRW_TAC [][] THEN1
-  FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
-  FULL_SIMP_TAC (srw_ss()) [p2gRules, EXTENSION, transSym,ntslCond,p2gStartRules,
-			   toState,frmState] THEN1
-  METIS_TAC [memStateRule] THEN1
-  METIS_TAC [memStateRule] THEN
-  SRW_TAC [][isNonTmnlSym_def] THEN
-  DISJ1_TAC THEN
-  Cases_on `ih` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def,isNonTmnlSym_def] THEN
-  SPOSE_NOT_THEN ASSUME_TAC THEN
-  FULL_SIMP_TAC (srw_ss()) [] THEN
-  Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
- METIS_TAC [res1, RTC_RULES,rtc_derives_same_append_left, APPEND])) THEN
-
-`∀e.MEM e l ⇒ (derives g)^* [NTS (tupfrmst e,tupstk e,tuptost e)] (tupinp e)`
-by
-(SRW_TAC [][] THEN
- Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN1
- (Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+ (Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+  FULL_SIMP_TAC (srw_ss()) [LENGTH_NIL] THEN
   SRW_TAC [][] THEN
-  `∃n.n < SUC (LENGTH t') ∧
-  NRC (ID m) n (tupfrmst e,tupinp e,[tupstk e])
-  (tuptost e,[],[])` by METIS_TAC [APPEND,APPEND_NIL,APPEND_ASSOC] THEN
-  `n < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
-  IMP_RES_TAC nrcListExists THEN
+  FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH ((tupfrmst h',tupinp h',
+                                         [tupstk h'])::t')`]
+                 MP_TAC) THEN
   SRW_TAC [][] THEN
-  `SUC n < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
-  FIRST_X_ASSUM (Q.SPECL_THEN [`SUC n`] MP_TAC) THEN SRW_TAC [][] THEN
-  FIRST_X_ASSUM (Q.SPECL_THEN [`l`] MP_TAC) THEN SRW_TAC [][] THEN
-  FIRST_X_ASSUM (Q.SPECL_THEN [`tupinp e`,`tupfrmst e`,`tupstk e`,
-			       `tuptost e`]
-		 MP_TAC) THEN SRW_TAC [][] THEN
-  `EVERY isTmnlSym (tupinp e)`
-  by (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-      SRW_TAC [][] THEN
-      FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
-      SRW_TAC [][] THEN
-      METIS_TAC [EVERY_APPEND,APPEND]) THEN
-  METIS_TAC []) THEN
+  FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+  SRW_TAC [][] THEN
+  FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
+  SRW_TAC [][] THEN
+  FIRST_X_ASSUM (Q.SPECL_THEN [`((tupfrmst h',tupinp h',
+                                  [tupstk h'])::t')`]
+                 MP_TAC) THEN
+  SRW_TAC [][] THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN1
+    (`rule (q,A,tuptost h') [NTS (tupfrmst h',tupstk h',tuptost h')] ∈ rules g`
+      by (FULL_SIMP_TAC (srw_ss()) [pda2grammar] THEN
+          Q_TAC SUFF_TAC
+           `rule (q,A,tuptost h') [NTS (tupfrmst h',tupstk h',tuptost h')] ∈
+            p2gStartRules m (startSym g) ∪ p2gRules m` THEN
+          SRW_TAC [][] THEN1 FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+          FULL_SIMP_TAC (srw_ss()) [p2gRules, EXTENSION, transSym,ntslCond,
+                                    p2gStartRules, toState,frmState] THEN1
+            METIS_TAC [memStateRule] THEN
+          SRW_TAC [][isNonTmnlSym_def] THEN
+          DISJ2_TAC THEN
+          SPOSE_NOT_THEN ASSUME_TAC THEN
+          FULL_SIMP_TAC (srw_ss()) [] THEN
+          Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
+     METIS_TAC [res1, RTC_RULES]) THEN
+  `rule (q,A,tuptost h') (TS ih::[NTS (tupfrmst h',tupstk h',tuptost h')]) ∈
+     rules g`
+     by
+       (FULL_SIMP_TAC (srw_ss()) [pda2grammar] THEN
+        Q_TAC SUFF_TAC
+        `rule (q,A,tuptost h') (TS ih::[NTS (tupfrmst h',tupstk h',tuptost h')]) ∈
+        p2gStartRules m (startSym g) ∪ p2gRules m` THEN SRW_TAC [][] THEN1
+        FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+        FULL_SIMP_TAC (srw_ss()) [p2gRules, EXTENSION, transSym,ntslCond,p2gStartRules,
+                                 toState,frmState] THEN1
+        METIS_TAC [memStateRule] THEN1
+          METIS_TAC [memStateRule] THEN
+        SRW_TAC [][isNonTmnlSym_def] THEN
+        SPOSE_NOT_THEN ASSUME_TAC THEN
+        FULL_SIMP_TAC (srw_ss()) [] THEN
+        Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) []) THEN
+   METIS_TAC [res1, RTC_RULES,rtc_derives_same_append_left, APPEND]) THEN
+
+`∀e.MEM e l ⇒ (derives g)^* [NTS (tupfrmst e,tupstk e,tuptost e)]
+                            (MAP TS (tupinp e))`
+by (SRW_TAC [][] THEN
+    Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN1
+      (Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+       SRW_TAC [][] THEN
+       `∃n. n < SUC (LENGTH t') ∧
+            NRC (ID m) n (tupfrmst e,tupinp e,[tupstk e]) (tuptost e,[],[])`
+         by METIS_TAC [APPEND,APPEND_NIL,APPEND_ASSOC] THEN
+       `n < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
+       IMP_RES_TAC nrcListExists THEN
+       SRW_TAC [][] THEN
+       `SUC n < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
+       FIRST_X_ASSUM (Q.SPECL_THEN [`SUC n`] MP_TAC) THEN SRW_TAC [][] THEN
+       FIRST_X_ASSUM (Q.SPECL_THEN [`l`] MP_TAC) THEN SRW_TAC [][]) THEN
+       FIRST_X_ASSUM (Q.SPECL_THEN [`tupinp e`] MP_TAC)
+       FIRST_X_ASSUM (Q.SPECL_THEN [`MAP TS (tupinp e)`,`tupfrmst e`,`tupstk e`,
+                                    `tuptost e`] MP_TAC)
+     METIS_TAC []) THEN
 
 Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN1
@@ -2198,7 +2128,7 @@ IMP_RES_TAC nrcListExists THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`SUC n`] MP_TAC) THEN SRW_TAC [][] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`l`] MP_TAC) THEN SRW_TAC [][] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`tupinp e`,`tupfrmst e`,`tupstk e`,`tuptost e`]
-	       MP_TAC) THEN SRW_TAC [][] THEN
+               MP_TAC) THEN SRW_TAC [][] THEN
 `EVERY isTmnlSym (tupinp e)`
 by (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
     SRW_TAC [][] THEN
@@ -2216,7 +2146,7 @@ IMP_RES_TAC nrcListExists THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`SUC n`] MP_TAC) THEN SRW_TAC [][] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`l`] MP_TAC) THEN SRW_TAC [][] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`tupinp e`,`tupfrmst e`,`tupstk e`,`tuptost e`]
-	       MP_TAC) THEN SRW_TAC [][] THEN
+               MP_TAC) THEN SRW_TAC [][] THEN
 `EVERY isTmnlSym (tupinp e)`
 by (FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
     SRW_TAC [][] THEN
@@ -2236,7 +2166,7 @@ FULL_SIMP_TAC (srw_ss()) [id_thm] THEN
 SRW_TAC [][]
 THENL[
       `LENGTH l ≥ 1` by (Cases_on `l` THEN
-			 FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+                         FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
       `(rule (q,A,p) (MAP toRhs l)) ∈ p2gRules m`
       by METIS_TAC [p2gtransNone] THEN
       `MEM (rule (q,A,p) (MAP toRhs l)) (rules g)`
@@ -2245,10 +2175,10 @@ THENL[
 
 
       `LENGTH l ≥ 1` by (Cases_on `l` THEN
-			 FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
+                         FULL_SIMP_TAC (srw_ss()++ARITH_ss) []) THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
       Cases_on `ih` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def,
-						   isTmnlSym_def] THEN
+                                                   isTmnlSym_def] THEN
       `(rule (q,A,p) (TS t::(MAP toRhs l))) ∈ p2gRules m`
       by METIS_TAC [p2gtransSome, symbol_11] THEN
       `MEM (rule (q,A,p) (TS t::(MAP toRhs l))) (rules g)`
@@ -2268,7 +2198,7 @@ val listPairImpIdc = store_thm
   (∀h1 h2 i1 i2 t.((l = (h1,h2)::t) ∧ (LAST l = (i1,i2)))
     ⇒
    (ID m)^* (frmState h1,h2++(FLAT (MAP SND t)),[transSym h1]++
-	     (MAP transSym (MAP FST t)))
+             (MAP transSym (MAP FST t)))
    (toState i1,[],[]))``,
 
 
@@ -2295,7 +2225,7 @@ SRW_TAC [][] THEN
 `(ID m)^* (q,h2,[q']) (q'',[],[])`
 by METIS_TAC [toState,transSym,frmState] THEN
 METIS_TAC [idcStackInsert,idcInpInsert,APPEND_NIL,APPEND,
-	   APPEND_ASSOC,RTC_RTC]);
+           APPEND_ASSOC,RTC_RTC]);
 
 
 val p2gImpPda = store_thm
@@ -2319,7 +2249,7 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq] THEN
       IMP_RES_TAC ruleMem2nextMemNone THEN
       `t'=[]` by (Cases_on `t'` THEN
-		  FULL_SIMP_TAC (srw_ss()) [derives_def]) THEN
+                  FULL_SIMP_TAC (srw_ss()) [derives_def]) THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
       METIS_TAC [id_thm, RTC_RULES,APPEND_NIL],
 
@@ -2333,213 +2263,213 @@ THENL[
       (FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH ([TS ts]::t')`] MP_TAC) THEN
        `isWord [TS ts]`by SRW_TAC [][isTmnlSym_def] THEN
        `t' = []` by (Cases_on `t'` THEN
-		     FULL_SIMP_TAC (srw_ss()) [derives_def, lreseq]) THEN
+                     FULL_SIMP_TAC (srw_ss()) [derives_def, lreseq]) THEN
        SRW_TAC [][id_thm])
       THENL[
-	    (* ((SOME (TS ts),A,q),q1,MAP transSym t) ∈ m.next ∧ t ≠ [] *)
+            (* ((SOME (TS ts),A,q),q1,MAP transSym t) ∈ m.next ∧ t ≠ [] *)
 
-	    Q.ABBREV_TAC `x=LAST ((TS ts::t)::t')` THEN
-	    `LENGTH ((TS s::t)::t')=SUC (LENGTH t')`
-	    by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-	    IMP_RES_TAC rtc2listExistsLen THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    `∃dl y.(x=TS ts::y) ∧
-	    (derives g) ⊢ dl ◁ t → y ∧ (LENGTH dl ≤ LENGTH l)`
-	    by METIS_TAC [ldStartTs,Abbrev_def] THEN
-	    `m ⊢ (q,TS ts::y,[A]) → (q1,y,MAP transSym t)`
-	    by SRW_TAC [][id_thm] THEN
-	    `∃l0.
-	    (t = MAP FST l0) ∧ (y = FLAT (MAP SND l0)) ∧
-	    ∀a b.MEM (a,b) l0 ⇒
-	    ∃dl0.LENGTH dl0 ≤ LENGTH dl ∧
-	    derives g ⊢ dl0 ◁ [a] → b` by
-	    METIS_TAC [listPairExistsLd] THEN
-	    SRW_TAC [][] THEN
+            Q.ABBREV_TAC `x=LAST ((TS ts::t)::t')` THEN
+            `LENGTH ((TS s::t)::t')=SUC (LENGTH t')`
+            by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+            IMP_RES_TAC rtc2listExistsLen THEN
+            FULL_SIMP_TAC (srw_ss()) [] THEN
+            `∃dl y.(x=TS ts::y) ∧
+            (derives g) ⊢ dl ◁ t → y ∧ (LENGTH dl ≤ LENGTH l)`
+            by METIS_TAC [ldStartTs,Abbrev_def] THEN
+            `m ⊢ (q,TS ts::y,[A]) → (q1,y,MAP transSym t)`
+            by SRW_TAC [][id_thm] THEN
+            `∃l0.
+            (t = MAP FST l0) ∧ (y = FLAT (MAP SND l0)) ∧
+            ∀a b.MEM (a,b) l0 ⇒
+            ∃dl0.LENGTH dl0 ≤ LENGTH dl ∧
+            derives g ⊢ dl0 ◁ [a] → b` by
+            METIS_TAC [listPairExistsLd] THEN
+            SRW_TAC [][] THEN
 
-	    `∀e1 e2.MEM (e1,e2) l0 ⇒
-	    (ID m)^* (frmState e1,e2,[transSym e1])
-	    (toState e1,[],[])` by
-	    (SRW_TAC [][] THEN
-	     RES_TAC THEN
-	     `LENGTH dl0 < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
-	     FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH dl0`] MP_TAC) THEN
-	     SRW_TAC [][] THEN
-	     FIRST_X_ASSUM (Q.SPECL_THEN [`dl0`] MP_TAC) THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
-	     Cases_on `dl0` THEN
-	     FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	     SRW_TAC [][] THEN
-	     Cases_on `e1`  THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
-	     (Cases_on `n` THEN
-	      Cases_on `r` THEN
-	      FULL_SIMP_TAC (srw_ss()) [] THEN
-	      SRW_TAC [][] THEN
-	      `∃r1' r2'.(l0 =r1' ++[(NTS (q',q'',r'),
-				     LAST ([NTS (q',q'',r')]::t))] ++r2')`
-	      by METIS_TAC [rgr_r9eq] THEN
-	      SRW_TAC [][] THEN
-	      FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,frmState,
-					toState,transSym] THEN
-	      `q' ∈ statesList m` by METIS_TAC [frmState, MEM, MEM_APPEND] THEN
-	      METIS_TAC [everyFlat]) THEN
-	     `t=[]` by (Cases_on `t` THEN
-			FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq]) THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,isNonTmnlSym_def]) THEN
-	    FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
-	    `∀i2 i1.(LAST l0 = (i1,i2)) ⇒
-		     ∀t h2 h1.(l0 = (h1,h2)::t) ⇒
-		     (ID m)^*
-		     (frmState h1,h2 ++ FLAT (MAP SND t),
-		      [transSym h1] ++ MAP transSym (MAP FST t))
-		     (toState i1,[],[])`
-	    by METIS_TAC [listPairImpIdc] THEN
+            `∀e1 e2.MEM (e1,e2) l0 ⇒
+            (ID m)^* (frmState e1,e2,[transSym e1])
+            (toState e1,[],[])` by
+            (SRW_TAC [][] THEN
+             RES_TAC THEN
+             `LENGTH dl0 < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
+             FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH dl0`] MP_TAC) THEN
+             SRW_TAC [][] THEN
+             FIRST_X_ASSUM (Q.SPECL_THEN [`dl0`] MP_TAC) THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
+             Cases_on `dl0` THEN
+             FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+             SRW_TAC [][] THEN
+             Cases_on `e1`  THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+             (Cases_on `n` THEN
+              Cases_on `r` THEN
+              FULL_SIMP_TAC (srw_ss()) [] THEN
+              SRW_TAC [][] THEN
+              `∃r1' r2'.(l0 =r1' ++[(NTS (q',q'',r'),
+                                     LAST ([NTS (q',q'',r')]::t))] ++r2')`
+              by METIS_TAC [rgr_r9eq] THEN
+              SRW_TAC [][] THEN
+              FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,frmState,
+                                        toState,transSym] THEN
+              `q' ∈ statesList m` by METIS_TAC [frmState, MEM, MEM_APPEND] THEN
+              METIS_TAC [everyFlat]) THEN
+             `t=[]` by (Cases_on `t` THEN
+                        FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq]) THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,isNonTmnlSym_def]) THEN
+            FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
+            `∀i2 i1.(LAST l0 = (i1,i2)) ⇒
+                     ∀t h2 h1.(l0 = (h1,h2)::t) ⇒
+                     (ID m)^*
+                     (frmState h1,h2 ++ FLAT (MAP SND t),
+                      [transSym h1] ++ MAP transSym (MAP FST t))
+                     (toState i1,[],[])`
+            by METIS_TAC [listPairImpIdc] THEN
 
-	    Cases_on `l0=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    `l0=FRONT l0++[LAST l0]` by METIS_TAC [APPEND_FRONT_LAST] THEN
-	    SRW_TAC [][] THEN
-	    Cases_on `LAST l0` THEN
-	    Cases_on `l0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    Cases_on `h` THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
-	    Cases_on `q'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][]
-	    THENL[
-		  Cases_on `n`  THEN
-		  Cases_on `r''` THEN
-		  FULL_SIMP_TAC (srw_ss()) [toState] THEN
-		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [frmState,transSym,
-					    toState] THEN1
-		  METIS_TAC [RTC_RULES, MEM, MEM_APPEND, frmState] THEN
-		  `LAST t = (NTS (q',q''',r'''),r)`
-		  by METIS_TAC [last_append,APPEND,APPEND_ASSOC,MEM] THEN
-		  `toState (LAST (q''::MAP FST t))= r'''`
-		  by (`MAP FST t = MAP FST (FRONT t) ++
-		      MAP FST [(NTS (q',q''',r'''),r)]`
-		      by METIS_TAC [MAP_APPEND,APPEND_FRONT_LAST] THEN
-		      FULL_SIMP_TAC (srw_ss()) [] THEN
-		      METIS_TAC [toState,last_append,APPEND,
-				 last_elem]) THEN
-		  METIS_TAC [RTC_RULES],
+            Cases_on `l0=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            `l0=FRONT l0++[LAST l0]` by METIS_TAC [APPEND_FRONT_LAST] THEN
+            SRW_TAC [][] THEN
+            Cases_on `LAST l0` THEN
+            Cases_on `l0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            Cases_on `h` THEN
+            FULL_SIMP_TAC (srw_ss()) [] THEN
+            UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
+            Cases_on `q'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            SRW_TAC [][]
+            THENL[
+                  Cases_on `n`  THEN
+                  Cases_on `r''` THEN
+                  FULL_SIMP_TAC (srw_ss()) [toState] THEN
+                  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN
+                  FULL_SIMP_TAC (srw_ss()) [frmState,transSym,
+                                            toState] THEN1
+                  METIS_TAC [RTC_RULES, MEM, MEM_APPEND, frmState] THEN
+                  `LAST t = (NTS (q',q''',r'''),r)`
+                  by METIS_TAC [last_append,APPEND,APPEND_ASSOC,MEM] THEN
+                  `toState (LAST (q''::MAP FST t))= r'''`
+                  by (`MAP FST t = MAP FST (FRONT t) ++
+                      MAP FST [(NTS (q',q''',r'''),r)]`
+                      by METIS_TAC [MAP_APPEND,APPEND_FRONT_LAST] THEN
+                      FULL_SIMP_TAC (srw_ss()) [] THEN
+                      METIS_TAC [toState,last_append,APPEND,
+                                 last_elem]) THEN
+                  METIS_TAC [RTC_RULES],
 
-		  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
-		  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
-		  `EVERY isNonTmnlSym (MAP FST (FRONT t++[(TS t'',r)]))`
-		  by METIS_TAC [APPEND_FRONT_LAST,last_append,APPEND] THEN
-		  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]
-		  ],
+                  Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+                  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+                  `EVERY isNonTmnlSym (MAP FST (FRONT t++[(TS t'',r)]))`
+                  by METIS_TAC [APPEND_FRONT_LAST,last_append,APPEND] THEN
+                  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]
+                  ],
 
 
-	    (* MEM ((NONE,A,q),q',transSym h''::MAP transSym t) m.next *)
+            (* MEM ((NONE,A,q),q',transSym h''::MAP transSym t) m.next *)
 
-	    Q.ABBREV_TAC `x=LAST ((h''::t)::t')` THEN
-	    `LENGTH ((h''::t)::t')=SUC (LENGTH t')`
-	    by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
-	    IMP_RES_TAC rtc2listExistsLen THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    `m ⊢ (q,x,[A]) → (q1,x,transSym h''::MAP transSym t)`
-	    by SRW_TAC [][id_thm] THEN
-	    `∃l0.
-	    (h''::t = MAP FST l0) ∧ (x = FLAT (MAP SND l0)) ∧
-	    ∀a b.MEM (a,b) l0 ⇒
-	    ∃dl0.LENGTH dl0 ≤ LENGTH l ∧
-	    derives g ⊢ dl0 ◁ [a] → b` by
-	    METIS_TAC [listPairExistsLd] THEN
-	    SRW_TAC [][] THEN
+            Q.ABBREV_TAC `x=LAST ((h''::t)::t')` THEN
+            `LENGTH ((h''::t)::t')=SUC (LENGTH t')`
+            by FULL_SIMP_TAC (srw_ss()++ARITH_ss) [] THEN
+            IMP_RES_TAC rtc2listExistsLen THEN
+            FULL_SIMP_TAC (srw_ss()) [] THEN
+            `m ⊢ (q,x,[A]) → (q1,x,transSym h''::MAP transSym t)`
+            by SRW_TAC [][id_thm] THEN
+            `∃l0.
+            (h''::t = MAP FST l0) ∧ (x = FLAT (MAP SND l0)) ∧
+            ∀a b.MEM (a,b) l0 ⇒
+            ∃dl0.LENGTH dl0 ≤ LENGTH l ∧
+            derives g ⊢ dl0 ◁ [a] → b` by
+            METIS_TAC [listPairExistsLd] THEN
+            SRW_TAC [][] THEN
 
-	    `∀e1 e2.MEM (e1,e2) l0 ⇒
-	    (ID m)^* (frmState e1,e2,[transSym e1])
-	             (toState e1,[],[])` by
-	    (SRW_TAC [][] THEN
-	     RES_TAC THEN
-	     `LENGTH dl0 < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
-	     FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH dl0`] MP_TAC) THEN
-	     SRW_TAC [][] THEN
-	     FIRST_X_ASSUM (Q.SPECL_THEN [`dl0`] MP_TAC) THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
-	     Cases_on `dl0` THEN
-	     FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-	     SRW_TAC [][] THEN
-	     Cases_on `e1`  THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
-	     (Cases_on `n` THEN
-	      Cases_on `r` THEN
-	      FULL_SIMP_TAC (srw_ss()) [] THEN
-	      SRW_TAC [][] THEN
-	      `∃r1' r2'.(l0 =r1' ++[(NTS (q',q'',r'),
-				     LAST ([NTS (q',q'',r')]::t''))] ++r2')`
-	      by METIS_TAC [rgr_r9eq] THEN
-	      SRW_TAC [][] THEN
-	      FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,frmState,
-					toState,transSym] THEN
-	      METIS_TAC [everyFlat, MEM, MEM_APPEND,frmState]) THEN
-	     `t''=[]` by (Cases_on `t''` THEN
-			FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq]) THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
-	     SRW_TAC [][] THEN
-	     FULL_SIMP_TAC (srw_ss()) [] THEN
-	     `EVERY isNonTmnlSym (MAP FST r1'''' ++ [TS t'''] ++ MAP FST r2'''')`
-	     by METIS_TAC [EVERY_DEF,EVERY_APPEND] THEN
-	     FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]) THEN
+            `∀e1 e2.MEM (e1,e2) l0 ⇒
+            (ID m)^* (frmState e1,e2,[transSym e1])
+                     (toState e1,[],[])` by
+            (SRW_TAC [][] THEN
+             RES_TAC THEN
+             `LENGTH dl0 < SUC (SUC (LENGTH t'))` by DECIDE_TAC THEN
+             FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH dl0`] MP_TAC) THEN
+             SRW_TAC [][] THEN
+             FIRST_X_ASSUM (Q.SPECL_THEN [`dl0`] MP_TAC) THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
+             Cases_on `dl0` THEN
+             FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+             SRW_TAC [][] THEN
+             Cases_on `e1`  THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+             (Cases_on `n` THEN
+              Cases_on `r` THEN
+              FULL_SIMP_TAC (srw_ss()) [] THEN
+              SRW_TAC [][] THEN
+              `∃r1' r2'.(l0 =r1' ++[(NTS (q',q'',r'),
+                                     LAST ([NTS (q',q'',r')]::t''))] ++r2')`
+              by METIS_TAC [rgr_r9eq] THEN
+              SRW_TAC [][] THEN
+              FULL_SIMP_TAC (srw_ss()) [EVERY_APPEND,frmState,
+                                        toState,transSym] THEN
+              METIS_TAC [everyFlat, MEM, MEM_APPEND,frmState]) THEN
+             `t''=[]` by (Cases_on `t''` THEN
+                        FULL_SIMP_TAC (srw_ss()) [derives_def,lreseq]) THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+             SRW_TAC [][] THEN
+             FULL_SIMP_TAC (srw_ss()) [] THEN
+             `EVERY isNonTmnlSym (MAP FST r1'''' ++ [TS t'''] ++ MAP FST r2'''')`
+             by METIS_TAC [EVERY_DEF,EVERY_APPEND] THEN
+             FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]) THEN
 
-	    FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
-	    `∀i2 i1.(LAST l0 = (i1,i2)) ⇒
-		     ∀t h2 h1.(l0 = (h1,h2)::t) ⇒
-		     (ID m)^*
-		     (frmState h1,h2 ++ FLAT (MAP SND t),
-		      [transSym h1] ++ MAP transSym (MAP FST t))
-		     (toState i1,[],[])`
-	    by METIS_TAC [listPairImpIdc,EVERY_DEF] THEN
+            FULL_SIMP_TAC (srw_ss()) [ntslCond] THEN
+            `∀i2 i1.(LAST l0 = (i1,i2)) ⇒
+                     ∀t h2 h1.(l0 = (h1,h2)::t) ⇒
+                     (ID m)^*
+                     (frmState h1,h2 ++ FLAT (MAP SND t),
+                      [transSym h1] ++ MAP transSym (MAP FST t))
+                     (toState i1,[],[])`
+            by METIS_TAC [listPairImpIdc,EVERY_DEF] THEN
 
-	    Cases_on `l0=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    `l0=FRONT l0++[LAST l0]` by METIS_TAC [APPEND_FRONT_LAST] THEN
-	    SRW_TAC [][] THEN
-	    Cases_on `LAST l0` THEN
-	    Cases_on `l0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    Cases_on `h` THEN
-	    FULL_SIMP_TAC (srw_ss()) [] THEN
-	    UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
-	    Cases_on `q'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-	    SRW_TAC [][]
-	    THENL[
-		  Cases_on `n`  THEN
-		  Cases_on `r''` THEN
-		  FULL_SIMP_TAC (srw_ss()) [toState] THEN
-		  Cases_on `t''=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
+            Cases_on `l0=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            `l0=FRONT l0++[LAST l0]` by METIS_TAC [APPEND_FRONT_LAST] THEN
+            SRW_TAC [][] THEN
+            Cases_on `LAST l0` THEN
+            Cases_on `l0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            Cases_on `h` THEN
+            FULL_SIMP_TAC (srw_ss()) [] THEN
+            UNABBREV_ALL_TAC THEN SRW_TAC [][] THEN
+            Cases_on `q'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+            SRW_TAC [][]
+            THENL[
+                  Cases_on `n`  THEN
+                  Cases_on `r''` THEN
+                  FULL_SIMP_TAC (srw_ss()) [toState] THEN
+                  Cases_on `t''=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
 
-		  (SRW_TAC [][] THEN
-		   FULL_SIMP_TAC (srw_ss()) [frmState,transSym,
-					     toState] THEN
-		   METIS_TAC [RTC_RULES]) THEN
-		  `LAST t'' = (NTS (q',q'',r'''),r)`
-		  by METIS_TAC [last_append,APPEND,APPEND_ASSOC,MEM] THEN
+                  (SRW_TAC [][] THEN
+                   FULL_SIMP_TAC (srw_ss()) [frmState,transSym,
+                                             toState] THEN
+                   METIS_TAC [RTC_RULES]) THEN
+                  `LAST t'' = (NTS (q',q'',r'''),r)`
+                  by METIS_TAC [last_append,APPEND,APPEND_ASSOC,MEM] THEN
 
-		  `toState (LAST (h''::MAP FST t''))= r'''`
-		  by (`MAP FST t'' = MAP FST (FRONT t'') ++
-		      MAP FST [(NTS (q',q'',r'''),r)]`
-		      by METIS_TAC [MAP_APPEND,APPEND_FRONT_LAST] THEN
-		      FULL_SIMP_TAC (srw_ss()) [] THEN
-		      METIS_TAC [toState,last_append,APPEND,
-				 last_elem]) THEN
-		  METIS_TAC [RTC_RULES],
+                  `toState (LAST (h''::MAP FST t''))= r'''`
+                  by (`MAP FST t'' = MAP FST (FRONT t'') ++
+                      MAP FST [(NTS (q',q'',r'''),r)]`
+                      by METIS_TAC [MAP_APPEND,APPEND_FRONT_LAST] THEN
+                      FULL_SIMP_TAC (srw_ss()) [] THEN
+                      METIS_TAC [toState,last_append,APPEND,
+                                 last_elem]) THEN
+                  METIS_TAC [RTC_RULES],
 
-		  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
-		  Cases_on `t''` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		  SRW_TAC [][] THEN
-		  FULL_SIMP_TAC (srw_ss()) [frmState,transSym,toState] THEN
-		  `EVERY isNonTmnlSym (MAP FST (h::t'''))`
-		  by FULL_SIMP_TAC (srw_ss()) [] THEN
-		  `EVERY isNonTmnlSym (MAP FST (FRONT (h::t''') ++[(TS t,r)]))`
-		  by METIS_TAC [APPEND_FRONT_LAST,last_append,APPEND,MEM] THEN
-		  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]
-		  ]]]);
+                  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
+                  Cases_on `t''` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+                  SRW_TAC [][] THEN
+                  FULL_SIMP_TAC (srw_ss()) [frmState,transSym,toState] THEN
+                  `EVERY isNonTmnlSym (MAP FST (h::t'''))`
+                  by FULL_SIMP_TAC (srw_ss()) [] THEN
+                  `EVERY isNonTmnlSym (MAP FST (FRONT (h::t''') ++[(TS t,r)]))`
+                  by METIS_TAC [APPEND_FRONT_LAST,last_append,APPEND,MEM] THEN
+                  FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def]
+                  ]]]);
 
 
 val p2gEqPda = store_thm
@@ -2564,7 +2494,7 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [p2gRules, p2gStartRules] THEN
       SRW_TAC [][] THEN1
       (`pda2grammar m g` by FULL_SIMP_TAC (srw_ss()) [pda2grammar,
-						     p2gRules, p2gStartRules] THEN
+                                                     p2gRules, p2gStartRules] THEN
       `m.start ∈ statesList m` by SRW_TAC [][statesList_def] THEN
       METIS_TAC [rtc2list_exists', p2gImpPda]) THEN
       METIS_TAC [memStateRule, pdastate_def],
@@ -2576,13 +2506,13 @@ THENL[
       (`rule (startSym g) [NTS (m.start,m.ssSym,p)] ∈ rules g`
        by
        (FULL_SIMP_TAC (srw_ss()) [derives_def, pda2grammar] THEN
-	Q_TAC SUFF_TAC
+        Q_TAC SUFF_TAC
       `rule (startSym g) [NTS (m.start,m.ssSym,p)] ∈
-	p2gStartRules m (startSym g) ∪ p2gRules m`  THEN1
-	FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
-	FULL_SIMP_TAC (srw_ss()) [p2gRules, p2gStartRules] THEN
-	`m.start ∈ statesList m` by SRW_TAC [][statesList_def] THEN
-	METIS_TAC [memState]) THEN
+        p2gStartRules m (startSym g) ∪ p2gRules m`  THEN1
+        FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
+        FULL_SIMP_TAC (srw_ss()) [p2gRules, p2gStartRules] THEN
+        `m.start ∈ statesList m` by SRW_TAC [][statesList_def] THEN
+        METIS_TAC [memState]) THEN
       METIS_TAC [res1]) THEN
       METIS_TAC [pdaImpP2g, rtc2list_exists']]);
 

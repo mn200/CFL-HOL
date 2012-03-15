@@ -720,7 +720,7 @@ METIS_TAC [memStkSyms]);
 val mImpm'HNil = store_thm
 ("mImpm'HNil",
 ``∀l1.
-hInvpda m m' h  ∧ (∀e. MEM e l1 ⇒ e ∈ inpSyms m) ∧ 
+hInvpda m m' h  ∧ (∀e. MEM e l1 ⇒ e ∈ inpSyms m) ∧
 (∀e.MEM e l1 ⇒ (h e = [])) ∧ (q ∈ states m) ∧
 stkSymsInPda m' s
 ⇒
@@ -750,7 +750,7 @@ SRW_TAC [][ Once RTC_CASES1] THEN
 
 val mImpm' = store_thm
 ("mImpm'",
-``∀x dl q ssyms.ID m ⊢ dl ◁ (q,FLAT (MAP h x),ssyms) → (p,[],ssyms') ∧ 
+``∀x dl q ssyms.ID m ⊢ dl ◁ (q,FLAT (MAP h x),ssyms) → (p,[],ssyms') ∧
 ¬(lafs m ⊆ {[]}) ∧ (∀e. e ∈ x ⇒ e ∈ inpSyms m) ∧
  hInvpda m m' h  ∧ LENGTH dl > 1 ∧ stkSymsInPda m' ssyms ∧ q ∈ states m
 ⇒
@@ -1722,7 +1722,7 @@ val PAIR_ABS = prove(
 
 val FINITE_isSuffixTrans = store_thm(
   "FINITE_isSuffixTrans",
-  ``FINITE {((opt,q,r,x),(q',x),r') | (x,a:α) | a ∈ inpSyms (m:(α, β, γ) pda) ∧ 
+  ``FINITE {((opt,q,r,x),(q',x),r') | (x,a:α) | a ∈ inpSyms (m:(α, β, γ) pda) ∧
             isSuffix x ((h:α -> α list) a)}``,
 
  ONCE_REWRITE_TAC [GSPEC_IMAGE] THEN
@@ -1901,7 +1901,7 @@ val exists_hInvpda = store_thm ("exists_hInvpda",
 );
 
 val inverseHomomorphism = Define
-`inverseHomomorphism h g = 
+`inverseHomomorphism h g =
 { (MAP ts2str w) | (FLAT (MAP h w)) ∈ language g}`;
 
 
@@ -1915,9 +1915,9 @@ fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 val invhEq = store_thm
 ("invhEq",
-``∀m m'. hInvpda m m' h ∧ ¬(lafs m ⊆ {[]}) 
+``∀m m'. hInvpda m m' h ∧ ¬(lafs m ⊆ {[]})
  ⇒
- ∀x. (x ∈ lafs m' = 
+ ∀x. (x ∈ lafs m' =
   x ∈ { w | (FLAT (MAP h w)) ∈ lafs m})``,
 MAGIC);
 (*
@@ -1943,7 +1943,7 @@ Cases_on `LENGTH l > 1` THEN1
 MAGIC THEN1
 MAGIC
 THENL[
- 
+
       `m.start ∈ states m` by SRW_TAC [][states_def] THEN
       `stkSymsInPda m' [m.ssSym]` by METIS_TAC [mSsymInm'] THEN
       `∀e. e ∈ x ⇒ e ∈ inpSyms m` by MAGIC THEN
@@ -1974,7 +1974,7 @@ THENL[
 				       FULL_SIMP_TAC (srw_ss()) [FLAT_APPEND]) THEN
       `m.start ∈ states m` by SRW_TAC [][states_def] THEN
       `stkSymsInPda m' [m.ssSym]` by METIS_TAC [mSsymInm'] THEN
-      
+
       `IDC m' ((m.start,[]),x,[m.ssSym] ++ [m'.ssSym])
               ((m.start,[]),[],[m.ssSym] ++ [m'.ssSym])`
       by METIS_TAC [mImpm'HNil] THEN
@@ -1994,7 +1994,7 @@ val ntsTsTypeExists = store_thm("ntsTsTypeExists",
 ``∀tsl.isWord (tsl :
            (('state # ('nts, 'ts) symbol list) #
             ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts)
-           symbol list) ⇒ 
+           symbol list) ⇒
 ∃(w :('nts, 'ts) symbol list). (MAP ts2str tsl = MAP ts2str w) ∧ isWord w``,
 
 Induct_on `tsl` THEN SRW_TAC [][] THEN
@@ -2007,7 +2007,7 @@ val type_thm1 = store_thm("type_thm1",
 ``∀x y.(derives g)^* x (y:(('state # ('nts, 'ts) symbol list) #
             ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts) symbol list)
  ⇒ isWord y ⇒ (MAP ts2str y = MAP ts2str (w:('nts,'ts) symbol list)) ⇒
-∃y'. 
+∃y'.
 isWord y' ∧ (MAP ts2str w = MAP ts2str y') ∧ (derives g)^* x y'``,
 
 HO_MATCH_MP_TAC RTC_INDUCT THEN
@@ -2018,35 +2018,55 @@ Q.EXISTS_TAC `y'` THEN
 SRW_TAC [][] THEN
 METIS_TAC [RTC_CASES1]);
 
+val laesWords_def = Define`
+  laesWords (m : ((α,β)symbol, γ, δ) pda) : β list set =
+    { w : β list | ∃p. m ⊢ (m.start,MAP TS w,[m.ssSym]) →* (p,[],[]) }
+`
+
+val ts2str_o_TS = prove(
+  ``ts2str o TS = I``,
+  SRW_TAC [][FUN_EQ_THM, ts2str_def]);
+
+val p2gEqPda' = store_thm(
+  "p2gEqPda'",
+  ``pda2grammar m g ⇒ (laesWords m = languageWords g)``,
+  SIMP_TAC (srw_ss()) [languageWords, laesWords_def, EXTENSION, EQ_IMP_THM] THEN
+  STRIP_TAC THEN GEN_TAC THEN
+  `isWord (MAP TS x)` by SRW_TAC [][EVERY_MAP, isTmnlSym_def] THEN
+  REPEAT STRIP_TAC THENL [
+    Q.EXISTS_TAC `MAP TS x` THEN
+    SRW_TAC [][MAP_MAP_o, EVERY_MAP, ts2str_o_TS, isTmnlSym_def] THEN
+    METIS_TAC [p2gEqPda]
+
 
 val invHomomorphismThm = store_thm("invHomomorphismThm",
 ``∀g (h:('nts, 'ts) symbol -> ('nts, 'ts) symbol list).
-    INFINITE (UNIV:'nts set) ∧
-    INFINITE (UNIV:'state set) ∧     
-    [] ∉ language (g:('nts,'ts) grammar) ∧
-    (language g ≠ {}) ⇒
+    INFINITE univ(:'nts) ∧ INFINITE univ(:'state) ∧
+    [] ∉ language (g:('nts,'ts) grammar) ∧ (language g ≠ {}) ⇒
     ∃g':(('state # ('nts, 'ts) symbol list) #
-   ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts) grammar. 
-      (languageWords g') = (inverseHomomorphism h g)``,
+        ('nts, 'ts) symbol # 'state # ('nts, 'ts) symbol list, 'ts) grammar.
+      languageWords g' = inverseHomomorphism h g``,
 
 SRW_TAC [][] THEN
 `∃g'.isGnf g' ∧ (language g = language g')` by METIS_TAC [gnfExists] THEN
-`∃(m:(('nts, 'ts) symbol, ('nts,'ts) symbol, 'state) pda). 
+`∃(m:(('nts, 'ts) symbol, ('nts,'ts) symbol, 'state) pda).
             (∀x. x ∈ language g = x ∈ laes m)` by METIS_TAC [thm5_3] THEN
 
-`INFINITE (UNIV:('nts, 'ts) symbol set)` by MAGIC THEN                                    
-(*
-INJECTIVE_IMAGE_FINITE SUBSET_FINITE_I
-*)
+`INFINITE univ(:('nts, 'ts) symbol)`
+  by (Q.ABBREV_TAC `nts = IMAGE NTS univ(:'nts) : ('nts,'ts) symbol set` THEN
+      `INFINITE nts` by SRW_TAC [][INJECTIVE_IMAGE_FINITE, Abbr`nts`] THEN
+      `nts ⊆ univ(:('nts,'ts)symbol)`
+         by SRW_TAC [][SUBSET_DEF, Abbr`nts`] THEN
+      METIS_TAC [SUBSET_FINITE_I]) THEN
 
-`∃m':(('nts, 'ts) symbol, ('nts,'ts) symbol, 'state) pda. 
+`∃m':(('nts, 'ts) symbol, ('nts,'ts) symbol, 'state) pda.
                                    laes m = lafs m'` by METIS_TAC [thm52] THEN
 `∃m'':(('nts, 'ts) symbol, ('nts, 'ts) symbol, 'state # ('nts, 'ts) symbol list) pda.
      hInvpda m' m'' h` by METIS_TAC [exists_hInvpda] THEN
 
 `INFINITE (UNIV:('state # ('nts, 'ts) symbol list ) set)` by SRW_TAC [][] THEN
 
-`∃m''':(('nts, 'ts) symbol, ('nts, 'ts) symbol,'state # ('nts, 'ts) symbol list) pda. 
+`∃m''':(('nts, 'ts) symbol, ('nts, 'ts) symbol,'state # ('nts, 'ts) symbol list) pda.
 lafs m'' = laes m'''` by METIS_TAC [thm51] THEN
 
 `¬(lafs m' ⊆ {[]})` by (SRW_TAC [][] THEN
@@ -2054,7 +2074,7 @@ FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
 METIS_TAC []) THEN
 
 `∃g'':(('state # ('nts, 'ts) symbol list) #
-   ('nts, 'ts) symbol # ('state # ('nts, 'ts) symbol list), 'ts) grammar. 
+   ('nts, 'ts) symbol # ('state # ('nts, 'ts) symbol list), 'ts) grammar.
 pda2grammar m''' g''` by METIS_TAC [p2gGrExists] THEN
 `∀x. x ∈ {w | FLAT (MAP h w) ∈ lafs m'} ⇔ x ∈ lafs m''` by METIS_TAC [invhEq] THEN
 Q.EXISTS_TAC `g''` THEN
@@ -2062,7 +2082,7 @@ SRW_TAC [boolSimps.COND_elim_ss, boolSimps.DNF_ss,
             boolSimps.CONJ_ss]
 [EXISTS_rule, languageWords, inverseHomomorphism, EXTENSION, EQ_IMP_THM] THENL[
 
-`∃w: ('nts, 'ts) symbol list . isWord w ∧ 
+`∃w: ('nts, 'ts) symbol list . isWord w ∧
 (MAP ts2str tsl = MAP ts2str w)` by METIS_TAC [ntsTsTypeExists] THEN
 Q.EXISTS_TAC `w`  THEN
 SRW_TAC [][] THEN

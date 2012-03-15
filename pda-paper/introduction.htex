@@ -27,8 +27,7 @@ The rest of the paper is structured as follows.
 We introduce the basic details of our types (languages, grammars and automata) in Sections~\ref{sec:grammars} and~\ref{sec:pda}.
 In Section~\ref{sec:laeslafs} we describe the two ways in which a PDA can
 accept an input (``acceptance by empty stack'' and ``acceptance by final state''), and show that they are equivalent in power.
-In Sections~\ref{sec:cfg2pda} and \ref{sec:pda2cfg} we describe the mechanisation of the result that the CFGs and PDAs formalisms are equivalent in power.
-Finally, we present some closure properties for context-free languages in Section~\ref{sec:closureProps}.
+In Section~\ref{sec:closureProps}, we present some closure properties for context-free languages.
 
 It turns out that closure under union, concatenation and Kleene closure~(Sections~\ref{sec:union} to~\ref{sec:kleene}) are easy to formalise.
 These results depend on the fact that given any two grammars, $G_1$ and $G_2$, one can rename the variables such that variables of $G_1$ and $G_2$ are disjoint.
@@ -36,6 +35,8 @@ The main effort goes into establishing this `disjoint' property.
 %
 The remaining closure property illustrates how equivalence results for different models can be a great help: closure under substitution~(Section~\ref{sec:substitution}) uses a `parse tree' representation~(Section~\ref{sec:trees}) for derivations (rather than derivation lists).
 %, and closure under inverse homomorphism~(Section~\ref{sec:invhomomorphism}) relies on having an equivalent PDA for the given context-free grammar.
+
+Finally, in Sections~\ref{sec:cfg2pda} and \ref{sec:pda2cfg} we describe the paper's most involved mechanisations: proofs of the result that the CFG and PDA formalisms are equivalent in power.
 
 \paragraph{HOL4: Background,  Theorems and Notation}
 The work described in this paper was all carried out in HOL4~\citep{gordon93,SlindNorrish2008}, a modern interactive theorem-proving system, or proof assistant.

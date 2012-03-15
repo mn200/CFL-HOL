@@ -3,7 +3,7 @@
 We model PDAs as records containing four components:
 the start state
 (\texttt{start} or $q_0$); the starting stack symbol (\texttt{ssSym} or
-$Z_0$); the list of final states (\texttt{final} or $F$) ;and the next
+$Z_0$); the list of final states (\texttt{final} or $F$); and the next
 state transitions (\texttt{final} or $\delta$).
 
 \begin{salltt}

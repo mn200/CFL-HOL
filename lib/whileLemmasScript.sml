@@ -164,10 +164,9 @@ mwhile_EQ_NONE])
 
 val mwhileEndCond = store_thm ("mwhileEndCond",
 ``(mwhile C f s = SOME (SOME s')) ==> ~ C s'``,
-SRW_TAC [] [mwhile] THEN
-METIS_TAC [owhileEndCond, optionTheory.option_case_def])
-
-
+SRW_TAC [] [mwhile]
+ >> imp_res_tac owhileEndCond
+ >> full_simp_tac list_ss [optionTheory.option_case_def]);
 
 val mwhileEndState = store_thm ("mwhileEndState",
 ``(mwhile C f s = SOME (SOME s')) /\

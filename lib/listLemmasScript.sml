@@ -51,7 +51,6 @@ val lreseq = store_thm ("lreseq",
 METIS_TAC [EQ_IMP_THM,lres,lresb]
 );
 
-
 val rgr_r9 = store_thm ("rgr_r9",
 ``!r.MEM sym r ==> ?r1 r2.r=r1++[sym]++r2``,
 Induct_on `r` THENL
@@ -1040,7 +1039,6 @@ val listPairExists = store_thm
 ("listPairExists",
 ``∀l.∃l'.(l=MAP FST l') ∧ (l = FLAT (MAP SND l')) ∧
   (∀a b.MEM (a,b) l' ⇒  (LENGTH b = 1) ∧ (a=HD b))``,
-
 Induct_on `l` THEN SRW_TAC [][] THEN
 Q.EXISTS_TAC `(h,[h])::l'` THEN
 SRW_TAC [][] THEN
@@ -1060,7 +1058,9 @@ Cases_on `r1` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN
 Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][] THEN
-FIRST_X_ASSUM (Q.SPECL_THEN [`t`,`x`,`r2`] MP_TAC) THEN SRW_TAC [][]);
+FIRST_X_ASSUM (Q.SPECL_THEN [`t`,`x`,`r2`] MP_TAC) THEN 
+SRW_TAC [][]
+ >> rw_tac list_ss []);
 
 val mapSndTakeEq = store_thm
 ("mapSndTakeEq",
@@ -1069,11 +1069,10 @@ val mapSndTakeEq = store_thm
 ⇒
 (MAP SND (TAKE (LENGTH r1') l) = r1')``,
 
-Induct_on `l` THEN SRW_TAC [][] THEN1
-METIS_TAC [LENGTH_NIL] THEN
-Cases_on `r1'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
-METIS_TAC []);
+Induct_on `l` THEN SRW_TAC [][] 
+ >> Cases_on `r1'` THEN FULL_SIMP_TAC (srw_ss()) [] 
+ >> SRW_TAC [][] 
+ >> METIS_TAC []);
 
 val mapSndDropEq = store_thm
 ("mapSndDropEq",
@@ -1082,10 +1081,11 @@ val mapSndDropEq = store_thm
 ⇒
 ((MAP SND (DROP (1 + LENGTH r1') l)) = r2')``,
 
-Induct_on `l` THEN SRW_TAC [][] THEN
-Cases_on `r1'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
-METIS_TAC [DECIDE ``SUC t = 1 + t``]);
+Induct_on `l` THEN SRW_TAC [][] 
+ >> Cases_on `r1'` THEN FULL_SIMP_TAC (srw_ss()) [] 
+ >> SRW_TAC [][] 
+ >> rw_tac list_ss []
+ >> METIS_TAC [DECIDE ``SUC t = 1 + t``]);
 
 val flatMem = store_thm
 ("flatMem",
@@ -1133,17 +1133,18 @@ FULL_SIMP_TAC (srw_ss()) [] THENL[
 
 val mapDrop = store_thm
 ("mapDrop",
-``∀l n.MAP SND (DROP n l) = DROP n (MAP SND l)``,
+``∀l n. MAP SND (DROP n l) = DROP n (MAP SND l)``,
 
-Induct_on `l` THEN SRW_TAC [][]);
+Induct_on `l` THEN rw_tac list_ss []
+  >> Cases_on `n`
+  >> rw_tac list_ss []);
 
 val dropLen = store_thm
 ("dropLen",
 ``∀l l1 l2.(l = l1 ++ l2) ∧ (LENGTH l1 ≤ LENGTH l) ⇒
    (DROP (LENGTH l1) l = l2)`` ,
 
-Induct_on `l` THEN SRW_TAC [][] THEN1
-METIS_TAC [LENGTH_NIL,APPEND_NIL] THEN
+Induct_on `l` THEN SRW_TAC [][] THEN
 Cases_on `l1` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) []);
 
@@ -1208,7 +1209,6 @@ val addFrontMem = store_thm
 
 Induct_on `l` THEN SRW_TAC [][addFront] THEN
 METIS_TAC []);
-
 
 val addFrontLast = store_thm
 ("addFrontLast",
@@ -1363,18 +1363,14 @@ METIS_TAC [BUTFIRSTN_LENGTH_APPEND]);
 
 val listsecLast = store_thm
 ("listsecLast",
-``∀l.
-(LAST l =p ++ ml ++ s) ∧ (l≠[]) ∧
-(∀e.MEM e l ⇒ ∃m. m ≠ [] ∧ (e = p ++ m ++ s))
-⇒
-(LAST (MAP (listsec p s) l) = ml)``,
+``!l. (LAST l =p ++ ml ++ s) ∧ (l≠[]) ∧
+       (∀e.MEM e l ⇒ ∃m. m ≠ [] ∧ (e = p ++ m ++ s))
+       ==>
+      (LAST (MAP (listsec p s) l) = ml)``,
 
 Induct_on `l` THEN SRW_TAC [][] THEN
 Cases_on `l=[]`THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][listsecPfxSfx] THEN1
-METIS_TAC [APPEND_11,APPEND_ASSOC] THEN
-`(LAST l = p ++ ml ++ s)` by METIS_TAC [APPEND,last_append] THEN
-METIS_TAC [MAP_EQ_NIL,APPEND,last_append]);
+SRW_TAC [][listsecPfxSfx]);
 
 val addFrontListsec = store_thm
 ("addFrontListsec",

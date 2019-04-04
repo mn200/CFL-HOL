@@ -367,24 +367,23 @@ val distinctldNts = Define
 
 val memldNts = store_thm
 ("memldNts",
-``∀t.MEM (NTS A) (ldNts t) ⇔ ∃e.MEM e t ∧ MEM (NTS A) e``,
+``∀t. MEM (NTS A) (ldNts t) ⇔ ∃e.MEM e t ∧ MEM (NTS A) e``,
 
 SRW_TAC [][ldNts] THEN
 FULL_SIMP_TAC (srw_ss()) [FILTER_FLAT,EQ_IMP_THM] THEN
 SRW_TAC [][]
-THENL[
-      `∃e'. MEM e' (MAP (FILTER isNonTmnlSym) t) ∧ MEM (NTS A) e'`
-      by METIS_TAC [flat_map_mem] THEN
-      FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
-      SRW_TAC [][] THEN
-      FULL_SIMP_TAC (srw_ss()) [MEM_FILTER] THEN
-      SRW_TAC [][] THEN
-      METIS_TAC [],
+  >- (`∃e'. MEM e' (MAP (FILTER isNonTmnlSym) t) ∧ MEM (NTS A) e'`
+         by METIS_TAC [flat_map_mem] THEN
+       FULL_SIMP_TAC (srw_ss()) [MEM_MAP] THEN
+       SRW_TAC [][] THEN
+       FULL_SIMP_TAC (srw_ss()) [MEM_FILTER] THEN
+       SRW_TAC [][] THEN
+       METIS_TAC [])
 
-      FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+  >- (FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
       SRW_TAC [][FILTER_APPEND,isNonTmnlSym_def] THEN
-      METIS_TAC [rgr_r9eq,MEM_FLAT]
-      ]);
+      METIS_TAC [rgr_r9eq,MEM_FLAT,APPEND_ASSOC])
+);
 
 
 val memdistNtsApp = store_thm
@@ -556,7 +555,6 @@ SRW_TAC [][] THEN
 METIS_TAC [memdistNtsApp, APPEND, APPEND_ASSOC]);
 
 
-
 val memdist' = store_thm
 ("memdist'",
 ``∀dl.distElemSubset ((p++pfx++rhs++s2++s2')::l) dl ⇒
@@ -574,20 +572,11 @@ FULL_SIMP_TAC (srw_ss()) [distElemSubset] THEN
 SRW_TAC [][] THEN
 METIS_TAC [memdistNtsApp, APPEND, APPEND_ASSOC]);
 
-
-
 val distesubaddlist = store_thm
 ("distesubaddlist",
 ``distElemSubset dl l ⇒ distElemSubset (p++dl++s) l``,
-SRW_TAC [][distElemSubset] THEN
-FULL_SIMP_TAC (srw_ss()) [distinctldNts,ldNts] THEN
-Q_TAC SUFF_TAC `MEM e (FILTER isNonTmnlSym (FLAT (p ++ dl ++ s)))` THEN1
-METIS_TAC [rmd_r2] THEN
-`MEM e (FILTER isNonTmnlSym (FLAT l))` by METIS_TAC [rmd_r2] THEN
-SRW_TAC [][FLAT_APPEND,FILTER_APPEND] THEN
-METIS_TAC [rmd_r2]);
-
-
+rw_tac list_ss [distElemSubset,distinctldNts,ldNts,
+                FILTER_APPEND,rmd_mem_list,GSYM rmd_r2])
 
 val distesub1 = store_thm
 ("distesub1",

@@ -3,6 +3,19 @@ open HolKernel boolLib bossLib Parse boolSimps
 open stringTheory containerTheory optionTheory
 open pred_setTheory listTheory arithmeticTheory Defn
 
+infix byA;
+val op byA = BasicProvers.byA;
+
+val qpat_k_assum = Lib.C qpat_x_assum kall_tac;
+
+fun qspec q th = th |> Q.SPEC q 
+fun qspec_arith q th = qspec q th |> SIMP_RULE arith_ss [];
+
+val var_eq_tac = rpt BasicProvers.VAR_EQ_TAC;
+
+val decide = bossLib.DECIDE;
+val qdecide = decide o Parse.Term;
+
 val _ = new_theory "boolLemmas";
 
 val if_rw_SOMEeqSOME = store_thm ("if_rw_SOMEeqSOME",
@@ -18,7 +31,6 @@ val list_case_rwt = store_thm("list_case_rwt",
 
     (((case x of [] => y | h::t => NONE) = SOME z) = ((x = []) /\ (y = SOME z)))``,
   Cases_on `x` THEN SRW_TAC [][] );
-
 
 val option_r1 = store_thm ("option_r1",
 ``!f.~(f=NONE) ==> (x=THE f) ==> ( SOME x = f)``,
@@ -52,18 +64,19 @@ val all_distinct_lemma2 = prove(
 ``FINITE { x | P x } ==>
 { l | EVERY P l /\ ALL_DISTINCT l } SUBSET
 { l | EVERY P l /\ LENGTH l <= CARD { x | P x } }``,
-STRIP_TAC THEN SIMP_TAC (srw_ss()) [SUBSET_DEF] THEN
-Induct THEN SRW_TAC [][] THEN
-`LIST_TO_SET x SUBSET { x | P x}` by METIS_TAC [every_list_to_set] THEN
-`~(LIST_TO_SET x = { x | P x})`
-by (STRIP_TAC THEN
-`~(h IN {x | P x})` by METIS_TAC [IN_LIST_TO_SET] THEN
-FULL_SIMP_TAC (srw_ss()) []) THEN
-`LIST_TO_SET x PSUBSET { x | P x}` by METIS_TAC [PSUBSET_DEF] THEN
-`CARD (LIST_TO_SET x) < CARD { x | P x}` by METIS_TAC [CARD_PSUBSET] THEN
-`LENGTH x <= CARD { x | P x}` by METIS_TAC [] THEN
-`LENGTH x = CARD (LIST_TO_SET x)` by METIS_TAC [all_distinct_lemma] THEN
-DECIDE_TAC);
+STRIP_TAC THEN 
+  SIMP_TAC (srw_ss()) [SUBSET_DEF] THEN
+  Induct THEN 
+  SRW_TAC [][] THEN
+  `LIST_TO_SET x SUBSET { x | P x}` by METIS_TAC [every_list_to_set] THEN
+  `~(LIST_TO_SET x = { x | P x})`
+    by (STRIP_TAC THEN
+         FULL_SIMP_TAC (srw_ss()) []) THEN
+  `LIST_TO_SET x PSUBSET { x | P x}` by METIS_TAC [PSUBSET_DEF] THEN
+  `CARD (LIST_TO_SET x) < CARD { x | P x}` by METIS_TAC [CARD_PSUBSET] THEN
+  `LENGTH x <= CARD { x | P x}` by METIS_TAC [] THEN
+  `LENGTH x = CARD (LIST_TO_SET x)` by METIS_TAC [all_distinct_lemma] THEN
+  DECIDE_TAC);
 
 val lemma = store_thm("lemma",
 ``FINITE { x | P x} ==> FINITE {l | EVERY P l /\ ALL_DISTINCT l}``,

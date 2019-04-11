@@ -806,28 +806,29 @@ val slemma12_a_1NT2 = prove(
 SRW_TAC [] [] THEN
 Cases_on `e` THEN
 FULL_SIMP_TAC (srw_ss()) [ruleNonTmnlsAlt] THEN
-Cases_on `LENGTH l' <= 2` THEN FULL_SIMP_TAC (srw_ss()) [] THENL[
-`(LENGTH l' <= 1) ∨ (LENGTH l' = 2)` by DECIDE_TAC THENL[
-`(LENGTH l' = 0) ∨ (LENGTH l' = 1)` by DECIDE_TAC THENL[
-SRW_TAC [] [] THEN `l'=[]` by METIS_TAC [LENGTH_NIL] THEN FULL_SIMP_TAC (srw_ss()) [],
-`∃e.l'=[e]` by METIS_TAC [list_lem1] THEN SRW_TAC [] [] THEN METIS_TAC [sl_l4]],
+Cases_on `LENGTH l' <= 2` THEN FULL_SIMP_TAC (srw_ss()) []
+ >- (`(LENGTH l' <= 1) ∨ (LENGTH l' = 2)` by DECIDE_TAC 
+      >- (`(LENGTH l' = 0) ∨ (LENGTH l' = 1)` by DECIDE_TAC 
+          >- (SRW_TAC [] [] THEN `l'=[]` by METIS_TAC [LENGTH_NIL] 
+               >> FULL_SIMP_TAC (srw_ss()) [])
+          >- (`∃e.l'=[e]` by METIS_TAC [list_lem1] THEN 
+              SRW_TAC [] [] THEN METIS_TAC [sl_l4]))
+      >- (`∃e1 e2.l'=[e1;e2]` by METIS_TAC [list_lem2] THEN
+          SRW_TAC [] [] THEN
+          Cases_on `([e1; e2] = p ++ [NTS t1; NTS t2] ++ s)` THEN
+          METIS_TAC [sl_l5,NULL_EQ_NIL]))
 
-`∃e1 e2.l'=[e1;e2]` by METIS_TAC [list_lem2] THEN
-SRW_TAC [] [] THEN
-Cases_on `([e1; e2] = p ++ [NTS t1; NTS t2] ++ s)` THEN
-METIS_TAC [sl_l5,NULL_EQ_NIL]],
-
-`LENGTH l' >= 3` by DECIDE_TAC THEN
-`∃e1 e2 e3 r.(l'=[e1;e2;e3]++r)` by METIS_TAC [list_lem3] THEN
-`LENGTH (FILTER isNonTmnlSym l') = 0` by METIS_TAC [] THEN
-`(FILTER isNonTmnlSym l') = []` by METIS_TAC [LENGTH_NIL] THEN
-`~(∃m.MEM m l' ∧ isNonTmnlSym m)` by METIS_TAC [filter_l2] THEN
-FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
-`(EVERY isTmnlSym l')` by METIS_TAC [sym_r6,rgr_r9eq] THEN
-Cases_on `l'=p ++ [NTS t1; NTS t2] ++ s` THEN
-SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN METIS_TAC [isTmnlSym_def,isNonTmnlSym_def,sym_r1b]]
-)
+ >- (`LENGTH l' >= 3` by DECIDE_TAC THEN
+     `∃e1 e2 e3 r.(l'=[e1;e2;e3]++r)` by METIS_TAC [list_lem3] THEN
+     `LENGTH (FILTER isNonTmnlSym l') = 0` by rw_tac list_ss [] THEN
+     `~(∃m.MEM m l' ∧ isNonTmnlSym m)` by METIS_TAC [filter_l2] THEN
+     FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
+     `(EVERY isTmnlSym l')` by METIS_TAC [sym_r6,rgr_r9eq] THEN
+     Cases_on `l'=p ++ [NTS t1; NTS t2] ++ s` THEN
+     SRW_TAC [] [] THEN
+     FULL_SIMP_TAC (srw_ss()) [] THEN 
+     METIS_TAC [isTmnlSym_def,isNonTmnlSym_def,sym_r1b])
+);
 
 val lemma12_a = prove
 (``(badTmnlsCount g = 0) ⇒ ~∃g' nt t.trans1Tmnl nt t g g'``,
@@ -861,7 +862,6 @@ SRW_TAC [] [] THENL[
 SRW_TAC [] [ruleTmnlsAlt] THEN  METIS_TAC [isTmnlSym_def,LESS_EQ_SUC_REFL],
 SRW_TAC [] [ruleTmnlsAlt] THEN
 SRW_TAC [] [FILTER_APPEND_DISTRIB,isTmnlSym_def]])
-
 
 val lemma13_aNT = prove(
 ``∀l l' p s nt t.ruleNonTmnls (rule l (p++[TS t]++s)) <= ruleNonTmnls (rule l' (p++[NTS nt]++s))``,
@@ -903,8 +903,6 @@ SRW_TAC [] [FILTER_APPEND_DISTRIB,LENGTH_APPEND,isTmnlSym_def,isNonTmnlSym_def] 
 DECIDE_TAC]]
 )
 
-
-
 val mapSumDelLeq = store_thm
 ("mapSumDelLeq",
 ``∀l.(∀e.MEM e l ⇒ (SUM (MAP f (delete e l)) + f e ≤ SUM (MAP f l)))``,
@@ -921,8 +919,6 @@ THENL[
       SRW_TAC [][] THEN
       RES_TAC THEN FULL_SIMP_TAC (srw_ss()++ARITH_ss) []
       ]);
-
-
 
 
 val lemma6_a = prove
@@ -1077,7 +1073,6 @@ SRW_TAC [] [] THEN
  DECIDE_TAC) THEN
  DECIDE_TAC);
 
-
 val lemma7_a = prove
 (``∀g g'.trans1Tmnl nt t g g' ⇒ (badTmnlsCount g > 0)``,
 SRW_TAC [] [] THEN
@@ -1130,24 +1125,26 @@ METIS_TAC [lemma15_a]);
 val finiteNts = prove(
 ``∀s.FINITE s ⇒ ∀g.(s=LIST_TO_SET (rules g)) ⇒ FINITE (nonTerminals g)``,
 HO_MATCH_MP_TAC FINITE_INDUCT THEN
-SRW_TAC [] [] THENL[
-Cases_on `g`  THEN
-SRW_TAC [] [nonTerminals_def] THEN
-FULL_SIMP_TAC (srw_ss()) [rules_def] THEN METIS_TAC [MEM],
+SRW_TAC [] [] 
+ >- (Cases_on `g`  THEN
+     SRW_TAC [] [nonTerminals_def] THEN
+     FULL_SIMP_TAC (srw_ss()) [rules_def] THEN METIS_TAC [MEM])
 
-Cases_on `g`  THEN
-SRW_TAC [] [nonTerminals_def] THEN
-FULL_SIMP_TAC (srw_ss()) [rules_def] THEN
-Cases_on `x` THEN
-`FINITE (LIST_TO_SET l)` by METIS_TAC [finiteLists] THEN
-SRW_TAC [] [rule_nonterminals_def] THEN
-`{nt | isNonTmnlSym nt ∧ MEM nt l'} = {nt | isNonTmnlSym nt ∧ nt IN (LIST_TO_SET l')}`
-    by SRW_TAC [] [SET_TO_LIST_IN_MEM] THEN
-ASM_REWRITE_TAC [] THEN
-`{nt | isNonTmnlSym nt ∧ nt IN (LIST_TO_SET l')} SUBSET (LIST_TO_SET l')` by FULL_SIMP_TAC (srw_ss()) [SUBSET_DEF]  THEN
-METIS_TAC [SUBSET_FINITE, FINITE_LIST_TO_SET]]
+ >- (Cases_on `g`  THEN
+     SRW_TAC [] [nonTerminals_def] THEN
+     FULL_SIMP_TAC (srw_ss()) [rules_def] THEN
+     Cases_on `x` THEN
+    `FINITE (LIST_TO_SET l)` by METIS_TAC [finiteLists] THEN
+    SRW_TAC [] [rule_nonterminals_def] THEN
+    `{nt | isNonTmnlSym nt ∧ MEM nt l'} = 
+     {nt | isNonTmnlSym nt ∧ nt IN (LIST_TO_SET l')}`
+       by SRW_TAC [] [SET_TO_LIST_IN_MEM] THEN
+    POP_ASSUM SUBST_ALL_TAC THEN
+    `{nt | isNonTmnlSym nt ∧ nt IN (LIST_TO_SET l')} SUBSET 
+     (LIST_TO_SET l')` 
+       by FULL_SIMP_TAC (srw_ss()) [SUBSET_DEF] THEN
+    METIS_TAC [SUBSET_FINITE, FINITE_LIST_TO_SET])
 );
-
 
 val finiteNts2str = prove(
 ``∀s.FINITE s ⇒ ∀g.(s=(nonTerminals g))
@@ -1197,13 +1194,19 @@ FULL_SIMP_TAC (srw_ss()) [trans1Tmnl] THEN
 `~(NTS nt IN nonTerminals g)` by METIS_TAC [existsNewNt] THEN
 METIS_TAC [isTmnlSym_def,startSym_def,rules_def]);
 
+val sym_cases = Q.prove
+(`!s. isTmnlSym s \/ isNonTmnlSym s`,
+ Cases >> rw_tac (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def]);
+
+val sym_distinct = Q.prove
+(`!s. isTmnlSym s <=> ~isNonTmnlSym s`,
+ Cases >> rw_tac (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def]);
+
 val noTmnls = prove(
-``∀l r.(ruleTmnls (rule l r) = 0) = ((LENGTH r <= 1) ∨ (EVERY isNonTmnlSym r))``,
-SRW_TAC [] [ruleTmnlsAlt] THEN
-SRW_TAC [] [EQ_IMP_THM] THENL[
-`(FILTER isTmnlSym r) = []` by METIS_TAC [LENGTH_NIL] THEN
-`~(∃e.MEM e r ∧ isTmnlSym e)` by METIS_TAC [filter_l2] THEN METIS_TAC [sym_r7b,rgr_r9eq],
-METIS_TAC [sym_r3b,rgr_r9eq,filter_l2]]);
+``∀l r. (ruleTmnls (rule l r) = 0) <=> 
+         LENGTH r <= 1 ∨ EVERY isNonTmnlSym r``,
+SRW_TAC [] [ruleTmnlsAlt,FILTER_EQ_NIL,sym_distinct] 
+  >> metis_tac[]);
 
 val lemma8_b = prove (
 ``INFINITE (UNIV : 'nts set) ⇒

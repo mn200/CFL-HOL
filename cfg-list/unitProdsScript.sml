@@ -419,8 +419,8 @@ METIS_TAC [RTC_TRANSITIVE,TC_DEF]);
 
 val upgr_r8 = prove(
 ``negr g0 g ⇒ upgr g g' ⇒
-derives g [NTS lhs] [NTS nt] ⇒ derives g [NTS nt] r ⇒
-		    ~(∃n.r=[NTS n]) ⇒ derives g' [NTS lhs] r``,
+  derives g [NTS lhs] [NTS nt] ⇒ derives g [NTS nt] r
+  ⇒ ~(∃n.r=[NTS n]) ⇒ derives g' [NTS lhs] r``,
 
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
@@ -438,22 +438,20 @@ SRW_TAC [][] THEN
 `FINITE (unitProds g)` by METIS_TAC [finiteunitProds] THEN
 `∃ru. set ru = unitProds g` by METIS_TAC [listExists4Set] THEN
 Q.EXISTS_TAC `ru` THEN
-SRW_TAC [][] THEN1
-FULL_SIMP_TAC (srw_ss()) [unitProds] THENL[
+SRW_TAC [][] THEN1 FULL_SIMP_TAC (srw_ss()) [unitProds] 
 
-`rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
-METIS_TAC [res1, RTC_RULES, rules_def, startSym_def, mem_in],
+ >- (`rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
+     METIS_TAC [res1, RTC_RULES, rules_def, startSym_def, mem_in])
 
-SRW_TAC [][allSyms_def] THEN
-`rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
-METIS_TAC [startSym_def, rules_def, slemma1_4, symbol_11, mem_in],
+ >- (SRW_TAC [][allSyms_def] THEN
+     `rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
+     METIS_TAC [startSym_def, rules_def, slemma1_4, symbol_11, mem_in])
 
-SRW_TAC [][allSyms_def] THEN
-`rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
-METIS_TAC [startSym_def, rules_def, slemma1_4, symbol_11, mem_in, APPEND_NIL,
-	   APPEND],
-
-METIS_TAC [mem_in]]);
+ >- (SRW_TAC [][allSyms_def] THEN
+     `rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
+     METIS_TAC [startSym_def, rules_def, slemma1_4, symbol_11, mem_in, 
+                APPEND_NIL,APPEND])
+);
 
 val upgr_r8rgr = prove(
 ``rgr gr g0 ⇒ negr g0 g ⇒ upgr g g' ⇒
@@ -489,10 +487,8 @@ METIS_TAC [startSym_def, rules_def, slemma1_4, symbol_11, mem_in],
 SRW_TAC [][allSyms_def] THEN
 `rule lhs [NTS lhs''] ∈ (unitProds g)` by SRW_TAC [][unitProds] THEN
 METIS_TAC [startSym_def, rules_def, slemma1_4, symbol_11, mem_in, APPEND_NIL,
-	   APPEND],
-
-METIS_TAC [mem_in]]);
-
+	   APPEND]
+]);
 
 
 val upgr_r9 = prove
@@ -506,20 +502,18 @@ SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [upgr, upgr_rules,EXTENSION] THEN
 `rule lhs rhs ∈ nonUnitProds g0 ∨
  rule lhs rhs ∈ newProds g0 (nonUnitProds g0)` by METIS_TAC []
- THENL[
-       Q.EXISTS_TAC `lhs` THEN
+  >- (Q.EXISTS_TAC `lhs` THEN
        SRW_TAC [] [RTC_RULES] THEN
        FULL_SIMP_TAC (srw_ss()) [nonUnitProds] THEN
        MAP_EVERY Q.EXISTS_TAC [`[]`,`[]`,`rhs`,`lhs`] THEN
-       SRW_TAC [] [],
-
-       FULL_SIMP_TAC (srw_ss()) [newProds,allDeps] THEN
+       SRW_TAC [] [])
+  >- (FULL_SIMP_TAC (srw_ss()) [newProds,allDeps] THEN
        Q.EXISTS_TAC `b` THEN
        SRW_TAC [] [] THEN
        `set ru = set ru'` by FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
        FULL_SIMP_TAC (srw_ss()) [nonUnitProds] THEN
-       METIS_TAC [rulesets_the_same_RTC_derives, IN_LIST_TO_SET, rules_def]
-       ]);
+       METIS_TAC [rulesets_the_same_RTC_derives, mem_in, rules_def])
+);
 
 
 val upgr_r10 = prove

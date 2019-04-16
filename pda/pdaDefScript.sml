@@ -6,7 +6,6 @@ listTheory rich_listTheory
 open listLemmasTheory containerLemmasTheory relationLemmasTheory
 
 
-
 val _ = new_theory "pdaDef"
 
 val _ = Globals.linewidth := 60
@@ -622,12 +621,11 @@ THENL[
 	    SRW_TAC [][id_thm]
 	    ],
 
-
       FULL_SIMP_TAC (srw_ss()) [DISJ_IMP_THM, FORALL_AND_THM, pdastk] THEN
       SRW_TAC [][] THEN
       ONCE_REWRITE_TAC [RTC_CASES1] THEN
       DISJ2_TAC THEN
-      Q.PAT_ASSUM `X ⊢ (q,Y,Z) → WW` MP_TAC THEN
+      Q.PAT_X_ASSUM `X ⊢ (q,Y,Z) → WW` MP_TAC THEN
       SRW_TAC [][id_thm]
       THENL[
 	    Q.EXISTS_TAC `(q1,ipfx,s)` THEN
@@ -674,8 +672,6 @@ SRW_TAC [][] THEN
  Q.EXISTS_TAC `ih::p'` THEN
 SRW_TAC [][isSuffix_def, REVERSE_APPEND, IS_PREFIX_APPEND] THEN
 METIS_TAC [APPEND_ASSOC]);
-
-
 
 val frontdlProp = store_thm
 ("frontdlProp",
@@ -1027,8 +1023,6 @@ THENL[
 	    ]]);
 
 
-
-
 val pdaTransOnPfxLd = store_thm
 ("pdaTransOnPfxLd",
 ``∀q q' ipfx isfx spfx ssfx.
@@ -1169,9 +1163,6 @@ THENL[
 	    FULL_SIMP_TAC (srw_ss()) [] THEN
 	    METIS_TAC [APPEND_ASSOC, APPEND_11]
 	    ]]);
-
-
-
 
 val stackRedGen = store_thm
 ("stackRedGen",
@@ -1491,8 +1482,6 @@ THENL[
        FULL_SIMP_TAC (srw_ss()) [] THEN
        `LENGTH s1 = 0` by DECIDE_TAC THEN
        METIS_TAC [LENGTH_NIL,APPEND])]);
-
-
 
 val lem1 = store_thm
 ("lem1",

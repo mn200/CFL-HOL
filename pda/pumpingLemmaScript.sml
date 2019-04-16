@@ -506,7 +506,6 @@ SRW_TAC [][] THEN
 SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]);
 
-
 val ldSplitDeriv = store_thm
 ("ldSplitDeriv",
 ``∀x y v pfx sfx.
@@ -634,10 +633,10 @@ THENL[
 		    FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
 		    `t'' = []` by METIS_TAC [rtc2listRtcldTmnls] THEN
 		    SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 		    FIRST_X_ASSUM (Q.SPECL_THEN [`[]`,`h`,`B`,`s2`,`v`,`w`,
 						`(h ++ NTS n::NTS n'::s2)::
 						(MAP (addFront h) t' ++
@@ -653,10 +652,10 @@ THENL[
 				    EVERY_APPEND] THEN
 		      FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN1
 		     METIS_TAC [NOT_EVERY] THEN
-		     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		     Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		     Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		     Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		     Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 		     FIRST_X_ASSUM (Q.SPECL_THEN
 				    [`(h ++ NTS n::NTS n'::s2)::
 				     (MAP (addFront h) t')`,`MAP (addFront h) s1`]
@@ -684,10 +683,10 @@ THENL[
 		   by METIS_TAC [] THEN
 		   FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
 		   SRW_TAC [][] THEN
-		   Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		   Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		   Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		   Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		   Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		   Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		   Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		   Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 		   FIRST_X_ASSUM (Q.SPECL_THEN
 				  [`(h ++ [NTS lhs] ++ s2)::(MAP (addFront h) t'')`,
 				   `h ++ tsl`,`B`,`sfx`,`v`,`w`,
@@ -704,16 +703,16 @@ THENL[
 			 SPOSE_NOT_THEN ASSUME_TAC THEN
 			 FULL_SIMP_TAC (srw_ss()) [] THEN
 			 SRW_TAC [][] THEN
-			 Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-			 Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-			 Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-			 Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+			 Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+			 Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+			 Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+			 Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 			 FIRST_X_ASSUM (Q.SPECL_THEN [`MAP (addFront h) s0`,
 						      `MAP (addFront h) s1`] MP_TAC) THEN
 			 SRW_TAC [][] THEN
 			 SPOSE_NOT_THEN ASSUME_TAC THEN SRW_TAC [][] THEN1
 			 METIS_TAC [leftmostAddFront', existsThrice, NOT_EVERY] THEN
-			 Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+			 Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 			 FIRST_X_ASSUM (Q.SPECL_THEN
 					[`t''`,`tsl`,`B`,`sfx`,`v`,`w`,
 					 `s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx] ++ s1`] MP_TAC) THEN
@@ -808,10 +807,10 @@ THENL[
 
 
 		    FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 		    Q.ABBREV_TAC `z=(LAST ((pfx ++ [NTS n; NTS n'] ++ pfx')::
 					   (t'' ++ [pfx ++ v ++ [NTS B] ++ w ++ pfx']
 					    ++ s1)))` THEN
@@ -824,9 +823,9 @@ THENL[
 				   MP_TAC) THEN
 		    SRW_TAC [][] THEN1
 		    METIS_TAC [NOT_EVERY] THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 		    FIRST_X_ASSUM (Q.SPECL_THEN
 				   [`(pfx ++ [NTS n; NTS n'] ++ pfx' ++ h)::
 				    MAP (λl. l ++ h) t''`,
@@ -848,15 +847,15 @@ THENL[
 	     Q.ABBREV_TAC `s1' =
 	    MAP (addFront (LAST (t'' ++ [tsl ++ [NTS B] ++ sfx'] ++ s0 ++
 				 [tsl ++ v ++ [NTS B] ++ w ++ sfx'] ++s1))) t` THEN
-	     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-	     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+	     Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+	     Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 	     FIRST_X_ASSUM (Q.SPECL_THEN
 			    [`t''`,`tsl`,`B`,`sfx'`,`v`,`w`,
 			     `s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx'] ++ s1`]
 			    MP_TAC) THEN
 	     SRW_TAC [][] THEN1
 	     METIS_TAC [NOT_EVERY] THEN
-	     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+	     Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 	     FIRST_X_ASSUM (Q.SPECL_THEN [`s0`,`s1`] MP_TAC) THEN
 	     SRW_TAC [][] THEN
 	     METIS_TAC [NOT_EVERY]) THEN1
@@ -952,10 +951,10 @@ THENL[
 		    SRW_TAC [][] THEN
 		    `t=[]` by METIS_TAC [rtc2listRtcldTmnls] THEN
 		    SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 		    FIRST_X_ASSUM (Q.SPECL_THEN
 				   [`[]`,`h++sfx`,`B`,`s2`,`v`,`w`,
 				    `(h ++ sfx ++ [NTS n; NTS n'] ++ s2)::
@@ -965,9 +964,9 @@ THENL[
 		    SRW_TAC [][] THEN1
 		    METIS_TAC [NOT_EVERY] THEN1
 		    METIS_TAC [NOT_EVERY] THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
-		    Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
+		    Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 		    FIRST_X_ASSUM (Q.SPECL_THEN
 				   [`(h ++ sfx ++ [NTS n; NTS n'] ++ s2)::
 				    MAP (addFront h) t''`,
@@ -982,7 +981,7 @@ THENL[
 		    METIS_TAC [APPEND_11, APPEND_ASSOC, NOT_EVERY]]) THEN
 
 	     Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [addLast_def] THEN
-	     Q.PAT_ASSUM `∀e.P e` MP_TAC THEN
+	     Q.PAT_X_ASSUM `∀e.P e` MP_TAC THEN
 	     FIRST_X_ASSUM (Q.SPECL_THEN
 			    [`t''`,`tsl`,`B`,`sfx'`,`v`,`w`,
 			     `s0 ++ [tsl ++ v ++ [NTS B] ++ w ++ sfx'] ++ s1`]
@@ -1174,8 +1173,8 @@ THENL[
 		    ]) THEN
 
 	     FULL_SIMP_TAC (srw_ss()) [addLast_def] THEN
-	     Q.PAT_ASSUM `∀e.P` MP_TAC THEN
-	     Q.PAT_ASSUM `∀e.P` MP_TAC THEN
+	     Q.PAT_X_ASSUM `∀e.P` MP_TAC THEN
+	     Q.PAT_X_ASSUM `∀e.P` MP_TAC THEN
 	     FIRST_X_ASSUM (Q.SPECL_THEN
 			    [`t'''`,`tsl`,`B`,`sfx`,`v`,`w`,
 			     `s0 ++[tsl ++ v ++ [NTS B] ++ w ++ sfx] ++ s1`]
@@ -1273,7 +1272,7 @@ THENL[
 		    ]) THEN
 
 	     FULL_SIMP_TAC (srw_ss()) [addLast_def] THEN
-	     Q.PAT_ASSUM `∀e.P` MP_TAC THEN
+	     Q.PAT_X_ASSUM `∀e.P` MP_TAC THEN
 	     FIRST_X_ASSUM (Q.SPECL_THEN
 			    [`t'''`,`tsl`,`B`,`sfx`,`v`,`w`,
 			     `s0 ++[tsl ++ v ++ [NTS B] ++ w ++ sfx] ++ s1`]
@@ -1338,7 +1337,7 @@ SRW_TAC [][] THEN
 `∀tsl e sfx.LENGTH (tsl ++ [e] ++ sfx) + 1 = LENGTH tsl + 1 + LENGTH sfx + 1`
       by SRW_TAC [][] THEN
 
-Q.PAT_ASSUM `lderives g ⊢ h::[e1; e2]::t' ◁ [NTS A] → z` MP_TAC THEN
+Q.PAT_X_ASSUM `lderives g ⊢ h::[e1; e2]::t' ◁ [NTS A] → z` MP_TAC THEN
 
 `∃dl1 dl2 x' y'.
 splitDerivProp (g,[e1; e2]::t',z) (dl1,[e1],x') (dl2,[e2],y')`
@@ -1531,35 +1530,45 @@ METIS_TAC [lderives_same_append_left]);
 val listsecldSfxNil = store_thm
 ("listsecldSfxNil",
 ``∀dl x.
-lderives g ⊢ dl ◁ (p++x) → (p++y) ∧ EVERY isTmnlSym p
-⇒
-lderives g ⊢ MAP (listsec p []) dl ◁
-listsec p [] (p++x) → listsec p [] (p++y)``,
-
-Induct_on `dl` THEN SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-Cases_on `dl` THEN SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [listsecDropNilSfx] THEN
-FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
-SRW_TAC [][] THEN
-
-(IMP_RES_TAC twoListAppEq THEN SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def] THEN
-IMP_RES_TAC twoListAppEq THEN SRW_TAC [][] THEN1
-METIS_TAC [APPEND_ASSOC,listsecDropNilSfx,APPEND_NIL,APPEND_ASSOC,APPEND,
-	   EVERY_DEF,EVERY_APPEND] THEN1
-METIS_TAC [APPEND_ASSOC,listsecDropNilSfx,APPEND_NIL,APPEND_ASSOC,APPEND,
-	   EVERY_DEF,EVERY_APPEND]  THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
-`s1''=[]`  by (Cases_on `s1''` THEN SRW_TAC [][] THEN
-	       Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
-SRW_TAC [][] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [][] THEN
-METIS_TAC [APPEND_ASSOC,listsecDropNilSfx,APPEND_NIL,APPEND_ASSOC,APPEND,
-	   EVERY_DEF,EVERY_APPEND]));
-
+     lderives g ⊢ dl ◁ (p++x) → (p++y) ∧ EVERY isTmnlSym p
+   ⇒
+     lderives g ⊢ MAP (listsec p []) dl ◁ listsec p [] (p++x) → listsec p [] (p++y)``,
+let 
+ val tac = 
+  IMP_RES_TAC twoListAppEq THEN SRW_TAC [][] THEN
+  FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def] THEN
+  IMP_RES_TAC twoListAppEq THEN SRW_TAC [][] 
+    >- METIS_TAC [listsecDropNilSfx,
+                   APPEND_NIL,APPEND_ASSOC,APPEND,EVERY_DEF,EVERY_APPEND]
+    >- METIS_TAC [APPEND_ASSOC,listsecDropNilSfx,APPEND_NIL,
+                  APPEND,EVERY_DEF,EVERY_APPEND]
+    >- (FULL_SIMP_TAC (srw_ss()) [] THEN
+        SRW_TAC [][] THEN
+        `s1''=[]`  
+         by (Cases_on `s1''` THEN SRW_TAC [][] THEN
+             Cases_on `h` THEN 
+             FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]) THEN
+        SRW_TAC [][] THEN
+        FULL_SIMP_TAC (srw_ss()) [] THEN
+        SRW_TAC [][] THEN
+        METIS_TAC [listsecDropNilSfx,
+          APPEND_NIL,APPEND_ASSOC,APPEND,EVERY_DEF,EVERY_APPEND])
+in 
+  Induct_on `dl` THEN SRW_TAC [][] THEN
+  FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
+  Cases_on `dl` THEN SRW_TAC [][] THEN
+  FULL_SIMP_TAC (srw_ss()) [listsecDropNilSfx] THEN
+  FULL_SIMP_TAC (srw_ss()) [lderives_def] THEN
+  SRW_TAC [][] 
+ >- tac
+ >- tac
+ >- (Q_TAC SUFF_TAC `LAST (MAP (listsec p []) ((s1 ++ rhs ++ s2)::t)) = y`
+       >- metis_tac [MAP] >>
+     Q_TAC SUFF_TAC `listsec p [] (LAST ((s1 ++ rhs ++ s2)::t)) = y`
+       >- metis_tac [LAST_MAP,list_distinct] >>
+     metis_tac [listsecDropNilSfx])
+end
+);
 
 val memListDistSub = store_thm
 ("memListDistSub",

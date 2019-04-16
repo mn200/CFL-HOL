@@ -1,4 +1,4 @@
-open HolKernel boolLib bossLib Parse BasicProvers Defn
+open HolKernel boolLib ;
 
 open pumpingLemmaTheory pumpingLemmaTreeTheory
 

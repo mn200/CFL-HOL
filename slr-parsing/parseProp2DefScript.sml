@@ -1,13 +1,14 @@
 open HolKernel boolLib bossLib Parse BasicProvers Defn
 
 open listTheory containerTheory pred_setTheory arithmeticTheory
-relationTheory markerTheory boolSimps optionTheory
+     relationTheory markerTheory boolSimps optionTheory
 
 open symbolDefTheory grammarDefTheory boolLemmasTheory listLemmasTheory
-parseTreeTheory yaccDefTheory parseProp1DefTheory
+     parseTreeTheory yaccDefTheory parseProp1DefTheory
 
 
 val _ = new_theory "parseProp2Def";
+
 val _ = diminish_srw_ss ["list EQ"];
 
 (* 2. All the trees associated with nonterminal symbols on the stack
@@ -21,10 +22,10 @@ val stacktreeleaves = Define
 val leaves_eq_inv = Define 
 `leaves_eq_inv orig sl stl = (stacktreeleaves stl ++ sl = orig)`;
 
-
 val addrule_stkl = store_thm ("revTakeMap",
-``∀p l r nt ptl.(addRule p (rule l r) = SOME (Node nt ptl)) ⇒ 
-(ptl = REVERSE (MAP SND (THE (take (LENGTH r) p))))``,
+``∀p l r nt ptl.
+      (addRule p (rule l r) = SOME (Node nt ptl)) ⇒ 
+      (ptl = REVERSE (MAP SND (THE (take (LENGTH r) p))))``,
 
 SRW_TAC [] [addRule_def, LET_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [buildTree_def, LET_THM] THEN
@@ -32,10 +33,11 @@ Cases_on `take (LENGTH (REVERSE r)) (MAP (ptree2Sym o SND) p)` THEN FULL_SIMP_TA
 Cases_on `REVERSE r = x` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 `LENGTH r = LENGTH x` by METIS_TAC [rev_len] THEN
 `(LENGTH p) = LENGTH (MAP (ptree2Sym o SND) p)` by METIS_TAC [LENGTH_MAP] THEN
-`~( take (LENGTH x) (MAP (ptree2Sym o SND) p) = NONE)` by FULL_SIMP_TAC (srw_ss()) [] THEN
+`~(take (LENGTH x) (MAP (ptree2Sym o SND) p) = NONE)` by FULL_SIMP_TAC (srw_ss()) [] THEN
 `(LENGTH p) >= LENGTH x ` by METIS_TAC [take_len] THEN
-METIS_TAC [revTakeMap, takeCoMap]);
+METIS_TAC [revTakeMap, takeCoMap,REVERSE_11]);
 
+    
 val addrule_ntLf = store_thm ("addrule_ntLf",
 ``(addRule p (rule l r) = SOME x) ⇒ ~(isLeaf x)``,
 SRW_TAC [] [addRule_def, LET_THM] THEN
@@ -57,7 +59,6 @@ Cases_on `h` THEN
 Cases_on `q` THEN Cases_on `r` THEN 
 SRW_TAC [] [stl_append, stacktreeleaves, leaves_def]
 );
-
 
 val addrule_len = store_thm("addrule_len", 
 ``(addRule sl (rule l r) = SOME x) ⇒ ((LENGTH sl) >= LENGTH r)``,
@@ -110,7 +111,6 @@ Induct_on `stl` THEN SRW_TAC [] [stacktreeleaves, MAP, FLAT] THEN
 Cases_on `h` THEN Cases_on `q` THEN 
 FULL_SIMP_TAC (srw_ss()) [stacktreeleaves, leaves_def]
 );
-
 
 val red_stkleaves = store_thm ("red_stkleaves", 
 ``(doReduce m (sym::rst,stl,(s, itl)::csl) r = 

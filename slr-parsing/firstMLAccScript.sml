@@ -1,6 +1,8 @@
 open HolKernel boolLib Parse bossLib
 
-open regexpTheory grammarDefTheory
+(* open regexpTheory *)
+	       
+open grammarDefTheory
 open listLemmasTheory
 open containerTheory pred_setTheory listTheory relationTheory
 
@@ -11,23 +13,20 @@ val _ = set_trace "Unicode" 1
 val _ = Globals.linewidth := 60
 
 val firstSet_def = Define
-`firstSet g sym =
-{(TS fst) | ?rst.RTC (derives g) [sym] ([TS fst]++rst)}`
+   `firstSet g sym = {TS fst | ?rst. RTC (derives g) [sym] ([TS fst]++rst)}`
 
 val getRhsNilMem = store_thm ("getRhsNilMem",
-``(getRhs nt (rules g) =[]) = ~(?r.MEM (rule nt r) (rules g))``,
-SRW_TAC [] [EQ_IMP_THM] THEN
-Cases_on `g` THEN
-FULL_SIMP_TAC (srw_ss()) [rules_def] THEN
-Induct_on `l` THEN
-SRW_TAC [] [getRhs_def] THEN
-SRW_TAC [] [] THEN
-Cases_on `h` THEN
-FULL_SIMP_TAC (srw_ss()) [getRhs_def] THEN
-Cases_on `nt=s` THEN
-SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-METIS_TAC [getRhsDistrib,APPEND,APPEND_eq_NIL])
+``(getRhs nt (rules g) = []) <=> ~?r. MEM (rule nt r) (rules g)``,
+ SRW_TAC [] [EQ_IMP_THM] THEN
+ Cases_on `g` THEN
+ FULL_SIMP_TAC (srw_ss()) [rules_def] THEN
+ Induct_on `l` THEN
+ SRW_TAC [] [getRhs_def] THEN
+ Cases_on `h`
+  >- (pop_assum mp_tac >> rw_tac (srw_ss()) [getRhs_def])
+  >- (pop_assum mp_tac >> rw_tac (srw_ss()) [getRhs_def])
+  >- (rw_tac list_ss [getRhs_def] >> metis_tac[])
+);
 
 val getRhsNilRtc = store_thm ("getRhsNilRtc",
 ``(getRhs nt (rules g) = []) ==>
@@ -43,12 +42,14 @@ val firstSetList_def = Define
       {TS fst | ?rst. RTC (derives g) l ([TS fst] ++ rst)}`
 
 
-val firstSetAML_defn = Hol_defn "firstSetAML" `
+val firstSetAML_def = 
+ tDefine 
+  "firstSetAML" `
   (firstSetAML g acc sn [] = acc) ∧
   (firstSetAML g acc sn (sym :: rest) =
      case sym of
-        TS t -> sym INSERT acc
-     || NTS N -> let
+     | TS t => sym INSERT acc
+     | NTS N => let
                   acc' = if nullableML g [][sym] then firstSetAML g acc sn rest
                          else acc
         in
@@ -57,11 +58,8 @@ val firstSetAML_defn = Hol_defn "firstSetAML" `
             FOLDL (λacc rhs. firstSetAML g acc (sym::sn) rhs)
                   acc'
                   (getRhs N (rules g)))
-`;
-
-val (firstSetAML_def, firstSetAML_ind) = Defn.tprove(
-  firstSetAML_defn,
-  WF_REL_TAC `
+ `
+(WF_REL_TAC `
     inv_image (measure (λ(g,sn). CARD (nonTerminals g DIFF LIST_TO_SET sn))
                 LEX
                measure LENGTH)
@@ -102,7 +100,9 @@ val (firstSetAML_def, firstSetAML_ind) = Defn.tprove(
     `~(CARD (nonTerminals g DIFF set sn)=0)`
        by METIS_TAC [CARD_EQ_0,FINITE_DIFF] THEN
     DECIDE_TAC
-  ])
+]);
+
+val firstSetAML_ind = fetch "-" "firstSetAML_ind";
 
 val RTC_derives_tokfirst = store_thm(
   "RTC_derives_tokfirst",
@@ -161,15 +161,16 @@ val accumulatingset_FOLDL = prove(
 val firstSetAML_acc = store_thm(
   "firstSetAML_acc",
   ``∀g a sn r b. firstSetAML g (a ∪ b) sn r = firstSetAML g a sn r ∪ b``,
-  HO_MATCH_MP_TAC firstSetAML_ind THEN
-  SIMP_TAC (srw_ss()) [firstSetAML_def] THEN REPEAT GEN_TAC THEN
-  `(∃tok. sym = TS tok) ∨ (∃N. sym = NTS N)`
-      by (Cases_on `sym` THEN SRW_TAC [][]) THEN
-  SRW_TAC [][LET_THM] THENL [
-    SRW_TAC [][EXTENSION] THEN METIS_TAC [],
-    MATCH_MP_TAC accumulatingset_FOLDL THEN METIS_TAC [],
-    MATCH_MP_TAC accumulatingset_FOLDL THEN METIS_TAC []
-  ]);
+  HO_MATCH_MP_TAC firstSetAML_ind THEN rpt strip_tac 
+   >- RW_TAC (srw_ss()) [firstSetAML_def]
+   >- (`(∃tok. sym = TS tok) ∨ (∃N. sym = NTS N)`
+          by (Cases_on `sym` THEN SRW_TAC [][]) THEN
+       SRW_TAC [][LET_THM,firstSetAML_def]
+       >- (RW_TAC (srw_ss()) [EXTENSION] THEN METIS_TAC [])
+       >- (MATCH_MP_TAC accumulatingset_FOLDL THEN METIS_TAC [])
+       >- (MATCH_MP_TAC accumulatingset_FOLDL THEN METIS_TAC [])
+      )
+);
 
 val firstSetAML_FOLDL = prove(
   ``∀l acc.

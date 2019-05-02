@@ -1,33 +1,44 @@
-open HolKernel boolLib bossLib Parse BasicProvers Defn
+open HolKernel boolLib bossLib Parse BasicProvers Defn;
 
 open listTheory containerTheory pred_setTheory arithmeticTheory
-relationTheory markerTheory containerTheory pairTheory boolSimps
-optionTheory rich_listTheory
+     relationTheory markerTheory containerTheory pairTheory boolSimps
+     optionTheory rich_listTheory;
 
 open symbolDefTheory parseTreeTheory grammarDefTheory listLemmasTheory
-firstSetDefTheory followSetDefTheory containerLemmasTheory
-setLemmasTheory boolLemmasTheory whileLemmasTheory relationLemmasTheory
+     firstSetDefTheory followSetDefTheory containerLemmasTheory
+     setLemmasTheory boolLemmasTheory whileLemmasTheory relationLemmasTheory
+     grammarMLTheory;
 
 val _ = new_theory "yaccDef"
+
+infix byA;
+val op byA = BasicProvers.byA;
+
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
 
 
 val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];
 
-val _ = Hol_datatype 
-`item = item of 'nts => ('nts,'ts) symbol list # ('nts,'ts) symbol list`; 
+val _ = 
+  Hol_datatype 
+    `item = item of 'nts => ('nts,'ts) symbol list # ('nts,'ts) symbol list`; 
 
 val _ = type_abbrev ("state", ``:('nts,'ts) item list``);
 
-val _ = Hol_datatype `action = 
-    REDUCE of ('nts,'ts) rule | GOTO of ('nts,'ts) state | NA`;
+val _ = 
+  Hol_datatype 
+    `action = REDUCE of ('nts,'ts) rule 
+            | GOTO of ('nts,'ts) state 
+            | NA`;
 
 
 val getItems = Define `
-(getItems [] s = []) ∧ 
-(getItems ((rule l r)::rs) s = if (l=s) then (item l ([],r)::getItems rs s) 
-			       else getItems rs s)`;
+  (getItems [] s = []) ∧ 
+  (getItems ((rule l r)::rs) s = 
+       if (l=s) then 
+          (item l ([],r)::getItems rs s) 
+       else getItems rs s)`;
 
 (* iclosure :: grammar -> item list -> item list *)
 val iclosure1 = Define 
@@ -51,15 +62,12 @@ val iclosure1 = Define `(iclosure1 g [] = []) ∧
 val iclosure_defn = Hol_defn 
 "iclosure_defn" 
 `(iclosure g [] = []) ∧
-(iclosure g il = 
-	let
-	    ril = rmDupes il
-	    in
-		let
-		    al = rmDupes (iclosure1 g ril)
-		in 
-		    if ~(LIST_TO_SET ril = LIST_TO_SET al) then iclosure g al
-		    else al)`;
+ (iclosure g il = 
+   let ril = rmDupes il in
+   let al = rmDupes (iclosure1 g ril)
+   in if ~(LIST_TO_SET ril = LIST_TO_SET al) then 
+           iclosure g al
+       else al)`;
 
 
 val closure = Define
@@ -86,8 +94,6 @@ Cases_on `h` THEN Cases_on `p` THEN Cases_on `r` THEN
 FULL_SIMP_TAC (srw_ss()) [iclosure1] THEN
 Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [iclosure1] THEN
 METIS_TAC [rmd_r2_1, MEM, APPEND, CONS, rgr_r9eq, MEM_APPEND]]);
-
-
 
 val iclosure1_not_nil = store_thm ("iclosure1_not_nil", 
 ``∀g x xs.~(iclosure1 g (x::xs) = [])``,
@@ -144,25 +150,22 @@ METIS_TAC [rmd_r2_2, MEM, MEM_APPEND, rules2items_sub]);
 
 
 val iclosure1_before_after_len = store_thm ("iclosure1_before_after_len",
-``∀l.(CARD (set (iclosure1 g l)) > CARD (set l)) ⇒ 
-((CARD (set (rules2Items (rules g)) INTER set (iclosure1 g l)) -
-CARD (set (rules2Items (rules g)) INTER (set l))) > 0)``,
+``∀l. (CARD (set (iclosure1 g l)) > CARD (set l)) ⇒ 
+       ((CARD (set (rules2Items (rules g)) INTER set (iclosure1 g l)) -
+        CARD (set (rules2Items (rules g)) INTER (set l))) > 0)``,
 SRW_TAC [] [] THEN
 `(set l) SUBSET (set (iclosure1 g l))` by METIS_TAC [mem_subset, iclosure1_mem] THEN
-`∃e.~(e IN set l) ∧ (e IN set (iclosure1  g l))` by METIS_TAC [set_neq, FINITE_LIST_TO_SET] THEN
-`MEM e (iclosure1 g l)` by METIS_TAC [IN_LIST_TO_SET] THEN
-`~(MEM e l)` by METIS_TAC [IN_LIST_TO_SET] THEN
+`∃e. ~(e IN set l) ∧ (e IN set (iclosure1  g l))` by METIS_TAC [set_neq, FINITE_LIST_TO_SET] THEN
 `MEM e (rules2Items (rules g))` by METIS_TAC [iclosure1_outmem] THEN
-`e IN set (rules2Items (rules g))` by METIS_TAC [IN_LIST_TO_SET] THEN
-`~(set l= set (iclosure1 g l))` by METIS_TAC [LIST_TO_SET_THM, IN_LIST_TO_SET] THEN
+`~(set l= set (iclosure1 g l))` by METIS_TAC [] THEN
 `(set l) PSUBSET set (iclosure1 g l)` by METIS_TAC [PSUBSET_DEF] THEN
 `CARD (set l) < CARD (set (iclosure1 g l))` by METIS_TAC [CARD_PSUBSET, 
 							  FINITE_LIST_TO_SET] THEN
 `CARD (set l) < CARD (set (iclosure1 g l))` by METIS_TAC [CARD_PSUBSET, 
 							  FINITE_LIST_TO_SET] THEN
-`CARD (set l INTER (set (rules2Items (rules g)))) 
-< CARD (set (iclosure1 g l) INTER (set (rules2Items (rules g))))` 
-by METIS_TAC [card_same_inter, FINITE_LIST_TO_SET] THEN
+`CARD (set l INTER (set (rules2Items (rules g)))) < 
+ CARD (set (iclosure1 g l) INTER (set (rules2Items (rules g))))` 
+  by METIS_TAC [card_same_inter, FINITE_LIST_TO_SET] THEN
 FULL_SIMP_TAC (arith_ss) [INTER_COMM]);
 
 
@@ -234,7 +237,7 @@ val _ = save_thm ("iclosure",iclosure);
 val _ = save_thm ("iclosure_ind",iclosure_ind);
 
 val iclosure_nil = store_thm ("iclosure_nil", 
-``∀g l.~(l=[]) ⇒ ~(iclosure g l = [])``,
+``∀g l. ~(l=[]) ⇒ ~(iclosure g l = [])``,
 HO_MATCH_MP_TAC iclosure_ind THEN SRW_TAC [] [] THEN
 SRW_TAC [] [iclosure, LET_THM] THEN
 METIS_TAC [iclosure1_not_nil, rmDupes_not_nil, len_not_0, LENGTH_NIL]);
@@ -245,9 +248,6 @@ val auggr = Define `(auggr g s eof =
 	    (~ ((TS eof) IN (terminalsML g))))) then 
          SOME (G ([(rule s [NTS (startSym g); TS eof])]++(rules g)) s) 
          else NONE)`;
-
-
-
 
 val lastEof = store_thm ("lastEof",
 ``∀g st eof.(auggr g st eof = SOME ag) ⇒ 
@@ -368,6 +368,7 @@ FULL_SIMP_TAC (srw_ss()) [rderives_def, lreseq] THEN
 SRW_TAC [] [] THEN
 RES_TAC THEN
 FULL_SIMP_TAC (srw_ss()) []);
+
 
 val auggrDerivesNotNil = store_thm ("auggrDerivesNotNil",
 ``∀g st eof.
@@ -640,19 +641,21 @@ Cases_on `h` THEN SRW_TAC [] [initItems, initProds2Items, iclosure] THEN
 (*val moveDot = Define `moveDot its sym = {item s (pfx++[sym],sfx) | item s (pfx,[sym]++sfx) IN its}`*)
 
 
-
-
- val moveDot = Define `(moveDot [] sym = []) ∧
- (moveDot ((item str (a,(s::ss)))::it) sym =  
-if (s=sym) then (item str (a++[s],ss))::moveDot it sym else moveDot it sym) ∧
- (moveDot (_::it) sym = moveDot it sym)`;
+val moveDot = 
+  Define 
+   `(moveDot [] sym = []) ∧
+    (moveDot ((item str (a,(s::ss)))::it) sym =  
+       if (s=sym) then 
+         (item str (a++[s],ss))::moveDot it sym 
+       else moveDot it sym) ∧
+    (moveDot (_::it) sym = moveDot it sym)`;
 
 val trans = Define
 `(trans ag (s,[]) = SOME s) ∧
  (trans ag (s,sym::rst) =
     case moveDot s sym of 
-       [] -> NONE
-    || x -> trans ag (iclosure ag x, rst))`;
+      | [] => NONE
+      | x  => trans ag (iclosure ag x, rst))`;
  
 
 val EXISTS_item = store_thm("EXISTS_item",
@@ -784,12 +787,13 @@ METIS_TAC [validItl_iclosure]);
 
 
 (*!!!!Make followSet followSetML*)
+
 val reduce = Define `
 (reduce (g:(α,β) grammar) ([]:(α,β) item list) (s:β) = []:(α,β) rule list) ∧ 
-(reduce (g:(α,β) grammar) 
-(item (l:α) (r:(α,β) symbol list, []:(α,β) symbol list)::it) (s:β)  = 
-if ((TS s) IN (followSet g (NTS l))) then 
-    ((rule l r)::reduce g it s) else reduce g it s) ∧
+(reduce (g:(α,β) grammar) (item (l:α) (r:(α,β) symbol list, []:(α,β) symbol list)::it) (s:β)  = 
+    if ((TS s) IN (followSet g (NTS l))) then 
+        ((rule l r)::reduce g it s) 
+    else reduce g it s) ∧
 (reduce g ((item l (r, _))::it) s = reduce g it s)`;
 
 
@@ -833,19 +837,17 @@ iclosure (reduce)
 
 
 val slrmac = Define `slrmac g =
-let
-sg = sgoto g and
-red = reduce g
+let sg = sgoto g and
+    red = reduce g
 in
 if (∃pfx itl sym. isTmnlSym sym ∧ (trans g (initItems g (rules g),pfx) = SOME itl) ∧
-let
-    (s = sg itl sym) and
-    (r = red itl (ts2str sym))
-in
-case (s,r) of (* ([],[]) dealt in the parser *)
- ((x::xs),(y::ys)) -> T
-|| (_,(y::y'::ys)) -> T
-|| otherwise -> F)
+   let (s = sg itl sym) and
+       (r = red itl (ts2str sym))
+   in
+    case (s,r) of (* ([],[]) dealt in the parser *)
+    | ((x::xs),(y::ys)) => T
+    | (_,(y::y'::ys)) => T
+    | otherwise => F)
 then NONE else SOME (sg,red)`;
 
 val noError = Define
@@ -853,9 +855,9 @@ val noError = Define
     (noError (sf,red) (sym::rst) st = 
      (st=[]) ∨
      case red st (ts2str sym) of
-         []  -> noError (sf,red) rst (sf st sym)
-       || [r] -> (sf st sym = [])
-       || otherwise -> F)`;
+       | [] => noError (sf,red) rst (sf st sym)
+       | [r] => (sf st sym = [])
+       | otherwise => F)`;
 
 val okSlr = Define
     `okSlr g initState = 
@@ -942,15 +944,12 @@ val asNeighbours = Define `(asNeighbours g itl [] = []) ∧
 
 
 val visit_defn = Hol_defn "visit_defn" 
-`(visit g sn itl = 
-if ~(ALL_DISTINCT itl) ∨ ~(validItl g itl) then [] else
-let 
-s = asNeighbours g itl (SET_TO_LIST (allSyms g)) 
-in
-		     let
-			 rem = diff s sn
-		     in
-			 rem++(FLAT (MAP (visit g (sn++rem)) rem)))`;
+`visit g sn itl = 
+    if ~(ALL_DISTINCT itl) ∨ ~(validItl g itl) then
+            [] 
+    else let s = asNeighbours g itl (SET_TO_LIST (allSyms g)) in
+         let rem = diff s sn
+         in rem ++ (FLAT (MAP (visit g (sn++rem)) rem))`;
 
 val itemEqRule = Define 
 `itemEqRule g (item l (r1,r2)) = MEM (rule l (r1++r2)) (rules g)`;
@@ -967,7 +966,7 @@ val finite_allItems = store_thm ("finite_allItems",
 SRW_TAC [] [EXTENSION]);
 
 val itemEqRuleRulesEqGrRules = store_thm ("itemEqRuleRulesEqGrRules",
-``∀g.{rule l (r1++r2) | itemEqRule g (item l (r1,r2))} = (LIST_TO_SET (rules g))``,
+``∀g. {rule l (r1++r2) | itemEqRule g (item l (r1,r2))} = (LIST_TO_SET (rules g))``,
 SRW_TAC [] [itemEqRule, SUBSET_DEF, EQ_IMP_THM, EXTENSION] THENL[
 METIS_TAC [],
 Cases_on `x` THEN Induct_on `l` THEN SRW_TAC [] [] THEN
@@ -979,7 +978,6 @@ Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [allItems] THEN
 Cases_on `h` THEN Cases_on `h'` THEN METIS_TAC [APPEND, APPEND_ASSOC, allItems]
 );
     
-
 val itemLhs = Define `itemLhs (item l r) = l`;
 val itemFstRhs = Define `itemFstRhs (item l r) = FST r`;
 val itemSndRhs = Define `itemSndRhs (item l r) = SND r`;
@@ -1003,7 +1001,6 @@ Induct_on `rs` THEN SRW_TAC [] [] THEN FULL_SIMP_TAC (srw_ss()) [allItems] THENL
 by FULL_SIMP_TAC (srw_ss()) [allMemRuleItems, itemSndRhs] THEN
 FULL_SIMP_TAC (srw_ss()) [itemFstRhs, itemLhs, itemSndRhs],
 Cases_on `h` THEN SRW_TAC [] [allItems]]);
-
 
 val itemEqRuleExists = store_thm ("itemEqRuleExists",
  ``∀it.∀s q r.MEM (item s (q,r)) (ruleItems it) ⇒ (s=itemLhs it) ∧ (q++r = itemFstRhs it ++ itemSndRhs it)``,
@@ -1033,7 +1030,6 @@ ASSUME_TAC lemma THEN
 ONCE_ASM_REWRITE_TAC [] THEN
 METIS_TAC [itemEqRuleEqAllItems, SUBSET_FINITE, FINITE_LIST_TO_SET]);
 
-
 val finite_allGrItls = store_thm ("finiteAllGrItls",
 ``∀g.FINITE (allGrammarItls g)``,
 SRW_TAC [] [allGrammarItls, isGrammarItl, setc_flem, finite_itemEqRule]);
@@ -1045,9 +1041,6 @@ Induct_on `l` THEN SRW_TAC [] [asNeighbours] THENL[
 METIS_TAC [asNeighbours],
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `e'`  THEN FULL_SIMP_TAC (srw_ss()) [asNeighbours] THEN METIS_TAC []]);
-
-
-
 
 val validItl_evmem = store_thm ("validItl_evmem", 
 ``∀l.validItl g l = EVERY (itemEqRule g) l``,
@@ -1072,9 +1065,6 @@ val ar1 = store_thm ("ar1",
 ``∀a b c.a >=c ⇒ (a < b + (a-c) = 0 < b-c)``,
 SRW_TAC [] [EQ_IMP_THM] THEN
 DECIDE_TAC);
-
-
-
 
 val (visit, visit_ind) = tprove (visit_defn,
 WF_REL_TAC (`measure (\(g,sn,itl).CARD ((allGrammarItls g )DIFF (LIST_TO_SET sn)))`) THEN
@@ -1130,30 +1120,26 @@ DECIDE_TAC]);
 val _ = save_thm ("visit",visit);
 val _ = save_thm ("visit_ind",visit_ind);
 
-
-val slrML4Sym = Define `
-(slrML4Sym g [] sym = SOME (sgoto g, reduce g)) ∧
-(slrML4Sym g (i::itl) sym = 
-let
-s = sgoto g i sym 
-in
-let
-r = reduce g i (ts2str sym)
-in
-case (s,r) of 
-                     ([],[]) -> slrML4Sym g itl sym
-                    || ([],[v12]) -> slrML4Sym g itl sym
-                    || ([],v12::v16::v17) -> NONE
-                    || (v8::v9,[]) -> slrML4Sym g itl sym
-                    || (v8::v9,[v20]) -> NONE
-                    || (v8::v9,v20::v26::v27) -> NONE)`;
+val slrML4Sym = 
+  Define `
+   (slrML4Sym g [] sym = SOME (sgoto g, reduce g)) ∧
+   (slrML4Sym g (i::itl) sym = 
+     let s = sgoto g i sym in
+     let r = reduce g i (ts2str sym)
+     in
+       case (s,r) of 
+         | ([],[]) => slrML4Sym g itl sym
+         | ([],[v12]) => slrML4Sym g itl sym
+         | ([],v12::v16::v17) => NONE
+         | (v8::v9,[]) => slrML4Sym g itl sym
+         | (v8::v9,[v20]) => NONE
+         | (v8::v9,v20::v26::v27) => NONE)`;
 
 
 val slrML = Define `
 (slrML g itl [] = SOME (sgoto g, reduce g)) ∧
 (slrML g itl (sym::rst) = 
-if (slrML4Sym g itl sym = NONE) then NONE else slrML g itl rst)`;
-
+   if (slrML4Sym g itl sym = NONE) then NONE else slrML g itl rst)`;
 
 
 val findItemInRules = Define 
@@ -1174,26 +1160,25 @@ val itemEqRuleList_defn = Hol_defn "itemEqRuleList_defn"
      else F)`;
 
 
-val (itemEqRuleList,itemEqRuleList_ind) = tprove (itemEqRuleList_defn,
-WF_REL_TAC (`measure (\(l1,l2).LENGTH l1)`) THEN	
-SRW_TAC [] []);
+val (itemEqRuleList,itemEqRuleList_ind) = 
+ tprove 
+  (itemEqRuleList_defn,
+   WF_REL_TAC (`measure (\(l1,l2).LENGTH l1)`) THEN	
+   SRW_TAC [] []);
 
 		
-val getState = Define 
-`(getState (sg,red) (itl:('nts,'ts)item list) (sym:('nts,'ts) symbol) = 
-             let 
-                newitl = sg itl sym and
-                rl =  (red itl (ts2str sym))
-	     in
-			case (newitl,rl) of ([],[]) -> NA 
-			|| ([],(y::ys)) -> if (LENGTH rl = 1) then REDUCE  (HD rl) 
-					   else NA 
-			|| ((x::xs),[]) -> GOTO newitl
-			|| ((x::xs),(y::ys)) -> if (itemEqRuleList (x::xs) (y::ys))
-						    then REDUCE (HD rl) else NA)`;
-
-
-
+val getState = 
+ Define 
+  `getState (sg,red) (itl:('nts,'ts)item list) (sym:('nts,'ts) symbol) = 
+     let newitl = sg itl sym and
+         rl =  red itl (ts2str sym)
+     in
+      case (newitl,rl) of 
+	| ([],[]) => NA 
+        | ([],(y::ys)) => if (LENGTH rl = 1) then REDUCE  (HD rl) else NA 
+        | ((x::xs),[]) => GOTO newitl
+	| ((x::xs),(y::ys)) => if (itemEqRuleList (x::xs) (y::ys))
+                               then REDUCE (HD rl) else NA`;
 
 
 (* three output options:
@@ -1228,16 +1213,15 @@ Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [reduce] THEN
 Cases_on `h'` THEN Cases_on `p` THEN Cases_on `r` THEN
 METIS_TAC [APPEND, CONS, reduce]);
 
-
-
-
 val trans_snoc = store_thm("trans_snoc",
   ``∀s. 
       trans ag (s, vp ++ [h]) =
         case trans ag (s, vp) of 
-           NONE -> NONE
-        || SOME s' -> (case moveDot s' h of [] -> NONE 
-                                        || x -> SOME (iclosure ag x))``,
+          | NONE => NONE
+          | SOME s' => 
+             (case moveDot s' h of 
+		| [] => NONE 
+                | x => SOME (iclosure ag x))``,
   Induct_on `vp` THEN SRW_TAC [][trans] THEN 
   Cases_on `moveDot s h'` THEN SRW_TAC [][]);
 
@@ -1256,7 +1240,6 @@ val memInitProds = store_thm ("memInitProds",
 SRW_TAC [] [initItems, rgr_r9eq] THEN
 SRW_TAC [] [initProds2Items_append, initProds2Items] THEN
 METIS_TAC [iclosure_mem, MEM, MEM_APPEND, rgr_r9eq]);
-
 
 val sublemma = store_thm("sublemma",
   ``∀pfx sfx. 
@@ -1426,30 +1409,31 @@ THENL[
 
 
 val getItems_append = store_thm ("getItems_append",
-``∀l1 l2.getItems (l1++l2) N  = getItems l1 N ++ getItems l2 N``,
-Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [getItems] THEN
-Cases_on `h'` THEN SRW_TAC [] [getItems]);
+``∀l1 l2. getItems (l1++l2) N  = getItems l1 N ++ getItems l2 N``,
+ Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [getItems] THEN
+ Cases_on `h'` THEN SRW_TAC [] [getItems]);
 
-
-  
+ 
 val iclosureNtGen = store_thm ("iclosureNtGen",
-``∀ag l r1.MEM (item lhs (r1,NTS N::r2)) (iclosure ag l) ⇒ 
- ∀rhs.MEM (rule N rhs) (rules ag) ⇒
-MEM (item N ([],rhs)) (iclosure ag l)``,
+``∀ag l r1. MEM (item lhs (r1,NTS N::r2)) (iclosure ag l) ⇒ 
+             ∀rhs. MEM (rule N rhs) (rules ag) ⇒
+                    MEM (item N ([],rhs)) (iclosure ag l)``,
 HO_MATCH_MP_TAC iclosure_ind THEN 
 SRW_TAC [] [iclosure, LET_THM] THEN
-`(item lhs (r1,NTS N::r2)) IN set 
-(rmDupes (iclosure1 ag (rmDupes (v2::v3))))` by 
-FULL_SIMP_TAC (srw_ss()) [] THEN
+`(item lhs (r1,NTS N::r2)) IN set (rmDupes (iclosure1 ag (rmDupes (v2::v3))))` 
+  by FULL_SIMP_TAC (srw_ss()) [] THEN
 `(item lhs (r1,NTS N::r2)) IN set (rmDupes (v2::v3))` by METIS_TAC [] THEN
-`MEM (item lhs (r1,NTS N::r2)) (SET_TO_LIST (set (rmDupes (v2::v3))))` by 
-METIS_TAC [FINITE_LIST_TO_SET, MEM_SET_TO_LIST, SET_TO_LIST_IN_MEM] THEN
-`MEM (item lhs (r1,NTS N::r2)) (rmDupes (v2::v3))` by METIS_TAC [stl_mem, FINITE_LIST_TO_SET] THEN
+`MEM (item lhs (r1,NTS N::r2)) (SET_TO_LIST (set (rmDupes (v2::v3))))` 
+  by METIS_TAC [FINITE_LIST_TO_SET, MEM_SET_TO_LIST, SET_TO_LIST_IN_MEM] THEN
+`MEM (item lhs (r1,NTS N::r2)) (rmDupes (v2::v3))` 
+  by METIS_TAC [stl_mem, FINITE_LIST_TO_SET] THEN
 FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, iclosure1_append] THEN
 `rmDupes (iclosure1 ag (rmDupes (v2::v3))) = 
-rmDupes (iclosure1 ag (r1''' ++ [item lhs (r1,NTS N::r2)] ++ r2'''))` by METIS_TAC [] THEN
+ rmDupes (iclosure1 ag (r1''' ++ [item lhs (r1,NTS N::r2)] ++ r2'''))` 
+  by METIS_TAC [] THEN
 FULL_SIMP_TAC (srw_ss()) [iclosure1_append, iclosure1] THEN
-`getItems (rules ag) N  = getItems (r1' ++ [rule N rhs] ++ r2') N` by METIS_TAC [] THEN
+`getItems (rules ag) N  = getItems (r1'' ++ [rule N rhs] ++ r2'') N` 
+  by METIS_TAC [] THEN
 FULL_SIMP_TAC (srw_ss()) [getItems_append, getItems] THEN
 METIS_TAC [rgr_r9eq, APPEND, rmd_r2, APPEND_ASSOC]);
 
@@ -1588,21 +1572,21 @@ THENL[
 
 val ic1ImpIcMem =
 store_thm ("ic1ImpIcMem",
-``∀e l.MEM e (iclosure1 g l) ⇒ MEM e (iclosure g l)``,
+``∀e l. MEM e (iclosure1 g l) ⇒ MEM e (iclosure g l)``,
 Induct_on `l` THEN SRW_TAC [] [iclosure,iclosure1,LET_THM] THEN
 METIS_TAC [iclosure1RmdMem,rmd_mem_list,iclosure_mem]);
 
 
 val icImpIcTwice =
 store_thm ("icImpIcTwice",
-``∀g l.MEM e (iclosure g l) ⇒ MEM e (iclosure g (iclosure g l))``,
+``∀g l. MEM e (iclosure g l) ⇒ MEM e (iclosure g (iclosure g l))``,
 HO_MATCH_MP_TAC iclosure_ind THEN
 SRW_TAC [][iclosure,LET_THM] THEN
 METIS_TAC [iclosure_mem]);
 
 val icEqIc1 = store_thm
 ("icEqIc1",
-``∀g l.(set (rmDupes l) = set (rmDupes (iclosure1 g (rmDupes l)))) ⇒
+``∀g l. (set (rmDupes l) = set (rmDupes (iclosure1 g (rmDupes l)))) ⇒
   (rmDupes (iclosure1 g (rmDupes l)) = iclosure g l)``,
 HO_MATCH_MP_TAC iclosure_ind THEN
 SRW_TAC [] [iclosure,iclosure1] THEN
@@ -1617,17 +1601,17 @@ Cases_on `h` THEN
 Cases_on `p` THEN SRW_TAC [][]);
 
 val forallRule = store_thm ("forallRule",
-``(∀h.P h) = ∀N rhs.P (rule N rhs)``,
+``(∀h.P h) = ∀N rhs. P (rule N rhs)``,
 SRW_TAC [][EQ_IMP_THM] THEN
 Cases_on `h` THEN
 SRW_TAC [][]);
 
-
-
 val getItemsInRule = 
 store_thm ("getItemsInRule",
-``∀l N l1 l2 nt.MEM (item N (l1,l2)) (getItems l nt) =
-  (N=nt) ∧ MEM (rule N (l1++l2)) l ∧ (l1=[])``,
+``∀l N l1 l2 nt. 
+     MEM (item N (l1,l2)) (getItems l nt) 
+     <=>
+   (N=nt) ∧ MEM (rule N (l1++l2)) l ∧ (l1=[])``,
 Induct_on `l` THEN 
 ASM_SIMP_TAC (srw_ss()) [forallRule,getItems] THEN
 SRW_TAC [][] THEN
@@ -1636,11 +1620,13 @@ METIS_TAC [APPEND_NIL]);
 
 val iclosure1MemType = store_thm
 ("iclosure1MemType",
-``∀e l.MEM e (iclosure1 g l) =
+``∀e l.
+  MEM e (iclosure1 g l) <=>
   MEM e l ∨ 
-∃N M p s r.MEM (rule N r) (rules g) ∧
-(MEM (item M (p,NTS N::s)) l) ∧
- (e=item N ([],r)) ``,
+  ∃N M p s r.
+      MEM (rule N r) (rules g) ∧ 
+      MEM (item M (p,NTS N::s)) l ∧
+     (e = item N ([],r))``,
 
 Induct_on `l` THEN 
 ASM_SIMP_TAC (srw_ss()) [iclosure1,forallItem] THEN
@@ -1689,16 +1675,15 @@ val iclosure_ind' = prove(
 
 val ic1EqSet = store_thm
 ("ic1EqSet",
-``∀l l'.(set l = set l') ⇒
-((set (iclosure1 g l)) = set (iclosure1 g l'))``,
+``∀l l'. (set l = set l') ⇒ (set (iclosure1 g l) = set (iclosure1 g l'))``,
 SRW_TAC [][ EXTENSION,EQ_IMP_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [iclosure1MemType] THEN
 METIS_TAC []);
 
 val ic1EqSetRmd = store_thm
 ("ic1EqSetRmd",
-``∀l l'.(set l = set l') ⇒
-((set (iclosure1 g l)) = set (iclosure1 g (rmDupes l')))``,
+``∀l l'. (set l = set l') ⇒
+          (set (iclosure1 g l) = set (iclosure1 g (rmDupes l')))``,
 SRW_TAC [] [] THEN
 SRW_TAC [][ EXTENSION,EQ_IMP_THM] THEN
 `((set (iclosure1 g l)) = set (iclosure1 g l'))`
@@ -1706,40 +1691,79 @@ SRW_TAC [][ EXTENSION,EQ_IMP_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [EXTENSION] THEN
 METIS_TAC [iclosure1RmdMem]);
 
+val set_rmDupes = 
+ METIS_PROVE [EXTENSION, rmd_mem_list] ``!l. set(rmDupes l) = set(l)``;
 
-val icTwiceImpIc =
-store_thm ("icTwiceImpIc",
-``∀g l.MEM e (iclosure g (iclosure g l)) ⇒ 
-	  MEM e (iclosure g l)``,
-HO_MATCH_MP_TAC iclosure_ind' THEN
-REPEAT GEN_TAC THEN STRIP_TAC THEN 
-MP_TAC iclosure' THEN 
-DISCH_THEN (fn th => REWRITE_TAC [th]) THEN 
-SRW_TAC [][LET_THM] THEN
-FULL_SIMP_TAC (srw_ss()) 
-	      [Once iclosure', LET_THM, rmDupes_twice] THEN 
-Q.ABBREV_TAC `l = v2::v3` THEN 
-markerLib.RM_ALL_ABBREVS_TAC THEN 
-IMP_RES_TAC icEqIc1 THEN
-FULL_SIMP_TAC (srw_ss()) [rmd_mem_list, Once iclosure', 
-			  LET_THM, rmDupes_twice] THEN
-SRW_TAC [] [iclosure1MemType,rmd_mem_list] THEN
-Cases_on `~(set (iclosure1 g (rmDupes l)) =
-            set
-                (iclosure1 g
-			   (rmDupes (iclosure1 g (rmDupes l)))))` THEN
-SRW_TAC [] []
-THENL[
-      METIS_TAC [ic1EqSetRmd],
+val set_iclosure1 = 
+ METIS_PROVE [EXTENSION, iclosure1RmdMem] 
+  ``!g l. set(iclosure1 g (rmDupes l)) = set (iclosure1 g l)``;
 
-      FULL_SIMP_TAC (srw_ss()) [] THEN
-      Q.ABBREV_TAC `l'=(iclosure1 g (rmDupes l))` THEN
-      METIS_TAC [ic1EqSet,mem_in,iclosure1RmdMem,rmd_mem_list]
-      ]);
+val iclosure_ind_alt =
+  iclosure_ind' 
+      |> SIMP_RULE std_ss [set_rmDupes,set_iclosure1];
+
+val set_iclosure = Q.prove
+(`!g l. set(iclosure g (rmDupes l)) = set (iclosure g l)`,
+ ho_match_mp_tac iclosure_ind_alt
+ >> rpt strip_tac
+ >> ONCE_REWRITE_TAC [iclosure']
+ >> rw_tac list_ss [LET_THM]
+ >> full_simp_tac (srw_ss()) [set_rmDupes,set_iclosure1,rmDupes_twice]);
+
+val set_iclosure1_arg = Q.prove
+(`!L1 L2. (set L1 = set L2) ==> (set (iclosure1 g (rmDupes L2)) = set (iclosure1 g L1))`,
+ metis_tac[ic1EqSetRmd]);
+
+val set_iclosure_arg = Q.prove
+(`!g L1 L2. (set L1 = set L2) ==> (set (iclosure g L1) = set (iclosure g L2))`,
+ recInduct iclosure_ind'
+ >> rpt strip_tac
+ >> ONCE_REWRITE_TAC [iclosure']
+ >> rw_tac list_ss [LET_THM,set_rmDupes,set_iclosure, set_iclosure1]
+ >> full_simp_tac list_ss [PULL_FORALL,set_rmDupes,set_iclosure, set_iclosure1]
+ >> metis_tac [set_iclosure1_arg]);
+
+val iclosure_end = Q.prove
+(`!g l. (set l = set (iclosure1 g l)) 
+        ==>
+        (iclosure g l = rmDupes (iclosure1 g (rmDupes l)))`,
+ simp_tac list_ss [Once iclosure',LET_THM,set_rmDupes,set_iclosure1])
+
+val iclosure_recurse = Q.prove
+(`!g l. ~(set l = set (iclosure1 g l)) 
+        ==>
+        (iclosure g l = iclosure g (rmDupes (iclosure1 g (rmDupes l))))`,
+ rpt strip_tac
+  >> simp_tac std_ss [SimpLHS,Once iclosure',LET_THM]
+  >> metis_tac[set_rmDupes,set_iclosure1])
+
+val icTwiceImpIc = store_thm 
+("icTwiceImpIc",
+ ``∀g l. MEM e (iclosure g (iclosure g l)) ⇒ MEM e (iclosure g l)``,
+ recInduct iclosure_ind
+ >> conj_tac 
+ >- simp_tac list_ss [iclosure]
+ >- (rpt gen_tac
+      >> strip_tac
+      >> simp_tac list_ss [iclosure,LET_THM]
+      >> COND_CASES_TAC
+      >> pop_assum (assume_tac o REWRITE_RULE [set_rmDupes,set_iclosure1])
+      >- (first_assum match_mp_tac  (* use IH *)
+           >> qexists_tac `rmDupes (v2::v3)`
+           >> rw_tac bool_ss [set_rmDupes]
+           >> metis_tac [set_iclosure1])
+      >- (simp_tac std_ss [set_rmDupes, set_iclosure,set_iclosure1,GSYM iclosure1RmdMem]
+          >> `set (iclosure1 g (rmDupes (v2::v3))) = set (iclosure1 g (v2::v3))`
+               by metis_tac [set_iclosure1]
+          >> `set (iclosure g (iclosure1 g (rmDupes (v2::v3)))) = set (iclosure g (v2::v3))`
+               by metis_tac [set_iclosure_arg]
+          >> pop_assum SUBST_ALL_TAC
+          >> rw_tac list_ss [iclosure_end,set_rmDupes,set_iclosure1]))
+);
 
 val iclosureTwice =
 store_thm ("iclosureTwice",
-``∀g l.set (iclosure g (iclosure g l)) = set (iclosure g l)``,
+``∀g l. set (iclosure g (iclosure g l)) = set (iclosure g l)``,
 SRW_TAC [] [EXTENSION,EQ_IMP_THM] THEN
  METIS_TAC [icTwiceImpIc,icImpIcTwice]);
 
@@ -1930,7 +1954,6 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) []
       ]);
 
-
 val transShiftExists = store_thm ("transShiftExists",
 ``∀s s0 r1 vp1 vp2 nt sfx rhs.
    (trans g (iclosure g s0,vp1) = SOME s) ⇒
@@ -1938,38 +1961,31 @@ val transShiftExists = store_thm ("transShiftExists",
     MEM (rule nt rhs) (rules g) ⇒
     ∃s'.(trans g (iclosure g s0, vp1++vp2) = SOME s') ∧
         MEM (item nt ([],rhs)) s'``,
-Induct_on `vp2` THEN SRW_TAC [] []
-THENL[
-      METIS_TAC [transOutMem],
-
-      `∃s'.(trans g (iclosure g s,h::vp2) = SOME s') ∧
-         MEM (item nt' (r1++[h]++vp2,[NTS nt]++sfx)) s'` by 
-      (SRW_TAC [] [] THEN
-      SRW_TAC [] [trans] THEN
-      `MEM (item nt' (r1,h::(vp2 ++ [NTS nt] ++ sfx))) (iclosure g s)`
-      by METIS_TAC [iclosure_mem]) 
-      THENL[
-	    `MEM (item nt' (r1++[h],(vp2 ++ [NTS nt] ++ sfx)))
-              (moveDot (iclosure g s) h)` by 
-               (SRW_TAC [] [] THEN
+Induct_on `vp2` 
+ >> SRW_TAC [] []
+ >- metis_tac [transOutMem]
+ >- (`?s'. (trans g (iclosure g s,h::vp2) = SOME s') ∧
+           MEM (item nt' (r1++[h]++vp2,[NTS nt]++sfx)) s'`
+     by (SRW_TAC [] [] THEN
+         SRW_TAC [] [trans] THEN
+         `MEM (item nt' (r1,h::(vp2 ++ [NTS nt] ++ sfx))) (iclosure g s)`
+            by METIS_TAC [iclosure_mem] >>
+         `MEM (item nt' (r1++[h],(vp2 ++ [NTS nt] ++ sfx))) 
+              (moveDot (iclosure g s) h)`
+            by (SRW_TAC [] [] THEN
 		FULL_SIMP_TAC (srw_ss()) [rgr_r9eq, md_append, moveDot] THEN
-		METIS_TAC []) THEN
-	       Cases_on `moveDot (iclosure g s) h` THEN
-	       SRW_TAC [] [] 
-               THENL[
-		     METIS_TAC [MEM, MEM_APPEND],
-
-		     `∃s'.(trans g (iclosure g (h'::t),vp2) = SOME s') ∧
-									    MEM (item nt' (r1 ++ [h] ++ vp2,[NTS nt]++sfx)) s'` 
-			 by METIS_TAC [transExists, iclosure_mem, APPEND_ASSOC] THEN
-		     FULL_SIMP_TAC (srw_ss()) []
-		     ],
-	    
-	    `MEM (item nt ([],rhs)) s'` by METIS_TAC [transOutMem, APPEND] THEN
-	    IMP_RES_TAC transSeqIcGen THEN
-	    METIS_TAC [mem_in]
-	    ]]);
-      
+		METIS_TAC [])
+	 >> Cases_on `moveDot (iclosure g s) h`
+         >> SRW_TAC [] [] 
+            >- metis_tac [MEM, MEM_APPEND]
+            >- (`∃s'. (trans g (iclosure g (h'::t),vp2) = SOME s') ∧
+                       MEM (item nt' (r1 ++ [h] ++ vp2,[NTS nt]++sfx)) s'` 
+                    by METIS_TAC [transExists, iclosure_mem, APPEND_ASSOC] 
+                 >> full_simp_tac (srw_ss()) [])
+        )
+     >> metis_tac [transOutMem, APPEND, transSeqIcGen,mem_in]
+    )
+);
 
 
 val lemma =store_thm("lemma",
@@ -2009,7 +2025,6 @@ val lemma =store_thm("lemma",
     ]);
  
 
-
 val transOutEq = store_thm ("transOutEq",
 ``∀s0 pfx s s'.
   (trans g (s0,pfx) = SOME s) ⇒
@@ -2017,47 +2032,35 @@ val transOutEq = store_thm ("transOutEq",
   (s=s')``,
 Induct_on `pfx` THEN SRW_TAC [] [trans]);
     
-
-
-
-val doReduce = Define 
-`doReduce m ((sym::rst), os, ((s, itl)::rem)) ru =
-                   if (isNonTmnlSym sym) then NONE 
-                   else 
-                       let 
-                           l = ruleLhs ru and
-                           r = ruleRhs ru 
-                       in 
-                           let 
-                                 ptree = addRule os ru 
-                           in 
-                                case ptree of NONE -> NONE 
-                                || (SOME p) -> 
-                                   let 
-                                       newStk = pop os (LENGTH r) 
-                                    in 
-					let 
-					newStateStk = pop  ((s, itl)::rem) (LENGTH r)
-					in
-					if (newStateStk = []) then NONE else
-					let 
-                                            topitl = SND (HD newStateStk)
-					in
-					    let
-						nx = ((FST m) topitl (NTS l))
-					    in
-						if (nx=[]) then NONE else
-						let 
-						    ns = ((NTS l), nx)
-						in 
-						    SOME ((sym::rst),([(ns,p)] ++ newStk), push newStateStk ns)`;
+val doReduce = 
+ Define 
+  `doReduce m ((sym::rst), os, ((s, itl)::rem)) ru =
+    if isNonTmnlSym sym then 
+      NONE 
+    else let l = ruleLhs ru and
+             r = ruleRhs ru in 
+         let ptree = addRule os ru 
+         in case ptree of 
+             | NONE => NONE 
+             | SOME p => 
+                 let newStk = pop os (LENGTH r) in 
+                 let newStateStk = pop  ((s, itl)::rem) (LENGTH r) 
+                 in if newStateStk = [] then 
+                       NONE 
+                    else let topitl = SND (HD newStateStk) in
+                         let nx = (FST m) topitl (NTS l) 
+                         in if (nx=[]) then 
+                               NONE 
+                            else let ns = ((NTS l), nx)
+                                 in SOME (sym::rst,
+                                          [(ns,p)] ++ newStk, 
+                                          push newStateStk ns)`;
 
 
 (*!!!!Make this followSetML*)
 val red_eq1 = store_thm ("red_eq1",
 ``~(TS sym IN followSet g (NTS s)) ⇒
 (reduce g itl sym = reduce g (item s (q,[])::itl) sym)``,
-
 SRW_TAC [] [reduce]);
 
 (*!!!!Make this followSetML*)
@@ -2091,10 +2094,13 @@ THENL[
  METIS_TAC [MEM , reduce]]);
 
 
-
 val getstate_red = store_thm ("getstate_red", 
-``∀m itl sym g.(m = (sgoto g, reduce g)) ⇒
-validItl g itl ⇒ (getState m itl sym = REDUCE r) ⇒ MEM r (rules g)``,
+``∀m itl sym g.
+      (m = (sgoto g, reduce g)) ==>
+      validItl g itl ==> 
+      (getState m itl sym = REDUCE r) 
+    ==>
+      MEM r (rules g)``,
 
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [getState, LET_THM] THEN
@@ -2104,7 +2110,8 @@ THENL[
  Cases_on `~(LENGTH t = 0)` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
  Cases_on `sym` THEN Induct_on `itl` THEN
  SRW_TAC [] [] THEN
- FULL_SIMP_TAC (srw_ss()) [reduce] THEN `t=[]` by METIS_TAC [LENGTH_NIL] THEN
+ FULL_SIMP_TAC (srw_ss()) [reduce] THEN 
+(* `t=[]` by METIS_TAC [LENGTH_NIL] THEN *)
  SRW_TAC [] [] THEN
  FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def] THEN
  `∀e.MEM e [h] ⇒
@@ -2115,8 +2122,9 @@ METIS_TAC [reduce_mem,validItl, APPEND, CONS, EVERY_DEF, MEM, validItl_append, r
  APPEND_NIL],
 
 Cases_on `itemEqRuleList (h::t) (h'::t')` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-`∀e.MEM e (h'::t') ⇒
-         ∃l r1. (e = rule l r1) ∧ MEM (item l (r1,[])) itl` by METIS_TAC [reduce_mem]
+`∀e. MEM e (h'::t') ⇒
+     ∃l r1. (e = rule l r1) ∧ MEM (item l (r1,[])) itl` 
+  by METIS_TAC [reduce_mem]
 THEN
 FULL_SIMP_TAC (srw_ss()) [reduce_mem,validItl, THE_DEF, APPEND, CONS, EVERY_DEF] THEN
 METIS_TAC [reduce_mem,validItl, APPEND, CONS, EVERY_DEF, MEM, validItl_append, rgr_r9eq, 
@@ -2125,24 +2133,28 @@ APPEND_NIL]]);
 
 val getState_mem_itl = store_thm ("getState_mem_itl", 
 ``validItl g itl ⇒ (m = (sgoto g, reduce g)) ⇒ isTmnlSym e ⇒
-(getState m itl e = REDUCE (rule s' l)) ⇒ (MEM (item s' (l,[])) itl)``,
+  (getState m itl e = REDUCE (rule s' l)) ⇒ (MEM (item s' (l,[])) itl)``,
 
 SRW_TAC [] [] THEN
 `MEM (rule s' l) (rules g)` by METIS_TAC [getstate_red] THEN
 FULL_SIMP_TAC (srw_ss()) [getState, LET_THM] THEN
 Cases_on `sgoto g itl e` THEN Cases_on `reduce g itl (ts2str e)` THEN 
-FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]  THENL[
-Cases_on `LENGTH t = 0` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [] [] THEN
-`MEM (rule s' l) (rule s' l::t)` by METIS_TAC [MEM] THEN
-`∃l' r1. (rule s' l = rule l' r1) ∧ MEM (item l' (r1,[])) itl` by METIS_TAC [reduce_mem] THEN
-FULL_SIMP_TAC (srw_ss()) [],
+FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]  
+>- (Cases_on `t=[]` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
+    SRW_TAC [] [] THEN
+    `MEM (rule s' l) [rule s' l]` by METIS_TAC [MEM] THEN
+    `∃l' r1. (rule s' l = rule l' r1) ∧ 
+              MEM (item l' (r1,[])) itl` by METIS_TAC [reduce_mem] THEN
+    FULL_SIMP_TAC (srw_ss()) [])
 
-Cases_on `itemEqRuleList (h::t) (h'::t')` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-SRW_TAC [] [] THEN
-`MEM (rule s' l) (rule s' l::t')` by METIS_TAC [MEM] THEN
-`∃l' r1. (rule s' l = rule l' r1) ∧ MEM (item l' (r1,[])) itl` by METIS_TAC [reduce_mem] THEN
-FULL_SIMP_TAC (srw_ss()) []]);
+>- (Cases_on `itemEqRuleList (h::t) (h'::t')` THEN 
+    FULL_SIMP_TAC (srw_ss()) [] THEN
+    SRW_TAC [] [] THEN
+    `MEM (rule s' l) (rule s' l::t')` by METIS_TAC [MEM] THEN
+    `∃l' r1. (rule s' l = rule l' r1) ∧ 
+              MEM (item l' (r1,[])) itl` by METIS_TAC [reduce_mem] THEN
+    FULL_SIMP_TAC (srw_ss()) [])
+);
 
 
 val validItl_initProds2Items = store_thm ("validItl_initProds2Items", 
@@ -2153,34 +2165,32 @@ Cases_on `h` THEN
 SRW_TAC [] [initProds2Items, validItl, rules_def] THEN
 METIS_TAC [validItl_rules_cons]);
 
-
-
-val parse = Define `
-(parse m (inp, os, ((s, itl)::rem)) = 
-	case inp of [] -> NONE
-	    || [e] -> 
-	    (let      
-		 newState = getState m itl e
-	     in 
-		 case newState of NA -> NONE 
-		   || (GOTO st) -> NONE		     
-		   || (REDUCE ru) -> doReduce m ([e], os, ((s, itl)::rem)) ru)
-
-	    || (sym::rst) -> 
-		 (let      
-		     newState = getState m itl sym 
-		 in 
-		     case newState of NA -> NONE 
-		       || (GOTO st) -> 
-			 if (isNonTmnlSym sym) then NONE 
-			 else (* shift goto *) 
-			     SOME (rst,((sym,st),Leaf (ts2str sym))::os, push ((s, itl)::rem) (sym,st))
-			   || (REDUCE ru) -> doReduce m ((sym::rst), os, ((s, itl)::rem)) ru))`;
+val parse = 
+ Define `
+  parse m (inp, os, ((s, itl)::rem)) = 
+    case inp of 
+      | [] => NONE
+      | [e] => 
+        (let newState = getState m itl e
+         in case newState of 
+              | NA => NONE 
+              | GOTO st => NONE		     
+              | REDUCE ru => doReduce m ([e], os, ((s, itl)::rem)) ru)
+      | sym::rst => 
+         let newState = getState m itl sym 
+         in case newState of 
+              | NA => NONE 
+              | GOTO st => 
+                 (if (isNonTmnlSym sym) then
+                    NONE 
+                 else (* shift goto *) 
+		   SOME (rst,((sym,st),Leaf (ts2str sym))::os, push ((s, itl)::rem) (sym,st)))
+              | REDUCE ru => doReduce m ((sym::rst), os, ((s, itl)::rem)) ru`;
     
-
-
 (* parser :: machine -> symbol list -> ((state,ptree) list -> ptree option *)
-val stackSyms = Define `stackSyms stl = (REVERSE (MAP FST (MAP FST stl)))`;
+val stackSyms = 
+ Define 
+  `stackSyms stl = REVERSE (MAP FST (MAP FST stl))`;
 
 val exitCond = Define 
 `exitCond (eof,oldSym)  (inp,stl,csl) =  
@@ -2192,39 +2202,40 @@ val init = Define
 `init inis sl =  
 (sl,([]:((('nts,'ts)symbol# ('nts,'ts)state) # ('nts,'ts)ptree) list),[inis])`;
 
-val parser = Define `parser (initConf, eof, oldS) m sl = 
-let 
-out = (mwhile (\s. ~(exitCond (eof,NTS oldS) s))
-(\(sli,stli,csli).parse m (sli,stli, csli)) (sl,([]:((('nts,'ts)symbol# ('nts,'ts)state) # ('nts,'ts)ptree) list),[initConf]))
-in
-    case out of NONE -> NONE
-              || (SOME (SOME (slo,[(st1,pt)],cs))) -> SOME (SOME pt)
-	     || SOME (NONE) -> SOME (NONE)
-	|| SOME _ -> SOME NONE`;
-
+val parser =
+ Define 
+   `parser (initConf, eof, oldS) m sl = 
+      let out = mwhile (\s. ~(exitCond (eof,NTS oldS) s))
+                       (\(sli,stli,csli).parse m (sli,stli, csli)) 
+                       (sl,([]:((('nts,'ts)symbol#('nts,'ts)state)#('nts,'ts)ptree) list),
+                        [initConf])
+      in
+        case out of 
+          | NONE => NONE
+          | SOME (SOME (slo,[(st1,pt)],cs)) => SOME (SOME pt)
+	  | SOME NONE => SOME NONE
+	  | SOME _ => SOME NONE`;
 
 
 (* yacc :: grammar -> symbol list -> ptree opion*)
-val lrparse = Define `lrparse g s' eof sl = 
-let 
-    g' = auggr g s' eof
-in
-    case g' of NONE -> NONE
-    || (SOME ag) ->
-       (let
-	    mac = slrmac ag (* slrML g [(initItems ag (rules ag))] (SET_TO_LIST (allSyms g))  -- FOR ML version*)
-	in 
-	    case mac of NONE -> NONE
-            || (SOME m) -> (
-      let
-	  initConf =  ((NTS s'), initItems ag (rules ag))
-      in
-	  case (parser (initConf,eof,startSym g) m sl) 
-	   of NONE -> NONE
-		|| SOME (NONE) -> NONE
-		|| SOME (SOME out) -> SOME out))`;
-
-
+val lrparse = 
+ Define 
+  `lrparse g s' eof sl = 
+    let g' = auggr g s' eof
+    in case g' of 
+        | NONE => NONE
+        | SOME ag =>
+           let mac = slrmac ag 
+                (* slrML g [(initItems ag (rules ag))] (SET_TO_LIST (allSyms g))  -- FOR ML version*)
+	   in 
+	     case mac of 
+              | NONE => NONE
+              | SOME m => 
+                  let initConf = (NTS s', initItems ag (rules ag))
+                  in case parser (initConf,eof,startSym g) m sl of 
+                       | NONE => NONE
+                       | SOME NONE => NONE
+                       | SOME (SOME out) => SOME out`;
 
 val parseExp = store_thm
 ("parseExp",

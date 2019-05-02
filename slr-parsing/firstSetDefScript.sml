@@ -1,7 +1,7 @@
 open HolKernel boolLib bossLib Parse BasicProvers Defn
 
 open listTheory containerTheory pred_setTheory arithmeticTheory
-relationTheory markerTheory
+     relationTheory markerTheory
 
 open symbolDefTheory grammarDefTheory listLemmasTheory
 
@@ -12,14 +12,15 @@ val _ = set_trace "Unicode" 1;
 val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];
 
-val firstSet = Define
-`firstSet g sym =
-{ (TS fst) | ∃rst.RTC (derives g) [sym] ([TS fst]++rst) }`
+val firstSet = 
+ Define
+  `firstSet g sym = {TS fst | ∃rst. RTC (derives g) [sym] ([TS fst]++rst) }`
 
 
-val firstSetML_defn = Hol_defn "firstSetML_defn" `
-  (firstSetML (g:(α,β) grammar) (sn:(α,β) symbol list) ([]:(α,β) symbol list) =
-   []:(α,β) symbol list) ∧
+val firstSetML = tDefine
+  "firstSetML" `
+  (firstSetML (g:(α,β) grammar) (sn:(α,β) symbol list) ([]:(α,β) symbol list) 
+       = []:(α,β) symbol list) ∧
   (firstSetML g sn (TS ts :: rest) = [TS ts]) ∧
   (firstSetML g sn (NTS nt :: rest) =
      rmDupes
@@ -30,12 +31,8 @@ val firstSetML_defn = Hol_defn "firstSetML_defn" `
 	      FLAT (MAP (firstSetML g (NTS nt::sn)) r))
      ++ (if nullableML g [] [NTS nt] then
 	    firstSetML g sn rest
-	 else []))`;
-
-
-val (firstSetML,firstSetML_ind) = tprove (
-  firstSetML_defn,
-  WF_REL_TAC
+	 else []))`
+ (WF_REL_TAC
    `inv_image (measure (λ(g,sn). CARD (nonTerminals g DIFF LIST_TO_SET sn))
                  LEX
                measure (λ(syms).LENGTH syms))
@@ -79,10 +76,12 @@ val (firstSetML,firstSetML_ind) = tprove (
     DECIDE_TAC
   ]);
 
+val firstSetML_ind = fetch "-" "firstSetML_ind";
+
 val firstSetMLList = Define `firstSetMLList g sym = firstSetML g [] [sym]`;
 
 val getRhsNilMem = store_thm ("getRhsNilMem",
-``(getRhs nt (rules g) =[]) = ~(∃r.MEM (rule nt r) (rules g))``,
+``(getRhs nt (rules g) = []) = ~∃r.MEM (rule nt r) (rules g)``,
 SRW_TAC [] [EQ_IMP_THM] THEN
 Cases_on `g` THEN
 FULL_SIMP_TAC (srw_ss()) [rules_def] THEN
@@ -111,9 +110,9 @@ val MEM_getRhs = store_thm(
   Cases_on `h` THEN SRW_TAC [][getRhs_def] THEN SRW_TAC [][]);
 
 
-val firstSetList = Define
-`firstSetList g l =
-      {TS fst | ∃rst. RTC (derives g) l ([TS fst] ++ rst)}`
+val firstSetList = 
+ Define
+  `firstSetList g l = {TS fst | ∃rst. RTC (derives g) l ([TS fst] ++ rst)}`
 
 val firstSetMLEq1 = store_thm ("firstSetMLEq1",
   ``∀g sn l. MEM s (firstSetML g sn l) ⇒ s ∈ firstSetList g l``,
@@ -313,7 +312,7 @@ val ntderive_list_exists = store_thm("ntderive_list_exists",
                   ¬(pfx ++ rhs ++ sfx = p ++ [TS tok] ++ s)`
   THENL [
     FULL_SIMP_TAC (srw_ss()) [] THEN
-    REPEAT (Q.PAT_ASSUM `∀x. P x` (K ALL_TAC)) THEN
+    REPEAT (Q.PAT_X_ASSUM `∀x. P x` (K ALL_TAC)) THEN
     RULE_ASSUM_TAC (SIMP_RULE (srw_ss()) [split_killer]) THEN
     FULL_SIMP_TAC (srw_ss()) [] THENL [
       SRW_TAC [][] THEN METIS_TAC [APPEND_ASSOC],
@@ -411,13 +410,13 @@ THENL[
 
 
 
+(*
 val _ = save_thm ("firstSetML",firstSetML);
 val _ = save_thm ("firstSetML_ind",firstSetML_ind);
 
-
-
 val _ = save_thm ("firstSetML",firstSetML);
 val _ = save_thm ("firstSetML_ind",firstSetML_ind);
+*)
 
 val followML_defn = Hol_defn "followML"
   `(followG g sn N = followrs g sn N (rules g)) ∧

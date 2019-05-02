@@ -1,10 +1,10 @@
 open HolKernel boolLib bossLib Parse BasicProvers Defn
 
 open listTheory containerTheory pred_setTheory arithmeticTheory
-relationTheory markerTheory
+     relationTheory markerTheory
 
 open symbolDefTheory grammarDefTheory listLemmasTheory firstSetDefTheory
-    relationLemmasTheory
+     relationLemmasTheory
 
 val _ = new_theory "followSetDef"
 
@@ -31,14 +31,14 @@ val followG_defn = Hol_defn "followG"
    (followr g sn N i 0 = {}) ∧
    (followr g sn N i rhsLen = 
     case (TAKE rhsLen (ruleRhs (EL i (rules g)))) of
-       (TS t::rest) -> followr g sn N i (rhsLen - 1) 
-    || (NTS P :: rest) ->
-      (if N = P then
-         firstSetList g rest ∪
-         (if nullableML g [] rest then
-            if  N ∈ sn then {}
-            else followG g (N::sn) (ruleLhs (EL i (rules g)))
-          else {})
+      | TS t::rest => followr g sn N i (rhsLen - 1) 
+      | NTS P :: rest =>
+        (if N = P then
+           firstSetList g rest ∪
+           (if nullableML g [] rest then
+              if  N ∈ sn then {}
+               else followG g (N::sn) (ruleLhs (EL i (rules g)))
+            else {})
        else {}) ∪ followr g sn N i (rhsLen - 1))`;
 
 

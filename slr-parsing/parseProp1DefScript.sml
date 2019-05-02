@@ -7,6 +7,7 @@ open symbolDefTheory grammarDefTheory boolLemmasTheory listLemmasTheory
 parseTreeTheory yaccDefTheory whileLemmasTheory
 
 val _ = new_theory "parseProp1Def";
+
 val _ = diminish_srw_ss ["list EQ"];
 
 val stacklntmnls = Define `(stacklntmnls [] = []) ∧
@@ -234,8 +235,7 @@ SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss() ++ DNF_ss) [doReduce_def, LET_THM, option_case_rwt, list_case_rwt, pairTheory.FORALL_PROD] THEN
 Cases_on `isNonTmnlSym sym` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r)) = []` THEN 
-FULL_SIMP_TAC (srw_ss()) [] THENL[
-Cases_on `addRule stl r` THEN FULL_SIMP_TAC (srw_ss()) [],
+FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `addRule stl r` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `FST m (SND (HD (pop ((s,itl)::csl) (LENGTH (ruleRhs r)))))
                (NTS (ruleLhs r)) =
@@ -252,7 +252,7 @@ Cases_on `buildTree stl (REVERSE l)` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 FULL_SIMP_TAC (srw_ss()) [ruleLhs_def] THEN
 SRW_TAC [] [] THENL[
 METIS_TAC [ptree2Sym_def],
-METIS_TAC [popl,vst_append_distrib]]]
+METIS_TAC [popl,vst_append_distrib]]
 );
 
 val list_pop = store_thm ("list_pop", 
@@ -280,31 +280,34 @@ Cases_on `itemEqRuleList (h::t) (h'::t')`  THEN FULL_SIMP_TAC (srw_ss()) []]
 *)
 
 val parse_csl_not_nil = store_thm ("parse_csl_not_nil",
-``∀m g.(slrmac g = SOME m) ⇒ 
-(parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))
-⇒ ~(NULL csl')``,
+``∀m g.
+   (slrmac g = SOME m) ⇒ 
+   (parse m (sl, stl, ((s, itl)::csl)) = SOME (sl',stl',csl'))
+  ⇒ 
+   ~(NULL csl')``,
 
 FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM] THEN
 SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss() ++ DNF_ss) [option_case_rwt, list_case_rwt, 
- pairTheory.FORALL_PROD] THEN
+FULL_SIMP_TAC (srw_ss() ++ DNF_ss) 
+   [option_case_rwt, list_case_rwt, pairTheory.FORALL_PROD] THEN
 Cases_on `getState m itl e` THEN
 Cases_on `v1` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-FULL_SIMP_TAC (srw_ss() ++ DNF_ss) [option_case_rwt, list_case_rwt, pairTheory.FORALL_PROD]  THEN
+FULL_SIMP_TAC (srw_ss() ++ DNF_ss) 
+   [option_case_rwt, list_case_rwt, pairTheory.FORALL_PROD]  THEN
 FULL_SIMP_TAC (srw_ss()) [slrmac_def, LET_THM] THEN 
 Cases_on `∃pfx itl' sym.
                (trans g (initItems g (rules g),pfx) = SOME itl') ∧
                case sgoto g itl' sym of
-                  [] ->
+                  [] =>
                     (case reduce g itl' (ts2str sym) of
-                        [] -> F
-                     || [v12] -> F
-                     || v12::v16::v17 -> T)
-               || v8::v9 ->
+                        [] => F
+                     | [v12] => F
+                     | v12::v16::v17 => T)
+               | v8::v9 =>
                     case reduce g itl' (ts2str sym) of
-                       [] -> F
-                    || [v20] -> T
-                    || v20::v26::v27 -> T` THEN 
+                       [] => F
+                    | [v20] => T
+                    | v20::v26::v27 => T` THEN 
 FULL_SIMP_TAC (srw_ss()) [] THEN
       FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM] THEN
       Cases_on `isNonTmnlSym e` THEN Cases_on `addRule stl r` THEN 
@@ -337,16 +340,16 @@ FULL_SIMP_TAC (srw_ss()) [slrmac_def, LET_THM] THEN
 Cases_on `∃pfx itl' sym. isTmnlSym sym ∧
                (trans g (initItems g (rules g),pfx) = SOME itl') ∧
                case sgoto g itl' sym of
-                  [] ->
+                  [] =>
                     (case reduce g itl' (ts2str sym) of
-                        [] -> F
-                     || [v12] -> F
-                     || v12::v16::v17 -> T)
-               || v8::v9 ->
+                        [] => F
+                     | [v12] => F
+                     | v12::v16::v17 => T)
+               | v8::v9 =>
                     case reduce g itl' (ts2str sym) of
-                       [] -> F
-                    || [v20] -> T
-                    || v20::v26::v27 -> T` THEN 
+                       [] => F
+                    | [v20] => T
+                    | v20::v26::v27 => T` THEN 
 FULL_SIMP_TAC (srw_ss()) [] THEN
 `SOME (sgoto g,reduce g) = SOME m` by METIS_TAC [NOT_SOME_NONE] THEN
 SRW_TAC [][] THEN
@@ -354,11 +357,11 @@ SRW_TAC [][] THEN
 ((FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM] THEN
 Cases_on `isNonTmnlSym e` THEN Cases_on `addRule stl r` THEN 
 Cases_on `sgoto g (SND (HD (pop ((s,itl)::csl) (LENGTH (ruleRhs r)))))
-               (NTS (ruleLhs r)) =
-             []` THEN
+               (NTS (ruleLhs r)) = []` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r)) = []` THEN FULL_SIMP_TAC (srw_ss()) [validStates_def] THEN
-`validStates   g        [((NTS (ruleLhs r)),
+Cases_on `pop ((s, itl)::csl) (LENGTH (ruleRhs r)) = []` THEN 
+FULL_SIMP_TAC (srw_ss()) [validStates_def] THEN
+`validStates   g [((NTS (ruleLhs r)),
                (sgoto g
                   (SND
                      (HD (pop ((s, itl)::csl) (LENGTH (ruleRhs r)))))
@@ -392,7 +395,8 @@ METIS_TAC [validItl_sgoto] THEN
 Cases_on `itemEqRuleList (h::t) (h'::t')` THEN FULL_SIMP_TAC (srw_ss()) [])));
 
 
-(* 1.All the nonterminal symbols on top of the stack are the result of reduce operations *)
+(* 1. All the nonterminal symbols on top of the stack are the result of reduce operations *)
+
 val validptree_invthm = store_thm ("validptree_invthm", 
 ``∀m g.(SOME m=slrmac g) ⇒ validStates g ((s, itl)::csl) ⇒ 
    ∀stl.validptree_inv g stl ⇒

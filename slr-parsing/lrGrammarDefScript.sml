@@ -167,31 +167,43 @@ FULL_SIMP_TAC (srw_ss()) [ruleLhs_def] THEN
 ONCE_ASM_REWRITE_TAC [] THEN
 SRW_TAC [] [stackSyms_def, ruleRhs_def]);
 
-val validStlItems = Define
-`(validStlItems stl [] = T) ∧
-(validStlItems stl ((e::t):('nts,'ts) item list) =
-(isSuffix (itemFstRhs e) (stackSyms stl)) ∧ validStlItems stl t)`;
+Definition validStlItems_def:
+  (validStlItems stl [] ⇔ T) ∧
+  (validStlItems stl ((e::t):('nts,'ts) item list) ⇔
+    isSuffix (itemFstRhs e) (stackSyms stl) ∧ validStlItems stl t)
+End
+val validStlItems = validStlItems_def
 
-val validStlItemsStack = Define
-`(validStlItemsStack [] [e] =
-  validStlItems ([]:((('nts,'ts)symbol # ('nts,'ts)state) # ('nts,'ts)ptree) list) (SND e)) ∧
-(validStlItemsStack (h::stl) (e::csl) =
- validStlItems (h::stl) (SND e) ∧ validStlItemsStack stl csl) ∧
-(validStlItemsStack _ _ = F)`;
+Definition validStlItemsStack_def:
+  (validStlItemsStack [] [e] ⇔
+     validStlItems
+       ([]:((('nts,'ts)symbol # ('nts,'ts)state) # ('nts,'ts)ptree) list)
+       (SND e)) ∧
+  (validStlItemsStack (h::stl) (e::csl) ⇔
+     validStlItems (h::stl) (SND e) ∧ validStlItemsStack stl csl) ∧
+  (validStlItemsStack _ _ ⇔ F)
+End
+val validStlItemsStack = validStlItemsStack_def
 
-val validItemStack = Define `(validItemStack g [] = T) ∧
-(validItemStack g (e::rst) =
-                       EVERY (validItem g (stackSyms (e::rst))) (SND (FST e)) ∧
-                       validItemStack g rst )`;
+Definition validItemStack_def:
+  (validItemStack g [] = T) ∧
+  (validItemStack g (e::rst) ⇔
+     EVERY (validItem g (stackSyms (e::rst))) (SND (FST e)) ∧
+     validItemStack g rst )
+End
+val validItemStack = validItemStack_def
 
 
-val validStlItems_append = store_thm ("validStlItems_append",
-``∀l1 l2.validStlItems stl (l1++l2) = validStlItems stl l1 ∧ validStlItems stl l2``,
-Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [] THENL[
-METIS_TAC [APPEND, validStlItems],
-METIS_TAC [APPEND, validStlItems],
-Cases_on `h'` THEN Cases_on `p`  THEN
-METIS_TAC [APPEND, validStlItems, APPEND_ASSOC, APPEND_NIL]]);
+Theorem validStlItems_append:
+  ∀l1 l2.
+   validStlItems stl (l1++l2) ⇔ validStlItems stl l1 ∧ validStlItems stl l2
+Proof
+  Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] []
+  >- METIS_TAC [APPEND, validStlItems]
+  >- METIS_TAC [APPEND, validStlItems] >>
+  Cases_on `h'` THEN Cases_on `p`  THEN
+  METIS_TAC [APPEND, validStlItems, APPEND_ASSOC, APPEND_NIL]
+QED
 
 
 val stackSyms_len = store_thm ("stackSyms_len",
@@ -288,20 +300,27 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [ruleLhs_def, reduce_followSet, MEM]]);
 
 
-val validItls = Define `
-validItls ((s, itl)) topitl =
-(∀N r1 r2.(MEM (item N (r1,r2)) itl) ⇒ (r1=[]) ∨
-(LAST r1 = s)) ∧
-(∀N' r1' r2'.(MEM (item N' (r1',r2')) topitl) ⇒ (r1'=[]) ∨ (∃l1 l2.(r1'=l1++[s]++l2) ∧
-MEM (item N' (l1++[s],l2++r2')) itl))`
+Definition validItls_def:
+  validItls (s, itl) topitl ⇔
+    (∀N r1 r2. MEM (item N (r1,r2)) itl ⇒ (r1=[]) ∨ (LAST r1 = s))
+      ∧
+    (∀N' r1' r2'. MEM (item N' (r1',r2')) topitl ⇒
+                  (r1'=[]) ∨
+                  (∃l1 l2. (r1'=l1++[s]++l2) ∧
+                           MEM (item N' (l1++[s],l2++r2')) itl))
+End
 
-val stateValidItls = Define `
-(stateValidItls [] topitl = T) ∧
-(stateValidItls (st::rst) topitl = validItls st topitl ∧ stateValidItls rst topitl)`;
+Definition stateValidItls_def:
+  (stateValidItls [] topitl ⇔ T) ∧
+  (stateValidItls (st::rst) topitl ⇔
+    validItls st topitl ∧ stateValidItls rst topitl)
+End
 
-val symsAfterDot = Define `(symsAfterDot [] = []) ∧
-(symsAfterDot (item l (r1,[])::t) = symsAfterDot t) ∧
-(symsAfterDot (item l (r1,s::ss)::t) = s::symsAfterDot t)`;
+Definition symsAfterDot_def:
+   (symsAfterDot [] = []) ∧
+   (symsAfterDot (item l (r1,[])::t) = symsAfterDot t) ∧
+   (symsAfterDot (item l (r1,s::ss)::t) = s::symsAfterDot t)
+End
 
 
 val rhsEqItems = Define
@@ -309,21 +328,26 @@ val rhsEqItems = Define
 (itemFstRhs e1 ++ itemSndRhs e1 = itemFstRhs e2 ++ itemSndRhs e2)`;
 
 
-val isNewItem = Define `(isNewItem [] = T) ∧
-(isNewItem ((item l (r1,r2))::rst) = if (r1=[]) then (isNewItem rst) else F)`;
+Definition isNewItem_def:
+   (isNewItem [] ⇔ T) ∧
+   (isNewItem (item l (r1,r2)::rst) ⇔ if r1=[] then isNewItem rst else F)
+End
+val isNewItem = isNewItem_def
 
 val isNewItem_rules2items = store_thm ("newItem_rules2items",
-``∀g.isNewItem  (rules2Items (rules g))``,
+``∀g. isNewItem  (rules2Items (rules g))``,
 Cases_on `g` THEN SRW_TAC [] [rules_def] THEN
 Induct_on `l` THEN SRW_TAC [] [isNewItem, rules2Items_def] THEN
 Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNewItem,rules2Items_def]);
 
 
-val isNewItem_append = store_thm ("isNewItem_append",
-``∀l1 l2.isNewItem (l1++l2) = isNewItem l1 ∧ isNewItem l2``,
-Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [isNewItem, EQ_IMP_THM] THEN
-Cases_on `h'` THEN Cases_on `p` THEN
-METIS_TAC [APPEND, isNewItem]);
+Theorem isNewItem_append:
+  ∀l1 l2.isNewItem (l1++l2) ⇔ isNewItem l1 ∧ isNewItem l2
+Proof
+  Induct_on `l1` >> Induct_on `l2` >> SRW_TAC [] [isNewItem, EQ_IMP_THM] THEN
+  Cases_on `h'` THEN Cases_on `p` THEN
+  METIS_TAC [APPEND, isNewItem]
+QED
 
 
 val isNewItem_mem = store_thm ("isNewItem_mem",

@@ -2,6 +2,8 @@
 *Theory.sml
 *.uo
 *.ui
+*.dat
+.hollogs
 .HOLMK
 *.aux
 *.make

@@ -13,9 +13,12 @@ open parseProp2DefTheory
 val _ = new_theory "parserPropDef"
 fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
 
-val parser_inv = Define
-`parser_inv g stl csl = validptree_inv g stl /\
-                      ~NULL csl /\ validStates g csl`
+Definition parser_inv_def:
+  parser_inv g stl csl ⇔ validptree_inv g stl /\
+                         ~NULL csl /\ validStates g csl
+End
+
+val parser_inv = parser_inv_def
 
 
 val parserValidptree_Invthm = store_thm ("parserValidptree_Invthm",

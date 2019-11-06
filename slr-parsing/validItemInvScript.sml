@@ -496,23 +496,26 @@ Induct_on `l` THEN SRW_TAC [] [pop_def]);
 
 
 
-val stackValid = Define
-`(stackValid ag ([]:(((('nts,β)symbol#('nts,β)state)#('nts,β)ptree)list))
-  ([]:((('nts,β)symbol#('nts,β)state)list)) = F) ∧
- (stackValid ag [] [e] = EVERY (validItem ag []) (itemlist [e])) ∧
- (stackValid ag (x::xs) (y::ys) =
-  EVERY (validItem ag (stackSyms (x::xs))) (itemlist (y::ys))
-  ∧ stackValid ag xs ys) ∧
- (stackValid ag _ _ = F)`;
+Definition stackValid_def:
+  (stackValid ag ([]:(((('nts,β)symbol#('nts,β)state)#('nts,β)ptree)list))
+     ([]:((('nts,β)symbol#('nts,β)state)list)) ⇔ F) ∧
+  (stackValid ag [] [e] ⇔ EVERY (validItem ag []) (itemlist [e])) ∧
+  (stackValid ag (x::xs) (y::ys) ⇔
+    EVERY (validItem ag (stackSyms (x::xs))) (itemlist (y::ys)) ∧
+    stackValid ag xs ys) ∧
+  (stackValid ag _ _ ⇔ F)
+End
+val stackValid = stackValid_def
 
 
-val parseInv = Define
-`parseInv
-(ag,(stl:((('nts,β)symbol # ('nts,β)state) # ('nts,β)ptree) list),csl) =
-validStates ag csl ∧
-stackValid ag stl csl ∧
-validStlItemsStack stl csl ∧
-(validStkSymTree stl)`;
+Definition parseInv_def:
+  parseInv
+    (ag,(stl:((('nts,β)symbol # ('nts,β)state) # ('nts,β)ptree) list),csl)
+ ⇔
+   validStates ag csl ∧ stackValid ag stl csl ∧ validStlItemsStack stl csl ∧
+   validStkSymTree stl
+End
+val parseInv = parseInv_def
 
 val validItemInvReduceStlNil = store_thm(
 "validItemInvReduceStlNil",
@@ -1013,12 +1016,10 @@ METIS_TAC [lastListBdown, NOT_CONS_NIL, last_append, last_elem]],
 METIS_TAC [slemma1_4, nonTerminalsEq]]);
 
 
-val COND_SOME = store_thm(
-  "COND_SOME",
-  ``((if P then NONE else x) = SOME y) =
-    ~P ∧ (x = SOME y)``,
-  SRW_TAC [][]);
-val _ = export_rewrites ["COND_SOME"];
+Theorem COND_SOME[simp]:
+  ((if P then NONE else x) = SOME y) ⇔ ~P ∧ (x = SOME y)
+Proof SRW_TAC [][]
+QED
 
 val stackSyms_CONS = store_thm(
   "stackSyms_CONS",

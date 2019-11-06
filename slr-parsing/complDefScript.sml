@@ -26,10 +26,12 @@ val stackSyms_NIL = Store_thm(
   SRW_TAC [][stackSyms_def]);
 
 
-val takesSteps = Define
-`(takesSteps 0 f g s0 s = (s0 = s)) /\
-(takesSteps (SUC n) f g s0 s =
-   ~(g s0) /\ ?s'. ((f s0) = SOME s') /\ takesSteps n f g s' s)`;
+Definition takesSteps_def:
+  (takesSteps 0 f g s0 s ⇔ s0 = s) /\
+  (takesSteps (SUC n) f g s0 s ⇔
+    ¬g s0 ∧ ∃s'. f s0 = SOME s' ∧ takesSteps n f g s' s)
+End
+val takesSteps = takesSteps_def
 
 
 val takesSteps_mwhile = store_thm(

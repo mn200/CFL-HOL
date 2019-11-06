@@ -9,7 +9,7 @@ setLemmasTheory whileLemmasTheory parseTreeTheory followSetDefTheory
 yaccDefTheory parseProp1DefTheory parseProp2DefTheory
 lrGrammarDefTheory validItemInvTheory macStepTheory
 
-fun Store_thm(s,t,tac) = (store_thm(s,t,tac) before export_rewrites [s]) 
+fun Store_thm(s,t,tac) = (store_thm(s,t,tac) before export_rewrites [s])
 
 
 val _ = augment_srw_ss [rewrites [rich_listTheory.IS_PREFIX_NIL]]
@@ -23,12 +23,12 @@ val _ = diminish_srw_ss ["list EQ"];
 val stackSyms_NIL = Store_thm(
   "stackSyms_NIL",
   ``stackSyms [] = []``,
-  SRW_TAC [][stackSyms_def]); 
+  SRW_TAC [][stackSyms_def]);
 
 
-val takesSteps = Define 
+val takesSteps = Define
 `(takesSteps 0 f g s0 s = (s0 = s)) /\
-(takesSteps (SUC n) f g s0 s = 
+(takesSteps (SUC n) f g s0 s =
    ~(g s0) /\ ?s'. ((f s0) = SOME s') /\ takesSteps n f g s' s)`;
 
 
@@ -36,18 +36,18 @@ val takesSteps_mwhile = store_thm(
   "takesSteps_mwhile",
 ``!n f g s0 s.takesSteps n f g s0 s /\ (g s) ==>
      (mwhile (\s. ~g s) f s0 =  SOME (SOME s))``,
-Induct_on `n` THEN 
+Induct_on `n` THEN
 SRW_TAC [][takesSteps] THEN
 ONCE_REWRITE_TAC [mwhile_COND] THEN SRW_TAC [][]);
 
 val getStateReduce = store_thm ("getStateReduce",
-``!itl h rhs. 
+``!itl h rhs.
      (auggr g st eof = SOME ag) ==> (slrmac ag = SOME m) ==>
      validItl ag itl ==>
      (trans ag (initItems ag (rules ag),pfx) = SOME itl) ==>
-     MEM (item lhs (rhs,([]:(α,β)symbol list))) itl ==> 
+     MEM (item lhs (rhs,([]:(α,β)symbol list))) itl ==>
      isTmnlSym h ==>
-     h IN (followSet ag (NTS lhs)) 
+     h IN (followSet ag (NTS lhs))
    ==>
     (getState m itl h = REDUCE (rule lhs rhs))``,
 
@@ -56,8 +56,8 @@ SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM,slrmac_def] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`pfx`,`itl`,`h`] MP_TAC) THEN
 SRW_TAC [][] THEN
-Cases_on `sgoto ag itl h` THEN 
-Cases_on `reduce ag itl (ts2str h)` THEN FULL_SIMP_TAC (srw_ss()) [] 
+Cases_on `sgoto ag itl h` THEN
+Cases_on `reduce ag itl (ts2str h)` THEN FULL_SIMP_TAC (srw_ss()) []
  THENL[
        Cases_on `t` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
        FULL_SIMP_TAC (srw_ss()) [rgr_r9eq] THEN
@@ -86,13 +86,13 @@ val getStateGotoValidItl = store_thm ("getStateGotoValidItl",
 SRW_TAC [][] THEN
 `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
 FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM, ts2str_def] THEN
-Cases_on `sgoto (ag :(α, β) grammar) (itl :(α, β) state) (TS (s :β))` THEN 
+Cases_on `sgoto (ag :(α, β) grammar) (itl :(α, β) state) (TS (s :β))` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `reduce ag itl s` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [][]
-THENL[      
-      Cases_on `t` THEN 
+THENL[
+      Cases_on `t` THEN
       FULL_SIMP_TAC (srw_ss()) [],
 
       SRW_TAC [] [] THEN
@@ -105,7 +105,7 @@ THENL[
 val reduce_not_nil = store_thm ("reduce_not_nil",
 ``!itl.isTmnlSym h ==>
   ~(reduce ag itl (ts2str h) = []) ==>
-  ?N r1.MEM (item N (r1,[])) itl /\ 
+  ?N r1.MEM (item N (r1,[])) itl /\
      h IN followSet ag (NTS N)``,
 
 Induct_on `itl` THEN SRW_TAC [] [reduce_def] THEN
@@ -115,7 +115,7 @@ Cases_on `r` THEN
 Cases_on `h` THEN
 FULL_SIMP_TAC (srw_ss()) [reduce_def, ts2str_def, isTmnlSym_def]
 THENL[
-      Cases_on `TS t IN followG ag [] n` 
+      Cases_on `TS t IN followG ag [] n`
       THENL[
 	    METIS_TAC [followSetEq],
 
@@ -126,7 +126,7 @@ THENL[
 
       METIS_TAC []
       ]);
-      
+
 val getStateGotoExists = store_thm ("getStateGotoExists",
 ``(slrmac ag = SOME m) ==>
   validItl ag itl ==>
@@ -163,7 +163,7 @@ THENL[
       Cases_on `t'` THEN SRW_TAC [][],
 
       FULL_SIMP_TAC (srw_ss()) [reduce_def] THEN
-      Cases_on `?N r1.MEM (item N (r1,[])) itl /\           
+      Cases_on `?N r1.MEM (item N (r1,[])) itl /\
                  h IN followSet ag (NTS N)`
       THENL[
 	    METIS_TAC [rgr_r9eq, validItl_append, validItl_def, slrmacNotValid, APPEND_NIL],
@@ -171,7 +171,7 @@ THENL[
 	    ]
       ]
 );
-      
+
 
 val takesStepsManyToOne1 = store_thm
 ("takesStepsManyToOne1",
@@ -233,15 +233,15 @@ val takesStepsAdd = store_thm
   takesSteps (n+n') f g s0 s''``,
 Induct_on `n'` THEN SRW_TAC [] []
 THENL[
-      FULL_SIMP_TAC (srw_ss()) [takesSteps], 
+      FULL_SIMP_TAC (srw_ss()) [takesSteps],
 
-      Cases_on `n` THEN 
+      Cases_on `n` THEN
       FULL_SIMP_TAC (srw_ss()) [takesSteps] THEN
       `takesSteps (SUC n'') f g s0 s'` by SRW_TAC [] [takesSteps] THEN
       `?sx.takesSteps (SUC 0) f g s0 sx /\ takesSteps n'' f g sx s'` by METIS_TAC [takesStepsOneToMany] THEN
       `takesSteps (SUC 0) f g s' s''''` by SRW_TAC [] [takesSteps] THEN
       `takesSteps (SUC n') f g s' s''` by  METIS_TAC [takesStepsOneToMany] THEN
-      `takesSteps (SUC (SUC n'')) f g s0 s''''` 
+      `takesSteps (SUC (SUC n'')) f g s0 s''''`
 	  by METIS_TAC [takesStepsManyToOne] THEN
       `takesSteps ((SUC (SUC n'')) + n') f g s0 s''` by METIS_TAC [] THEN
       FULL_SIMP_TAC (arith_ss) [ADD1]
@@ -302,7 +302,7 @@ SRW_TAC [] [validStkSymTree_def] THEN
 Cases_on `n` THEN
 SRW_TAC [] []
 THENL[
-      
+
       FULL_SIMP_TAC (srw_ss()) [takesSteps] THEN
       METIS_TAC [parseVldStkSymTree],
 
@@ -310,7 +310,7 @@ THENL[
       `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,e::csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `validStkSymTree q'` 
+      Q_TAC SUFF_TAC `validStkSymTree q'`
       THENL[
 	    SRW_TAC [] []THEN
 	    Cases_on `e` THEN
@@ -345,7 +345,7 @@ THENL[
       `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,e::csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `validStates ag r'` 
+      Q_TAC SUFF_TAC `validStates ag r'`
       THENL[
 	    SRW_TAC [] [] THEN
 	    Cases_on `e` THEN
@@ -370,12 +370,12 @@ val doRedCslEqStl = store_thm(
 Cases_on `stl` THEN
 SRW_TAC [] []
 THENL[
-      
+
       Cases_on `e` THEN
       FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM] THEN
       Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
       Cases_on `r'` THEN FULL_SIMP_TAC (srw_ss()) [ruleLhs_def, ruleRhs_def] THEN
-      Cases_on `addRule ([] :(((α, γ) symbol # (α, β) state) # (α, β) ptree) list) 
+      Cases_on `addRule ([] :(((α, γ) symbol # (α, β) state) # (α, β) ptree) list)
  (rule n l)` THEN
       FULL_SIMP_TAC (srw_ss()) [push_def]  THEN
       `csl' = (NTS n,FST m (SND (HD (pop [(q,r'')] (LENGTH l)))) (NTS n))::
@@ -386,10 +386,10 @@ THENL[
       FULL_SIMP_TAC (arith_ss) [],
 
 
-      Cases_on `h'` THEN Cases_on `q` THEN 
+      Cases_on `h'` THEN Cases_on `q` THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
       FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM] THEN
-      Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN      
+      Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def] THEN
       Cases_on `addRule (((q',r'''),r'')::t) r'` THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
       Cases_on `FST m
@@ -403,19 +403,19 @@ THENL[
       Cases_on `pop ((q',r''')::(MAP FST t ++ [e]))
                      (LENGTH (ruleRhs r')) = []` THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN
-      Cases_on `r'` THEN 
+      Cases_on `r'` THEN
       FULL_SIMP_TAC (srw_ss()) [ruleRhs_def, ruleLhs_def, LET_THM, push_def] THEN
       `csl' = (NTS n,
            FST m (SND (HD (pop ((q',r''')::(MAP FST t ++ [e])) (LENGTH l))))
              (NTS n))::pop ((q',r''')::(MAP FST t ++ [e])) (LENGTH l)` by METIS_TAC [] THEN
       SRW_TAC [] [] THEN
       `MAP FST (pop (((q',r'''),r'')::t) (LENGTH l)) ++ [e]
-       = pop (MAP FST (((q',r'''),r'')::t)) (LENGTH l) ++ [e]` 
+       = pop (MAP FST (((q',r'''),r'')::t)) (LENGTH l) ++ [e]`
 	  by METIS_TAC [map_pop] THEN
       SRW_TAC [] []THEN
       `LENGTH (((q',r'''),r'')::t) >= LENGTH l` by METIS_TAC [addrule_len] THEN
       `((q',r''')::(MAP FST t ++ [e])) = ([(q',r''')]++MAP FST t) ++ [e]` by FULL_SIMP_TAC (srw_ss()) [] THEN
-      `LENGTH ([((q',r'''),r'')]++t) >= LENGTH l` 
+      `LENGTH ([((q',r'''),r'')]++t) >= LENGTH l`
 	  by (FULL_SIMP_TAC (srw_ss()) [] THEN
 	      FULL_SIMP_TAC (arith_ss) []) THEN
       `((q',r''')::MAP FST t) = ([(q',r''')]++MAP FST t)` by FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -425,11 +425,11 @@ THENL[
 
 val parseCslStlEq = store_thm (
 "parseCslStlEq",
-``(parse m (sl,stl,MAP FST stl ++ [e]) 
+``(parse m (sl,stl,MAP FST stl ++ [e])
    = SOME (sl',stl',csl')) ==>
     (csl' = MAP FST stl' ++ [e])``,
 
-Cases_on `stl` THEN SRW_TAC  [] [] 
+Cases_on `stl` THEN SRW_TAC  [] []
 THENL[
       Cases_on `e` THEN
       FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM] THEN
@@ -437,15 +437,15 @@ THENL[
       Cases_on `t` THEN
       Cases_on `getState m r h` THEN FULL_SIMP_TAC (srw_ss()) []
       THENL[
-	    `[(q,r)] = MAP FST ([]:(((α,β)symbol#(α,β)state)#(α,β)ptree) list) ++ 
+	    `[(q,r)] = MAP FST ([]:(((α,β)symbol#(α,β)state)#(α,β)ptree) list) ++
             [(q,r)]` by SRW_TAC [] [] THEN
 	    METIS_TAC [doRedCslEqStl,APPEND],
 
-	    `[(q,r)] = MAP FST ([]:(((α,β)symbol#(α,β)state)#(α,β)ptree) list) ++ 
+	    `[(q,r)] = MAP FST ([]:(((α,β)symbol#(α,β)state)#(α,β)ptree) list) ++
             [(q,r)]` by SRW_TAC [] [] THEN
 	    METIS_TAC [doRedCslEqStl,APPEND],
 
-	    Cases_on `h` THEN 
+	    Cases_on `h` THEN
 	    FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def, push_def] THEN
 	    `csl' = [(TS t,l); (q,r)]` by METIS_TAC [] THEN
 	    SRW_TAC [] []
@@ -509,13 +509,13 @@ val parseValidStlStack = store_thm
   validStlItemsStack stl' csl'``,
 
 Cases_on `stl` THEN
-SRW_TAC [] [] 
+SRW_TAC [] []
 THENL[
 
       FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM] THEN
       Q.ABBREV_TAC `inis = initItems ag (rules ag)` THEN
       Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-      Cases_on `t` THEN 
+      Cases_on `t` THEN
       Cases_on `getState m inis h` THEN
       FULL_SIMP_TAC (srw_ss()) []
       THENL[
@@ -558,7 +558,7 @@ THENL[
       Cases_on `h` THEN Cases_on `q` THEN
       FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM] THEN
       Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-      Cases_on `t'` THEN 
+      Cases_on `t'` THEN
       Cases_on `getState m r' h` THEN
       FULL_SIMP_TAC (srw_ss()) []
       THENL[
@@ -586,13 +586,13 @@ THENL[
 	    SRW_TAC [] [validStlItemsStack_def, push_def] THEN
 	    `LENGTH (((q',r'),r)::t) >= LENGTH l` by METIS_TAC [addrule_len] THEN
  	    `LENGTH l <= LENGTH (((q',r'),r)::t)` by DECIDE_TAC THEN
-	    `validStlItemsStack (pop (((q',r'),r)::t) (LENGTH l)) 
-				(pop ((q',r')::(MAP FST t ++ [(NTS st,initItems ag (rules ag))])) (LENGTH l))` 
+	    `validStlItemsStack (pop (((q',r'),r)::t) (LENGTH l))
+				(pop ((q',r')::(MAP FST t ++ [(NTS st,initItems ag (rules ag))])) (LENGTH l))`
 		by METIS_TAC [validStlItems_pop, NOT_CONS_NIL] THEN
 	    Cases_on `l` THEN SRW_TAC [] [] THEN
-	    FULL_SIMP_TAC (srw_ss()) [pop_def, LENGTH] 
+	    FULL_SIMP_TAC (srw_ss()) [pop_def, LENGTH]
             THENL[
-		  SRW_TAC [] [] THEN 
+		  SRW_TAC [] [] THEN
 		  METIS_TAC [validStlItems_sgoto_gen],
 
 		  Q.ABBREV_TAC `pped = pop (MAP FST t ++ [(NTS st,initItems ag (rules ag))]) (LENGTH t')` THEN
@@ -628,13 +628,13 @@ THENL[
 	    SRW_TAC [] [validStlItemsStack_def, push_def] THEN
 	    `LENGTH (((q',r'),r)::t) >= LENGTH l` by METIS_TAC [addrule_len] THEN
  	    `LENGTH l <= LENGTH (((q',r'),r)::t)` by DECIDE_TAC THEN
-	    `validStlItemsStack (pop (((q',r'),r)::t) (LENGTH l)) 
-				(pop ((q',r')::(MAP FST t ++ [(NTS st,initItems ag (rules ag))])) (LENGTH l))` 
+	    `validStlItemsStack (pop (((q',r'),r)::t) (LENGTH l))
+				(pop ((q',r')::(MAP FST t ++ [(NTS st,initItems ag (rules ag))])) (LENGTH l))`
 		by METIS_TAC [validStlItems_pop, NOT_CONS_NIL] THEN
 	    Cases_on `l` THEN SRW_TAC [] [] THEN
-	    FULL_SIMP_TAC (srw_ss()) [pop_def, LENGTH] 
+	    FULL_SIMP_TAC (srw_ss()) [pop_def, LENGTH]
             THENL[
-		  SRW_TAC [] [] THEN 
+		  SRW_TAC [] [] THEN
 		  METIS_TAC [validStlItems_sgoto_gen],
 
 		  Q.ABBREV_TAC `pped = pop (MAP FST t ++ [(NTS st,initItems ag (rules ag))]) (LENGTH t')` THEN
@@ -672,11 +672,11 @@ THENL[
       METIS_TAC [parseValidStlStack],
 
       Q.ABBREV_TAC `csl=MAP FST stl ++ [(NTS st,initItems ag (rules ag))]` THEN
-      `takesSteps (SUC 0) (parse m) 
+      `takesSteps (SUC 0) (parse m)
          (exitCond (eof,NTS (startSym g)))
          (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `validStlItemsStack q' r'` 
+      Q_TAC SUFF_TAC `validStlItemsStack q' r'`
       THENL[
 	    SRW_TAC [] [] THEN
 	    FIRST_X_ASSUM (Q.SPECL_THEN [`q`, `q'`, `r'`] MP_TAC) THEN
@@ -695,12 +695,12 @@ val svPop = store_thm
   (LENGTH l1 >= n) ==>
   (stackValid ag (pop l1 n) (pop l2 n))``,
 Induct_on `n` THEN SRW_TAC [] [pop_def,pop0] THEN
-Cases_on `l1` THEN Cases_on `l2` THEN 
+Cases_on `l1` THEN Cases_on `l2` THEN
 FULL_SIMP_TAC (srw_ss()) [stackValid_def,pop_def,pop0] THEN
 FULL_SIMP_TAC (arith_ss) []);
 
 
-val parseValidItem = store_thm 
+val parseValidItem = store_thm
 ("parseValidItem",
 ``!m g.
 (slrmac ag = SOME m) ==>
@@ -711,7 +711,7 @@ EVERY isTmnlSym sl ==>
 (parse m (sl, stl, csl) = SOME (sl',stl',csl')) ==>
 stackValid ag stl' csl'``,
 
- Cases_on `stl` THEN SRW_TAC [] [] 
+ Cases_on `stl` THEN SRW_TAC [] []
  THENL[
 
       FULL_SIMP_TAC (srw_ss()) [parse_def, itemlist_def, LET_THM,stackValid_def] THEN
@@ -722,7 +722,7 @@ stackValid ag stl' csl'``,
       Cases_on `getState m inis h` THEN
       FULL_SIMP_TAC (srw_ss()) []
       THENL[
-	    
+
 	    Cases_on `r` THEN
 	    FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM, pop_def, push_def, ruleRhs_def, ruleLhs_def] THEN
 	    Cases_on `addRule ([]:(((α,β)symbol#(α,β)state)#(α,β)ptree) list) (rule n l)` THEN
@@ -788,11 +788,11 @@ stackValid ag stl' csl'``,
 		  ]
 	    ],
 
-      Cases_on `h` THEN 
+      Cases_on `h` THEN
       Cases_on `q` THEN
       FULL_SIMP_TAC (srw_ss()) [parse_def, LET_THM] THEN
       Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) []THEN
-      Cases_on `t'` THEN 
+      Cases_on `t'` THEN
       Cases_on `getState m r' h` THEN
       FULL_SIMP_TAC (srw_ss()) []
       THENL[
@@ -801,7 +801,7 @@ stackValid ag stl' csl'``,
 	    FULL_SIMP_TAC (srw_ss()) [doReduce_def, LET_THM, pop_def, push_def, ruleRhs_def, ruleLhs_def] THEN
 	    Cases_on `addRule (((q',r'),r)::t) (rule n l)` THEN
 	    Cases_on `LENGTH l = 0` THEN
-	    FULL_SIMP_TAC (srw_ss()) [] 
+	    FULL_SIMP_TAC (srw_ss()) []
             THENL[
 		  Cases_on `l` THEN
 		  FULL_SIMP_TAC (srw_ss()) [itemlist_def,stackValid_def] THEN
@@ -826,7 +826,7 @@ stackValid ag stl' csl'``,
 		  `LENGTH (((q',r'),r)::t) >= LENGTH l` by METIS_TAC [addrule_len] THEN
 		  FULL_SIMP_TAC (srw_ss()) [] THEN
 		  `LENGTH t >= LENGTH l - 1` by DECIDE_TAC THEN
-		  `stackValid ag (pop t (LENGTH l - 1)) ((q,r'')::t')` 
+		  `stackValid ag (pop t (LENGTH l - 1)) ((q,r'')::t')`
 		      by METIS_TAC [svPop] THEN
 		  SRW_TAC [] [] THEN
 		  METIS_TAC [validItem_moveDot, EVERY_MEM, validItem_iclosure,sv_1]
@@ -838,7 +838,7 @@ stackValid ag stl' csl'``,
 	    Cases_on `addRule (((q',r'),r)::t) (rule n l)` THEN
 	    Cases_on `LENGTH l = 0` THEN
 	    `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
-	    FULL_SIMP_TAC (srw_ss()) [] 
+	    FULL_SIMP_TAC (srw_ss()) []
             THENL[
 		  Cases_on `l` THEN
 		  FULL_SIMP_TAC (srw_ss()) [itemlist_def,stackValid_def] THEN
@@ -859,14 +859,14 @@ stackValid ag stl' csl'``,
 		  `LENGTH (((q',r'),r)::t) >= LENGTH l` by METIS_TAC [addrule_len] THEN
 		  FULL_SIMP_TAC (srw_ss()) [] THEN
 		  `LENGTH t >= LENGTH l - 1` by DECIDE_TAC THEN
-		  `stackValid ag (pop t (LENGTH l - 1)) ((q,r'')::t')` 
+		  `stackValid ag (pop t (LENGTH l - 1)) ((q,r'')::t')`
 		      by METIS_TAC [svPop] THEN
 		  SRW_TAC [] [] THEN
 		  METIS_TAC [validItem_moveDot, EVERY_MEM, validItem_iclosure,sv_1]
 		  ],
 
 	    SRW_TAC [] [stackValid_def,itemlist_def,push_def] THEN
-	    FULL_SIMP_TAC (srw_ss()) [stackValid_def,itemlist_def] THEN	    
+	    FULL_SIMP_TAC (srw_ss()) [stackValid_def,itemlist_def] THEN
 	    `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
 	    FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM] THEN
 	    Cases_on `sgoto ag r' h` THEN
@@ -889,7 +889,7 @@ stackValid ag stl' csl'``,
 	    ]]);
 
 
-val parseTmnlSyms = store_thm 
+val parseTmnlSyms = store_thm
 ("parseTmnlSyms",
 ``!m g.
 (csl = MAP FST stl ++ [e]) ==>
@@ -900,13 +900,13 @@ EVERY isTmnlSym sl'``,
 Cases_on `stl`
 THENL[
       Cases_on `e` THEN
-      Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN      
+      Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
       FULL_SIMP_TAC (srw_ss()) [parse_def,LET_THM] THEN
       Cases_on `t` THEN
       FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][] THEN
       Cases_on `getState m r h` THEN FULL_SIMP_TAC (srw_ss()) []
       THENL[
-	    
+
  	    FULL_SIMP_TAC (srw_ss()) [doReduce_def,LET_THM] THEN
 	    Cases_on `addRule ([]:((((α,β)symbol#(α,β)state)#(α,β)ptree)list)) r'` THEN
 	    Cases_on `pop [(q,r)] (LENGTH (ruleRhs r'))` THEN
@@ -934,13 +934,13 @@ THENL[
 	    ],
 
 
-      
+
       Cases_on `h` THEN
       Cases_on `q` THEN
       FULL_SIMP_TAC (srw_ss()) [parse_def,LET_THM] THEN
       SRW_TAC [][] THEN
       Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-      Cases_on `t'` THEN 
+      Cases_on `t'` THEN
       Cases_on `getState m r' h` THEN
       FULL_SIMP_TAC (srw_ss()) []
       THENL[
@@ -1011,7 +1011,7 @@ THENL[
       `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `EVERY isTmnlSym q` 
+      Q_TAC SUFF_TAC `EVERY isTmnlSym q`
       THENL[
 	    SRW_TAC [] [] THEN
 	    METIS_TAC [takesStepsCslStlEq],
@@ -1021,7 +1021,7 @@ THENL[
       ]);
 
 
-val parseSlNotNil = store_thm 
+val parseSlNotNil = store_thm
 ("parseSlNotNil",
 ``!m g.
 (csl = MAP FST stl ++ [e]) ==>
@@ -1040,7 +1040,7 @@ THENL[
       Cases_on `getState m r h` THEN
       FULL_SIMP_TAC (srw_ss()) []
       THENL[
-	    
+
 	    FULL_SIMP_TAC (srw_ss()) [doReduce_def,LET_THM] THEN
 	    Cases_on `addRule ([]:(((((α,β)symbol#(α,β)state)#(α,β)ptree)list))) r'` THEN
 	    Cases_on `pop [(q,r)] (LENGTH (ruleRhs r')) = []` THEN
@@ -1069,13 +1069,13 @@ THENL[
 	    METIS_TAC [NOT_CONS_NIL]
 	    ],
 
-      
+
       Cases_on `h` THEN
       Cases_on `q` THEN
       FULL_SIMP_TAC (srw_ss()) [parse_def,LET_THM] THEN
       SRW_TAC [][] THEN
       Cases_on `sl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
-      Cases_on `t'` THEN 
+      Cases_on `t'` THEN
       Cases_on `getState m r' h` THEN
       FULL_SIMP_TAC (srw_ss()) []
       THENL[
@@ -1148,7 +1148,7 @@ THENL[
       `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `~(q=[])` 
+      Q_TAC SUFF_TAC `~(q=[])`
       THENL[
 	    SRW_TAC [] [] THEN
 	    METIS_TAC [takesStepsCslStlEq],
@@ -1184,7 +1184,7 @@ THENL[
       `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `stackValid ag q' r'` 
+      Q_TAC SUFF_TAC `stackValid ag q' r'`
       THENL[
 	    SRW_TAC [] [] THEN
 	    METIS_TAC [takesStepsCslStlEq,takesStepsTmnlSyms],
@@ -1195,24 +1195,24 @@ THENL[
 
 
 
-val parseInvInit = store_thm 
+val parseInvInit = store_thm
 ("parseInvInit",
 ``!m g sl st.
 (!nt. nt IN nonTerminals ag ==> gaw ag nt) ==>
 parseInv (ag, [], [((NTS st), initItems ag (rules ag))])``,
-SRW_TAC [] [parseInv_def, validStkSymTree_def, itemlist_def] 
+SRW_TAC [] [parseInv_def, validStkSymTree_def, itemlist_def]
 THENL[
       FULL_SIMP_TAC (srw_ss()) [validStates_def, initItems_def] THEN
       METIS_TAC [validItl_initProds2Items, validItl_iclosure],
 
-      
+
       SRW_TAC [] [initItems_def,stackValid_def,itemlist_def] THEN
-      `EVERY (validItem ag []) (initProds2Items (startSym ag) (rules ag))` 
+      `EVERY (validItem ag []) (initProds2Items (startSym ag) (rules ag))`
 	  by METIS_TAC [validItem_initProds2Items] THEN
       METIS_TAC [validItem_iclosure],
 
-      
-      FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN	    
+
+      FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN
       METIS_TAC [b4DotEmpty, nullFstRhs_validStlItems]
       ]);
 
@@ -1228,11 +1228,11 @@ parseInv (ag,stl,csl) ==>
 parseInv (ag,stl',csl')``,
 
       FULL_SIMP_TAC (srw_ss()) [parseInv_def] THEN
-      SRW_TAC [] [] 
+      SRW_TAC [] []
       THENL[
-		    
+
 	    Cases_on `stl` THEN SRW_TAC [] [] THEN
-	    FULL_SIMP_TAC (srw_ss()) [] 
+	    FULL_SIMP_TAC (srw_ss()) []
             THENL[
 		  METIS_TAC [parse_csl_validStates],
 
@@ -1245,7 +1245,7 @@ parseInv (ag,stl',csl')``,
       METIS_TAC [parseValidItem],
 
       METIS_TAC [parseValidStlStack],
-      
+
       Cases_on `stl` THEN SRW_TAC [] [] THEN
       FULL_SIMP_TAC (srw_ss()) []
       THENL[
@@ -1279,14 +1279,14 @@ Cases_on `n` THEN SRW_TAC [][]
 THENL[
       FULL_SIMP_TAC (srw_ss()) [takesSteps] THEN
       METIS_TAC [parseParseInv],
-	    
-	    
+
+
       Q.ABBREV_TAC `csl=MAP FST stl ++ [(NTS st,initItems ag (rules ag))]` THEN
-      `takesSteps (SUC 0) (parse m) 
+      `takesSteps (SUC 0) (parse m)
          (exitCond (eof,NTS (startSym g)))
          (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `parseInv (ag,q',r')` 
+      Q_TAC SUFF_TAC `parseInv (ag,q',r')`
       THENL[
 	    SRW_TAC [] [] THEN
 	    METIS_TAC [takesStepsCslStlEq,takesStepsTmnlSyms],
@@ -1324,7 +1324,7 @@ THENL[
       `takesSteps (SUC 0) (parse m) (exitCond (eof,NTS (startSym g)))
             (sl,stl,csl) s'`by SRW_TAC [] [takesSteps] THEN
       Cases_on `s'` THEN Cases_on `r` THEN
-      Q_TAC SUFF_TAC `validItemInv (ag,q')` 
+      Q_TAC SUFF_TAC `validItemInv (ag,q')`
       THENL[
 	    SRW_TAC [] [] THEN
 	    METIS_TAC [takesStepsCslStlEq,takesStepsTmnlSyms,takesStepsParseInv,takesStepsSlNotNil],
@@ -1357,14 +1357,14 @@ SRW_TAC [] [] THEN
  `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
  FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM, ts2str_def] THEN
  Cases_on `sgoto ag r' (TS s) ` THEN
- Cases_on `reduce ag r' s` THEN       
+ Cases_on `reduce ag r' s` THEN
 Cases_on `REVERSE t ++ [((q',r'),r)] ++ [((TS s,l),Leaf s)]` THEN
  FULL_SIMP_TAC (srw_ss()) [] THEN
  FULL_SIMP_TAC (srw_ss()) [] THEN1
  (Cases_on `LENGTH t''=0` THEN
- FULL_SIMP_TAC (srw_ss()) []) 
+ FULL_SIMP_TAC (srw_ss()) [])
  THENL[
- 
+
  SRW_TAC [][] THEN
  `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t ++ [((q',r'),r)]))) =
  SOME (stkItl (REVERSE (REVERSE t ++ [((q',r'),r)]))))`
@@ -1391,7 +1391,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `moveDot x q'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 
 
-Q_TAC SUFF_TAC 
+Q_TAC SUFF_TAC
 `trans ag
 (initItems ag (rules ag),[FST (FST h)] ++ REVERSE (MAP FST (MAP FST (REVERSE t'))))
 = SOME (SND (FST (HD (REVERSE t' ++ [h]))))` THEN1
@@ -1414,11 +1414,11 @@ FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND] THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
  FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN
- `REVERSE (REVERSE t' ++ [h]) = 
+ `REVERSE (REVERSE t' ++ [h]) =
  REVERSE (((TS s,h'::t''),Leaf  s)::((q',r'),r)::t)`
  by METIS_TAC [] THEN
  FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN
- `stackSyms (h::(t'++l)) = 
+ `stackSyms (h::(t'++l)) =
  stackSyms (REVERSE t ++ [((q',r'),r)] ++ [((TS s,h'::t''),Leaf s)])`
  by METIS_TAC [] THEN
  FULL_SIMP_TAC (srw_ss()) [stackSyms_def,REVERSE_APPEND] THEN
@@ -1438,7 +1438,7 @@ by METIS_TAC [] THEN
  SRW_TAC [] [trans_snoc] THEN
  FULL_SIMP_TAC (srw_ss()) [sgoto_def,nextState_def]
  ]]],
- 
+
 
  Cases_on `itemEqRuleList (h'::t'') (h''::t''')` THEN
  FULL_SIMP_TAC (srw_ss()) []
@@ -1486,14 +1486,14 @@ SRW_TAC [] [] THEN
 	     FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_APPEND] THEN
 	     SRW_TAC [][trans_def] THEN
 	     FULL_SIMP_TAC (srw_ss()) [sgoto_def,nextState_def] THEN
-	     Cases_on `moveDot (initItems ag (rules ag)) (TS s)` 
+	     Cases_on `moveDot (initItems ag (rules ag)) (TS s)`
 	     THENL[
 		   FULL_SIMP_TAC (srw_ss()) [iclosure],
 
 		   FULL_SIMP_TAC (srw_ss()) []
 		   ],
 
-             
+
              Cases_on `REVERSE t''' ++ [h''] ++ [((TS s,l),Leaf s)]` THEN
              FULL_SIMP_TAC (srw_ss()) [] THEN
              SRW_TAC [][] THEN
@@ -1506,8 +1506,8 @@ SRW_TAC [] [] THEN
 		 THENL[
 			RES_TAC THEN
 			FULL_SIMP_TAC (srw_ss()) [stackSyms_def, REVERSE_APPEND,stkItl_def],
-			
-			`((REVERSE t''' ++ [h''])=h::t') 
+
+			`((REVERSE t''' ++ [h''])=h::t')
                          \/ ((REVERSE t''' ++ [h''] ++
                                       [((TS s,l),Leaf s)])=(h::t'))` by METIS_TAC [isPfx1]
 			 THENL[
@@ -1528,7 +1528,7 @@ SRW_TAC [] [] THEN
 			       FULL_SIMP_TAC (srw_ss()) [stackSyms_def, stkItl_def] THEN
 			       SRW_TAC [] [trans_snoc] THEN
 			       Cases_on `moveDot (SND (FST h'')) (TS s)` THEN
-			       SRW_TAC [] [] 
+			       SRW_TAC [] []
 			       THENL[
 				     FULL_SIMP_TAC (srw_ss()) [iclosure,sgoto_def,nextState_def],
 
@@ -1537,7 +1537,7 @@ SRW_TAC [] [] THEN
 				     `REVERSE (REVERSE t' ++ [h]) = REVERSE (((TS s,h'::t''),Leaf s)::h''::t''')`
 				     by METIS_TAC [] THEN
 				     FULL_SIMP_TAC (srw_ss()) [REVERSE_APPEND] THEN
-				     `stackSyms (h::t') = 
+				     `stackSyms (h::t') =
 			              stackSyms (REVERSE t''' ++ [h''] ++ [((TS s,h'::t''),Leaf s)])`
 				     by METIS_TAC [] THEN
 				     FULL_SIMP_TAC (srw_ss()) [stackSyms_def,REVERSE_APPEND] THEN
@@ -1559,30 +1559,30 @@ SRW_TAC [] [] THEN
 
 val lem1 = store_thm ("lem1",
 ``!csli stli rhs pfx sfx N onstk ininp.
-    (auggr g st eof = SOME ag) ==> 
+    (auggr g st eof = SOME ag) ==>
     RTC (rderives ag) [NTS (startSym ag)] (pfx ++ [NTS N] ++ sfx) ==>
     (csli = (MAP FST stli++[(NTS st,initItems ag (rules ag))])) ==>
-    MEM (rule N rhs) (rules ag) ==> 
+    MEM (rule N rhs) (rules ag) ==>
     ~(N=startSym ag) ==>
     EVERY isTmnlSym (pfx++rhs++sfx) ==>
-    (slrmac ag = SOME m) ==> 
-    (rhs = onstk ++ ininp) ==> 
-    (stackSyms stli = pfx ++ onstk) ==> 
-    IS_PREFIX (pfx ++ rhs) (stackSyms stli) ==> 
+    (slrmac ag = SOME m) ==>
+    (rhs = onstk ++ ininp) ==>
+    (stackSyms stli = pfx ++ onstk) ==>
+    IS_PREFIX (pfx ++ rhs) (stackSyms stli) ==>
     (!nt. nt IN (nonTerminals ag) ==> gaw ag nt) ==>
-    (LENGTH csli = LENGTH stli + 1) ==> 
+    (LENGTH csli = LENGTH stli + 1) ==>
     parseInv (ag, stli, csli) ==>
     validItemInv (ag, stli)
   ==>
   ?i stl csl.
       takesSteps (LENGTH ininp) (parse m) (exitCond (eof,NTS (startSym g)))
                  (ininp ++ sfx,stli,csli)
-                 (i,stl,csl) /\ 
+                 (i,stl,csl) /\
       (stackSyms stl = pfx ++ rhs) /\ (i=sfx) /\
       (MEM (item N (rhs,[])) (itemlist csl))``,
 
 Induct_on `ininp` THEN SRW_TAC [] [] THEN
- FULL_SIMP_TAC (srw_ss()) [takesSteps] 
+ FULL_SIMP_TAC (srw_ss()) [takesSteps]
  THEN1
    (`validItem ag (stackSyms stli) (item N (onstk,[]))`
        by (SRW_TAC [] [validItem_def] THEN
@@ -1624,22 +1624,22 @@ Induct_on `ininp` THEN SRW_TAC [] [] THEN
 	  METIS_TAC [lastEof,MEM,MEM_APPEND,APPEND_NIL],
 
 	  `MEM (item N ([],h::ininp)) (initItems ag (rules ag))`
-             by METIS_TAC [initItemsHdNt] THEN		  
+             by METIS_TAC [initItemsHdNt] THEN
 	     Cases_on `r` THEN
 	     `MEM (item n (l,[])) (initItems ag (rules ag))`
 	        by METIS_TAC [parseInv_def,validStates_def,getState_mem_itl,sgoto_exp] THEN
-	     `h  IN (followSet ag (NTS n))` 
+	     `h  IN (followSet ag (NTS n))`
                 by METIS_TAC [parseInv_def,validStates_def,getState_reduce_followSet,sgoto_exp] THEN
 	     METIS_TAC [trans_def,slrmacNotValid,sgoto_exp],
 
-          Cases_on `h` THEN 
+          Cases_on `h` THEN
           FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def,isTmnlSym_def] THEN
-	  FIRST_X_ASSUM 
-            (Q.SPECL_THEN 
-	       [`[((TS t',l),Leaf t')]`,`[]`,`sfx`, `N`,`[TS t']`] MP_TAC) THEN 
+	  FIRST_X_ASSUM
+            (Q.SPECL_THEN
+	       [`[((TS t',l),Leaf t')]`,`[]`,`sfx`, `N`,`[TS t']`] MP_TAC) THEN
 	  SRW_TAC [] [] THEN
 	  FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def,IS_PREFIX] THEN
-	  FULL_SIMP_TAC (srw_ss()) 
+	  FULL_SIMP_TAC (srw_ss())
              [parseInv_def,validStates_def,validStlItemsStack_def,
               stackValid_def,itemlist_def,validStkSymTree_def] THEN
 	  FULL_SIMP_TAC (srw_ss()) [ptree2Sym_def,tmnlSym_def] THEN
@@ -1652,7 +1652,7 @@ Induct_on `ininp` THEN SRW_TAC [] [] THEN
               (getState (sgoto ag,reduce ag) (itemlist csl) (TS t') = GOTO l) ==>
               (csl = MAP FST t ++ [(NTS st,initItems ag (rules ag))]) ==>
 	      parseInv (ag,t,csl) ==>
-              validItemInv (ag,t) ==> validItemInv (ag,((TS t',l),Leaf t')::t)` 
+              validItemInv (ag,t) ==> validItemInv (ag,((TS t',l),Leaf t')::t)`
                 by METIS_TAC [validItemInvGotoInit, ts2str_def] THEN
 	  FIRST_X_ASSUM (Q.SPECL_THEN [`[(NTS st,initItems ag (rules ag))]`,`[]`] MP_TAC) THEN
 	  SRW_TAC [][] THEN
@@ -1668,11 +1668,11 @@ Induct_on `ininp` THEN SRW_TAC [] [] THEN
           THENL[
 			Cases_on `t''` THEN
 			FULL_SIMP_TAC (srw_ss()) [],
-			
+
 			FULL_SIMP_TAC (srw_ss()) [sgoto_def,nextState_def] THEN
 			`EVERY (validItem ag [TS t']) (moveDot (initItems ag (rules ag)) (TS t'))`
 			    by METIS_TAC [validItem_moveDot, APPEND_NIL] THEN
-			`EVERY (validItem ag [TS t']) l` 
+			`EVERY (validItem ag [TS t']) l`
 			    by METIS_TAC [validItem_iclosure] THEN
 			FULL_SIMP_TAC (srw_ss()) [push_def],
 
@@ -1704,9 +1704,9 @@ Induct_on `ininp` THEN SRW_TAC [] [] THEN
  Cases_on `ininp++sfx` THEN
  Cases_on `getState m r' h` THEN
  FULL_SIMP_TAC (srw_ss()) [] THEN
- SRW_TAC [] [] 
+ SRW_TAC [] []
  >- (Cases_on `r''` THEN
-     `(item N (onstk,[h])=item n (l,[])) \/ 
+     `(item N (onstk,[h])=item n (l,[])) \/
        ~?l' r2 r1. (item N (onstk,[h]) = item l' (r1,h::r2))`
           by METIS_TAC [parseInv_def, validStates_def, shiftReduce] THEN
        FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1715,20 +1715,20 @@ Induct_on `ininp` THEN SRW_TAC [] [] THEN
      SRW_TAC [] [] THEN
      `?p.[]=p++[TS eof]`by METIS_TAC [lastEof, APPEND_NIL] THEN
      Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [])
- >- METIS_TAC [sgoto_exp, APPEND, parseInv_def, validStates_def, APPEND_NIL, 
+ >- METIS_TAC [sgoto_exp, APPEND, parseInv_def, validStates_def, APPEND_NIL,
                APPEND_ASSOC, getState_shift_not_NA]
  >- (Cases_on `r''` THEN
-     `(item N (onstk,h::ininp)=item n (l,[])) \/ 
+     `(item N (onstk,h::ininp)=item n (l,[])) \/
       ~?l' r2 r1. (item N (onstk,h::ininp) = item l' (r1,h::r2))`
 	    by METIS_TAC [parseInv_def, validStates_def, shiftReduce] THEN
      FULL_SIMP_TAC (srw_ss()) [] THEN
-	    METIS_TAC [APPEND]) 
+	    METIS_TAC [APPEND])
  >- (Cases_on `h` THEN
      FULL_SIMP_TAC (srw_ss()) [isNonTmnlSym_def, isTmnlSym_def] THEN
      SRW_TAC [] [exitCond_def, push_def] THEN
-     FIRST_X_ASSUM (Q.SPECL_THEN 
+     FIRST_X_ASSUM (Q.SPECL_THEN
 	      [`((TS t'',l),Leaf t'')::((q',r'),r)::t`,
-	       `pfx`, `sfx`, `N`, 
+	       `pfx`, `sfx`, `N`,
 	       `onstk++[TS t'']`] MP_TAC) THEN
      SRW_TAC [] [] THEN
      IMP_RES_TAC validItemInvGoto THEN
@@ -1736,34 +1736,34 @@ Induct_on `ininp` THEN SRW_TAC [] [] THEN
      SRW_TAC [] [] THEN
      `MEM (rule N (onstk ++ [TS t''] ++ ininp)) (rules ag)` by METIS_TAC [c1] THEN
      FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, IS_PREFIX_APPEND] THEN
-     FULL_SIMP_TAC (srw_ss()) 
+     FULL_SIMP_TAC (srw_ss())
            [validStkSymTree_def, tmnlSym_def, ptree2Sym_def, parseInv_def] THEN
      SRW_TAC [] [] THEN
      FULL_SIMP_TAC (srw_ss()) [validStates_def, itemlist_def] THEN
      `validItl ag l` by METIS_TAC [getStateGotoValidItl] THEN
      FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN
-     `validStlItems (((TS t'',l),Leaf t'')::((ptree2Sym r,r'),r)::t) l` 
+     `validStlItems (((TS t'',l),Leaf t'')::((ptree2Sym r,r'),r)::t) l`
 	by METIS_TAC [validStlItems_goto,sgoto_exp, ts2str_def] THEN
-     FULL_SIMP_TAC (srw_ss()) [tmnlSym_def, ptree2Sym_def,stackValid_def,itemlist_def] THEN	    
+     FULL_SIMP_TAC (srw_ss()) [tmnlSym_def, ptree2Sym_def,stackValid_def,itemlist_def] THEN
      `m = (sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
      FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM] THEN
      Cases_on `sgoto ag r' (TS t'')` THEN
      Cases_on `reduce ag r' t''` THEN
      FULL_SIMP_TAC (srw_ss()) [ts2str_def]
-             >- (Cases_on `t'''` THEN FULL_SIMP_TAC (srw_ss()) []) 
+             >- (Cases_on `t'''` THEN FULL_SIMP_TAC (srw_ss()) [])
 
              >- (FULL_SIMP_TAC (srw_ss()) [sgoto_def, nextState_def] THEN
-		  `EVERY (validItem ag (stackSyms t ++ [ptree2Sym r]++[TS t''])) 
+		  `EVERY (validItem ag (stackSyms t ++ [ptree2Sym r]++[TS t'']))
 					(moveDot r' (TS t''))`
 		  by METIS_TAC [validItem_moveDot] THEN
-		  `EVERY (validItem ag (stackSyms t ++ [ptree2Sym r]++[TS t''])) 
+		  `EVERY (validItem ag (stackSyms t ++ [ptree2Sym r]++[TS t'']))
 					(iclosure ag (moveDot r' (TS t'')))`
 		      by METIS_TAC [validItem_iclosure] THEN
 		  SRW_TAC [] [] THEN
 		  FULL_SIMP_TAC (srw_ss()) [validStates_def,stackValid_def] THEN
-		  `~(MEM (TS eof) (onstk ++ TS t''::ininp))` 
+		  `~(MEM (TS eof) (onstk ++ TS t''::ininp))`
                    by METIS_TAC [auggrAllTmsRhs,EVERY_DEF,isTmnlSym_def,EVERY_APPEND] THEN
-		  `~(t''=eof)` by FULL_SIMP_TAC (srw_ss()) [] THEN                  
+		  `~(t''=eof)` by FULL_SIMP_TAC (srw_ss()) [] THEN
 		  METIS_TAC [EVERY_DEF, APPEND, APPEND_ASSOC])
 
              >- (Cases_on `itemEqRuleList (h::t''') (h''::t'''')` THEN
@@ -1776,26 +1776,26 @@ Induct_on `ininp` THEN SRW_TAC [] [] THEN
 
 val lem2 = store_thm ("lem2",
 ``!csli stli rhs pfx sfx N onstk ininp.
-(auggr g st eof = SOME ag) ==> 
+(auggr g st eof = SOME ag) ==>
 RTC (rderives ag) [NTS (startSym ag)] (pfx ++ [NTS N] ++ sfx) ==>
 (csli = (MAP FST stli++[(NTS st,initItems ag (rules ag))])) ==>
-MEM (rule N rhs) (rules ag) ==> 
+MEM (rule N rhs) (rules ag) ==>
 ~(N=startSym ag) ==>
 EVERY isTmnlSym (pfx++rhs++sfx) ==>
-(slrmac ag = SOME m) ==> 
-(pfx = onstk ++ ininp) ==> 
-(stackSyms stli = onstk) ==> 
+(slrmac ag = SOME m) ==>
+(pfx = onstk ++ ininp) ==>
+(stackSyms stli = onstk) ==>
 (!nt.nt IN (nonTerminals ag) ==> gaw ag nt) ==>
-(LENGTH csli = LENGTH stli + 1) ==> 
+(LENGTH csli = LENGTH stli + 1) ==>
 parseInv (ag, stli, csli) ==>
 validItemInv (ag,stli) ==>
 ?i stl csl.
       takesSteps (LENGTH ininp) (parse m) (exitCond (eof,NTS (startSym g)))
-        (ininp ++ rhs++ sfx,stli,csli) (i,stl,csl) 
+        (ininp ++ rhs++ sfx,stli,csli) (i,stl,csl)
 	   /\ (stackSyms stl = pfx) /\ (i=rhs++sfx)``,
 MAGIC);
 (*
-Induct_on `ininp` THEN 
+Induct_on `ininp` THEN
 SRW_TAC [] [takesSteps, exitCond_def] THEN
       SRW_TAC [] [] THEN
       FULL_SIMP_TAC (srw_ss()) [takesSteps] THEN
@@ -1820,7 +1820,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 	     (* 3 *)
 	     `?p.[]=p++[TS eof]` by METIS_TAC [APPEND_NIL, lastEof] THEN
 	     Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [],
-      
+
 	     (* 4 *)
 	     Cases_on `r` THEN
 	     `h IN followSet ag (NTS n)` by METIS_TAC [getState_reduce_followSet, sgoto_exp, validStates_def, parseInv_def, parseInvInit] THEN
@@ -1836,20 +1836,20 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 		   Cases_on `ininp++rhs++sfx` THEN
 		   SRW_TAC [][] THEN
 		   FULL_SIMP_TAC (srw_ss()) [] THEN
-		   SRW_TAC [][] 
+		   SRW_TAC [][]
 	           THENL[
 			 `[h;NTS N] = [h]++[NTS N]`
 			     by SRW_TAC [][] THEN
 			 METIS_TAC [APPEND_NIL,lastEof,MEM,MEM_APPEND],
 
-			 `(h::(ininp ++ [NTS N] ++ sfx)) = 
+			 `(h::(ininp ++ [NTS N] ++ sfx)) =
               		   (h::ininp) ++ [NTS N] ++ sfx`
 			     by SRW_TAC [][] THEN
-			 `?lhs r1 r2.MEM (item lhs (r1,h::r2)) (initItems ag (rules ag))` 
+			 `?lhs r1 r2.MEM (item lhs (r1,h::r2)) (initItems ag (rules ag))`
 			     by METIS_TAC [initItemsNtInBtwn,HD,NOT_CONS_NIL,EVERY_DEF] THEN
 			 METIS_TAC [slrmacNotValid,trans_def,sgoto_exp]
 			 ],
-		   
+
 
 		   Cases_on `stli` THEN
 		   FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1863,7 +1863,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 FULL_SIMP_TAC (srw_ss()) [] THEN
 			 SRW_TAC [] [] THEN
 			 `(h''::(t' ++ [h] ++ [NTS N])) =
-              		   ((h''::t' ++ [h]) ++ [NTS N])` 
+              		   ((h''::t' ++ [h]) ++ [NTS N])`
 			     by SRW_TAC [] [] THEN
 			 `?p.[]=p++[TS eof]` by METIS_TAC [lastEof, APPEND_NIL] THEN
 			 Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [],
@@ -1871,7 +1871,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 FULL_SIMP_TAC (srw_ss()) [] THEN
 			 SRW_TAC [] [] THEN
 			 `(h''::(t' ++ [h] ++ [NTS N])) =
-              		   ((h''::t' ++ [h]) ++ [NTS N])` 
+              		   ((h''::t' ++ [h]) ++ [NTS N])`
 			     by SRW_TAC [] [] THEN
 			 `?p.[]=p++[TS eof]` by METIS_TAC [lastEof, APPEND_NIL] THEN
 			 Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [],
@@ -1880,7 +1880,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 FULL_SIMP_TAC (srw_ss()) [] THEN
 			 SRW_TAC [] [] THEN
 			 `(h''::(t' ++ [h] ++ [NTS N])) =
-              		   ((h''::t' ++ [h]) ++ [NTS N])` 
+              		   ((h''::t' ++ [h]) ++ [NTS N])`
 			     by SRW_TAC [] [] THEN
 			 `?p.[]=p++[TS eof]` by METIS_TAC [lastEof, APPEND_NIL] THEN
 			 Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [],
@@ -1895,7 +1895,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
                           (h''::t' ++ h::ininp) ++ [NTS N] ++ sfx`
 			     by SRW_TAC [][] THEN
 			 `?itl.trans ag (initItems ag (rules ag), (h''::t' ++ h::ininp)) = SOME itl` by METIS_TAC [rtcRdImpTrans] THEN
-			 `?itl.trans ag (initItems ag (rules ag), h''::t') = SOME itl` by METIS_TAC [transAppend,APPEND_ASSOC] THEN			 
+			 `?itl.trans ag (initItems ag (rules ag), h''::t') = SOME itl` by METIS_TAC [transAppend,APPEND_ASSOC] THEN
 			 FULL_SIMP_TAC (srw_ss()) [validItemInv_def] THEN
 			 `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t'' ++ [((q',r'),r)]))) =
 			   SOME (stkItl (REVERSE (REVERSE t'' ++ [((q',r'),r)]))))`
@@ -1908,10 +1908,10 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 METIS_TAC [slrmacTransConf,parseInv_def,validStates_def],
 
 			 (*5*)
-			 Cases_on `h` THEN 
+			 Cases_on `h` THEN
 			 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def] THEN
 			 SRW_TAC [] [] THEN
-			 FIRST_X_ASSUM (Q.SPECL_THEN 
+			 FIRST_X_ASSUM (Q.SPECL_THEN
 			    [`((TS t'''',l'),Leaf (ts2str (TS t'''')))::((q',r'),r)::t''`,
 			     `rhs`, `sfx`, `N`] MP_TAC) THEN
 			 SRW_TAC [] [ts2str_def] THEN
@@ -1923,10 +1923,10 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 SRW_TAC [] [] THEN
 			 FULL_SIMP_TAC (srw_ss()) [validStates_def, itemlist_def] THEN
 			 `validItl ag l'` by METIS_TAC [getStateGotoValidItl] THEN
-			 FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN	    
-			 `validStlItems (((TS t'''',l'),Leaf (ts2str (TS t'''')))::((ptree2Sym r,r'),r)::t'') l'` 
+			 FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN
+			 `validStlItems (((TS t'''',l'),Leaf (ts2str (TS t'''')))::((ptree2Sym r,r'),r)::t'') l'`
 			     by METIS_TAC [validStlItems_goto,sgoto_exp, ts2str_def] THEN
-			 FULL_SIMP_TAC (srw_ss()) [tmnlSym_def, ptree2Sym_def,stackValid_def,itemlist_def] THEN	    
+			 FULL_SIMP_TAC (srw_ss()) [tmnlSym_def, ptree2Sym_def,stackValid_def,itemlist_def] THEN
 			 `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
 			 FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM] THEN
 			 Cases_on `sgoto ag r' (TS t'''')` THEN
@@ -1935,7 +1935,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 THENL[
 			       Cases_on `LENGTH t'''''=0` THEN
 			       FULL_SIMP_TAC (srw_ss()) [],
-			       
+
 			       FULL_SIMP_TAC (srw_ss()) [sgoto_def, nextState_def] THEN
 			       `EVERY (validItem ag (stackSyms t'' ++ [ptree2Sym r]++[TS t''''])) (moveDot r' (TS t''''))`
 				   by METIS_TAC [validItem_moveDot] THEN
@@ -1954,9 +1954,9 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
                           (h''::t' ++ h::ininp) ++ [NTS N] ++ sfx`
 			     by SRW_TAC [][] THEN
 			 `?itl.trans ag (initItems ag (rules ag), (h''::t' ++ h::ininp)) = SOME itl` by METIS_TAC [rtcRdImpTrans] THEN
-			 `?s.(trans ag (initItems ag (rules ag), h''::t') = SOME s) 
-                          /\ (trans ag (s,h::ininp) = SOME itl)` 
-			     by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN			 
+			 `?s.(trans ag (initItems ag (rules ag), h''::t') = SOME s)
+                          /\ (trans ag (s,h::ininp) = SOME itl)`
+			     by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN
 			 FULL_SIMP_TAC (srw_ss()) [validItemInv_def] THEN
 			 `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t'' ++ [((q',r'),r)]))) =
 			   SOME (stkItl (REVERSE (REVERSE t'' ++ [((q',r'),r)]))))`
@@ -1981,7 +1981,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 
 			       Cases_on `itemEqRuleList (h'''''::t''''') (h''''''::t'''''')`THEN
 			       FULL_SIMP_TAC (srw_ss()) [slrmac_def,LET_THM] THEN
-			       FIRST_X_ASSUM (Q.SPECL_THEN 
+			       FIRST_X_ASSUM (Q.SPECL_THEN
 						  [`REVERSE (MAP FST (MAP FST t'')) ++ [q']`,`r'`,`h`] MP_TAC) THEN
 			       SRW_TAC [][] THEN
 			       Cases_on `t''''''` THEN SRW_TAC [][]
@@ -1991,7 +1991,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 
 		   (* GOTO l *)
 	     Cases_on `stli` THEN
-	     FULL_SIMP_TAC (srw_ss()) [] 
+	     FULL_SIMP_TAC (srw_ss()) []
 		   THENL[
 
 			 FULL_SIMP_TAC (srw_ss()) [parse_def,LET_THM] THEN
@@ -2006,8 +2006,8 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			       METIS_TAC [APPEND_NIL,MEM,MEM_APPEND,lastEof],
 
 			       SRW_TAC [] [push_def,tmnlSym_def,ptree2Sym_def] THEN
-			       FIRST_X_ASSUM (Q.SPECL_THEN 
-						  [`[((TS t'',l),Leaf t'')]`,`rhs`,`sfx`, `N`] MP_TAC)   THEN 
+			       FIRST_X_ASSUM (Q.SPECL_THEN
+						  [`[((TS t'',l),Leaf t'')]`,`rhs`,`sfx`, `N`] MP_TAC)   THEN
 			       SRW_TAC [] [] THEN
 			       FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def,IS_PREFIX] THEN
 			       FULL_SIMP_TAC (srw_ss()) [parseInv_def,validStates_def,validStlItemsStack_def,stackValid_def,itemlist_def,validStkSymTree_def] THEN
@@ -2022,7 +2022,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 						     (ag,t,MAP FST t ++ [(NTS st,initItems ag (rules ag))]) ==>
 						     validItemInv
 						     (ag,((TS t'',l),Leaf t'')::t,
-						      (TS t'',l)::MAP FST t ++ [(NTS st,initItems ag (rules ag))])` 
+						      (TS t'',l)::MAP FST t ++ [(NTS st,initItems ag (rules ag))])`
 				   by METIS_TAC [validItemInvGotoInit, ts2str_def] THEN
 			       FIRST_X_ASSUM (Q.SPECL_THEN [`[(NTS st,initItems ag (rules ag))]`,`[]`] MP_TAC) THEN
 			       SRW_TAC [][] THEN
@@ -2041,8 +2041,8 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 				THENL[
 				      Cases_on `LENGTH t'''` THEN
 				      FULL_SIMP_TAC (srw_ss()) [],
-				      
-			
+
+
 				      FULL_SIMP_TAC (srw_ss()) [sgoto_def,nextState_def] THEN
 				      `EVERY (validItem ag [TS s]) (moveDot (initItems ag (rules ag)) (TS t''))` by MAGIC
 					  by METIS_TAC [validItem_moveDot, APPEND_NIL, ts2str_def] THEN
@@ -2050,12 +2050,12 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 					  by METIS_TAC [validItem_iclosure] THEN
 				      FULL_SIMP_TAC (srw_ss()) [push_def] THEN
 				      METIS_TAC [ptree2Sym_def,ts2str_def],
-				      
+
 				      Cases_on `itemEqRuleList (h::t''') (h'''::t'''')` THEN
 				      FULL_SIMP_TAC (srw_ss()) []
 				      ]
 			       ],
-			       
+
 			 (*~stl=[]*)
 			 `~(h=TS eof)` by METIS_TAC [auggrTmSymInBtwn,MEM,MEM_APPEND,APPEND,APPEND_ASSOC] THEN
 			 SRW_TAC [][] THEN
@@ -2071,7 +2071,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 		         THENL[
 
 			       METIS_TAC [MEM,MEM_APPEND,lastEof,APPEND_NIL],
-			       
+
 			       METIS_TAC [MEM,MEM_APPEND,lastEof,APPEND_NIL],
 
 			       METIS_TAC [MEM,MEM_APPEND,lastEof,APPEND_NIL],
@@ -2081,16 +2081,16 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			       `MEM (rule n l') (rules ag)`
 				   by METIS_TAC [getstate_red, sgoto_exp] THEN
 			       `h IN (followSet ag (NTS n))` by METIS_TAC [getState_reduce_followSet, sgoto_exp] THEN
-			       FULL_SIMP_TAC (srw_ss()) [validItemInv_def] THEN			       
+			       FULL_SIMP_TAC (srw_ss()) [validItemInv_def] THEN
 			       `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t' ++ [((q',r'),r)]))) =
 				 SOME (stkItl (REVERSE (REVERSE t' ++ [((q',r'),r)]))))`
 			       by METIS_TAC [nullNil,rev_nil,IS_PREFIX_REFL,MEM,MEM_APPEND] THEN
 			       FULL_SIMP_TAC (srw_ss()) [stackSyms_def,stkItl_def,REVERSE_APPEND] THEN
 			       `?itl.(trans ag (initItems ag (rules ag),(REVERSE (MAP FST (MAP FST t')) ++ [q'] ++ h::ininp)) = SOME itl)`
 			       by METIS_TAC [rtcRdImpTrans] THEN
-			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t')) ++ [q']) = SOME s) 
-                                  /\ (trans ag (s,h::ininp) = SOME itl)` 
-				   by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN			 
+			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t')) ++ [q']) = SOME s)
+                                  /\ (trans ag (s,h::ininp) = SOME itl)`
+				   by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN
 			       `r'=s` by METIS_TAC [transOutMem,SOME_11] THEN
 			       SRW_TAC [][] THEN
 			       `m=(sgoto ag,reduce ag)` by METIS_TAC [sgoto_exp] THEN
@@ -2107,16 +2107,16 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 
 				     Cases_on `itemEqRuleList (h''''::t'''') (h'''''::t''''')`THEN
 				     FULL_SIMP_TAC (srw_ss()) [slrmac_def,LET_THM] THEN
-				     FIRST_X_ASSUM (Q.SPECL_THEN 
+				     FIRST_X_ASSUM (Q.SPECL_THEN
 							[`REVERSE (MAP FST (MAP FST t')) ++ [q']`,`r'`,`h`] MP_TAC) THEN
 				     SRW_TAC [][] THEN
 				     Cases_on `t'''''` THEN FULL_SIMP_TAC (srw_ss()) []
 				     ],
 
-			 Cases_on `h` THEN 
+			 Cases_on `h` THEN
 			 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def] THEN
 			 SRW_TAC [] [push_def] THEN
-			 FIRST_X_ASSUM (Q.SPECL_THEN 
+			 FIRST_X_ASSUM (Q.SPECL_THEN
 			    [`((TS t''',l'),Leaf t''')::((TS t''',r'),r)::t'`,
 			     `rhs`, `sfx`, `N`] MP_TAC) THEN
 			 SRW_TAC [] [] THEN
@@ -2129,7 +2129,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			   (q',r')::(MAP FST t ++ [(NTS st,initItems ag (rules ag))])) ==>
 			  validItemInv
 			  (ag,((TS s,l),Leaf (s))::((q',r'),r)::t,
-			   (TS s,l)::csli)` 
+			   (TS s,l)::csli)`
 			     by METIS_TAC [validItemInvGoto, ts2str_def] THEN
 			 FIRST_X_ASSUM (Q.SPECL_THEN [`TS t'''`,`r'`,`r`, `l'`,`t'`,`s`,`(TS s',r')::(MAP FST t' ++ [(NTS st,initItems ag (rules ag))])`] MP_TAC) THEN
 			 SRW_TAC [] [] THEN
@@ -2137,9 +2137,9 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 SRW_TAC [] [] THEN
 			 FULL_SIMP_TAC (srw_ss()) [validStates_def, itemlist_def] THEN
 			 `validItl ag l'` by METIS_TAC [getStateGotoValidItl] THEN
-			 FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN	    
-			 FULL_SIMP_TAC (srw_ss()) [tmnlSym_def, ptree2Sym_def] THEN	    
-			 `validStlItems (((TS t''',l'),Leaf t''')::((TS t''',r'),r)::t') l'` 
+			 FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN
+			 FULL_SIMP_TAC (srw_ss()) [tmnlSym_def, ptree2Sym_def] THEN
+			 `validStlItems (((TS t''',l'),Leaf t''')::((TS t''',r'),r)::t') l'`
 			     by METIS_TAC [validStlItems_goto,sgoto_exp, ptree2Sym_def, tmnlSym_def, ts2str_def] THEN
 			 `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
 			 FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM] THEN
@@ -2150,17 +2150,17 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			       Cases_on `LENGTH t'''=0` THEN
 			       FULL_SIMP_TAC (srw_ss()) [],
 
-			       
+
 			       FULL_SIMP_TAC (srw_ss()) [sgoto_def, nextState_def] THEN
 			       `EVERY (validItem ag (stackSyms t' ++ [TS s']++[TS s])) (moveDot r' (TS s))`
 				   by METIS_TAC [validItem_moveDot] THEN
 			       `EVERY (validItem ag (stackSyms t' ++ [TS s']++[TS s])) (iclosure ag (moveDot r' (TS s)))`
 				   by METIS_TAC [validItem_iclosure] THEN
 			       METIS_TAC [APPEND, APPEND_ASSOC, isTmnlSym_def,ts2str_def],
-			       
+
 			       Cases_on `itemEqRuleList (h::t''') (h'''::t'''')` THEN
 			       FULL_SIMP_TAC (srw_ss()) []
-			       ],			 
+			       ],
 
 
 			 SRW_TAC [] [] THEN
@@ -2169,7 +2169,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 SRW_TAC [] [] THEN
 			 FULL_SIMP_TAC (srw_ss()) [] THEN
 			 SRW_TAC [] [] THEN
-			 FULL_SIMP_TAC (srw_ss()) [] 
+			 FULL_SIMP_TAC (srw_ss()) []
 			 THENL[
 
 			       `(stackSyms t' ++ [q'] ++ h::ininp ++ [NTS N]) =
@@ -2181,16 +2181,16 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 				(stackSyms t' ++ [q'] ++ h::ininp) ++ [NTS N] ++ h'''::t'''`
 			       by SRW_TAC [][] THEN
 			       `?itl.trans ag (initItems ag (rules ag),(stackSyms t' ++ [q'] ++ h::ininp)) = SOME itl` by METIS_TAC [rtcRdImpTrans] THEN
-			       FULL_SIMP_TAC (srw_ss()) [validItemInv_def] THEN			       
+			       FULL_SIMP_TAC (srw_ss()) [validItemInv_def] THEN
 			       `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t' ++ [((q',r'),r)]))) =
 				 SOME (stkItl (REVERSE (REVERSE t' ++ [((q',r'),r)]))))`
 			       by METIS_TAC [nullNil,rev_nil,IS_PREFIX_REFL,MEM,MEM_APPEND] THEN
 			       FULL_SIMP_TAC (srw_ss()) [stackSyms_def,stkItl_def,REVERSE_APPEND] THEN
 			       `?itl.(trans ag (initItems ag (rules ag),(REVERSE (MAP FST (MAP FST t')) ++ [q'] ++ h::ininp)) = SOME itl)`
 				   by METIS_TAC [rtcRdImpTrans] THEN
-			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t')) ++ [q']) = SOME s) 
-                                  /\ (trans ag (s,h::ininp) = SOME itl)` 
-				   by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN			 
+			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t')) ++ [q']) = SOME s)
+                                  /\ (trans ag (s,h::ininp) = SOME itl)`
+				   by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN
 			       `r'=s` by METIS_TAC [transOutMem,SOME_11] THEN
 			       SRW_TAC [][] THEN
 			       `m=(sgoto ag,reduce ag)` by METIS_TAC [sgoto_exp] THEN
@@ -2207,10 +2207,10 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 
 				     FULL_SIMP_TAC (srw_ss()) [sgoto_def,nextState_def] THEN
 				     METIS_TAC [iclosure_mem,MEM],
-				     
+
 				     Cases_on `itemEqRuleList (h'''''::t''''') (h''''''::t'''''')`THEN
 				     FULL_SIMP_TAC (srw_ss()) [slrmac_def,LET_THM] THEN
-				     FIRST_X_ASSUM (Q.SPECL_THEN 
+				     FIRST_X_ASSUM (Q.SPECL_THEN
 							[`REVERSE (MAP FST (MAP FST t')) ++ [q']`,`r'`,`h`] MP_TAC) THEN
 				     SRW_TAC [][] THEN
 				     Cases_on `t''''''` THEN FULL_SIMP_TAC (srw_ss()) []
@@ -2224,11 +2224,11 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 	     SRW_TAC [] [] THEN
 	     FULL_SIMP_TAC (srw_ss()) [] THEN
 	     SRW_TAC [] [] THEN
-	     FULL_SIMP_TAC (srw_ss()) [] 
+	     FULL_SIMP_TAC (srw_ss()) []
              THENL[
 		   `?p.[]=p++[TS eof]` by METIS_TAC [lastEof, APPEND_NIL] THEN
 		   Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [],
-			 
+
  		   `(stackSyms stli ++ h::ininp ++ [NTS N] ++ h''::t') =
 	     (stackSyms stli ++ h::ininp) ++ [NTS N] ++ h''::t'`
 		       by SRW_TAC [][] THEN
@@ -2251,17 +2251,17 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 FULL_SIMP_TAC (srw_ss()) [parse_def,LET_THM] THEN
 			 Cases_on `ininp++rhs++h''::t'` THEN
 			 Cases_on `getState m r' h` THEN
-			 SRW_TAC [][] 
-			 THENL[			       
-			       
+			 SRW_TAC [][]
+			 THENL[
+
 			       `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t'' ++ [h''']))) =
 				 SOME (stkItl (REVERSE (REVERSE t'' ++ [h''']))))`
 				   by METIS_TAC [nullNil,rev_nil,IS_PREFIX_REFL,MEM,MEM_APPEND] THEN
 			       FULL_SIMP_TAC (srw_ss()) [stackSyms_def,stkItl_def,REVERSE_APPEND] THEN
 			       `?itl.(trans ag (initItems ag (rules ag),(REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')] ++ h::ininp)) = SOME itl)`
 				   by METIS_TAC [rtcRdImpTrans] THEN
-			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')]) = SOME s) 
-			 /\ (trans ag (s,h::ininp) = SOME itl)` 			     
+			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')]) = SOME s)
+			 /\ (trans ag (s,h::ininp) = SOME itl)`
 				   by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend],
 
 			       `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t'' ++ [h''']))) =
@@ -2270,8 +2270,8 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			       FULL_SIMP_TAC (srw_ss()) [stackSyms_def,stkItl_def,REVERSE_APPEND] THEN
 			       `?itl.(trans ag (initItems ag (rules ag),(REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')] ++ h::ininp)) = SOME itl)`
 				   by METIS_TAC [rtcRdImpTrans] THEN
-			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')]) = SOME s) 
-			 /\ (trans ag (s,h::ininp) = SOME itl)` 			     
+			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')]) = SOME s)
+			 /\ (trans ag (s,h::ininp) = SOME itl)`
 				   by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend],
 
 			       `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t'' ++ [h''']))) =
@@ -2280,8 +2280,8 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			       FULL_SIMP_TAC (srw_ss()) [stackSyms_def,stkItl_def,REVERSE_APPEND] THEN
 			       `?itl.(trans ag (initItems ag (rules ag),(REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')] ++ h::ininp)) = SOME itl)`
 				   by METIS_TAC [rtcRdImpTrans] THEN
-			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')]) = SOME s) 
-			 /\ (trans ag (s,h::ininp) = SOME itl)` 			     
+			       `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t'')) ++ [FST (FST h''')]) = SOME s)
+			 /\ (trans ag (s,h::ininp) = SOME itl)`
 				   by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend],
 
 			 (*4*)
@@ -2296,17 +2296,17 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			     by METIS_TAC [nullNil,rev_nil,IS_PREFIX_REFL,MEM,MEM_APPEND] THEN
 			 FULL_SIMP_TAC (srw_ss()) [stackSyms_def,REVERSE_APPEND,stkItl_def,transOutMem] THEN
 			 SRW_TAC [][] THEN
-			 `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t'')) ++ [q']) = SOME s) 
-			     /\ (trans ag (s,h::ininp) = SOME itl)` 			     
+			 `?s.(trans ag (initItems ag (rules ag), REVERSE (MAP FST (MAP FST t'')) ++ [q']) = SOME s)
+			     /\ (trans ag (s,h::ininp) = SOME itl)`
 			     by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN
 			 FULL_SIMP_TAC (srw_ss()) [transOutMem] THEN
 			 METIS_TAC [slrmacTransConf,parseInv_def,validStates_def],
 
 			 (*5*)
-			 Cases_on `h` THEN 
+			 Cases_on `h` THEN
 			 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def, isNonTmnlSym_def] THEN
  			 SRW_TAC [] [] THEN
-			 FIRST_X_ASSUM (Q.SPECL_THEN 
+			 FIRST_X_ASSUM (Q.SPECL_THEN
 			    [`((TS s,l),Leaf (s))::((TS s',r'),r)::t''`,
 			     `rhs`, `TS s''::t'`, `N`] MP_TAC) THEN
 			 SRW_TAC [] [] THEN
@@ -2318,10 +2318,10 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			 SRW_TAC [] [] THEN
 			 FULL_SIMP_TAC (srw_ss()) [validStates_def, itemlist_def] THEN
 			 `validItl ag l` by METIS_TAC [getStateGotoValidItl] THEN
-			 FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN	    
-			 `validStlItems (((TS s,l),Leaf (s))::((TS s',r'),r)::t'') l ` 
+			 FULL_SIMP_TAC (srw_ss()) [validStlItemsStack_def] THEN
+			 `validStlItems (((TS s,l),Leaf (s))::((TS s',r'),r)::t'') l `
 			     by METIS_TAC [validStlItems_goto,sgoto_exp,ptree2Sym_def,tmnlSym_def] THEN
-			 FULL_SIMP_TAC (srw_ss()) [tmnlSym_def, ptree2Sym_def,stackValid_def,itemlist_def] THEN	    
+			 FULL_SIMP_TAC (srw_ss()) [tmnlSym_def, ptree2Sym_def,stackValid_def,itemlist_def] THEN
 			 `m=(sgoto ag, reduce ag)` by METIS_TAC [sgoto_exp] THEN
 			 FULL_SIMP_TAC (srw_ss()) [getState_def, LET_THM] THEN
 			 Cases_on `sgoto ag r' (TS s)` THEN
@@ -2331,7 +2331,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			       Cases_on `LENGTH t''''=0` THEN
 			       FULL_SIMP_TAC (srw_ss()) [],
 
-			       
+
 			       FULL_SIMP_TAC (srw_ss()) [sgoto_def, nextState_def] THEN
 			       `EVERY (validItem ag (stackSyms t'' ++ [TS s']++[TS s])) (moveDot r' (TS s))`
 				   by METIS_TAC [validItem_moveDot] THEN
@@ -2350,9 +2350,9 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
                            ((stackSyms t'' ++ [q'] ++ h::ininp) ++ [NTS N] ++ h''::t')`
 			     by SRW_TAC [][] THEN
 			 `?itl.trans ag (initItems ag (rules ag), (stackSyms t'' ++ [q'] ++ h::ininp)) = SOME itl` by METIS_TAC [rtcRdImpTrans] THEN
-			 `?s.(trans ag (initItems ag (rules ag), stackSyms t''++[q']) = SOME s) 
-                          /\ (trans ag (s,h::ininp) = SOME itl)` 
-			     by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN			 
+			 `?s.(trans ag (initItems ag (rules ag), stackSyms t''++[q']) = SOME s)
+                          /\ (trans ag (s,h::ininp) = SOME itl)`
+			     by METIS_TAC [transAppend,APPEND_ASSOC,transOverAppend] THEN
 			 FULL_SIMP_TAC (srw_ss()) [validItemInv_def] THEN
 			 `(trans ag (initItems ag (rules ag),stackSyms (REVERSE (REVERSE t'' ++ [((q',r'),r)]))) =
 			   SOME (stkItl (REVERSE (REVERSE t'' ++ [((q',r'),r)]))))`
@@ -2376,13 +2376,13 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 
 			       Cases_on `itemEqRuleList (h'''''::t''''') (h''''''::t'''''')`THEN
 			       FULL_SIMP_TAC (srw_ss()) [slrmac_def,LET_THM] THEN
-			       FIRST_X_ASSUM (Q.SPECL_THEN 
+			       FIRST_X_ASSUM (Q.SPECL_THEN
 						  [`REVERSE (MAP FST (MAP FST t'')) ++ [q']`,`r'`,`h`] MP_TAC) THEN
 			       SRW_TAC [][] THEN
 			       Cases_on `t''''''` THEN SRW_TAC [][]
 			       ]
-			 ]				 
-                         
+			 ]
+
 		   ]]]);
 
 *)
@@ -2390,7 +2390,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 val parseMacGuard = store_thm ("parseMacGuard",
 ``(slrmac ag = SOME m) ==>
 (auggr g st eof = SOME ag) ==>
-RTC (rderives ag) [NTS (startSym ag)] 
+RTC (rderives ag) [NTS (startSym ag)]
       (h::(t ++ [NTS N] ++ sfx)) ==>
   MEM (rule N rhs) (rules ag) ==>
 parseInv
@@ -2411,7 +2411,7 @@ Cases_on `stl` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 Cases_on `(~(h = NTS (startSym g)) ∨ ~(t = [])) ∨ ~(HD (rhs ++ sfx) = TS eof)` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
-Cases_on `rhs` THEN 
+Cases_on `rhs` THEN
 Cases_on `sfx` THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN1
       (`!n sl stl csl e sl' stl' csl'.
@@ -2453,7 +2453,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN1
 	    SRW_TAC [][] THEN
 	    `[NTS (startSym g)]++[NTS N] = pfx`
 		by METIS_TAC [APPEND_11,APPEND] THEN
-	    `rderives ag ([NTS (startSym g)]++[NTS N]++[TS eof]) 
+	    `rderives ag ([NTS (startSym g)]++[NTS N]++[TS eof])
 			       ([NTS (startSym g)]++[]++[TS eof])`
 		by METIS_TAC [rdres1,rderives_append,isTmnlSym_def,EVERY_DEF] THEN
 	    FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -2486,14 +2486,14 @@ FULL_SIMP_TAC (srw_ss()) [] THEN1
 	    `NTS (startSym g)::NTS N::TS eof::FRONT (h::t)=pfx`
 		by METIS_TAC [APPEND_11,APPEND_ASSOC] THEN
 	    METIS_TAC [MEM,MEM_APPEND]
-	    ],	   
+	    ],
 
       `(h::(t ++ [NTS N])) = ((h::t) ++ [NTS N])` by SRW_TAC [] [] THEN
       `?p.[]=p++[TS eof]` by METIS_TAC [lastEof,APPEND_NIL] THEN
       Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [],
 
 
-      SRW_TAC [] [] THEN      
+      SRW_TAC [] [] THEN
       METIS_TAC [auggrEofInRhs,APPEND,APPEND_NIL]
       ]);
 
@@ -2541,12 +2541,12 @@ Cases_on `N=startSym ag` THEN1
            takesSteps (LENGTH ininp) (parse m)
              (exitCond (eof,NTS (startSym g))) (ininp ++ sfx,stli,csli)
              (i,stl,csl) /\ (stackSyms stl = pfx ++ rhs) /\ (i = sfx) /\
-           MEM (item N (rhs,[])) (itemlist csl)` 
+           MEM (item N (rhs,[])) (itemlist csl)`
 	 by METIS_TAC [lem1] THEN
-     FIRST_X_ASSUM (Q.SPECL_THEN 
-	  [`[(NTS st,initItems ag (rules ag))]`, 
+     FIRST_X_ASSUM (Q.SPECL_THEN
+	  [`[(NTS st,initItems ag (rules ag))]`,
 	   `[]:(((α,β)symbol # (α,β)state)# (α,β)ptree) list`,
-	   `rhs`,`[]`,`sfx`,`N`,`[]`,`rhs`] MP_TAC) THEN 
+	   `rhs`,`[]`,`sfx`,`N`,`[]`,`rhs`] MP_TAC) THEN
      SRW_TAC [] [] THEN
      METIS_TAC [parseInvInit, validItemInvInit]) THEN
 
@@ -2554,7 +2554,7 @@ Cases_on `N=startSym ag` THEN1
      by METIS_TAC [parseInvInit] THEN
      `validItemInv
          ((ag :(α, β) grammar),
-          ([] :(((α, β) symbol # (α, β) state) # (α, β) ptree) list))` 
+          ([] :(((α, β) symbol # (α, β) state) # (α, β) ptree) list))`
      by METIS_TAC [validItemInvInit] THEN
      IMP_RES_TAC lem2 THEN
      FIRST_X_ASSUM (Q.SPECL_THEN [`sfx`, `h::t`, `N`] MP_TAC) THEN
@@ -2581,18 +2581,18 @@ Cases_on `N=startSym ag` THEN1
            takesSteps (LENGTH ininp) (parse m)
              (exitCond (eof,NTS (startSym g))) (ininp ++ sfx,stli,csli)
              (i,stl,csl) /\ (stackSyms stl = pfx ++ rhs) /\ (i = sfx) /\
-           MEM (item N (rhs,[])) (itemlist csl)` 
+           MEM (item N (rhs,[])) (itemlist csl)`
 	 by METIS_TAC [lem1] THEN
      `?stl csl.
              takesSteps (SUC (LENGTH t)) (parse m)
                (exitCond (eof,NTS (startSym g)))
                (h::(t ++ rhs ++ sfx),[],[(NTS st,initItems ag (rules ag))])
-               (rhs++sfx,stl,csl) /\ (stackSyms stl = h::t)` 
+               (rhs++sfx,stl,csl) /\ (stackSyms stl = h::t)`
 	 by METIS_TAC [parseInvInit, validItemInvInit] THEN
-     FIRST_X_ASSUM (Q.SPECL_THEN 
-	  [`csl`, 
+     FIRST_X_ASSUM (Q.SPECL_THEN
+	  [`csl`,
 	   `stl`,
-	   `rhs`,`h::t`,`sfx`,`N`,`[]`,`rhs`] MP_TAC) THEN 
+	   `rhs`,`h::t`,`sfx`,`N`,`[]`,`rhs`] MP_TAC) THEN
      SRW_TAC [] [] THEN
      FULL_SIMP_TAC (srw_ss()) [IS_PREFIX_REFL,IS_PREFIX_APPEND] THEN
      `(csl = MAP FST stl ++ [(NTS st,initItems ag (rules ag))])`
@@ -2602,7 +2602,7 @@ Cases_on `N=startSym ag` THEN1
 
 `parseInv (ag,[],[(NTS st,initItems ag (rules ag))])`
     by METIS_TAC [parseInvInit] THEN
-`validItemInv (ag,[])` 
+`validItemInv (ag,[])`
     by METIS_TAC [validItemInvInit] THEN
 `!n sl stl csl stl' csl' sl'.
          (csl = MAP FST stl ++ [(NTS st,initItems ag (rules ag))]) ==>
@@ -2618,8 +2618,8 @@ Cases_on `N=startSym ag` THEN1
     by METIS_TAC [takesStepsParseInv] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH t`,`h::(t ++ rhs ++ sfx)`,
 			     `[]`,`[(NTS st,initItems ag (rules ag))]`,
-			     `stl`,`MAP FST stl++[(NTS st,initItems ag (rules ag))]`, 
-			     `rhs++sfx`] 
+			     `stl`,`MAP FST stl++[(NTS st,initItems ag (rules ag))]`,
+			     `rhs++sfx`]
 			    MP_TAC) THEN
 SRW_TAC [] [] THEN
 `!n sl stl csl sl' stl' csl'.
@@ -2634,11 +2634,11 @@ SRW_TAC [] [] THEN
          (auggr g st eof = SOME ag) ==>
          parseInv (ag,stl,csl) ==>
          validItemInv (ag,stl) ==>
-         validItemInv (ag,stl')` 
+         validItemInv (ag,stl')`
     by METIS_TAC [takesStepsValidItemInv] THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`LENGTH t`,`h::(t ++ rhs ++ sfx)`,
 			     `[]`,`[(NTS st,initItems ag (rules ag))]`,
-			     `rhs++sfx`,`stl`,`MAP FST stl++[(NTS st,initItems ag (rules ag))]`] 
+			     `rhs++sfx`,`stl`,`MAP FST stl++[(NTS st,initItems ag (rules ag))]`]
 			    MP_TAC) THEN
 SRW_TAC [] [] THEN
 IMP_RES_TAC parseMacGuard THEN
@@ -2646,7 +2646,7 @@ SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [takesStepsAdd, validItemInvInit]);
 
-val validItemInvInit = store_thm 
+val validItemInvInit = store_thm
 ("validItemInvInit",
 ``!m g sl st.
 validItemInv (ag, [])``,
@@ -2658,6 +2658,3 @@ METIS_TAC [NULL]);
 
 
 val _ = export_theory ();
-
-
-

@@ -13,10 +13,6 @@ relationLemmasTheory
 
 val _ = new_theory "termination"
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
-
-
-val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];
 
 val stepDoRedInit = store_thm ("stepDoRedInit",
@@ -32,7 +28,7 @@ val stepDoRedInit = store_thm ("stepDoRedInit",
        (doReduce m (h::sfx,[],[(NTS st,inis)]) r =
                             SOME (h::sfx,stl',csl')) /\
       (stackSyms stl' = [NTS lhs])``,
-MAGIC);
+cheat);
 (*
 SRW_TAC [][]THEN
 Q.ABBREV_TAC `inis=initItems ag (rules ag)` THEN
@@ -99,7 +95,7 @@ validItemInv
                             SOME (h::sfx,stl',csl')) /\
       (stackSyms stl' = stackSyms (pop stl (SUC (LENGTH t))) ++
 				  [NTS lhs])``,
-MAGIC);
+cheat);
 (*
 SRW_TAC [][] THEN
 Cases_on `r` THEN
@@ -219,7 +215,7 @@ val takesStepsReduce = store_thm
    (s2,stl',csl') /\
    (stackSyms stl'=stackSyms (pop stl (LENGTH rhs))++[NTS lhs]) /\
    (getState m (itemlist csl) (HD s2) = REDUCE (rule lhs rhs))``,
-MAGIC);
+cheat);
 (*
 SRW_TAC [] [takesSteps_def] THEN
 Q.ABBREV_TAC `csl=MAP FST stl ++ [(NTS st,initItems ag (rules ag))]` THEN
@@ -728,7 +724,7 @@ validItemInv (ag,stli) ==>
            /\ (getState m (itemlist csl) (HD sfx)
 	       = REDUCE (rule N rhs))``,
 
-MAGIC);
+cheat);
 (*
 Induct_on `ininp` THEN
 FULL_SIMP_TAC (srw_ss()) [takesSteps_def]
@@ -970,7 +966,7 @@ validItemInv (ag,stli) ==>
         (ininp ++ rhs++ sfx,stli,csli) (i,stl,csl)
 	   /\ (stackSyms stl = pfx) /\ (i=rhs++sfx)
 	   /\  MEM (item N ([],rhs)) (itemlist csl)``,
-MAGIC);
+cheat);
 
 (*
 Induct_on `ininp` THEN
@@ -1613,7 +1609,7 @@ val a1 = store_thm ("a1",
   ~(lhs=startSym ag) ==>
   (HD (s1++s2)=TS eof) ==>
   ((s1=[TS eof]) /\ (s2=[])) \/ ((s2=[TS eof]) /\ (s1=[]))``,
-MAGIC);
+cheat);
 
 (*
 SRW_TAC [] [] THEN
@@ -1704,7 +1700,7 @@ RTC (rderives ag) [NTS (startSym ag)] (pfx ++ [NTS N] ++ sfx) ==>
          [(NTS st,initItems ag (rules ag))]) (sfx,stl,csl) /\
       (stackSyms stl = s1 ++ [NTS lhs] ++ pfx') /\
       MEM (item N (rhs,[])) (itemlist csl)``,
-MAGIC);
+cheat);
 (*
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [exitCond_def] THEN
@@ -2460,7 +2456,7 @@ EVERY isTmnlSym sfx ==>
 		(i,stl,csl) /\
    (stackSyms stl = pfx ++ rhs) /\
 MEM (item N (rhs, [])) (itemlist csl) /\ (i=sfx)``,
-MAGIC);
+cheat);
 (*
 Induct_on `dtl` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [rsf_def, rtc2list_def]  THEN
@@ -2566,7 +2562,7 @@ sl IN language ag ==>
 (initState = (NTS st,initItems ag (rules ag))) ==>
 ?tree.(parser (initState,eof,startSym g) m sl
        = SOME (SOME tree))``,
-MAGIC);
+cheat);
 (*
 SRW_TAC [][] THEN
 `((rderives ag [NTS (startSym ag)] [NTS (startSym g);TS eof])

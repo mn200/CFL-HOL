@@ -8,10 +8,6 @@ open symbolDefTheory grammarDefTheory listLemmasTheory firstSetDefTheory
 
 val _ = new_theory "followSetDef"
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
-
-val _ = set_trace "Unicode" 1;
-
 val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];
 
@@ -99,11 +95,11 @@ HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [] [RTC_RULES] THEN1
 
 val (followG,followG_ind) =
 tprove (followG_defn,
-MAGIC);
+cheat);
 
 val followSetEq = store_thm ("followSetEq",
 ``!g sym. s ∈ followG g [] nt <=> s IN followSet g (NTS nt)``,
-MAGIC)
+cheat)
 
 val _ = export_theory ();
 
@@ -128,14 +124,14 @@ val (followML_def, followML_ind) = tprove(
   SRW_TAC [][gsn_def, cg_def, easy_def, tricky_def] THEN
 
 `NTS P ∈ ruleRhs (EL i (rules g))` by METIS_TAC [MEM, takeMem] THEN
-`NTS P ∈ nonTerminals g` by MAGIC THENL[
+`NTS P ∈ nonTerminals g` by cheat THENL[
 SRW_TAC [][validSeen] THEN
 `{e | ((e = P) ∨ e ∈ sn) ∧ NTS e ∈ nonTerminals g} =
 {P} ∪ {e | e ∈ sn ∧ NTS e ∈ nonTerminals g}` by (SRW_TAC [][EXTENSION] THEN
 						 METIS_TAC []) THEN
 `{P} ∩ {e | e ∈ sn ∧ NTS e ∈ nonTerminals g} = {}`
 by (SRW_TAC [][EXTENSION] THEN METIS_TAC []) THEN
-`FINITE {e | e ∈ sn ∧ NTS e ∈ nonTerminals g}` by MAGIC THEN
+`FINITE {e | e ∈ sn ∧ NTS e ∈ nonTerminals g}` by cheat THEN
 `CARD {e | ((e = P) ∨ e ∈ sn) ∧ NTS e ∈ nonTerminals g} + 0 =
 CARD {P} + CARD {e | e ∈ sn ∧ NTS e ∈ nonTerminals g}` by
 			  METIS_TAC [CARD_UNION,FINITE_SING,
@@ -146,7 +142,7 @@ DECIDE_TAC,
 
 Q_TAC SUFF_TAC `CARD (validSeen g sn) < CARD (nonTerminals g)` THEN1
 DECIDE_TAC THEN
-`FINITE (nonTerminals g)` by MAGIC THEN
+`FINITE (nonTerminals g)` by cheat THEN
 Q_TAC SUFF_TAC `validSeen g sn ⊂ nonTerminals g` THEN1 METIS_TAC [CARD_PSUBSET]
 
 `FINITE (validSeen g sn)`
@@ -357,12 +353,12 @@ TS ts ∈ followSetML g sym``
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN1
 `m = p ++ [sym]++[TS ts]++s`by METIS_TAC [APPEND_11, APPEND_ASSOC] THEN
 SRW_TAC [][] THEN
-MAGIC
+cheat
 
 
 FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
 SRW_TAC [][] THEN
-`MEM rhs (MAP ruleRhs (rules g))` by MAGIC THEN
+`MEM rhs (MAP ruleRhs (rules g))` by cheat THEN
 FIRST_X_ASSUM (Q.SPECL_THEN [`s1`,`s2`,`rhs`] MP_TAC) THEN SRW_TAC [][] THEN
 
 
@@ -382,7 +378,7 @@ Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [] THEN1
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 SRW_TAC [][] THEN
-MAGIC
+cheat
 
 
 

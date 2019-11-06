@@ -14,8 +14,6 @@ fun Store_thm(s,t,tac) = (store_thm(s,t,tac) before export_rewrites [s])
 
 val _ = augment_srw_ss [rewrites [rich_listTheory.IS_PREFIX_NIL]]
 
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w);
-
 val _ = new_theory "complDef"
 
 val _ = diminish_srw_ss ["list EQ"];
@@ -1346,7 +1344,7 @@ validItemInv (ag,((q',r'),r)::t) ==>
  (q',r')::(MAP FST t ++ [(NTS st,initItems ag (rules ag))])) ==>
 validItemInv
    (ag,((TS s,l),Leaf (ts2str (TS s)))::((q',r'),r)::t)``,
-MAGIC);
+cheat);
 (*
 SRW_TAC [] [] THEN
  FULL_SIMP_TAC (srw_ss()) [validItemInv_def, tmnlSym_def] THEN
@@ -1457,7 +1455,7 @@ parseInv (ag,t,csl) ==>
 validItemInv (ag,t) ==>
 validItemInv
    (ag,((TS s,l),Leaf (ts2str (TS s)))::t)``,
-MAGIC);
+cheat);
 (*
 SRW_TAC [] [] THEN
  FULL_SIMP_TAC (srw_ss()) [validItemInv_def, tmnlSym_def] THEN
@@ -1795,7 +1793,7 @@ validItemInv (ag,stli) ==>
       takesSteps (LENGTH ininp) (parse m) (exitCond (eof,NTS (startSym g)))
         (ininp ++ rhs++ sfx,stli,csli) (i,stl,csl)
 	   /\ (stackSyms stl = pfx) /\ (i=rhs++sfx)``,
-MAGIC);
+cheat);
 (*
 Induct_on `ininp` THEN
 SRW_TAC [] [takesSteps, exitCond_def] THEN
@@ -2015,7 +2013,7 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 			       FULL_SIMP_TAC (srw_ss()) [parseInv_def,validStates_def,validStlItemsStack_def,stackValid_def,itemlist_def,validStkSymTree_def] THEN
 			       FULL_SIMP_TAC (srw_ss()) [ptree2Sym_def,tmnlSym_def] THEN
 			       `validItl ag l` by METIS_TAC [getStateGotoValidItl] THEN
-			       `validStlItems [((TS t'',l),Leaf (ts2str (TS t'')))] l` by MAGIC
+			       `validStlItems [((TS t'',l),Leaf (ts2str (TS t'')))] l` by cheat
                                by METIS_TAC [validStlItems_goto,ptree2Sym_def,sgoto_exp, ts2str_def] THEN
 			       `!csl t.(getState m (itemlist csl) (TS t'') = GOTO l) ==>
          					     (csl = MAP FST t ++ [(NTS st,initItems ag (rules ag))]) ==>
@@ -2046,9 +2044,9 @@ SRW_TAC [] [takesSteps, exitCond_def] THEN
 
 
 				      FULL_SIMP_TAC (srw_ss()) [sgoto_def,nextState_def] THEN
-				      `EVERY (validItem ag [TS s]) (moveDot (initItems ag (rules ag)) (TS t''))` by MAGIC
+				      `EVERY (validItem ag [TS s]) (moveDot (initItems ag (rules ag)) (TS t''))` by cheat
 					  by METIS_TAC [validItem_moveDot, APPEND_NIL, ts2str_def] THEN
-				      `EVERY (validItem ag [TS t'']) l` by MAGIC
+				      `EVERY (validItem ag [TS t'']) l` by cheat
 					  by METIS_TAC [validItem_iclosure] THEN
 				      FULL_SIMP_TAC (srw_ss()) [push_def] THEN
 				      METIS_TAC [ptree2Sym_def,ts2str_def],

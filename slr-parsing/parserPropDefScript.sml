@@ -11,7 +11,6 @@ open parseProp1DefTheory
 open parseProp2DefTheory
 
 val _ = new_theory "parserPropDef"
-fun MAGIC (asl, w) = ACCEPT_TAC (mk_thm(asl,w)) (asl,w)
 
 Definition parser_inv_def:
   parser_inv g stl csl ⇔ validptree_inv g stl /\
@@ -105,7 +104,7 @@ val soundness = store_thm ("soundness",
          eof, startSym g) m sl = SOME (SOME tree)) ⇒
 sl ∈ language ag``,
 
-MAGIC);
+cheat);
 
 (*
 SRW_TAC [][language_def] THEN
@@ -131,7 +130,7 @@ SRW_TAC [] [] THEN
 UNABBREV_ALL_TAC THEN
 FULL_SIMP_TAC (srw_ss()) [exitCond_def, stackSyms_def] THEN
 SRW_TAC [][] THEN
-MAGIC);
+cheat);
 *)
 
 val parse_sl_not_nil = store_thm ("parse_sl_not_nil",

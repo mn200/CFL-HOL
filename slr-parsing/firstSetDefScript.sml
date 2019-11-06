@@ -12,14 +12,14 @@ val _ = set_trace "Unicode" 1;
 val _ = Globals.linewidth := 60
 val _ = diminish_srw_ss ["list EQ"];
 
-val firstSet = 
+val firstSet =
  Define
   `firstSet g sym = {TS fst | ∃rst. RTC (derives g) [sym] ([TS fst]++rst) }`
 
 
 val firstSetML = tDefine
   "firstSetML" `
-  (firstSetML (g:(α,β) grammar) (sn:(α,β) symbol list) ([]:(α,β) symbol list) 
+  (firstSetML (g:(α,β) grammar) (sn:(α,β) symbol list) ([]:(α,β) symbol list)
        = []:(α,β) symbol list) ∧
   (firstSetML g sn (TS ts :: rest) = [TS ts]) ∧
   (firstSetML g sn (NTS nt :: rest) =
@@ -110,7 +110,7 @@ val MEM_getRhs = store_thm(
   Cases_on `h` THEN SRW_TAC [][getRhs_def] THEN SRW_TAC [][]);
 
 
-val firstSetList = 
+val firstSetList =
  Define
   `firstSetList g l = {TS fst | ∃rst. RTC (derives g) l ([TS fst] ++ rst)}`
 
@@ -459,4 +459,3 @@ val _ =
 
 
 val _ = export_theory ();
-

@@ -114,13 +114,13 @@ SRW_TAC [][] THEN
 val cnfRtcdPfxSfx = store_thm
 ("cnfRtcdPfxSfx",
 ``∀dl z z'.
-(lderives g) ⊢ dl ◁ z → z' ∧
-isCnf g ∧
-MEM (NTS B) (ldNts (TL dl)) ∧ MEM  (v++[NTS B]++x) (TL dl)
+     (lderives g) ⊢ dl ◁ z → z' ∧
+     isCnf g ∧
+     MEM (NTS B) (ldNts (TL dl)) ∧ MEM  (v++[NTS B]++x) (TL dl)
  ⇒
 (v≠[]) ∨ (x≠[])``,
 
-Induct_on `dl` THEN SRW_TAC [][] THEN1
+Induct_on `dl` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 SRW_TAC [][]
@@ -225,19 +225,18 @@ IMP_RES_TAC twoListAppEq THEN
 SRW_TAC [][] THEN
 METIS_TAC [APPEND_NIL,EVERY_DEF,EVERY_APPEND]);
 
+FOO;
 
 val symPropExistsGen1Sym = store_thm
 ("symPropExistsGen1Sym",
 ``∀dl h y p s.
-lderives g ⊢ dl ◁ [h] → y ∧ MEM (p ++ [h] ++ s) (TL dl) ∧ isWord p
-⇒
-symRepProp dl``,
-
+       lderives g ⊢ dl ◁ [h] → y ∧ MEM (p ++ [h] ++ s) (TL dl) ∧ isWord p
+       ⇒
+       symRepProp dl``,
 HO_MATCH_MP_TAC SNOC_INDUCT THEN
-SRW_TAC [][SNOC_APPEND] THEN1
+SRW_TAC [][SNOC_APPEND] THEN
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
-
- Cases_on `dl=[]` THEN
+Cases_on `dl=[]` THEN
 SRW_TAC [][] THEN1
 FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 `dl = FRONT dl ++ [LAST dl]` by METIS_TAC [APPEND_FRONT_LAST] THEN
@@ -278,7 +277,7 @@ THENL[
       FULL_SIMP_TAC (srw_ss()) [lderives_def, listderiv_def] THEN
       `isWord [TS t']`by SRW_TAC [][isTmnlSym_def] THEN
       METIS_TAC [rtc2listRtcldTmnls, MEM, MEM_APPEND]
-      ]);
+]);
 
 
 val symRepPropAddLast = store_thm

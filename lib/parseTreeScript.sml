@@ -11,7 +11,6 @@ val _ = new_theory "parseTree";
 val _ = Globals.linewidth := 60
 val _ = set_trace "Unicode" 1
 
-
 val _ = Hol_datatype 
 `ptree = Leaf of 'ts | Node of 'nts => ptree list`;
 
@@ -46,8 +45,6 @@ val root = Define
 val fringe_defn = Hol_defn "fringe_defn"
     `(fringe (Leaf tm) = [tm]) ∧
 (fringe (Node x ptl) = FLAT (MAP fringe ptl))`;
-
-
 
 val ptsize_better = prove(
   ``ptsize (Node nt ptlist) = 1 + SUM (MAP ptsize ptlist)``,
@@ -94,24 +91,23 @@ val ptreeToRules = Define
 (ptreeToRules2 [] = []) ∧
 (ptreeToRules2 (h::t) = (ptreeToRules h) ++ (ptreeToRules2 t))`;
 
-val checkRules = Define `(checkRules [] rls = T) ∧
-(checkRules (h::t) rls = (MEM h rls) ∧ checkRules t rls)`;
-
-
+val checkRules = Define 
+ `(checkRules [] rls = T) ∧
+  (checkRules (h::t) rls <=> MEM h rls ∧ checkRules t rls)`;
 
 val ptreeSubtSyms = Define 
 `(ptreeSubtSyms (Node nt tl) = MAP ptree2Sym tl) ∧
-(ptreeSubtSyms (Leaf  tm) = [])`;
+ (ptreeSubtSyms (Leaf  tm) = [])`;
 
 val ptreeSubtree = Define 
 `(ptreeSubtree (Node x l) = l) ∧
 (ptreeSubtree (Leaf tm) = [])`;
 
 val validptree_defn = Hol_defn "validptree_defn" 
-    `(validptree g (Node n ptl) =
+ `(validptree g (Node n ptl) <=>  
       MEM (rule n (getSymbols ptl)) (rules g) ∧
-      (∀e.MEM e ptl ⇒ isNode e ⇒ validptree g e)) ∧
-(validptree g (Leaf tm) = F)`;
+      (∀e. MEM e ptl ⇒ isNode e ⇒ validptree g e)) ∧
+  (validptree g (Leaf tm) <=> F)`;
 
 val (validptree, validptree_ind) = tprove (validptree_defn,
 WF_REL_TAC (`measure (\(g,e).ptsize e)`) THEN
@@ -123,11 +119,10 @@ DECIDE_TAC);
 val _ = save_thm ("validptree",validptree)
 val _ = save_thm ("validptree_ind",validptree_ind)
 
-
 val leaves_def = Define 
 `(leaves (Leaf tm) = [tm]) ∧
-(leaves (Node nt ptlist) = cleaves ptlist) ∧
-(cleaves [] = []) /\ (cleaves (h::t) = leaves h ++ cleaves t)`;
+ (leaves (Node nt ptlist) = cleaves ptlist) ∧
+ (cleaves [] = []) /\ (cleaves (h::t) = leaves h ++ cleaves t)`;
 
 val flat_leaves = store_thm("flat_leaves", 
 ``∀l.(leaves (Node n l)) = FLAT (MAP leaves l)``,
@@ -192,7 +187,6 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 SRW_TAC [] [take1]
 ]]);
 
-
 val take_getSyms = store_thm ("take_getSyms",
 ``∀n l.(take n (MAP SND l) = SOME x) ⇒ 
 (THE (take n  (getSymbols (MAP SND l))) = getSymbols (THE (take n (MAP SND l))))``,
@@ -213,19 +207,19 @@ FULL_SIMP_TAC (arith_ss) [] THEN
 METIS_TAC [take1_getSyms]]]);
 
 
-val checkRules_append = store_thm("checkRules_append", 
-``checkRules (l1++l2) rs = checkRules l1 rs ∧ checkRules l2 rs``,
-SRW_TAC [] [EQ_IMP_THM] THENL[
-Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [checkRules],
-Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [checkRules],
-Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [checkRules]]
+val checkRules_append = store_thm
+("checkRules_append", 
+ ``checkRules (l1++l2) rs <=> checkRules l1 rs ∧ checkRules l2 rs``,
+ SRW_TAC [] [EQ_IMP_THM] THENL[
+ Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [checkRules],
+ Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [checkRules],
+ Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [checkRules]]
 );
 
 val ptreeToRules_append = store_thm ("ptreeToRules_append", 
 ``ptreeToRules2 (l1++l2) = ptreeToRules2 l1 ++ ptreeToRules2 l2``,
 Induct_on `l1` THEN SRW_TAC [] [ptreeToRules]
 );
-
 
 val getSyms_nil = store_thm ("getSyms_nil", 
 ``(getSymbols l = []) ⇒ (l=[])``,
@@ -268,7 +262,6 @@ val fringeTmsEq = store_thm
 (MAP TS (FLAT (MAP fringe (MAP Leaf (MAP ts2str x)))) = x)``,
 
 Induct_on `x` THEN SRW_TAC [][ts2str_def, isTmnlSym_def, fringe_def]);
-
 
 
 val height_defn = Hol_defn "height_defn"
@@ -314,8 +307,6 @@ val mapFringeLeaves = store_thm
 
 Induct_on `ptl` THEN SRW_TAC [][leaves_def]);
 
-
-
 val fringeEqLeaves = store_thm
 ("fringeEqLeaves",
 ``∀t. (fringe t = leaves t)``,
@@ -339,7 +330,7 @@ val _ = save_thm ("treeSyms_ind",treeSyms_ind)
 
 
 val distinctNtms = Define
-`distinctNtms t = rmDupes (FILTER isNonTmnlSym (treeSyms t))`;
+ `distinctNtms t = rmDupes (FILTER isNonTmnlSym (treeSyms t))`;
 
 val subtree = Define
 `(subtree (Leaf tm) (p::ps) = NONE) ∧
@@ -367,14 +358,13 @@ val allTms = Define
 `allTms ptl = isWord (MAP root ptl)`;
 
 val btree = Define
-`btree B st t = (root st = B) ∧  isSubtree st t`;
+`btree B st t <=> (root st = B) ∧  isSubtree st t`;
 
 val subtreeApp = store_thm
 ("subtreeApp",
 ``∀t t1 p p'.
- (subtree t p = SOME t1) ∧ (subtree t1 p' = SOME t0) ⇒
- (subtree t (p++p') = SOME t0)``,
-
+   (subtree t p = SOME t1) ∧ (subtree t1 p' = SOME t0) ⇒
+   (subtree t (p++p') = SOME t0)``,
 Induct_on `p` THEN SRW_TAC [][] THEN
 Cases_on `t` THEN
 FULL_SIMP_TAC (srw_ss()) [subtree] THEN
@@ -431,13 +421,10 @@ Cases_on `h < LENGTH l` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 DISJ2_TAC THEN
 Q.EXISTS_TAC `h::t` THEN
 SRW_TAC [][subtree]) THEN1
-
 (Cases_on `t` THEN METIS_TAC [subtree]) THEN
-
 METIS_TAC []);
 
  
-
 val subtreeHeight = store_thm
 ("subtreeHeight",
 ``∀t p t1. (subtree t p = SOME t1) ∧ p ≠ [] ⇒ height t1 < height t``,
@@ -583,7 +570,6 @@ METIS_TAC [CARD_SUBSET, FINITE_LIST_TO_SET, DECIDE ``a ≤ b ∧b ≤ c ⇒ a �
 val cleavesApp = store_thm
 ("cleavesApp",
 ``∀a b. cleaves (a ++ b) = cleaves a ++ cleaves b``,
-
 Induct_on `a` THEN SRW_TAC [][leaves_def]);
 
 
@@ -689,8 +675,6 @@ SRW_TAC [][FILTER_APPEND, FLAT_APPEND] THEN
 METIS_TAC [rmdLenLe, APPEND, APPEND_ASSOC]) THEN
 DECIDE_TAC);
 
-
-
 val distSymsLenSub = store_thm
 ("distSymsLenSub",
 ``∀t1 t. isSubtreeEq t1 t ⇒ LENGTH (distinctNtms t1) ≤ LENGTH (distinctNtms t)``,
@@ -698,12 +682,14 @@ val distSymsLenSub = store_thm
 SRW_TAC [][isSubtreeEq] THEN
 METIS_TAC [subtDistNtms]);
 
-
-
 val cnfTree = store_thm
 ("cnfTree",
-``∀g tree. validptree g tree ⇒ isCnf g ⇒ ∀n t. (tree = Node n t) ⇒
-    ∃n1 t1 n2 t2.(t = [Node n1 t1; Node n2 t2]) ∨ ∃ts.(t = [Leaf ts])``,
+``∀g tree. 
+     validptree g tree ⇒ 
+     isCnf g ⇒ 
+     ∀n t. (tree = Node n t) ⇒
+           ∃n1 t1 n2 t2. 
+              (t = [Node n1 t1; Node n2 t2]) ∨ ∃ts.(t = [Leaf ts])``,
 
 HO_MATCH_MP_TAC validptree_ind THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [validptree, isCnf_def] THEN
@@ -751,11 +737,11 @@ SRW_TAC [][leaves_def]);
 
 
 val rootRep = Define
-`rootRep st t = (root st = root t) ∧  isSubtree st t`;
+`rootRep st t <=> (root st = root t) ∧  isSubtree st t`;
 
 
 val symRepProp = Define
-`symRepProp t0 t1 t = isSubtreeEq t1 t ∧ rootRep t0 t1`;
+`symRepProp t0 t1 t <=> isSubtreeEq t1 t ∧ rootRep t0 t1`;
 
 val subtreeNotSymProp = store_thm
 ("subtreeNotSymProp",
@@ -768,11 +754,10 @@ FULL_SIMP_TAC (srw_ss()) [btree] THEN
 `isSubtreeEq t1 t` by METIS_TAC [isSubtreeEq, option_CLAUSES] THEN
 METIS_TAC [subtreeEqTrans,root, isSubtree, root, isSubtreeEq]);
 
-
 val notSymRepImpTreeSyms = store_thm
 ("notSymRepImpTreeSyms",
 ``(∀t0 t1. ¬symRepProp t0 t1 (Node n ptl)) ⇒ 
-(∀e. e ∈ ptl ⇒ ¬((NTS n) ∈ treeSyms e))``,
+            (∀e. e ∈ ptl ⇒ ¬((NTS n) ∈ treeSyms e))``,
 
 SRW_TAC [][] THEN
 SPOSE_NOT_THEN ASSUME_TAC THEN

@@ -1,5 +1,5 @@
 (* A theory about regular expressions *)
-open HolKernel boolLib bossLib Parse
+open HolKernel boolLib bossLib Parse;
 open stringTheory relationTheory listTheory;
 open pred_setTheory grammarDefTheory listLemmasTheory containerLemmasTheory;
 
@@ -10,10 +10,10 @@ val rgrRules = Define
     { rule l r | MEM (rule l r) (rules g) ∧
      ∃a b.RTC (derives g) [NTS (startSym g)] (a++[NTS l]++b)}`;
 
-val rgr = Define
-`rgr g g' = (set (rules g') = rgrRules g) ∧
-            (startSym g' = startSym g)`;
-
+val rgr = 
+ Define
+  `rgr g g' <=> (set (rules g') = rgrRules g) /\ (startSym g' = startSym g)`;
+ 
 
 val finitergrRules = store_thm
 ("finitergrRules",
@@ -83,7 +83,6 @@ val rgr_subr3g = prove(
 ``∀u v.rgr g g' ⇒
 derives g u v ⇒ (u=[NTS (startSym g)]) ⇒ derives g' u v``,
 METIS_TAC [rgr_subr3,startSym_def,eq_srgr]);
-
 
 val rgr_subr3_rtc = store_thm ("rgr_subr3_rtc",
 ``∀u v.RTC (derives g') u v ⇒ rgr g g' ⇒ RTC (derives g) u v``,

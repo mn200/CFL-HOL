@@ -644,8 +644,6 @@ SRW_TAC [] [pop] THEN
 `LENGTH l >= n'` by FULL_SIMP_TAC (arith_ss) [] THEN
 METIS_TAC [SOME_11])
 
-
-
 val take_mem = store_thm ("take_mem",
 ``!n l.(take n l = SOME x) ==> (!e.MEM e x ==> MEM e l)``,
 Induct_on `n` THEN SRW_TAC [] [] THENL[
@@ -656,7 +654,6 @@ METIS_TAC [take0, SOME_11, take1, take0out, MEM],
 SRW_TAC [] [] THEN
 METIS_TAC [rgr_r9eq, MEM_APPEND]]
 )
-
 
 val listeq = store_thm ("listeq",
 ``!l1 l2 e l1' l2' e'.(l1++[e]++l2 = l1'++[e']++l2') ==>
@@ -678,7 +675,6 @@ val rmDupes_prop = store_thm ("rmDupes_prop",
 ``! l.EVERY P l ==> EVERY P (rmDupes l)``,
 HO_MATCH_MP_TAC rmDupes_ind THEN SRW_TAC [] [rmDupes] THEN
 METIS_TAC [delete_prop])
-
 
 val alld_delete = store_thm ("alld_delete",
 ``!l.ALL_DISTINCT l ==> !h.ALL_DISTINCT (delete h l)``,
@@ -708,15 +704,15 @@ val diff_thm = store_thm(
 
 val MEM_delete = store_thm(
   "MEM_delete",
-  ``MEM e (delete h l) = e ≠ h ∧ MEM e l``,
+  ``MEM e (delete h l) <=> e ≠ h ∧ MEM e l``,
   Induct_on `l` THEN SRW_TAC [][delete] THEN METIS_TAC []);
 
 val diff_mem = store_thm ("diff_mem",
-``!e l1 l2. MEM e (diff l1 l2) = MEM e l1 /\ ~(MEM e l2)``,
+``!e l1 l2. MEM e (diff l1 l2) <=> MEM e l1 /\ ~(MEM e l2)``,
 Induct_on `l2` THEN SRW_TAC [][diff_thm, MEM_delete] THEN METIS_TAC []);
 
 val diff_mem1 = store_thm ("diff_mem1",
-``!e l1 l2.MEM e (diff l1 l2) ==> MEM e l1 /\ ~(MEM e l2)``,
+``!e l1 l2. MEM e (diff l1 l2) ==> MEM e l1 /\ ~(MEM e l2)``,
 METIS_TAC [diff_mem]);
 
 val diff_mem2 = store_thm ("diff_mem2",
@@ -745,14 +741,10 @@ FULL_SIMP_TAC (arith_ss) [] THEN
 `LENGTH l1' > LENGTH l1` by FULL_SIMP_TAC (arith_ss) [] THEN
 METIS_TAC [])
 
-
-val listStartSame = store_thm ("listStartSame",
-			       ``!l l1 l1'.((l++l1) = (l++l1')) ==> (l1=l1')``,
-Induct_on `l` THEN SRW_TAC [] [])
-
-
-
-
+val listStartSame = store_thm 
+("listStartSame",
+ ``!l l1 l1'.((l++l1) = (l++l1')) ==> (l1=l1')``,
+ Induct_on `l` THEN SRW_TAC [] [])
 
 val list_mem1 = store_thm ("list_mem1",
 ``!l.~(l=[]) = ?e.MEM e l``,
@@ -1238,7 +1230,6 @@ Induct_on `dl` THEN SRW_TAC [][] THEN
 SRW_TAC [][addFront] THEN1
 METIS_TAC [BUTFIRSTN_LENGTH_APPEND] THEN
 METIS_TAC [addFrontDrop]);
-
 
 val addFrontAppList = store_thm
 ("addFrontAppList",

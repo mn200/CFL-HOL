@@ -29,9 +29,9 @@ val upgr_rules = Define
 `(upgr_rules g =  (nonUnitProds g) ∪ (newProds g (nonUnitProds g)))`;
 
 val upgr = Define
-`upgr g g' =
-(set (rules g') = upgr_rules g) ∧
-(startSym g' = startSym g)`;
+`upgr g g' <=>
+  (set (rules g') = upgr_rules g) ∧
+  (startSym g' = startSym g)`;
 
 
 val finiteallDeps = store_thm
@@ -652,8 +652,9 @@ FULL_SIMP_TAC (srw_ss()) [EXTENSION]);
 
 
 val up_r1 = prove (
-``rule lhs (s1++[NTS nt]++s2) ∈ unitProds g =
-		   (s1=[]) ∧ (s2=[]) ∧ rule lhs [NTS nt] ∈ unitProds g``,
+``rule lhs (s1++[NTS nt]++s2) ∈ unitProds g 
+    <=>
+  (s1=[]) ∧ (s2=[]) ∧ rule lhs [NTS nt] ∈ unitProds g``,
 SRW_TAC [][EQ_IMP_THM] THENL[
 
 FULL_SIMP_TAC (srw_ss()) [unitProds] THEN METIS_TAC [lres],

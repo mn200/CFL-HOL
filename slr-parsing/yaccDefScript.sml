@@ -2217,7 +2217,7 @@ val parser =
 	  | SOME _ => SOME NONE`;
 
 
-(* yacc :: grammar -> symbol list -> ptree opion*)
+(* yacc :: grammar -> symbol list -> ptree option *)
 val lrparse = 
  Define 
   `lrparse g s' eof sl = 
@@ -2239,8 +2239,8 @@ val lrparse =
 
 val parseExp = store_thm
 ("parseExp",
-``∀Q.(\(x,y,z).parse Q (x,y,z)) = parse Q``,
-SRW_TAC [] [FUN_EQ_THM,UNCURRY]);
+ ``∀Q. (\(x,y,z).parse Q (x,y,z)) = parse Q``,
+ SRW_TAC [] [FUN_EQ_THM,UNCURRY]);
 
 
 val mlDir = ref ("./theoryML/");

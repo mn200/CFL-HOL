@@ -42,7 +42,7 @@ val l2rRules = Define
        (ru ∪ newAprods A B ru) ∪ bprods A B ru DIFF recprods A ru`;
 
 val left2Right = Define
-`left2Right A B g g' =
+`left2Right A B g g' <=>
    NTS B ∉ nonTerminals g ∧
    (startSym g = startSym g') ∧
    (set (rules g') = l2rRules A B (set (rules g)))`;
@@ -94,19 +94,25 @@ Q_TAC SUFF_TAC `Horrible = BIGUNION (IMAGE f ru)`
 val ntfree = Define `ntfree sf nt = ~(MEM (NTS nt) sf)`;
 
 val ntderives = Define
-`(ntderives g nt f lsl rsl = ((f=1) ∧ ∃s1 s2 rhs lhs.
-           ((s1 ++ [NTS lhs] ++ s2 = lsl) ∧ (s1 ++ rhs ++ s2 = rsl) ∧
-           MEM (rule lhs rhs) (rules g) ∧ (lhs=nt))) \/
-           ((f=0) ∧ ∃s1 s2 rhs lhs.
-           ((s1 ++ [NTS lhs] ++ s2 = lsl) ∧ (s1 ++ rhs ++ s2 = rsl) ∧
-	    MEM (rule lhs rhs) (rules g) ∧ ~(lhs=nt))))`;
+`ntderives g nt f lsl rsl <=> 
+  ((f=1) ∧ 
+     ∃s1 s2 rhs lhs.
+        ((s1 ++ [NTS lhs] ++ s2 = lsl) ∧ (s1 ++ rhs ++ s2 = rsl) ∧
+        MEM (rule lhs rhs) (rules g) ∧ (lhs=nt)))
+  \/
+  ((f=0) ∧ 
+     ∃s1 s2 rhs lhs.
+        ((s1 ++ [NTS lhs] ++ s2 = lsl) ∧ (s1 ++ rhs ++ s2 = rsl) ∧
+        MEM (rule lhs rhs) (rules g) ∧ ~(lhs=nt)))`;
 
 val pntderives = Define
-`(pntderives g nt f 0 lsl rsl  = ntderives g nt f lsl rsl) ∧
-(pntderives g nt f n lsl rsl = ((f=1) ∧ ∃s1 s2 rhs lhs.
+`(pntderives g nt f 0 lsl rsl <=> ntderives g nt f lsl rsl) ∧
+ (pntderives g nt f n lsl rsl <=> 
+    ((f=1) ∧ ∃s1 s2 rhs lhs.
            ((s1 ++ [NTS lhs] ++ s2 = lsl) ∧ (s1 ++ rhs ++ s2 = rsl) ∧
-           MEM (rule lhs rhs) (rules g) ∧ (lhs=nt)) ∧ (LENGTH s1 = n-1)) \/
-           ((f=0) ∧ ∃s1 s2 rhs lhs.
+           MEM (rule lhs rhs) (rules g) ∧ (lhs=nt)) ∧ (LENGTH s1 = n-1)) 
+    \/
+    ((f=0) ∧ ∃s1 s2 rhs lhs.
            ((s1 ++ [NTS lhs] ++ s2 = lsl) ∧ (s1 ++ rhs ++ s2 = rsl) ∧
            MEM (rule lhs rhs) (rules g) ∧ ~(lhs=nt)) ∧ (LENGTH s1 = n-1)))`;
 
@@ -224,7 +230,7 @@ SRW_TAC [] [] THEN
        METIS_TAC [RTC_RULES_RIGHT1,APPEND_ASSOC,APPEND]]);
 
 val l2r_r6 = prove(
-``∀u v nt.ntderives g nt f u v ⇒ derives g u v``,
+``∀u v nt. ntderives g nt f u v ⇒ derives g u v``,
 SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [derives_def, ntderives] THEN
 METIS_TAC []);
@@ -244,7 +250,7 @@ val l2r_r11 = prove(
 SRW_TAC [] [ntfree]);
 
 val ntfree_append = prove(
-``ntfree (x++y) nt = ntfree x nt ∧ ntfree y nt``,
+``ntfree (x++y) nt <=> ntfree x nt ∧ ntfree y nt``,
 SRW_TAC [] [EQ_IMP_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [ntfree]);
 
@@ -453,7 +459,7 @@ val blocksb = Define
 
 val expSymsApp = store_thm
 ("expSymsApp",
-``∀l1 l2.nt ∉ expSyms (l1 ++ l2) = nt ∉ expSyms l1 ∧ nt ∉ expSyms l2``,
+``∀l1 l2.nt ∉ expSyms (l1 ++ l2) <=> nt ∉ expSyms l1 ∧ nt ∉ expSyms l2``,
 
 Induct_on `l1` THEN SRW_TAC [][expSyms] THEN
 FULL_SIMP_TAC (srw_ss()) [expSyms, EXTENSION] THEN
@@ -605,14 +611,14 @@ Cases_on `l` THEN FULL_SIMP_TAC (srw_ss()) [addFront_def] THEN
 METIS_TAC [derives_same_append_left]);
 
 val ntderivl = Define
-`ntderivl (nt:('a,'b) symbol) (l:('a, 'b) symbol list list) =
-(∀e.MEM e l ⇒ (HD e = nt)) ∧
-(∀e1 e2 p s.(l = p++[e1;e2]++s) ⇒ LENGTH e2 ≥ LENGTH e1)`;
+  `ntderivl (nt:('a,'b) symbol) (l:('a, 'b) symbol list list) <=>
+    (∀e.MEM e l ⇒ (HD e = nt)) ∧
+    (∀e1 e2 p s.(l = p++[e1;e2]++s) ⇒ LENGTH e2 ≥ LENGTH e1)`;
 
 val ntderivr = Define
-`ntderivr (nt:('a,'b) symbol) (l:('a, 'b) symbol list list) =
-(∀e.MEM e l ⇒ (LAST e = nt)) ∧
-(∀e1 e2 p s.(l = p++[e1;e2]++s) ⇒ LENGTH e2 ≥ LENGTH e1)`;
+`ntderivr (nt:('a,'b) symbol) (l:('a, 'b) symbol list list) <=>
+   (∀e.MEM e l ⇒ (LAST e = nt)) ∧
+   (∀e1 e2 p s.(l = p++[e1;e2]++s) ⇒ LENGTH e2 ≥ LENGTH e1)`;
 
 
 (*
@@ -856,8 +862,9 @@ val rdNumNt = Define
 
 val ldNumNtApp = store_thm
 ("ldNumNtApp",
- ``∀l1 l2.(ldNumNt (NTS A) (l1 ++ l2) = 0) =
-(ldNumNt (NTS A) l1 = 0) ∧ (ldNumNt (NTS A) l2 = 0)``,
+ ``∀l1 l2.
+     (ldNumNt (NTS A) (l1 ++ l2) = 0) <=>
+     (ldNumNt (NTS A) l1 = 0) ∧ (ldNumNt (NTS A) l2 = 0)``,
 
 Induct_on `l1` THEN SRW_TAC [][ldNumNt] THEN
 FULL_SIMP_TAC (srw_ss()) [ldNumNt] THEN
@@ -866,8 +873,7 @@ METIS_TAC []);
 val ldNumNtNeq = store_thm
 ("ldNumNtNeq",
 ``(ldNumNt (NTS A) [s1++[NTS lhs]++s2] = 0) ∧ EVERY isTmnlSym s1
-⇒
-lhs ≠ A``,
+  ⇒ lhs ≠ A``,
 
 SRW_TAC [][ldNumNt] THEN
 FULL_SIMP_TAC (srw_ss()) [leftntm] THEN
@@ -877,8 +883,9 @@ METIS_TAC [NOT_EVERY]);
 
 val rdNumNtApp = store_thm
 ("rdNumNtApp",
- ``∀l1 l2.(rdNumNt (NTS A) (l1 ++ l2) = 0) =
-(rdNumNt (NTS A) l1 = 0) ∧ (rdNumNt (NTS A) l2 = 0)``,
+ ``∀l1 l2.
+     (rdNumNt (NTS A) (l1 ++ l2) = 0) <=>
+     (rdNumNt (NTS A) l1 = 0) ∧ (rdNumNt (NTS A) l2 = 0)``,
 
 Induct_on `l1` THEN SRW_TAC [][rdNumNt] THEN
 FULL_SIMP_TAC (srw_ss()) [rdNumNt] THEN
@@ -886,9 +893,10 @@ METIS_TAC []);
 
 val rdNumNtNeq = store_thm
 ("rdNumNtNeq",
-``(rdNumNt (NTS A) [s1++[NTS lhs]++s2] = 0) ∧ EVERY isTmnlSym s2
-⇒
-lhs ≠ A``,
+``(rdNumNt (NTS A) [s1++[NTS lhs]++s2] = 0) ∧ 
+  EVERY isTmnlSym s2
+  ⇒
+  lhs ≠ A``,
 
 SRW_TAC [][rdNumNt] THEN
 FULL_SIMP_TAC (srw_ss()) [rightntm] THEN
@@ -897,9 +905,10 @@ METIS_TAC [NOT_EVERY]);
 
 val listNtEq = store_thm
 ("listNtEq",
-``(s1++[NTS nt]++s2 = pfx++[NTS nt']++sfx) ∧ EVERY isTmnlSym s1 ∧ EVERY isTmnlSym pfx
-⇒
-(s1=pfx) ∧ (nt=nt') ∧ (s2=sfx)``,
+``(s1++[NTS nt]++s2 = pfx++[NTS nt']++sfx) ∧ 
+  EVERY isTmnlSym s1 ∧ EVERY isTmnlSym pfx
+  ⇒
+  (s1=pfx) ∧ (nt=nt') ∧ (s2=sfx)``,
 
 SRW_TAC [][] THEN
 IMP_RES_TAC twoListAppEq THEN FULL_SIMP_TAC (srw_ss()) [] THEN
@@ -1066,8 +1075,8 @@ METIS_TAC [listNtEq']);
 
 val lnnSing = store_thm
 ("lnnSing",
-``ldNumNt nt [e] ≠ 0 =
-∃pfx sfx.EVERY isTmnlSym pfx ∧ (e = pfx ++ [nt] ++ sfx)``,
+``ldNumNt nt [e] ≠ 0 <=>
+  ∃pfx sfx.EVERY isTmnlSym pfx ∧ (e = pfx ++ [nt] ++ sfx)``,
 
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [ldNumNt, leftntm, EQ_IMP_THM] THEN
@@ -1075,8 +1084,8 @@ METIS_TAC [LENGTH_NIL,NOT_CONS_NIL]);
 
 val rnnSing = store_thm
 ("rnnSing",
-``rdNumNt nt [e] ≠ 0 =
-∃pfx sfx.EVERY isTmnlSym sfx ∧ (e = pfx ++ [nt] ++ sfx)``,
+``rdNumNt nt [e] ≠ 0 <=>
+  ∃pfx sfx.EVERY isTmnlSym sfx ∧ (e = pfx ++ [nt] ++ sfx)``,
 
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [rdNumNt, rightntm, EQ_IMP_THM] THEN

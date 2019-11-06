@@ -20,7 +20,7 @@ val isTmnlSymML_def = Define
 val _ = overload_on ("isWord", ``EVERY isTmnlSym``)
 
 val isNonTmnlSym_def = Define
-`isNonTmnlSym sym = (∃s.sym = (NTS s)) ∨ F`;
+`isNonTmnlSym sym <=> (∃s.sym = (NTS s)) ∨ F`;
 
 val tmnlSym_def = Define `tmnlSym (TS tmnl) = tmnl`;
 val nonTmnlSym_def = Define `nonTmnlSym (NTS ntmnl) = ntmnl`;
@@ -31,11 +31,9 @@ val ts2str = Define `ts2str (TS s) = s`
 
 val toTmnlSym = Define `toTmnlSym s = TS s`;
 
-
 val isWordRev = store_thm
 ("isWordRev",
 ``∀l.isWord (REVERSE l) ⇔ isWord l``,
-
 Induct_on `l` THEN SRW_TAC [][] THEN
 METIS_TAC []);
 
@@ -210,7 +208,6 @@ val lang_def = Define
 (lang (Star r) = star (lang r))`;
 *)
 
-
 val listCompLens = store_thm ("listCompLens",
 ``∀t t' s2 N rst.(t' ++ s2 = t ++ [NTS N] ++ rst) ⇒
 (t=t') ∨ (∃pfx sfx.(t'=t++[NTS N]++pfx) ∧ (rst=pfx++sfx)) ∨ (∃pfx sfx.(t=pfx++sfx) ∧ (t'=pfx))``,
@@ -242,7 +239,7 @@ THENL[
 
 val symlistnil = store_thm
 ("symlistnil",
-``EVERY isTmnlSym l ∧ EVERY isNonTmnlSym l = (l=[])``,
+``EVERY isTmnlSym l ∧ EVERY isNonTmnlSym l <=> (l=[])``,
 Cases_on `l` THEN SRW_TAC [][] THEN
 Cases_on `h` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def,isNonTmnlSym_def]);
 
@@ -271,8 +268,6 @@ val symListDiv = store_thm
 	   Cases_on`h` THEN FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def,
 						      isNonTmnlSym_def]
 	   ]);
-
-
 
 val symlistdiv3 = store_thm
 ("symlistdiv3",
@@ -629,7 +624,7 @@ val symRepProp = Define
 
 
 val ntProp = Define
-`ntProp dl p s tsl B sfx N1 N2=
+`ntProp dl p s tsl B sfx N1 N2 <=>
 (dl = p ++ [tsl ++ [NTS B] ++ sfx] ++ [tsl++[NTS N1;NTS N2]++sfx] ++ s) ∧
  EVERY isTmnlSym tsl ∧
  ((N1=B) ∨
@@ -638,8 +633,7 @@ val ntProp = Define
 
 val spropApp = store_thm
 ("spropApp",
-``∀dl.(dl≠[]) ∧  ¬symRepProp dl ⇒
-¬symRepProp (TL dl)``,
+ ``∀dl.(dl≠[]) ∧  ¬symRepProp dl ⇒ ¬symRepProp (TL dl)``,
 
 Induct_on `dl` THEN SRW_TAC [][symRepProp] THEN
 Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [symRepProp] THEN
@@ -664,8 +658,8 @@ Induct_on `p0` THEN SRW_TAC [][]);
 
 val spropAppFst = store_thm
 ("spropAppFst",
-``∀dl1 dl2.(dl≠[]) ∧  ¬symRepProp dl ∧ (dl = dl1 ++ dl2) ⇒
-¬symRepProp dl1``,
+``∀dl1 dl2.
+   (dl≠[]) ∧ ¬symRepProp dl ∧ (dl = dl1 ++ dl2) ⇒ ¬symRepProp dl1``,
 
 Induct_on `dl1` THEN SRW_TAC [][symRepProp] THEN
 Cases_on `dl1` THEN FULL_SIMP_TAC (srw_ss()) [symRepProp] THEN1
@@ -807,8 +801,6 @@ val leftmostAddLast' = store_thm
 
 Induct_on `l` THEN SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [addLast_def]);
-
-
 
 val dldntsListsec = store_thm
 ("dldntsListsec",

@@ -39,18 +39,24 @@ Cases_on `f` THEN
 FULL_SIMP_TAC (srw_ss()) [THE_DEF]
 )
 
+
+val th = FINITE_INTER |> SIMP_RULE (srw_ss()) [INTER_DEF,IN_DEF];
+
 val ih = prove(
 ``{ l | EVERY P l /\ LENGTH l <= SUC n } =
-    [] INSERT BIGUNION (IMAGE (\t. IMAGE (\h. h :: t) { x | P x })
-                              { l | EVERY P l /\ LENGTH l <= n })``,
+  ([] INSERT BIGUNION (IMAGE (\t. IMAGE (\h. h :: t) { x | P x })
+                             { l | EVERY P l /\ LENGTH l <= n }))``,
 SRW_TAC [DNF_ss][Once EXTENSION, EQ_IMP_THM] THEN
 Cases_on `x` THEN SRW_TAC [][] THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 MAP_EVERY Q.EXISTS_TAC [`{ h'::t | P h'}`, `t`] THEN SRW_TAC [][]);
 
 val finite_length_limited = store_thm("finite_length_limited",
-``FINITE { x | P x } ==> !n. FINITE { l | EVERY P l /\ LENGTH l <= n }``,
-STRIP_TAC THEN Induct THEN1 SRW_TAC [CONJ_ss][LENGTH_NIL] THEN
-ASM_SIMP_TAC (srw_ss() ++ DNF_ss) [ih]);
+``FINITE {x | P x} ==> !n. FINITE { l | EVERY P l /\ LENGTH l <= n }``,
+disch_tac 
+ >> Induct 
+ >- (rw_tac list_ss [LENGTH_NIL] >> srw_tac [boolSimps.CONJ_ss] [])
+ >- ASM_SIMP_TAC (srw_ss() ++ boolSimps.DNF_ss) [ih]
+);
 
 val every_list_to_set = prove(
 ``EVERY P l ==> LIST_TO_SET l SUBSET { x | P x}``,

@@ -19,9 +19,9 @@ val munge = Define
 `(munge g p = { rule l r' | ∃r.MEM (rule l r) p ∧ MEM r' (munge0 g r) ∧ ~(r'=[]) })`;
 
 val negr = Define
-`negr g g' =
-(set (rules g') = munge g (rules g)) ∧
-(startSym g' =  startSym g)`;
+`negr g g' <=>
+   (set (rules g') = munge g (rules g)) ∧
+   (startSym g' =  startSym g)`;
 
 val finitenegrRules = store_thm
 ("finitenegrRules",

@@ -261,8 +261,8 @@ val aProdAllRules = Define
     (rule A (p++ [NTS B] ++ s)) IN ru ∧ (rule B x) IN ru }`;
 
 val aProdgAll = Define
-`aProdgAll A B PP g g' =
-  A≠B ∧
+`aProdgAll A B PP g g' <=>
+  (A≠B) ∧
   (startSym g = startSym g') ∧
   (set (rules g') = aProdAllRules A B PP (set (rules g)))`;
 
@@ -459,7 +459,7 @@ val lemma4_3all = store_thm
 (*********************************************************************************)
 
 val aProdgAlt = Define
-`aProdgAlt A l g g' =
+`aProdgAlt A l g g' <=>
   ¬MEM A l ∧
   (set (rules g') =
    set (rules g) DIFF {rule A (p ++ [NTS B] ++ s) | p, B, s |
@@ -473,8 +473,9 @@ val aProdgAlt = Define
 
 val derivgImpNewgalt = store_thm
 ("derivgImpNewgalt",
- ``∀u v. lderives g ⊢ dl ◁ u → v ⇒ aProdgAlt A l g g' ⇒ isWord v ⇒
- (lderives g')^* u v``,
+ ``∀u v. lderives g ⊢ dl ◁ u → v ⇒ 
+          aProdgAlt A l g g' ⇒ isWord v ⇒
+          (lderives g')^* u v``,
 
 completeInduct_on `LENGTH dl` THEN SRW_TAC [][] THEN
 Cases_on `dl` THEN SRW_TAC [][] THEN1
@@ -690,7 +691,7 @@ val aProdsRules = Define
     (rule A ([NTS B] ++ s)) IN ru ∧ (rule B x) IN ru }`;
 
 val aProds = Define
-`aProds A l g g' =
+`aProds A l g g' <=>
   ¬MEM A l ∧
   (startSym g = startSym g') ∧
   (set (rules g') = aProdsRules A l (set (rules g)))`;

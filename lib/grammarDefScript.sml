@@ -29,8 +29,9 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.INCONSISTENT, 2)),
 
 
 (* grammar = (V, T, P, S) *)
-val _ = Hol_datatype
-`grammar = G of ('nts,'ts)rule list => 'nts`;
+val _ = 
+ Hol_datatype
+   `grammar = G of ('nts,'ts)rule list => 'nts`;
 
 val ruleRhs = Define `ruleRhs (rule l r) = r`;
 
@@ -608,7 +609,7 @@ FULL_SIMP_TAC (srw_ss()) [getRhs] THEN
 METIS_TAC [getRhs]]);
 
 val notNullGetRhs_2 = store_thm ("notNullGetRhs_2",
-``(∃r.MEM (rule nt r) (rules g)) ⇒ ~(getRhs nt (rules g)=[])``,
+``(∃r. MEM (rule nt r) (rules g)) ⇒ ~(getRhs nt (rules g)=[])``,
 SRW_TAC [] [] THEN
 Cases_on `g` THEN
 FULL_SIMP_TAC (srw_ss()) [rules] THEN
@@ -622,7 +623,6 @@ val notNullGetRhs = store_thm ("notNullGetRhs",
 ``(∃r.MEM (rule nt r) (rules g)) = ~(getRhs nt (rules g)=[])``,
 METIS_TAC [notNullGetRhs_1,notNullGetRhs_2])
 
-
 val ntsInGr = store_thm ("ntsInGr",
 ``∀nt g.~(getRhs nt (rules g)=[]) ⇒ (NTS nt) IN (nonTerminals g)``,
 METIS_TAC [slemma1_4,notNullGetRhs])
@@ -631,12 +631,11 @@ val nullableList = Hol_defn "nullableList" `
   (nullableML
      (g:('a,'b)grammar) (sn:('a,'b)symbol list) ([]:('a,'b)symbol list) = T) ∧
   (nullableML g sn [TS ts] = F) ∧
-  (nullableML g sn [NTS A] = if (MEM (NTS A) sn) then F
-                             else EXISTS (nullableML g (NTS A :: sn))
-                                         (getRhs A (rules g))) ∧
-  (nullableML g sn (s::ss) = nullableML g sn [s] ∧ nullableML g sn ss)
-`
-
+  (nullableML g sn [NTS A] = 
+     if (MEM (NTS A) sn) then F
+     else EXISTS (nullableML g (NTS A :: sn)) (getRhs A (rules g))) 
+          ∧ (nullableML g sn (s::ss) <=> nullableML g sn [s] ∧ nullableML g sn ss)`
+;
 
 val (nullableML,nullable_ind) = tprove(
   nullableList,
@@ -875,27 +874,23 @@ val derives_split_append0 = prove(
       METIS_TAC [derives_def, RTC_RULES]
     ]]);
 
-
-
 val derives_split_append =
 SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) [] derives_split_append0
 
-
-val nullable_APPEND = store_thm(
-  "nullable_APPEND",
-  ``nullable g (x ++ y) = nullable g x ∧ nullable g y``,
-  SRW_TAC [][nullable, EQ_IMP_THM] THENL [
-    IMP_RES_TAC derives_split_append THEN
-    FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][],
-    IMP_RES_TAC derives_split_append THEN
-    FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][],
-    METIS_TAC [derives_append, APPEND]
-  ]);
-
+val nullable_APPEND = store_thm
+("nullable_APPEND",
+ ``nullable g (x ++ y) <=> nullable g x ∧ nullable g y``,
+ SRW_TAC [][nullable, EQ_IMP_THM] 
+  >- (IMP_RES_TAC derives_split_append THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][])
+  >- (IMP_RES_TAC derives_split_append THEN
+      FULL_SIMP_TAC (srw_ss()) [] THEN SRW_TAC [][])
+  >- METIS_TAC [derives_append, APPEND]
+);
 
 val nullableML_append = store_thm(
   "nullableML_append",
-  ``nullableML g sn (l1 ++ l2) =
+  ``nullableML g sn (l1 ++ l2) <=>
      nullableML g sn l1 ∧ nullableML g sn l2``,
   Induct_on `l1` THEN SRW_TAC[] [nullableML] THEN
   Cases_on `h` THEN SRW_TAC [][nullableML'] THEN
@@ -912,7 +907,7 @@ val finite_nts = store_thm
   METIS_TAC [FINITE_INSERT, FINITE_EMPTY, INTER_FINITE, INTER_COMM]);
 
 val nullableEq1 = store_thm ("nullableEq1",
-  ``∀g sn l. nullableML g sn l ⇒ nullable g l``,
+ ``∀g sn l. nullableML g sn l ⇒ nullable g l``,
   HO_MATCH_MP_TAC R_IND THEN REPEAT STRIP_TAC THEN
   `(l = []) ∨ ∃h t. l = h::t` by (Cases_on `l` THEN SRW_TAC [][]) THEN
   SRW_TAC [][nullableML'] THEN1 SRW_TAC [][nullable] THEN
@@ -925,26 +920,28 @@ val nullableEq1 = store_thm ("nullableEq1",
      by METIS_TAC [EXISTS_MEM] THEN
   Q_TAC SUFF_TAC `nullable g e` THEN1
      METIS_TAC [x_1, nullable, RTC_RULES] THEN
-  FIRST_X_ASSUM (Q.SPECL_THEN [`g`, `NTS s :: sn`, `e`]
-			      MP_TAC) THEN
+  FIRST_X_ASSUM 
+    (Q.SPECL_THEN [`g`, `NTS s :: sn`, `e`] MP_TAC) THEN
   SRW_TAC [][] THEN FIRST_X_ASSUM MATCH_MP_TAC THEN
   `FINITE (nonTerminals g)` by METIS_TAC [finite_nts] THEN
   SRW_TAC [][] THENL [
     `NTS s ∈ nonTerminals g` by METIS_TAC [ntsInGr, mem_r1] THEN
-    `nonTerminals g ∩ (NTS s INSERT set sn) =
-       NTS s INSERT (nonTerminals g ∩ set sn)`
+    `(nonTerminals g ∩ (NTS s INSERT set sn)) =
+       (NTS s INSERT (nonTerminals g ∩ set sn))`
       by METIS_TAC [INTER_COMM, INSERT_INTER] THEN
     SRW_TAC [][] THEN DECIDE_TAC,
-    Q_TAC SUFF_TAC `nonTerminals g ∩ set sn PSUBSET nonTerminals g`
-          THEN1 METIS_TAC [CARD_PSUBSET, DECIDE ``x < y = 0 < y - x``] THEN
+    Q_TAC SUFF_TAC `(nonTerminals g ∩ set sn) PSUBSET nonTerminals g`
+          THEN1 METIS_TAC [CARD_PSUBSET, DECIDE ``x < y <=> 0 < y - x``] THEN
     SRW_TAC [][PSUBSET_DEF, EXTENSION] THEN
     METIS_TAC [ntsInGr, mem_r1]
   ]);
 
 val n6 = store_thm ("n6",
-``∀h tl.nullableML g ([]:('nts,'ts) symbol list) (h:('nts,'ts) symbol::tl) =
-nullableML g ([]:('nts,'ts) symbol list) [h] ∧
-nullableML g ([]:('nts,'ts) symbol list) tl ``,
+``∀h tl. 
+    nullableML g ([]:('nts,'ts) symbol list) (h:('nts,'ts) symbol::tl) 
+     <=>
+     nullableML g ([]:('nts,'ts) symbol list) [h] ∧
+     nullableML g ([]:('nts,'ts) symbol list) tl ``,
 SRW_TAC [] [EQ_IMP_THM] THEN
 Cases_on `tl` THEN
 Cases_on `h` THEN
@@ -966,8 +963,6 @@ nullableML g ([]:('nts,'ts) symbol list) s1`
     by METIS_TAC [n4_1,APPEND] THEN
 RES_TAC THEN
 METIS_TAC [n6])
-
-
 
 val lderivesImpDerives = store_thm ("lderivesImpDerives",
 ``∀x y.RTC (lderives g) x y ⇒
@@ -1161,7 +1156,6 @@ THENL[
       ]]);
 
 
-
 val nrc_drd_ld = store_thm ("nrc_drd_ld",
 ``∀n l0 l1.NRC (derives g) (SUC n) l0 l1 ⇒
 EVERY isTmnlSym l1 ⇒
@@ -1216,7 +1210,6 @@ THENL[
             Cases_on `dl` THEN FULL_SIMP_TAC (srw_ss()) [rtc2list_def]
             ]]);
 
-
 val rtc2list_exists = store_thm ("rtc2list_exists",
   ``∀e. e ∈ language g ⇒
         ∃dl. rderives g ⊢ dl ◁ [NTS (startSym g)] → e``,
@@ -1242,12 +1235,10 @@ val rderivesRtc2list = store_thm(
 Induct_on `dl` THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [rtc2list_def])
 
-
-
 val lemma2' = store_thm(
   "lemma2'",
-  ``derives g
-      (x ++ y) tgt =
+  ``derives g (x ++ y) tgt 
+     <=>
       (∃x'. derives g x x' ∧ (tgt = x' ++ y)) ∨
       (∃y'. derives g y y' ∧ (tgt = x ++ y'))``,
 
@@ -1314,7 +1305,6 @@ THENL[
 	    FULL_SIMP_TAC (arith_ss) []
 	    ]
       ]);
-
 
 
 val rtc2list_isolate_NT = store_thm(
@@ -1531,14 +1521,16 @@ val no_repeats = prove(
 
 val derivNtsMem =
 store_thm ("derivNtsMem",
-``∀dl e.e ∈ derivNts dl  = ∃l.MEM  l dl ∧ MEM e l``,
+``∀dl e. e ∈ derivNts dl <=> ∃l.MEM  l dl ∧ MEM e l``,
 Induct_on `dl` THEN SRW_TAC [] [derivNts,EQ_IMP_THM] THEN
 METIS_TAC [derivNts,mem_in]);
 
 val nullableMLEq = store_thm (
   "nullableMLEq",
-  ``∀g sn l. nullableML g sn l =
-        ∀e. MEM e l ⇒ isNonTmnlSym e ∧ nullableML g sn [e]``,
+  ``∀g sn l. 
+      nullableML g sn l 
+       <=>
+      ∀e. MEM e l ⇒ isNonTmnlSym e ∧ nullableML g sn [e]``,
   Induct_on `l` THEN SRW_TAC [][nullableML'] THEN
   Cases_on `h` THEN SRW_TAC [] [nullableML'] THEN
   SRW_TAC [boolSimps.DNF_ss][EXISTS_MEM, isNonTmnlSym_def, nullableML'] THEN
@@ -1558,8 +1550,6 @@ Cases_on `t'` THEN FULL_SIMP_TAC (srw_ss()) [] THEN
 FULL_SIMP_TAC (srw_ss()) [derives_def] THEN
 SRW_TAC [][] THEN
 METIS_TAC []);
-
-
 
 val rtc2listTlHdEveryMem =
 store_thm ("rtc2listTlHdEveryMem",
@@ -1607,7 +1597,7 @@ FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [flatMemNot]);
 
 val listderiv_NIL = prove(
-  ``R ⊢ [] ◁ x → y = F``,
+  ``R ⊢ [] ◁ x → y <=> F``,
   SRW_TAC [][listderiv_def]);
 
 val split_derivations_horizontally = store_thm(
@@ -1777,14 +1767,15 @@ val nullableImpML = store_thm (
 );
 
 val nullableEq2 = store_thm ("nullableEq2",
-  ``∀g sn l.nullable (g:('a, 'b) grammar) l
-   ⇒ (sn=[]:('a, 'b) symbol list) ⇒ nullableML g sn l``,
+  ``∀g sn l.
+      nullable (g:('a, 'b) grammar) l
+      ⇒ (sn=[]:('a, 'b) symbol list) ⇒ nullableML g sn l``,
 SRW_TAC [][] THEN
 METIS_TAC [MEM,nullableImpML])
 
 val nullableEq = store_thm ("nullableEq",
-``∀g l.nullable g l =
-nullableML (g:('a, 'b) grammar) ([]:('a, 'b) symbol list) l``,
+``∀g l. nullable g l <=>
+         nullableML (g:('a, 'b) grammar) ([]:('a, 'b) symbol list) l``,
 METIS_TAC [nullableEq1, nullableEq2]);
 
 val list_neq = store_thm ("list_neq",
@@ -2083,7 +2074,6 @@ METIS_TAC [rtcDerivesInRuleRhsLenGte1, MEM, MEM_APPEND]) THEN
 	   by FULL_SIMP_TAC (arith_ss) [LENGTH, LENGTH_APPEND] THEN
 `[NTS N] ≠ (pfx++[sym]++sfx)` by SRW_TAC [][] THEN
 METIS_TAC [rtcDerivesInRuleRhsLenGte1, MEM, MEM_APPEND]);
-
 
 
 val infiniteSyms = store_thm
@@ -2439,7 +2429,6 @@ IMP_RES_TAC list_r6 THEN
 SRW_TAC [][] THEN
 FULL_SIMP_TAC (srw_ss()) [isTmnlSym_def]));
 
-
 val lderivesRtc2listPfxSame = store_thm
 ("lderivesRtc2listPfxSame",
 ``∀rst t.rtc2list (lderives g) ((h++rst)::t) ∧ EVERY isTmnlSym h
@@ -2715,7 +2704,7 @@ val CARD_IMAGE = prove(
   HO_MATCH_MP_TAC FINITE_INDUCT THEN SRW_TAC [][]);
 
 val FORALL_sym = prove(
-  ``(∀e. P e) = (∀n. P (NTS n)) ∧ (∀t. P (TS t))``,
+  ``(∀e. P e) <=> (∀n. P (NTS n)) ∧ (∀t. P (TS t))``,
   SRW_TAC [][EQ_IMP_THM] THEN Cases_on `e` THEN SRW_TAC [][]);
 
 val dldntsLeg = store_thm
@@ -2767,7 +2756,6 @@ Induct THEN SRW_TAC [][] THENL [
   SRW_TAC [][nts2str_def, isNonTmnlSym_def],
   Cases_on `h` THEN SRW_TAC [][nonTmnls]
 ]);
-
 
 val symMemProp = store_thm
 ("symMemProp",
@@ -2888,7 +2876,6 @@ THENL[
 	    METIS_TAC [NOT_EVERY, everyNotTwice, frontAppendFst, APPEND,
 		       existsThrice]])]);
 
-
 val memld = store_thm
 ("memld",
 ``R ⊢ dl ◁ x → y ⇒ MEM x dl ∧ MEM y dl``,
@@ -2924,8 +2911,6 @@ IMP_RES_TAC listDerivHdBrk THEN
 RES_TAC THEN
 `h = x` by FULL_SIMP_TAC (srw_ss()) [listderiv_def] THEN
 METIS_TAC [RTC_RULES]);
-
-
 
 val ldStreams = store_thm
 ("ldStreams",

@@ -1639,17 +1639,17 @@ val fstNtm2Tm = Define
 (startSym g = startSym g0)`;
 
 val gnfInv = Define
-`gnfInv ru s = 
-∀i. i < LENGTH s ⇒
-∀r. rule (EL i s) r ∈ ru ⇒ validGnfProd (rule (EL i s) r)`;
+`gnfInv ru s <=> 
+  ∀i. i < LENGTH s ⇒
+       ∀r. rule (EL i s) r ∈ ru ⇒ validGnfProd (rule (EL i s) r)`;
 
 val gnfAlt = Define
-`gnfAlt ru s = 
-∀l. l ∈ s ⇒ (∀r. (rule l r) ∈ ru ⇒ validGnfProd (rule l r))`;
+`gnfAlt ru s <=> 
+   ∀l. l ∈ s ⇒ (∀r. (rule l r) ∈ ru ⇒ validGnfProd (rule l r))`;
 
 val gnfEqAlt = store_thm
 ("gnfEqAlt",
-``∀ ru s.gnfInv ru s ⇔ gnfAlt ru s``,
+``∀ ru s. gnfInv ru s ⇔ gnfAlt ru s``,
 
 SRW_TAC [][gnfInv, gnfAlt, EQ_IMP_THM] THEN
 METIS_TAC [memImpEl, MEM_EL]);
@@ -1657,7 +1657,7 @@ METIS_TAC [memImpEl, MEM_EL]);
 
 
 val ruleInv = Define
-`ruleInv ru ontms s =
+`ruleInv ru ontms s <=>
      ∀i.
      i < LENGTH ontms ⇒
      ∀nt rst. rule (EL i ontms) (NTS nt::rst) ∈ ru ⇒ 
@@ -1665,7 +1665,7 @@ val ruleInv = Define
 
 val ntk2Tm = Define
 `ntk2Tm ru ntk s =
-∀i. i < LENGTH s ⇒ ∀rst.¬MEM (rule ntk (NTS (EL i s)::rst)) ru`;
+   ∀i. i < LENGTH s ⇒ ∀rst. ¬MEM (rule ntk (NTS (EL i s)::rst)) ru`;
 
 val r49E_ntk2Tm = store_thm
 ("r49E_ntk2Tm",
@@ -1836,7 +1836,7 @@ METIS_TAC [APPEND, APPEND_ASSOC, MEM, MEM_APPEND]);
 
 val gnfAppend = store_thm
 ("gnfAppend",
-``∀l1 l2. gnfInv ru (l1 ++ l2) = gnfInv ru l1 ∧ gnfInv ru l2``,
+ ``∀l1 l2. gnfInv ru (l1 ++ l2) <=> gnfInv ru l1 ∧ gnfInv ru l2``,
 
 Induct_on `l1` THEN SRW_TAC [][gnfEqAlt, gnfAlt] THEN
 Cases_on `l2` THEN SRW_TAC [][] THEN
@@ -1853,16 +1853,16 @@ SRW_TAC [][fstNtm2Tm] THEN
 IMP_RES_TAC r49ERtc_ntmsSubset THEN
 FULL_SIMP_TAC (srw_ss()) [SUBSET_DEF] THEN
 SRW_TAC [][] THEN
-Cases_on `g` THEN Cases_on `g0` THEN FULL_SIMP_TAC (srw_ss()) [rules_def,
-							       startSym_def] THEN
+Cases_on `g` THEN Cases_on `g0` THEN 
+FULL_SIMP_TAC (srw_ss()) [rules_def, startSym_def] THEN
 SRW_TAC [][]);
 
 val fstNtm2TmRtc_ntmsSubset = store_thm
 ("fstNtm2TmRtc_ntmsSubset",
 ``∀x y.fstNtm2Tm^* x y ⇒ 
-∀ontms0 g0 s0.
- (x=(ontms0,g0,s0)) ⇒ (y=(ontms,g,s)) ⇒
- set (ntms g) ⊆ set (ntms g0)``,
+ ∀ontms0 g0 s0.
+  (x=(ontms0,g0,s0)) ⇒ (y=(ontms,g,s)) ⇒
+  set (ntms g) ⊆ set (ntms g0)``,
 
 HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN
 `∃ontms1 g1 s1. (x' = (ontms1,g1,s1))` by METIS_TAC [exists_triple] THEN

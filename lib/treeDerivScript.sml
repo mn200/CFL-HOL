@@ -15,7 +15,8 @@ val _ = set_trace "Unicode" 1
 (* used to be lem1 in slr-parsing *)
 val treeRtc = store_thm("treeRtc",
 ``(∀t. MEM t ptl ∧ isNode t ⇒ RTC (derives g) [ptree2Sym t] (MAP TS (leaves t))) 
-⇒  RTC (derives g) (MAP ptree2Sym ptl) (MAP TS (cleaves ptl))``,
+  ⇒ 
+  RTC (derives g) (MAP ptree2Sym ptl) (MAP TS (cleaves ptl))``,
 
 Induct_on `ptl` THEN  SRW_TAC [] [ptree2Sym_def, leaves_def, RTC_RULES] THEN
 Cases_on `h` THEN SRW_TAC [] [ptree2Sym_def, leaves_def] THEN
@@ -26,8 +27,8 @@ METIS_TAC [derives_append, APPEND],
 METIS_TAC [derives_append, APPEND]]);
 
 val vpt_rtcd = store_thm ("vpt_rtcd",
-``∀g t.validptree g t ⇒ 
-RTC (derives g) [ptree2Sym t] (MAP TS (leaves t))``,
+``∀g t. validptree g t ⇒ 
+         RTC (derives g) [ptree2Sym t] (MAP TS (leaves t))``,
 HO_MATCH_MP_TAC validptree_ind THEN SRW_TAC [] [] THEN
 FULL_SIMP_TAC (srw_ss()) [validptree] THEN
 `derives g [NTS n] (MAP ptree2Sym ptl)` by METIS_TAC [res1, getSymsEqptree2Sym] THEN
@@ -56,7 +57,6 @@ METIS_TAC [rtc_derives_same_append_left, APPEND] THEN
 `(derives g)^* [NTS n] (MAP TS (fringe (Node n l)))` by METIS_TAC [root_def] THEN
 FULL_SIMP_TAC (srw_ss()++boolSimps.ETA_ss) [fringe_def] THEN
 METIS_TAC [derives_append, APPEND]);
-
 
 val vptRtcd = store_thm
 ("vptRtcd",
@@ -159,7 +159,7 @@ METIS_TAC [getSymsEqRoot]);
 
 val ptLangThm = store_thm
 ("ptLangThm",
-``∀w.w ∈ language g = 
+``∀w. w ∈ language g <=> 
  ∃t.validptree g t ∧ (MAP TS (fringe t) = w) ∧
  (root t = NTS (startSym g))``,
 
@@ -178,7 +178,7 @@ FULL_SIMP_TAC (srw_ss()) [MEM_MAP, isTmnlSym_def]]);
 val getSymsCleaves = store_thm
 ("getSymsCleaves",
 ``∀g t. (∀e. e ∈ t ∧ isNode e ⇒ validptree g e) ⇒
-(derives g)^* (getSymbols t) (MAP TS (cleaves t))``,
+        (derives g)^* (getSymbols t) (MAP TS (cleaves t))``,
 
 Induct_on `t` THEN SRW_TAC [][] THEN1
 SRW_TAC [][getSymbols_def, leaves_def] THEN
@@ -276,7 +276,6 @@ by METIS_TAC [rtc_derives_same_append_left, rtc_derives_same_append_right,
          (MAP TS (cleaves r1') ++ [NTS n'] ++ getSymbols r2')`
 by METIS_TAC [APPEND_ASSOC, rtc_derives_same_append_right] THEN
 METIS_TAC [APPEND_ASSOC, RTC_RTC, RTC_RULES]);
-
 
 
 val _ = export_theory();

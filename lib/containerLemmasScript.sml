@@ -1,18 +1,17 @@
 open HolKernel boolLib bossLib Parse BasicProvers Defn
 
 open listTheory containerTheory pred_setTheory arithmeticTheory
-relationTheory markerTheory
+     relationTheory markerTheory;
 
 val _ = new_theory "containerLemmas";
 
-
 val mem_in = store_thm ("mem_in",
-``!e l.MEM e l = e IN LIST_TO_SET l``,
+``!e l. MEM e l <=> e IN LIST_TO_SET l``,
 SRW_TAC [] [EQ_IMP_THM])
 
 
 val mem_subset = store_thm ("mem_subset", 
-``!l1 l2.(!e.MEM e l1 ==> MEM e l2) ==> 
+``!l1 l2.(!e. MEM e l1 ==> MEM e l2) ==> 
 (LIST_TO_SET l1) SUBSET (LIST_TO_SET l2)``,
 SRW_TAC [] [] THEN
 `!e.e IN LIST_TO_SET l1 ==> e IN LIST_TO_SET l2` by 

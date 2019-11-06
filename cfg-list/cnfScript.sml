@@ -125,7 +125,7 @@ val badTmnlsCount = Define `(badTmnlsCount g = SUM (MAP ruleTmnls (rules g)))`
 val badNtmsCount = Define `(badNtmsCount g = SUM  (MAP ruleNonTmnls (rules g)))`
 
 val cnf = Define
-    `cnf g = (badNtmsCount g = 0) ∧ (badTmnlsCount g = 0)`
+ `cnf g <=> (badNtmsCount g = 0) ∧ (badTmnlsCount g = 0)`
 
 
 val trans2NT = Define
@@ -139,24 +139,19 @@ val trans2NT = Define
 
 val trans2NT_noeProds = store_thm
 ("trans2NT_noeProds",
-``noeProds (rules g) ∧
-trans2NT nt1 nt2 t g g' ⇒
-noeProds (rules g')``,
+ ``noeProds (rules g) ∧ trans2NT nt1 nt2 t g g' ⇒ noeProds (rules g')``,
 
-SRW_TAC [][noeProds, trans2NT] THEN
-SPOSE_NOT_THEN ASSUME_TAC THEN
-`rule l' [] ∈ delete (rule l (p ++ [nt2; t] ++ s)) (rules g) ++
-      [rule nt1 [nt2; t]; rule l (p ++ [NTS nt1] ++ s)]` by METIS_TAC [] THEN
+ SRW_TAC [][noeProds, trans2NT] THEN
+ SPOSE_NOT_THEN ASSUME_TAC THEN
+ `rule l' [] ∈ delete (rule l (p ++ [nt2; t] ++ s)) (rules g) ++
+       [rule nt1 [nt2; t]; rule l (p ++ [NTS nt1] ++ s)]` by METIS_TAC [] THEN
 FULL_SIMP_TAC (srw_ss()) [] THEN
 METIS_TAC [memdel]);
 
 
 val trans2NT_noUnitProds = store_thm
 ("trans2NT_noUnitProds",
-``noUnitProds (rules g) ∧
-trans2NT nt1 nt2 t g g' ⇒
-noUnitProds (rules g')``,
-
+``noUnitProds (rules g) ∧ trans2NT nt1 nt2 t g g' ⇒ noUnitProds (rules g')``,
 SRW_TAC [][noUnitProds, trans2NT] THEN
 SPOSE_NOT_THEN ASSUME_TAC THEN
 `rule l' [NTS nt] ∈ delete (rule l (p ++ [nt2; t] ++ s)) (rules g) ++

@@ -7,8 +7,16 @@ val _ = new_theory "cnf";
 
 (* Chomsky Normal Form *)
 
-val trans1Tmnl = Define `trans1Tmnl nt t g g' = ?l r p s. rule l r IN rules g /\ (r=p++[t]++s) /\ (~NULL p \/ ~NULL s)
-/\ isTmnlSym t /\ ~((NTS nt) IN (nonTerminals g)) /\ (rules(g') = rules(g) DIFF {rule l r} UNION {rule nt [t];rule l (p++[NTS nt]++s)}) /\ (startSym g' = startSym g)`
+val trans1Tmnl = Define 
+ `trans1Tmnl nt t g g' = 
+   ?l r p s. rule l r IN rules g /\ 
+             (r=p++[t]++s) /\ 
+             (~NULL p \/ ~NULL s) /\ 
+             isTmnlSym t /\ 
+             ~((NTS nt) IN (nonTerminals g)) /\ 
+             (rules(g') = rules(g) DIFF {rule l r} UNION 
+                           {rule nt [t];rule l (p++[NTS nt]++s)}) /\ 
+             (startSym g' = startSym g)`
 
 open arithmeticTheory
 

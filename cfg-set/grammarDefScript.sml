@@ -1,7 +1,7 @@
 (* A theory about regular expressions *)
 open HolKernel boolLib bossLib Parse
-open stringTheory
-open pred_setTheory listLemmaTheory regexpTheory
+open relationTheory listTheory stringTheory pred_setTheory
+open listLemmaTheory regexpTheory BasicProvers
 
 val _ = new_theory "grammarDef";
 
@@ -29,14 +29,12 @@ and ignores BC as they don't occur on th lhs of any prods
 (* cnf done for replacement of terminals *)
 (* NOW handle nonterminals *)
 
-open stringTheory pred_setTheory regexpTheory relationTheory listTheory
-
-open BasicProvers
 (* e.g. S -> E * E becomes (Node S [E, *, E]) *)
 val _ = Hol_datatype `rule = rule of string => symbol list`; (*  # symbol list`;*)
 
 (* ?? verifying whether the spec of the grammar is consistent *)
 (* grammar = (V, T, P, S) *)
+
 val _ = Hol_datatype `grammar = G of rule set => string`;
 
 val rule_terminals_def = Define`
@@ -51,7 +49,7 @@ val rule_nonterminals_def = Define`
 
 val is_word  = Define `is_word w = EVERY isTmnlSym w`
 
-val rules_def = Define`rules (G p s) = p`
+val rules_def = Define `rules (G p s) = p`
 
 val startSym_def = Define `startSym (G p s) = s`;
 

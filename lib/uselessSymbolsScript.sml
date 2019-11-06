@@ -88,20 +88,17 @@ val gaw_rhs = store_thm ("gaw_rhs",
 (!nt.nt IN nonTerminals g ==> ?w. RTC (derives g) [nt] w /\ EVERY isTmnlSym w) ==> 
 EVERY (gaw g) rhs``,
 Induct_on `rhs` THEN SRW_TAC [] [] THEN
-FULL_SIMP_TAC (srw_ss()) [] THENL[
-
-Cases_on `h` THEN 
-METIS_TAC [term_syms_gen_words, EVERY_DEF, isTmnlSym_def, slemma1_4, APPEND, gaw],
-
-`!e.MEM e (h::rhs) ==> e IN (allSyms g)` by METIS_TAC [ruleRhsInAllSyms] THEN
-FULL_SIMP_TAC (srw_ss()) [] THEN
-`!e.MEM e rhs ==> e IN allSyms g` by METIS_TAC [] THEN
-`FINITE (LIST_TO_SET (rules g))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
-`FINITE (allSyms g)` by METIS_TAC [finiteAllSyms] THEN
-`!e. e IN allSyms g = MEM e (SET_TO_LIST (allSyms g))` by METIS_TAC [MEM_SET_TO_LIST] THEN
-`!e. MEM e rhs ==> gaw g e` by METIS_TAC [gawAllSyms] THEN
+FULL_SIMP_TAC (srw_ss()) [] THENL
+[Cases_on `h` THEN 
+ METIS_TAC [term_syms_gen_words, EVERY_DEF, isTmnlSym_def, slemma1_4, APPEND, gaw],
+ `!e. MEM e (h::rhs) ==> e IN (allSyms g)` by METIS_TAC [ruleRhsInAllSyms] THEN
+  FULL_SIMP_TAC (srw_ss()) [] THEN
+  `!e.MEM e rhs ==> e IN allSyms g` by METIS_TAC [] THEN
+  `FINITE (LIST_TO_SET (rules g))` by METIS_TAC [FINITE_LIST_TO_SET] THEN
+  `FINITE (allSyms g)` by METIS_TAC [finiteAllSyms] THEN
+  `!e. e IN allSyms g <=> MEM e (SET_TO_LIST (allSyms g))` by METIS_TAC [MEM_SET_TO_LIST] THEN
+  `!e. MEM e rhs ==> gaw g e` by METIS_TAC [gawAllSyms] THEN
 METIS_TAC [EVERY_MEM]]);
-
 
 
 val gaw_rderives_single = store_thm ("gaw_rderives_single", 

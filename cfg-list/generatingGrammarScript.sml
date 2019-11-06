@@ -11,7 +11,7 @@ val usefulntsRules = Define
 {rule l r | MEM (rule l r) (rules g) ∧ gaw g (NTS l) ∧ EVERY (gaw g) r}`;
 
 val usefulnts = Define
-    `usefulnts g g' =
+    `usefulnts g g' <=>
     (set (rules g') = usefulntsRules g) ∧ (startSym g' = startSym g)`;
 
 val finiteusefulntsRules = store_thm

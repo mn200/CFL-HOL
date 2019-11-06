@@ -267,15 +267,16 @@ val nullable_NIL = store_thm(
   SRW_TAC [][nullable_def])
 val _ = export_rewrites ["nullable_NIL"];
 
-val split_killer = store_thm
-("split_killer",
-  ``∀y p s.
-    (x ++ y = p ++ [E] ++ s) =
+Theorem split_killer:
+  ∀y p s.
+    (x ++ y = p ++ [E] ++ s) <=>
     (∃x2. (x = p ++ [E] ++ x2) ∧ (s = x2 ++ y)) ∨
-    (∃y1. (p = x ++ y1) ∧ (y = y1 ++ [E] ++ s))``,
+    (∃y1. (p = x ++ y1) ∧ (y = y1 ++ [E] ++ s))
+Proof
   Induct_on `x` THEN SRW_TAC [][] THEN
   Cases_on `p` THEN SRW_TAC [][] THEN1 METIS_TAC [] THEN
-  METIS_TAC []);
+  METIS_TAC []
+QED
 
 val isolate_last = store_thm
 ("isolate_last",
@@ -286,18 +287,19 @@ val isolate_last = store_thm
 
 
 
-val ntderive_list_exists = store_thm("ntderive_list_exists",
-  ``∀sf1 sf2.
+Theorem ntderive_list_exists:
+  ∀sf1 sf2.
        (derives g)^* sf1 sf2 ⇒
-       ∀tok rest. (sf2 = TS tok :: rest) ∧
+       ∀tok rest. sf2 = TS tok :: rest ∧
                   (∀pfx sfx. nullable g pfx ⇒
-                             ¬(sf1 = pfx ++ [TS tok] ++ sfx))
+                             sf1 ≠ pfx ++ [TS tok] ++ sfx)
                  ⇒
                   ∃nlist pfx sfx.
                      (sf1 = pfx ++ [NTS (HD nlist)] ++ sfx) ∧
                      nullable g pfx ∧
                      ntderive g tok nlist ∧
-                     ALL_DISTINCT nlist``,
+                     ALL_DISTINCT nlist
+Proof
   HO_MATCH_MP_TAC RTC_STRONG_INDUCT THEN SRW_TAC [][] THEN1
     (POP_ASSUM (Q.SPEC_THEN `[]` MP_TAC) THEN
 		SRW_TAC [][] THEN
@@ -362,12 +364,11 @@ val ntderive_list_exists = store_thm("ntderive_list_exists",
 				  MP_TAC) THEN
       SRW_TAC [][nullable_APPEND]
     ]
-  ]);
+  ]
+QED
 
-val lemma =  SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) []
-		       ntderive_list_exists;
-
-val _ = save_thm ("lemma",lemma);
+Theorem lemma =  SIMP_RULE (srw_ss() ++ boolSimps.DNF_ss) []
+		           ntderive_list_exists
 
 val first_first1 = store_thm("first_first1",
   ``TS t ∈ firstSetList g sf ⇒ TS t ∈ set (firstSetML g [] sf)``,

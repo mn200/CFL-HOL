@@ -23,14 +23,19 @@ val stacklsymtree = Define `(stacklsymtree [] = []) ∧
      ((sym,tree)::stacklsymtree rst))`;
 
 (*The symbols and the trees corresponding to them are the same one. *)
-val validStkSymTree = Define
-`(validStkSymTree [] = T) ∧
-(validStkSymTree (((sym, itl),tree)::rst) =
-(sym = ptree2Sym tree) ∧ validStkSymTree rst)`;
+Definition validStkSymTree_def:
+   (validStkSymTree [] ⇔ T) ∧
+   (validStkSymTree (((sym, itl),tree)::rst) ⇔
+      (sym = ptree2Sym tree) ∧ validStkSymTree rst)
+End
 
-val validptree_inv = Define `validptree_inv g stl =
-validStkSymTree stl ∧
-(∀s t.MEM (s,t) (stacklsymtree stl) ⇒ isNonTmnlSym s ⇒ validptree g t)`;
+Definition validptree_inv_def:
+   validptree_inv g stl ⇔
+      validStkSymTree stl ∧
+      (∀s t. MEM (s,t) (stacklsymtree stl) ⇒ isNonTmnlSym s ⇒ validptree g t)
+End
+val validStkSymTree = validStkSymTree_def
+val validptree_inv = validptree_inv_def
 
 val slst_append = store_thm ("slst_append",
 ``∀l1 l2.stacklsymtree (l1 ++ l2) = stacklsymtree l1 ++ stacklsymtree l2``,
@@ -65,20 +70,23 @@ Induct_on `l` THEN SRW_TAC [] [EQ_IMP_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [stacklsymtree] THEN
 METIS_TAC [rgr_r9eq, slst_append, APPEND, CONS, APPEND_ASSOC]);
 
-val vst_append_distrib = store_thm ("vst_append_distrib",
-``validStkSymTree (l1++l2) = validStkSymTree l1 ∧ validStkSymTree l2``,
+Theorem vst_append_distrib:
+  validStkSymTree (l1++l2) <=> validStkSymTree l1 ∧ validStkSymTree l2
+Proof
 Induct_on `l1` THEN SRW_TAC [] [] THENL[
-SRW_TAC [] [validStkSymTree],
-Cases_on `h`  THEN Cases_on `q` THEN
-METIS_TAC [validStkSymTree]]
-);
+  SRW_TAC [] [validStkSymTree],
+  Cases_on `h`  THEN Cases_on `q` THEN
+  METIS_TAC [validStkSymTree]
+]
+QED
 
-val validptree_inv_append_distrib = store_thm ("validptree_inv_append_distrib",
-``∀l1 l2.validptree_inv g (l1++l2) = validptree_inv g l1 ∧ validptree_inv g l2``,
-SRW_TAC [] [validptree_inv, EQ_IMP_THM] THEN
-FULL_SIMP_TAC (srw_ss()) [validptree_inv] THEN
-METIS_TAC [slst_mem1, slst_mem2, slst_mem3, vst_append_distrib]
-);
+Theorem validptree_inv_append_distrib:
+  ∀l1 l2. validptree_inv g (l1++l2) ⇔ validptree_inv g l1 ∧ validptree_inv g l2
+Proof
+  SRW_TAC [] [validptree_inv, EQ_IMP_THM] THEN
+  FULL_SIMP_TAC (srw_ss()) [validptree_inv] THEN
+  METIS_TAC [slst_mem1, slst_mem2, slst_mem3, vst_append_distrib]
+QED
 
 
 val validptree_inv_r1 = store_thm ("validptree_inv_r1",

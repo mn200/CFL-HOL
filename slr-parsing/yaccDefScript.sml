@@ -669,13 +669,15 @@ val EXISTS_item = store_thm("EXISTS_item",
 
 val nextState = Define `nextState g itl sym = iclosure g (moveDot itl sym)`
 
-Definition validItl:
+Definition validItl_def:
   (validItl g [] <=> T) ∧
   (validItl g (item l (r1,r2) :: rst) <=>
      MEM (rule l (r1++r2)) (rules g) ∧ validItl g rst)
 End
 
-Definition validStates:
+val validItl = validItl_def
+
+Definition validStates_def:
   (validStates g [] <=> T) ∧
   (validStates g ((sym, itl)::rst) <=> validItl g itl ∧ validStates g rst)
 End
@@ -700,8 +702,8 @@ QED
 Theorem validStates_append:
   ∀l1 l2.validStates g (l1 ++ l2) ⇔ validStates g l1 ∧ validStates g l2
 Proof
-Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [validStates] THEN
-Cases_on `h'` THEN METIS_TAC [validStates, APPEND]
+Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [validStates_def] THEN
+Cases_on `h'` THEN METIS_TAC [validStates_def, APPEND]
 QED
 
 

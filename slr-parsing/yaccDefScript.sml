@@ -669,16 +669,20 @@ val EXISTS_item = store_thm("EXISTS_item",
 
 val nextState = Define `nextState g itl sym = iclosure g (moveDot itl sym)`
 
-val validItl = Define
-`(validItl g [] = T) ∧
-(validItl g (item l (r1,r2) :: rst) =
-MEM (rule l (r1++r2)) (rules g) ∧ validItl g rst)`;
+Definition validItl:
+  (validItl g [] <=> T) ∧
+  (validItl g (item l (r1,r2) :: rst) <=>
+     MEM (rule l (r1++r2)) (rules g) ∧ validItl g rst)
+End
 
-val validStates = Define `(validStates g [] = T) ∧
-(validStates g ((sym, itl)::rst) = validItl g itl ∧ validStates g rst)`;
+Definition validStates:
+  (validStates g [] <=> T) ∧
+  (validStates g ((sym, itl)::rst) <=> validItl g itl ∧ validStates g rst)
+End
 
-val validItl_append = store_thm ("validItl_append",
-``validItl g (l1++l2) = validItl g l1 ∧ validItl g l2``,
+Theorem validItl_append:
+  validItl g (l1++l2) ⇔ validItl g l1 ∧ validItl g l2
+Proof
 SRW_TAC [] [EQ_IMP_THM] THENL [
 Induct_on `l1` THEN SRW_TAC [] [] THEN FULL_SIMP_TAC (srw_ss()) [validItl] THEN
 Cases_on `h` THEN Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [validItl],
@@ -690,13 +694,15 @@ Induct_on `l2` THEN SRW_TAC [] [] THEN Induct_on `l1` THEN
 FULL_SIMP_TAC (srw_ss()) [validItl] THEN
 SRW_TAC [] [] THEN Cases_on `h'` THEN
 Cases_on `p` THEN FULL_SIMP_TAC (srw_ss()) [validItl]]
-);
+QED
 
 
-val validStates_append = store_thm ("validStates_append",
-``∀l1 l2.validStates g (l1 ++ l2) = validStates g l1 ∧ validStates g l2``,
+Theorem validStates_append:
+  ∀l1 l2.validStates g (l1 ++ l2) ⇔ validStates g l1 ∧ validStates g l2
+Proof
 Induct_on `l1` THEN Induct_on `l2` THEN SRW_TAC [] [validStates] THEN
-Cases_on `h'` THEN METIS_TAC [validStates, APPEND]);
+Cases_on `h'` THEN METIS_TAC [validStates, APPEND]
+QED
 
 
 val validStates_pop = store_thm ("validStates_pop",
@@ -850,14 +856,15 @@ if (∃pfx itl sym. isTmnlSym sym ∧ (trans g (initItems g (rules g),pfx) = SOM
     | otherwise => F)
 then NONE else SOME (sg,red)`;
 
-val noError = Define
-    `(noError (sf,red) [] st = T) ∧
-    (noError (sf,red) (sym::rst) st =
+Definition noError:
+   (noError (sf,red) [] st ⇔ T) ∧
+   (noError (sf,red) (sym::rst) st ⇔
      (st=[]) ∨
      case red st (ts2str sym) of
        | [] => noError (sf,red) rst (sf st sym)
        | [r] => (sf st sym = [])
-       | otherwise => F)`;
+       | otherwise => F)
+End
 
 val okSlr = Define
     `okSlr g initState =
@@ -1061,10 +1068,10 @@ METIS_TAC [symNeighbour, alld_rmd]);
 
 
 
-val ar1 = store_thm ("ar1",
-``∀a b c.a >=c ⇒ (a < b + (a-c) = 0 < b-c)``,
-SRW_TAC [] [EQ_IMP_THM] THEN
-DECIDE_TAC);
+Triviality ar1:
+  ∀a b c.a >=c ⇒ (a < b + (a-c) ⇔ 0 < b-c)
+Proof SRW_TAC [] [EQ_IMP_THM] THEN DECIDE_TAC
+QED
 
 val (visit, visit_ind) = tprove (visit_defn,
 WF_REL_TAC (`measure (\(g,sn,itl).CARD ((allGrammarItls g )DIFF (LIST_TO_SET sn)))`) THEN
@@ -1811,11 +1818,11 @@ THENL[
       ]);
 
 
-val iclosureMemIc1 = store_thm
-("iclosureMemIc1",
-``∀g l.MEM e (iclosure g l) =
-  MEM e l ∨ ∃e'.MEM e' l ∧ MEM e (iclosure g [e'])``,
-MAGIC);
+Theorem iclosureMemIc1:
+  ∀g l. MEM e (iclosure g l) <=>
+        MEM e l ∨ ∃e'. MEM e' l ∧ MEM e (iclosure g [e'])
+Proof cheat
+QED
 (*
 HO_MATCH_MP_TAC iclosure_ind' THEN
 
@@ -1888,14 +1895,15 @@ THENL[
 *)
 
 
-val iclosure_APPEND =
-store_thm ("iclosure_APPEND",
-``MEM e (iclosure g (l1++l2)) =
-  (MEM e (l1++l2) ∨ MEM e (iclosure g l1) ∨
-  MEM e (iclosure g l2))``,
+Theorem iclosure_APPEND:
+  MEM e (iclosure g (l1++l2)) <=>
+     MEM e (l1++l2) ∨ MEM e (iclosure g l1) ∨
+     MEM e (iclosure g l2)
+Proof
 SRW_TAC [][EQ_IMP_THM] THEN
 FULL_SIMP_TAC (srw_ss()) [Once iclosureMemIc1] THEN
-METIS_TAC [iclosure_mem,iclosureMemIc1]);
+METIS_TAC [iclosure_mem,iclosureMemIc1]
+QED
 
 val iclosureSetEq = store_thm
 ("iclosureSetEq",
